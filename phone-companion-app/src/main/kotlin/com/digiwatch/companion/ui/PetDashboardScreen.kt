@@ -247,66 +247,18 @@ fun PetDashboardScreen(
                 shellPreviewStance = 0
             }
         ) {
-            Column(
+            Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(horizontal = 8.dp, vertical = 6.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.SpaceBetween
+                    .padding(8.dp),
+                contentAlignment = Alignment.Center
             ) {
-                // Top LCD Telemetry Strip
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    Text(
-                        text = "HP:${petState.currentHp}/${petState.maxHp}",
-                        fontSize = 9.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = Color(0xFF80CBC4),
-                        fontFamily = FontFamily.Monospace
-                    )
-                    Text(
-                        text = "PWR:${species.basePower}",
-                        fontSize = 9.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = Color(0xFFFFD54F),
-                        fontFamily = FontFamily.Monospace
-                    )
-                }
-
-                // 64x64 Pixel-Perfect Digimon Color Sprite
+                // Authentic 1997 Bandai V-Pet Dot-Matrix Pixel Sprite
                 SpriteCanvasRenderer(
                     speciesId = petState.speciesId,
                     frame = activeSpriteFrame,
-                    size = 104.dp
+                    size = 112.dp
                 )
-
-                // Bottom LCD Telemetry Strip
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    Text(
-                        text = "H:${"♥".repeat(petState.hunger.coerceIn(0, 4))}",
-                        fontSize = 9.sp,
-                        color = Color(0xFFFF8A80),
-                        fontFamily = FontFamily.Monospace
-                    )
-                    Text(
-                        text = "WINS:${petState.victories}/${petState.totalBattles}",
-                        fontSize = 9.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = Color(0xFFA5D6A7),
-                        fontFamily = FontFamily.Monospace
-                    )
-                    Text(
-                        text = "S:${"★".repeat(petState.strength.coerceIn(0, 4))}",
-                        fontSize = 9.sp,
-                        color = Color(0xFFFFD54F),
-                        fontFamily = FontFamily.Monospace
-                    )
-                }
             }
         }
 

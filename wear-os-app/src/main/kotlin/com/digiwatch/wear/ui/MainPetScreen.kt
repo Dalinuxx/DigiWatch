@@ -79,13 +79,13 @@ import java.util.Date
 import java.util.Locale
 
 enum class VPetMenu(val label: String, val icon: String) {
-    STATUS("STATUS", "📊"),
+    STATUS("STATUS", "⚖️"),
     FEED("FEED", "🍖"),
     TRAIN("TRAIN", "🥊"),
     BATTLE("BATTLE", "⚔"),
     FLUSH("FLUSH", "💩"),
     LIGHT("LIGHT", "💡"),
-    MEDS("MEDS", "💉"),
+    MEDS("MEDS", "🩹"),
     ATTENTION("CALL", "🚨")
 }
 
@@ -652,21 +652,25 @@ private fun ThreeButtonPetView(
                 // Active Menu Prompt or Action Feedback Pill
                 val promptText = if (selectedMenuIndex != null) {
                     "► ${VPetMenu.entries[selectedMenuIndex].label} ◄"
-                } else actionFeedback ?: if (petState.isSleeping) "ZZZ... SLEEPING" else "WT: ${petState.weight}g • AGE: ${petState.ageSeconds / 86400}d"
+                } else actionFeedback ?: if (petState.isSleeping) "ZZZ... SLEEPING" else null
 
-                Box(
-                    modifier = Modifier
-                        .background(Color(0x66091016), RoundedCornerShape(4.dp))
-                        .padding(horizontal = 6.dp, vertical = 1.dp)
-                ) {
-                    Text(
-                        text = promptText,
-                        fontSize = 8.sp,
-                        color = if (selectedMenuIndex != null) Color(0xFFFFD54F) else Color(0xFFB9F6CA),
-                        fontWeight = FontWeight.Bold,
-                        fontFamily = FontFamily.Monospace,
-                        textAlign = TextAlign.Center
-                    )
+                if (promptText != null) {
+                    Box(
+                        modifier = Modifier
+                            .background(Color(0x66091016), RoundedCornerShape(4.dp))
+                            .padding(horizontal = 6.dp, vertical = 1.dp)
+                    ) {
+                        Text(
+                            text = promptText,
+                            fontSize = 8.sp,
+                            color = if (selectedMenuIndex != null) Color(0xFFFFD54F) else Color(0xFFB9F6CA),
+                            fontWeight = FontWeight.Bold,
+                            fontFamily = FontFamily.Monospace,
+                            textAlign = TextAlign.Center
+                        )
+                    }
+                } else {
+                    Spacer(modifier = Modifier.height(10.dp))
                 }
             }
 
