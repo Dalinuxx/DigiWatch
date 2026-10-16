@@ -16,7 +16,7 @@
 
 Recreating the golden era of handheld virtual pets (Generations V1 through V6, Pendulum, D-3, and Digimon X), DigiWatch combines historical lifecycle simulation accuracy with modern smartwatch wearable hardware:
 - **Standalone Wear OS Simulation**: Operates 100% autonomously on your wrist without requiring an active smartphone tether. Physiological stats calculate via real-time UTC Unix timestamp deltas.
-- **Ultra-Low-Power Ambient Mode**: Custom monochrome outline shaders guarantee an On-Pixel Ratio ($\text{OPR} \le 15\%$) for all-day battery endurance.
+- **Ultra-Low-Power Ambient Mode**: Custom monochrome outline shaders guarantee an On-Pixel Ratio (OPR ≤ 15%) for all-day battery endurance.
 - **Physical Hardware Button Interception**: Sub-millisecond synchronous key dispatch intercepts watch stem buttons (`STEM_PRIMARY`, `STEM_1`, `STEM_2`, `STEM_3`), rotary crown, and volume keys for zero-latency sweet-spot Quick Time Events (QTEs).
 - **Digimon 0nl1ne / D-Com / A-Com Compatibility**: Full cryptographic 128-bit Crockford Base32 Comm Code codec with HMAC-16 verification for offline and asynchronous pvp battles.
 - **DNA Digivolution (Jogress) & DigiXros**: Canonical multi-partner fusions across both solo vault storage and friend Comm Codes without altering external wire protocol compliance.
@@ -31,7 +31,7 @@ The project is structured into three decoupled, high-performance Gradle modules:
 
 ```mermaid
 graph TD
-    subgraph "Shared Core Module (:shared-vpet-core)"
+    subgraph Core ["Shared Core Module (:shared-vpet-core)"]
         SE["PetSimulationEngine<br/>UTC Delta Life Decay Calculator"]
         EE["EvolutionEngine<br/>Multi-Variable Condition Evaluator"]
         JE["JogressEngine<br/>DNA & DigiXros Canonical Fusion Matrix"]
@@ -41,20 +41,20 @@ graph TD
         Catalog["PetSpecies Registry<br/>205 Authentic Species"]
     end
 
-    subgraph "Wear OS Smartwatch Application (:wear-os-app)"
+    subgraph WearApp ["Wear OS Smartwatch Application (:wear-os-app)"]
         WDC["WatchDisplayConfig<br/>Round & Square Display Geometry"]
         BG["BackgroundCanvas<br/>8 Selectable Themes + OLED Black"]
         UI_W["Wear Compose UI<br/>Authentic 3-Button [A][B][C] + Touch Mode"]
         HW["HardwareInputManager<br/>Stem Keys & Crown (Sub-ms QTE Interceptor)"]
         Canvas_W["Canvas Sprite Engine<br/>FilterQuality.None 64x64 Pixel Art"]
         Keypad["Crockford Base32 Keypad<br/>On-Wrist Comm Code Entry"]
-        AM["LocalAmbientModeManager<br/>Monochrome Outline / OPR <= 15%"]
+        AM["LocalAmbientModeManager<br/>Monochrome Outline / OPR ≤ 15%"]
         WM["WorkManager PetDecayWorker<br/>Background Delta Processor"]
         Sensors["Step Tracker Manager<br/>TYPE_STEP_COUNTER Sensor"]
         Room_W[("Room DB: pet_state & adventure_state")]
     end
 
-    subgraph "Mobile Companion Smartphone Application (:phone-companion-app)"
+    subgraph PhoneApp ["Mobile Companion Smartphone Application (:phone-companion-app)"]
         UI_P["Material Design 3 Compose"]
         Vault["DigiVault Cryo-Storage<br/>Multi-Partner Preservation & Fusion"]
         Widget["Android Home Screen AppWidget<br/>Live Pixel Art & Physiological Meters"]
@@ -85,7 +85,7 @@ graph TD
     Catalog --> Studio
     Room_P --> Widget
 
-    Room_W <===>|"Wearable Data Layer API<br/>/sync/update_settings & pet_state"| Room_P
+    Room_W <--> |"Wearable Data Layer API<br/>/sync/update_settings & pet_state"| Room_P
 ```
 
 ---
@@ -95,7 +95,9 @@ graph TD
 ### 1. Authentic V-Pet Lifecycle Simulation
 State decay strictly follows the original Bandai virtual pet timing schedules based on real-world elapsed UTC time:
 
-$$\Delta T = T_{\text{current}} - T_{\text{last\_processed}}$$
+```
+ΔT = Current_UTC_Time - Last_Processed_UTC_Time
+```
 
 | Life Stage | Hunger Loss | Strength Loss | Waste Interval | Sleep Window | Mistake Grace Window |
 |---|---|---|---|---|---|
@@ -143,7 +145,7 @@ DigiWatch provides both classic physical handheld controls and modern touch ergo
 ---
 
 ### 3. Full-Color Sprite Engine (205 Authentic Species)
-Every monster is rendered via a uniform $64 \times 64$ px matrix canvas at `FilterQuality.None` for crisp, authentic pixel art across round and square screens:
+Every monster is rendered via a uniform 64 × 64 px matrix canvas at `FilterQuality.None` for crisp, authentic pixel art across round and square screens:
 
 ```
 +-----------------------------------------------------------------------+
@@ -170,7 +172,10 @@ DigiWatch introduces authentic DNA Digivolution and DigiXros mechanics **without
 
 #### Why Wire Compatibility is 100% Preserved:
 In online battle simulators and physical 2-pin / 3-pin handheld communicators, communication packets contain only the **active combatant's current parameters**:
-$$\text{Payload} = \{\text{MonsterID}, \text{Stage}, \text{Attribute}, \text{BasePowerHP}, \text{Victories}, \text{Effort}, \text{Seed}, \text{Salt}, \text{HMAC}\}$$
+
+```
+Payload = { MonsterID, Stage, Attribute, BasePowerHP, Victories, Effort, Seed, Salt, HMAC }
+```
 Because external simulators inspect only the resulting species, Omnimon (`#510`), Paildramon (`#423`), and Mastemon (`#537`) transmit as standard canonical monsters with valid base power, Stage 6 (Ultimate), and elemental attributes.
 
 #### Canonical Fusion Catalog:
@@ -217,7 +222,7 @@ Bit 096-111: Timestamp Salt (16-bit)
 Bit 112-127: HMAC-16 Cryptographic Checksum (16-bit)
 ```
 
-- **Crockford Base32 Alphabet**: Encoded into an error-tolerant 26-character (128-bit) or 16-character (80-bit) alphanumeric string using `0123456789ABCDEFGHJKMNPQRSTVWXYZ` with HMAC-16 cryptographic verification. Ambiguous characters are automatically corrected (`O` $\to$ `0`, `I`/`L` $\to$ `1`).
+- **Crockford Base32 Alphabet**: Encoded into an error-tolerant 26-character (128-bit) or 16-character (80-bit) alphanumeric string using `0123456789ABCDEFGHJKMNPQRSTVWXYZ` with HMAC-16 cryptographic verification. Ambiguous characters are automatically corrected (`O` → `0`, `I`/`L` → `1`).
 - **Native Digimon 0nl1ne / D-Com / A-Com DigiROM Support**: Automatically generates and decodes `V1-XXXX-XXXX-XXXX` (48-bit) and `V1-XXXX-XXXX` (32-bit) hexadecimal DigiROM packets (`encodeDigiRom` / `decodeDigiRom` / `decodeAuto`) for direct interoperability with Digimon 0nl1ne, w0rld, Alpha Terminal, and 2-prong / 3-prong hardware serial tools.
 - **NFC Tap-to-Duel (Phone & Wear OS)**:
   - Touch two NFC-equipped devices (or tap the back of a companion phone to a smartwatch) on the Battle screen to instantly beam combatant DigiROM packets via Android Beam / NDEF records (`application/vnd.com.digiwatch.battle`).
@@ -226,7 +231,7 @@ Bit 112-127: HMAC-16 Cryptographic Checksum (16-bit)
   - Scan *any* physical NFC chip, transit card, hotel keycard, amiibo, or NFC sticker: `deriveDigiRomFromBytes(uidBytes)` deterministically seeds an authentic wild Digimon 0nl1ne combatant based on the hardware UID!
   - Write your active partner to physical NTAG213/215/216 stickers or NFC cards with one click from the Companion App Battle Hub ("WRITE TO NFC TAG") to challenge friends in the real world.
 - **Deterministic Turns**: Combines both combatant PRNG seeds into a unified sequence.
-- **Elemental Triangle ($1.2\times$ Damage)**: Vaccine defeats Virus, Virus defeats Data, Data defeats Vaccine.
+- **Elemental Triangle (1.2× Damage)**: Vaccine defeats Virus, Virus defeats Data, Data defeats Vaccine.
 
 ---
 
@@ -252,7 +257,7 @@ graph LR
 
 The mobile application (`:phone-companion-app`) serves as a full-featured management hub connected via 6 bidirectional Wearable Data Layer endpoints (`/sync/request_pet_state`, `/sync/response_pet_state`, `/sync/update_pet_state`, `/sync/update_settings`, `/sync/battle_code`, `/sync/campaign_data`):
 - **DigiVault Cryo-Preservation**: Archive raised Digimon in zero-decay cryostasis. Browse stored partners with live animated pixel art, search/filter by stage, deploy back to the watch & phone dashboard with one click, or generate dual 128-bit Base32 Comm Codes and `V1-XXXX-XXXX-XXXX` DigiROM packets.
-- **Android Home Screen AppWidget**: Built with standard `RemoteViews` rendering the live $64 \times 64$ color pixel-art sprite, stage, weight, hunger hearts (`♥♥♥♥`), and strength stars (`★★★★`). Refreshes automatically on watch sync, DigiDex morph, and DigiVault deployment.
+- **Android Home Screen AppWidget**: Built with standard `RemoteViews` rendering the live 64 × 64 color pixel-art sprite, stage, weight, hunger hearts (`♥♥♥♥`), and strength stars (`★★★★`). Refreshes automatically on watch sync, DigiDex morph, and DigiVault deployment.
 - **205-Species DigiDex, Evolution Encyclopedia & 6-Mode Sprite Studio**: Search and filter all 205 species by stage or ID, inspect all 12 animation frames across 6 live preview modes (`IDLE`, `WALK`, `FEED`, `SLEEP`, `ATTACK`, `STATUS`) with authentic V-Pet pixel overlays, browse interactive pre-evolutions, branching evolutions, and DNA Jogress recipes, and morph your active partner or synthesize into DigiVault.
 - **30-Sector Story Architect**: Create and customize custom campaign sagas and push them directly to the watch's active adventure engine via `/sync/campaign_data`.
 - **JSON Cloud Portability**: Export and import entire partner archives and settings with one-click JSON backup.
@@ -334,7 +339,7 @@ The wizard guides you through:
 #### Manual Sideloading via Standard ADB:
 
 ##### Sideloading to Wear OS Smartwatch via ADB over Wi-Fi:
-1. On your smartwatch, enable **Developer Options** (Settings $\to$ System $\to$ About $\to$ tap *Build Number* 7 times).
+1. On your smartwatch, enable **Developer Options** (Settings → System → About → tap *Build Number* 7 times).
 2. Under Developer Options, enable **ADB Debugging** and **Debug over Wi-Fi**.
 3. Note the IP address and pairing port shown on the watch.
 4. From your terminal:
@@ -355,11 +360,11 @@ adb install -r phone-companion-app/build/outputs/apk/release/phone-companion-app
 ## 🧪 Verification & Test Suite
 
 The shared core logic includes complete unit test coverage across 5 dedicated test suites:
-- **`CommCodeCodecTest`**: 128-bit payload binary serialization, Crockford Base32 alphabet validation, error-tolerant character mapping (`O` $\to$ `0`, `I`/`L` $\to$ `1`), and HMAC-16 tamper detection.
-- **`DeterministicBattleSolverTest`**: Combined PRNG seed turn reproducibility, $1.2\times$ elemental advantage damage calculations, and 10-round combat termination.
+- **`CommCodeCodecTest`**: 128-bit payload binary serialization, Crockford Base32 alphabet validation, error-tolerant character mapping (`O` → `0`, `I`/`L` → `1`), and HMAC-16 tamper detection.
+- **`DeterministicBattleSolverTest`**: Combined PRNG seed turn reproducibility, 1.2× elemental advantage damage calculations, and 10-round combat termination.
 - **`PetSimulationEngineTest`**: Physiological decay math across all 6 stages, metabolic sleep freezing, and care mistake grace windows.
 - **`AdventureEngineTest`**: 30-node step accumulation, hazard weather mechanics, and final boss victory flag recording (`Node 130` ZeedMillenniummon).
-- **`JogressEngineTest`**: Commutative fusion recipe matching (WarGreymon + MetalGarurumon == MetalGarurumon + WarGreymon $\to$ Omnimon), inherited stat bonuses, and Digimon 0nl1ne Comm Code roundtrip verification.
+- **`JogressEngineTest`**: Commutative fusion recipe matching (WarGreymon + MetalGarurumon == MetalGarurumon + WarGreymon → Omnimon), inherited stat bonuses, and Digimon 0nl1ne Comm Code roundtrip verification.
 
 Execute tests via:
 ```bash
