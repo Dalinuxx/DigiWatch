@@ -37,7 +37,20 @@ fun AmbientController(
     var ambientTick by remember { mutableLongStateOf(0L) }
     var lastHardwareTickMs by remember { mutableLongStateOf(0L) }
 
-    DisposableEffect(activity) {
+    val isWearableSharedLibraryAvailable = remember {
+        try {
+            Class.forName("com.google.android.wearable.compat.WearableActivityController")
+            true
+        } catch (_: Throwable) {
+            false
+        }
+    }
+
+    DisposableEffect(activity, isWearableSharedLibraryAvailable) {
+        if (!isWearableSharedLibraryAvailable) {
+            return@DisposableEffect onDispose {}
+        }
+
         val callback = object : AmbientLifecycleObserver.AmbientLifecycleCallback {
             override fun onEnterAmbient(ambientDetails: AmbientLifecycleObserver.AmbientDetails) {
                 isAmbient = true
@@ -62,11 +75,17 @@ fun AmbientController(
             }
         }
 
-        val observer = AmbientLifecycleObserver(activity, callback)
-        activity.lifecycle.addObserver(observer)
+        var observer: AmbientLifecycleObserver? = null
+        try {
+            val obs = AmbientLifecycleObserver(activity, callback)
+            activity.lifecycle.addObserver(obs)
+            observer = obs
+        } catch (e: Throwable) {
+            android.util.Log.w("AmbientController", "AmbientLifecycleObserver unavailable on this hardware: ${e.message}")
+        }
 
         onDispose {
-            activity.lifecycle.removeObserver(observer)
+            observer?.let { activity.lifecycle.removeObserver(it) }
         }
     }
 
