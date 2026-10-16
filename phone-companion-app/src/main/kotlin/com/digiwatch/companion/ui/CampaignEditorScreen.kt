@@ -28,6 +28,7 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -64,7 +65,7 @@ fun CampaignEditorScreen(
     val scrollState = rememberScrollState()
 
     // Parse on start
-    remember(rawJson) {
+    LaunchedEffect(rawJson) {
         try {
             parsedStory = AdventureEngine.parseCampaign(rawJson)
             parseError = null

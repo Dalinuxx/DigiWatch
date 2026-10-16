@@ -5,6 +5,7 @@
     android:layout_height="match_parent"
     android:background="@drawable/widget_background"
     android:orientation="horizontal"
+    android:baselineAligned="false"
     android:gravity="center_vertical"
     android:padding="10dp">
 

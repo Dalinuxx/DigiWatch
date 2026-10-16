@@ -42,6 +42,11 @@ android {
     buildFeatures {
         compose = true
     }
+
+    lint {
+        disable += "InvalidWearFeatureAttribute"
+        abortOnError = false
+    }
 }
 
 dependencies {

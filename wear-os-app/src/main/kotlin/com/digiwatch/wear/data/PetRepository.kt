@@ -29,17 +29,19 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.util.concurrent.TimeUnit
 
-class PetRepository private constructor(private val context: Context) {
+class PetRepository private constructor(context: Context) {
+
+    private val appContext = context.applicationContext
 
     private val db = Room.databaseBuilder(
-        context.applicationContext,
+        appContext,
         DigiWatchDatabase::class.java,
         "digiwatch_wear.db"
     ).build()
 
     private val dao = db.petDao()
 
-    private val prefs = context.getSharedPreferences("digiwatch_wear_prefs", Context.MODE_PRIVATE)
+    private val prefs = appContext.getSharedPreferences("digiwatch_wear_prefs", Context.MODE_PRIVATE)
 
     private val _themeFlow = MutableStateFlow(
         BackgroundTheme.fromId(prefs.getString("selected_theme", BackgroundTheme.CLASSIC_VPET_LCD.id))
@@ -357,7 +359,7 @@ class PetRepository private constructor(private val context: Context) {
             .setConstraints(Constraints.NONE)
             .build()
 
-        WorkManager.getInstance(context).enqueueUniquePeriodicWork(
+        WorkManager.getInstance(appContext).enqueueUniquePeriodicWork(
             "DigiWatchPetDecayWork",
             ExistingPeriodicWorkPolicy.KEEP,
             workRequest

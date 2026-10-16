@@ -106,7 +106,7 @@ fun BattleHubScreen(wearableManager: PhoneWearableManager) {
     }
 
     // Generate own code on load / change
-    remember(ownMonsterId, ownSeed) {
+    LaunchedEffect(ownMonsterId, ownSeed) {
         val species = PetSpecies.getById(ownMonsterId)
         generatedCode = CommCodeCodec.encode128(
             monsterId = ownMonsterId,

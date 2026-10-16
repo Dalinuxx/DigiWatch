@@ -24,8 +24,8 @@ import com.digiwatch.core.model.BackgroundTheme
 fun BackgroundCanvas(
     theme: BackgroundTheme,
     isAmbient: Boolean,
-    lightsOff: Boolean = false,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    lightsOff: Boolean = false
 ) {
     Spacer(
         modifier = modifier
