@@ -56,8 +56,8 @@ object DigiWatchPalette {
     val ShellSteel = Color(0xFF263238)
 }
 
-private val TOP_VPET_ICONS = listOf(("📊" to "STAT"), ("🍖" to "FEED"), ("⚔" to "TRN"), ("🥊" to "BTL"))
-private val BOTTOM_VPET_ICONS = listOf(("🧹" to "CLN"), ("💡" to "LGT"), ("💉" to "MED"), ("🚨" to "ALT"))
+private val TOP_VPET_ICONS = listOf(("📊" to "STAT"), ("🍖" to "FEED"), ("🥊" to "TRN"), ("⚔" to "BTL"))
+private val BOTTOM_VPET_ICONS = listOf(("💩" to "FLSH"), ("💡" to "LGT"), ("💉" to "MED"), ("🚨" to "CALL"))
 
 /**
  * Authentic 1997 Bandai V-Pet Brick-Wall Casing & Recessed LCD Viewport.

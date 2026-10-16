@@ -30,6 +30,7 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
@@ -78,12 +79,12 @@ import java.util.Date
 import java.util.Locale
 
 enum class VPetMenu(val label: String, val icon: String) {
-    FEED("FEED", "🍖"),
-    LIGHT("LIGHT", "💡"),
-    BATTLE("BATTLE", "⚔"),
-    FLUSH("FLUSH", "🧹"),
     STATUS("STATUS", "📊"),
+    FEED("FEED", "🍖"),
     TRAIN("TRAIN", "🥊"),
+    BATTLE("BATTLE", "⚔"),
+    FLUSH("FLUSH", "💩"),
+    LIGHT("LIGHT", "💡"),
     MEDS("MEDS", "💉"),
     ATTENTION("CALL", "🚨")
 }
@@ -450,8 +451,15 @@ private fun ThreeButtonPetView(
             .padding(displayConfig.contentPadding),
         contentAlignment = Alignment.Center
     ) {
+        val isTallDisplay = displayConfig.screenHeightDp > 340
         Column(
-            modifier = Modifier.fillMaxSize(),
+            modifier = if (isTallDisplay) {
+                Modifier
+                    .widthIn(max = 280.dp)
+                    .height(300.dp)
+            } else {
+                Modifier.fillMaxSize()
+            },
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.SpaceBetween
         ) {
@@ -643,8 +651,8 @@ private fun ThreeButtonPetView(
 
                 // Active Menu Prompt or Action Feedback Pill
                 val promptText = if (selectedMenuIndex != null) {
-                    "◀ ${VPetMenu.entries[selectedMenuIndex].label} [B:OK] ▶"
-                } else actionFeedback ?: if (petState.isSleeping) "ZZZ... SLEEPING" else "${species.stage.displayName.uppercase()} • ${petState.victories}W"
+                    "► ${VPetMenu.entries[selectedMenuIndex].label} ◄"
+                } else actionFeedback ?: if (petState.isSleeping) "ZZZ... SLEEPING" else "WT: ${petState.weight}g • AGE: ${petState.ageSeconds / 86400}d"
 
                 Box(
                     modifier = Modifier
@@ -662,7 +670,7 @@ private fun ThreeButtonPetView(
                 }
             }
 
-            // Bottom Recessed V-Pet LCD Rail: Status (4), Train (5), Meds (6), Call (7)
+            // Bottom Recessed V-Pet LCD Rail: Flush (4), Light (5), Meds (6), Call (7)
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -704,48 +712,48 @@ private fun ThreeButtonPetView(
                 }
             }
 
-            // Tactile Molded Bandai [A] [B] [C] Shell Button Bar
+            // Tactile Molded Bandai ( A ) ( B ) ( C ) Shell Button Bar
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(top = 1.dp),
+                    .padding(top = 2.dp),
                 horizontalArrangement = Arrangement.SpaceEvenly,
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 // Button A: Select / Cycle
                 Box(
                     modifier = Modifier
-                        .size(width = 40.dp, height = 21.dp)
+                        .size(width = 38.dp, height = 22.dp)
                         .background(Color(0xFF263238), RoundedCornerShape(11.dp))
                         .border(1.2.dp, Color(0xFF80D8FF), RoundedCornerShape(11.dp))
                         .clickable { onPressA() },
                     contentAlignment = Alignment.Center
                 ) {
-                    Text("A•SEL", fontSize = 8.sp, fontWeight = FontWeight.Black, color = Color.White, fontFamily = FontFamily.Monospace)
+                    Text("( A )", fontSize = 9.sp, fontWeight = FontWeight.Black, color = Color.White, fontFamily = FontFamily.Monospace)
                 }
 
                 // Button B: Confirm / Execute
                 Box(
                     modifier = Modifier
-                        .size(width = 40.dp, height = 21.dp)
+                        .size(width = 38.dp, height = 22.dp)
                         .background(Color(0xFF1B5E20), RoundedCornerShape(11.dp))
                         .border(1.2.dp, Color(0xFF69F0AE), RoundedCornerShape(11.dp))
                         .clickable { onPressB() },
                     contentAlignment = Alignment.Center
                 ) {
-                    Text("B•OK", fontSize = 8.sp, fontWeight = FontWeight.Black, color = Color(0xFFB9F6CA), fontFamily = FontFamily.Monospace)
+                    Text("( B )", fontSize = 9.sp, fontWeight = FontWeight.Black, color = Color(0xFFB9F6CA), fontFamily = FontFamily.Monospace)
                 }
 
                 // Button C: Cancel / Light
                 Box(
                     modifier = Modifier
-                        .size(width = 40.dp, height = 21.dp)
+                        .size(width = 38.dp, height = 22.dp)
                         .background(Color(0xFF4A148C), RoundedCornerShape(11.dp))
                         .border(1.2.dp, Color(0xFFEA80FC), RoundedCornerShape(11.dp))
                         .clickable { onPressC() },
                     contentAlignment = Alignment.Center
                 ) {
-                    Text("C•ESC", fontSize = 8.sp, fontWeight = FontWeight.Black, color = Color(0xFFF3E5F5), fontFamily = FontFamily.Monospace)
+                    Text("( C )", fontSize = 9.sp, fontWeight = FontWeight.Black, color = Color(0xFFF3E5F5), fontFamily = FontFamily.Monospace)
                 }
             }
         }
@@ -931,7 +939,7 @@ private fun ModernTouchPetView(
                         size = displayConfig.mainSpriteSize
                     )
                     Text(
-                        text = "EFF ${"★".repeat(petState.effort)} • ${petState.victories}W/${petState.totalBattles}B • STATUS ▶",
+                        text = "${species.stage.displayName.uppercase()} • ${petState.weight}g • ${petState.victories}W/${petState.totalBattles}B",
                         fontSize = 7.sp,
                         fontWeight = FontWeight.Bold,
                         color = Color(0xFFB0BEC5),

@@ -8,7 +8,7 @@ import kotlinx.serialization.Serializable
  */
 @Serializable
 data class PetState(
-    val speciesId: Int = 1,
+    val speciesId: Int = 201,
     val currentHp: Int = 100,
     val maxHp: Int = 100,
     val hunger: Int = 4,              // 0 to 4 hearts

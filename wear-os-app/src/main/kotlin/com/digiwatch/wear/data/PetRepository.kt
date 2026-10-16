@@ -52,7 +52,7 @@ class PetRepository private constructor(private val context: Context) {
     val vibrationFlow: Flow<Boolean> = _vibrationFlow.asStateFlow()
 
     private val _threeButtonModeFlow = MutableStateFlow(
-        prefs.getBoolean("vpet_3button_mode", false)
+        prefs.getBoolean("vpet_3button_mode", true)
     )
     val threeButtonModeFlow: Flow<Boolean> = _threeButtonModeFlow.asStateFlow()
 
@@ -137,7 +137,12 @@ class PetRepository private constructor(private val context: Context) {
     }
 
     val petStateFlow: Flow<PetState> = dao.getPetStateFlow().map { entity ->
-        entity?.toDomain() ?: PetState()
+        val domain = entity?.toDomain() ?: PetState(speciesId = 201)
+        if (domain.speciesId <= 1 || !PetSpecies.SPECIES_REGISTRY.containsKey(domain.speciesId)) {
+            domain.copy(speciesId = 201)
+        } else {
+            domain
+        }
     }.distinctUntilChanged()
 
     val adventureStateFlow: Flow<AdventureProgress> = dao.getAdventureStateFlow().map { entity ->
