@@ -14,79 +14,79 @@ object SpriteMatrixRegistry {
     // =========================================================================
 
     val AGUMON_IDLE_A = arrayOf(
-        "......BBBBB.....",
-        ".....B#####B....",
-        "....BBEB###B....",
-        "..BB###EE###B...",
-        ".B#####WWW###B..",
-        ".BBBB########B..",
-        "..B##########B..",
-        "...BBTTTT###B...",
-        "....BTTTT#B#B...",
-        "...B#TTTT#B.WW..",
-        "...BBTTTT#BBBW..",
-        ".....BTTTT#B..B.",
-        "...BBTTB###B..B.",
-        "..BWB..BWB.BWB.B",
-        "..BBBBBB.BBBBBBB",
-        "................"
+        "................",
+        ".....BBBBB......",
+        "....BTSSSTB.....",
+        "...BBSBB##TB....",
+        ".BBSS#WBB#TB....",
+        "BS####BBB#TTB...",
+        "BBBBT#####TTB...",
+        ".B#######TTTB...",
+        "..BBBBBTTTTB....",
+        "...BBTTT#BSB....",
+        "..BWBS##BW#TB...",
+        "..BBBS##BBBTB...",
+        "....BBTTTTBSTB..",
+        "..BB#TBBBBS##B..",
+        ".BWBTTB.BWBWBWB.",
+        ".BBBBBB.BBBBBBB."
     )
 
     val AGUMON_IDLE_B = arrayOf(
-        "......BBBBB.....",
-        ".....B#####B....",
-        "....BBEB###B....",
-        "..BB###EE###B...",
-        ".B#####WWW###B..",
-        ".BBBB########B..",
-        "..B##########B..",
-        "...BBTTTT###B...",
-        "....BTTTT#B#B...",
-        "...B#TTTT#B.WW..",
-        "...BBTTTT#BBBW..",
-        ".....BTTTT#B..B.",
-        "...BBTTB###B..B.",
-        "...BWB..BWB.BWB.",
-        "...BBBBBB.BBBBBB",
-        "................"
+        "................",
+        ".....BBBBB......",
+        "....BTSSSTB.....",
+        "...BBSBB##TB....",
+        ".BBSS#WBB#TB....",
+        "BS####BBB#TTB...",
+        "BBBBT#####TTB...",
+        ".B#######TTTB...",
+        "..BBBBBTTTTB....",
+        "...BBTTT#BSB....",
+        "..BWBS##BW#TB...",
+        "..BBBS##BBBTB...",
+        "....BBTTTTBSTB..",
+        "...BB#TBBBBS##B.",
+        "..BWBTTB.BWBWBW.",
+        "..BBBBBB.BBBBBB."
     )
 
     val AGUMON_SLEEP = arrayOf(
-        "......BBBBB.....",
-        ".....B#####B....",
-        "....BBBB###B....",
-        "..BB###BB###B...",
-        ".B#####WWW###B..",
-        ".BBBB########B..",
-        "..B##########B..",
-        "...BBTTTT###B...",
-        "....BTTTT#B#B...",
-        "...B#TTTT#B.WW..",
-        "...BBTTTT#BBBW..",
-        ".....BTTTT#B..B.",
-        "...BBTTB###B..B.",
-        "..BWB..BWB.BWB.B",
-        "..BBBBBB.BBBBBBB",
-        "................"
+        "................",
+        ".....BBBBB......",
+        "....BTSSSTB.....",
+        "...BBSBB##TB....",
+        ".BBSS#BBB#TB....",
+        "BS####BBB#TTB...",
+        "BBBBT#####TTB...",
+        ".B#######TTTB...",
+        "..BBBBBTTTTB....",
+        "...BBTTT#BSB....",
+        "..BWBS##BW#TB...",
+        "..BBBS##BBBTB...",
+        "....BBTTTTBSTB..",
+        "..BB#TBBBBS##B..",
+        ".BWBTTB.BWBWBWB.",
+        ".BBBBBB.BBBBBBB."
     )
 
     val AGUMON_ATTACK = arrayOf(
-        "......BBBBB.....",
-        ".....B#####B....",
-        "....BBEB###B....",
-        "..BB###EE###B...",
-        ".B#####RRRRRRRR.",
-        ".BBBB##RRRRRRRR.",
-        "..B##########B..",
-        "...BBTTTT###B...",
-        "....BTTTT#B#B...",
-        "...B#TTTT#B.WW..",
-        "...BBTTTT#BBBW..",
-        ".....BTTTT#B..B.",
-        "...BBTTB###B..B.",
-        "...BWB..BWB.BWB.",
-        "...BBBBBB.BBBBBB",
-        "................"
+        "................",
+        ".....BBBBB......",
+        "....BTSSSTB.....",
+        "...BBSBB##TB....",
+        ".BBSS#WBB#TBRRR.",
+        "BS####BBB#TTBRRR",
+        "BBBBT#####TTBRRR",
+        ".B#######TTTB...",
+        "..BBBBBTTTTB....",
+        "...BBTTT#BSB....",
+        "..BWBS##BW#TB...",
+        "..BBBS##BBBTB...",
+        "....BBTTTTBSTB..",
+        "...BB#TBBBBS##B.",
+        "..BWBTTB.BWBWBW.",
+        "..BBBBBB.BBBBBB."
     )
 
     val BOTAMON_IDLE = arrayOf(
@@ -1793,7 +1793,7 @@ object SpriteMatrixRegistry {
             119 -> SpritePalette(SpritePalette.rgb(55, 45, 95), SpritePalette.rgb(85, 75, 135), SpritePalette.rgb(225, 60, 80), SpritePalette.rgb(255, 215, 0)) // Yaamon
 
             // Child
-            201 -> SpritePalette(SpritePalette.rgb(255, 168, 38), SpritePalette.rgb(216, 112, 10), SpritePalette.rgb(255, 228, 140), SpritePalette.rgb(0, 200, 68)) // Agumon
+            201 -> SpritePalette(SpritePalette.rgb(255, 175, 25), SpritePalette.rgb(216, 112, 10), SpritePalette.rgb(247, 231, 140), SpritePalette.rgb(20, 20, 25)) // Agumon
             202 -> SpritePalette(SpritePalette.rgb(35, 175, 110), SpritePalette.rgb(20, 120, 75), SpritePalette.rgb(240, 60, 60), SpritePalette.rgb(255, 60, 60)) // Betamon
             203 -> SpritePalette(SpritePalette.rgb(240, 225, 170), SpritePalette.rgb(70, 120, 200), SpritePalette.rgb(230, 180, 50), SpritePalette.rgb(180, 30, 30)) // Gabumon
             204 -> SpritePalette(SpritePalette.rgb(225, 45, 55), SpritePalette.rgb(60, 110, 210), SpritePalette.rgb(255, 220, 50), SpritePalette.rgb(20, 20, 25)) // Elecmon
@@ -1806,8 +1806,8 @@ object SpriteMatrixRegistry {
             211 -> SpritePalette(SpritePalette.rgb(245, 215, 60), SpritePalette.rgb(115, 55, 135), SpritePalette.rgb(245, 245, 250), SpritePalette.rgb(20, 20, 25)) // Kunemon
 
             // Adult
-            301 -> SpritePalette(SpritePalette.rgb(255, 152, 0), SpritePalette.rgb(63, 81, 181), SpritePalette.rgb(121, 85, 72), SpritePalette.rgb(76, 175, 80)) // Greymon
-            302 -> SpritePalette(SpritePalette.rgb(220, 45, 40), SpritePalette.rgb(160, 30, 30), SpritePalette.rgb(240, 230, 210), SpritePalette.rgb(0, 180, 60)) // Tyrannomon
+            301 -> SpritePalette(SpritePalette.rgb(247, 154, 41), SpritePalette.rgb(16, 101, 156), SpritePalette.rgb(82, 65, 58), SpritePalette.rgb(25, 20, 0)) // Greymon
+            302 -> SpritePalette(SpritePalette.rgb(239, 53, 25), SpritePalette.rgb(33, 109, 8), SpritePalette.rgb(239, 235, 239), SpritePalette.rgb(33, 12, 0)) // Tyrannomon
             303 -> SpritePalette(SpritePalette.rgb(26, 26, 29), SpritePalette.rgb(45, 19, 44), SpritePalette.rgb(199, 0, 57), SpritePalette.rgb(255, 56, 56)) // Devimon
             304 -> SpritePalette(SpritePalette.rgb(255, 90, 25), SpritePalette.rgb(220, 40, 10), SpritePalette.rgb(255, 210, 40), SpritePalette.rgb(255, 255, 255)) // Meramon
             305 -> SpritePalette(SpritePalette.rgb(145, 200, 65), SpritePalette.rgb(105, 155, 40), SpritePalette.rgb(200, 240, 120), SpritePalette.rgb(255, 235, 59)) // Numemon
@@ -1815,7 +1815,7 @@ object SpriteMatrixRegistry {
             307 -> SpritePalette(SpritePalette.rgb(245, 245, 250), SpritePalette.rgb(45, 55, 115), SpritePalette.rgb(255, 215, 60), SpritePalette.rgb(45, 135, 225)) // Angemon
             308 -> SpritePalette(SpritePalette.rgb(85, 180, 75), SpritePalette.rgb(215, 50, 60), SpritePalette.rgb(145, 115, 75), SpritePalette.rgb(20, 20, 20)) // Togemon
             309 -> SpritePalette(SpritePalette.rgb(245, 75, 40), SpritePalette.rgb(245, 210, 50), SpritePalette.rgb(40, 40, 45), SpritePalette.rgb(255, 255, 255)) // Birdramon
-            310 -> SpritePalette(SpritePalette.rgb(180, 55, 45), SpritePalette.rgb(120, 35, 30), SpritePalette.rgb(245, 235, 210), SpritePalette.rgb(0, 220, 75)) // Kabuterimon
+            310 -> SpritePalette(SpritePalette.rgb(90, 109, 165), SpritePalette.rgb(58, 73, 107), SpritePalette.rgb(123, 142, 197), SpritePalette.rgb(255, 255, 222)) // Kabuterimon
             311 -> SpritePalette(SpritePalette.rgb(175, 120, 60), SpritePalette.rgb(235, 195, 125), SpritePalette.rgb(245, 245, 250), SpritePalette.rgb(20, 20, 25)) // Monochromon
             312 -> SpritePalette(SpritePalette.rgb(105, 175, 80), SpritePalette.rgb(165, 115, 55), SpritePalette.rgb(225, 215, 195), SpritePalette.rgb(220, 35, 35)) // Ogremon
             313 -> SpritePalette(SpritePalette.rgb(225, 175, 70), SpritePalette.rgb(145, 95, 40), SpritePalette.rgb(25, 25, 30), SpritePalette.rgb(45, 140, 225)) // Leomon
@@ -1829,7 +1829,7 @@ object SpriteMatrixRegistry {
             321 -> SpritePalette(SpritePalette.rgb(135, 165, 125), SpritePalette.rgb(85, 115, 75), SpritePalette.rgb(215, 115, 145), SpritePalette.rgb(220, 35, 35)) // Raremon
             322 -> SpritePalette(SpritePalette.rgb(185, 40, 40), SpritePalette.rgb(120, 25, 25), SpritePalette.rgb(245, 245, 250), SpritePalette.rgb(255, 215, 0)) // Kuwagamon
             323 -> SpritePalette(SpritePalette.rgb(240, 240, 245), SpritePalette.rgb(245, 75, 45), SpritePalette.rgb(35, 35, 40), SpritePalette.rgb(255, 215, 0)) // Kokatorimon
-            324 -> SpritePalette(SpritePalette.rgb(130, 140, 160), SpritePalette.rgb(85, 95, 115), SpritePalette.rgb(235, 185, 55), SpritePalette.rgb(0, 210, 75)) // Coelamon
+            324 -> SpritePalette(SpritePalette.rgb(181, 182, 189), SpritePalette.rgb(107, 113, 115), SpritePalette.rgb(222, 231, 239), SpritePalette.rgb(10, 10, 20)) // Coelamon
             325 -> SpritePalette(SpritePalette.rgb(245, 205, 75), SpritePalette.rgb(195, 145, 45), SpritePalette.rgb(240, 60, 60), SpritePalette.rgb(20, 20, 25)) // Nanimon
             326 -> SpritePalette(SpritePalette.rgb(235, 235, 240), SpritePalette.rgb(175, 175, 185), SpritePalette.rgb(40, 40, 50), SpritePalette.rgb(220, 35, 35)) // Bakemon
             327 -> SpritePalette(SpritePalette.rgb(240, 240, 245), SpritePalette.rgb(245, 75, 45), SpritePalette.rgb(35, 35, 40), SpritePalette.rgb(255, 215, 0)) // Shellmon
@@ -1856,13 +1856,13 @@ object SpriteMatrixRegistry {
             419 -> SpritePalette(SpritePalette.rgb(144, 164, 174), SpritePalette.rgb(215, 45, 45), SpritePalette.rgb(25, 25, 30), SpritePalette.rgb(255, 215, 0)) // Giromon
             420 -> SpritePalette(SpritePalette.rgb(215, 115, 175), SpritePalette.rgb(145, 75, 125), SpritePalette.rgb(245, 245, 250), SpritePalette.rgb(25, 25, 30)) // Vademon
             429 -> SpritePalette(SpritePalette.rgb(45, 50, 60), SpritePalette.rgb(30, 30, 35), SpritePalette.rgb(144, 164, 174), SpritePalette.rgb(244, 67, 54)) // BlackMetalGreymon
-            501 -> SpritePalette(SpritePalette.rgb(216, 67, 21), SpritePalette.rgb(255, 193, 7), SpritePalette.rgb(144, 164, 174), SpritePalette.rgb(0, 230, 118)) // WarGreymon
+            501 -> SpritePalette(SpritePalette.rgb(216, 67, 21), SpritePalette.rgb(255, 193, 7), SpritePalette.rgb(144, 164, 174), SpritePalette.rgb(30, 136, 229)) // WarGreymon
             503 -> SpritePalette(SpritePalette.rgb(65, 135, 225), SpritePalette.rgb(255, 215, 60), SpritePalette.rgb(144, 164, 174), SpritePalette.rgb(225, 40, 40)) // MetalGarurumon
             510 -> SpritePalette(SpritePalette.rgb(245, 245, 250), SpritePalette.rgb(255, 193, 7), SpritePalette.rgb(144, 164, 174), SpritePalette.rgb(0, 200, 255)) // Omegamon
             525 -> SpritePalette(SpritePalette.rgb(40, 40, 45), SpritePalette.rgb(255, 215, 0), SpritePalette.rgb(144, 164, 174), SpritePalette.rgb(220, 35, 35)) // BlackWarGreymon
             535 -> SpritePalette(SpritePalette.rgb(245, 245, 250), SpritePalette.rgb(225, 45, 45), SpritePalette.rgb(144, 164, 174), SpritePalette.rgb(0, 200, 255)) // Alter-S
             536 -> SpritePalette(SpritePalette.rgb(35, 35, 40), SpritePalette.rgb(180, 180, 190), SpritePalette.rgb(144, 164, 174), SpritePalette.rgb(220, 35, 35)) // Zwart
-            else -> SpritePalette(SpritePalette.rgb(255, 168, 38), SpritePalette.rgb(216, 112, 10), SpritePalette.rgb(255, 228, 140), SpritePalette.rgb(0, 200, 68))
+            else -> SpritePalette(SpritePalette.rgb(255, 175, 25), SpritePalette.rgb(216, 112, 10), SpritePalette.rgb(247, 231, 140), SpritePalette.rgb(20, 20, 25))
         }
     }
 }

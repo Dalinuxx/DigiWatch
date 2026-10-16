@@ -1,4 +1,4 @@
-package com.digiwatch.wear.render
+﻿package com.digiwatch.wear.render
 
 import android.graphics.Bitmap
 import android.graphics.Canvas
@@ -133,6 +133,7 @@ object PixelArtMatrices {
                         'S' -> palette.secondary
                         'T' -> palette.tertiary
                         'E' -> palette.eye
+                        'K' -> Color.rgb(18, 20, 26)
                         'W' -> Color.rgb(250, 250, 250)
                         'B' -> Color.rgb(18, 20, 26)
                         'R' -> Color.rgb(244, 67, 54)
