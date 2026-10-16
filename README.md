@@ -305,17 +305,17 @@ All modules assemble cleanly with 0 errors:
 
 | Module | Build Variant | Size | Output File Location |
 |---|---|---|---|
-| **Wear OS Smartwatch** | Release (Unsigned) | **20.77 MB** | `wear-os-app/build/outputs/apk/release/wear-os-app-release-unsigned.apk` |
-| **Wear OS Smartwatch** | Debug | **26.18 MB** | `wear-os-app/build/outputs/apk/debug/wear-os-app-debug.apk` |
-| **Phone Companion** | Release (Unsigned) | **11.95 MB** | `phone-companion-app/build/outputs/apk/release/phone-companion-app-release-unsigned.apk` |
-| **Phone Companion** | Debug | **17.67 MB** | `phone-companion-app/build/outputs/apk/debug/phone-companion-app-debug.apk` |
+| **Wear OS & AOSP Smartwatch** | Release (Signed) | **21.03 MB** | `wear-os-app/build/outputs/apk/release/wear-os-app-release.apk` *(also in `release_bin/`)* |
+| **Wear OS & AOSP Smartwatch** | Debug | **25.96 MB** | `wear-os-app/build/outputs/apk/debug/wear-os-app-debug.apk` |
+| **Phone Companion** | Release (Signed) | **12.06 MB** | `phone-companion-app/build/outputs/apk/release/phone-companion-app-release.apk` *(also in `release_bin/`)* |
+| **Phone Companion** | Debug | **17.95 MB** | `phone-companion-app/build/outputs/apk/debug/phone-companion-app-debug.apk` |
 
 ---
 
 ### 3. Sideloading to Devices
 
 #### ⚡ Automated One-Click Sideloading Companion Scripts (Recommended):
-DigiWatch includes interactive helper scripts that automatically locate `adb` on your system (checking PATH and default Android SDK folders), assist with Wi-Fi pairing/connecting, and install both APKs without manual terminal commands:
+DigiWatch includes interactive helper scripts that automatically locate `adb` on your system (checking PATH and default Android SDK folders), assist with Wi-Fi pairing/connecting, and install both signed APKs without manual terminal commands:
 
 - **Windows (Double-Click or Command Line)**:
   ```cmd
@@ -332,13 +332,13 @@ DigiWatch includes interactive helper scripts that automatically locate `adb` on
 The wizard guides you through:
 1. Detecting connected devices via USB or wireless Wi-Fi.
 2. Entering your watch's IP and port (e.g., `192.168.1.50:5555`) or 6-digit Wi-Fi pairing code.
-3. Automatically installing the latest release APKs with proper replace (`-r`) and downgrade (`-d`) flags.
+3. Automatically installing the latest signed release APKs with proper replace (`-r`) and downgrade (`-d`) flags.
 
 ---
 
 #### Manual Sideloading via Standard ADB:
 
-##### Sideloading to Wear OS Smartwatch via ADB over Wi-Fi:
+##### Sideloading to Wear OS or AOSP Smartwatch via ADB over Wi-Fi:
 1. On your smartwatch, enable **Developer Options** (Settings → System → About → tap *Build Number* 7 times).
 2. Under Developer Options, enable **ADB Debugging** and **Debug over Wi-Fi**.
 3. Note the IP address and pairing port shown on the watch.
@@ -346,13 +346,13 @@ The wizard guides you through:
    ```bash
    adb pair <WATCH_IP>:<PAIRING_PORT>
    adb connect <WATCH_IP>:<CONNECT_PORT>
-   adb -s <WATCH_IP>:<CONNECT_PORT> install -r wear-os-app/build/outputs/apk/release/wear-os-app-release-unsigned.apk
+   adb -s <WATCH_IP>:<CONNECT_PORT> install -r wear-os-app/build/outputs/apk/release/wear-os-app-release.apk
    ```
 
-#### Installing Phone Companion App:
+##### Installing Phone Companion App:
 Connect your Android phone via USB with USB Debugging enabled:
 ```bash
-adb install -r phone-companion-app/build/outputs/apk/release/phone-companion-app-release-unsigned.apk
+adb install -r phone-companion-app/build/outputs/apk/release/phone-companion-app-release.apk
 ```
 
 ---

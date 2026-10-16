@@ -44,11 +44,23 @@ ADB_CMD=$(find_adb)
 
 get_apk() {
     local module="$1"
-    local rel="$SCRIPT_DIR/$module/build/outputs/apk/release/$module-release-unsigned.apk"
+    local bin_rel="$SCRIPT_DIR/release_bin/$module-release.apk"
+    local bin_uns="$SCRIPT_DIR/release_bin/$module-release-unsigned.apk"
+    local bin_deb="$SCRIPT_DIR/release_bin/$module-debug.apk"
+    local rel="$SCRIPT_DIR/$module/build/outputs/apk/release/$module-release.apk"
+    local uns="$SCRIPT_DIR/$module/build/outputs/apk/release/$module-release-unsigned.apk"
     local deb="$SCRIPT_DIR/$module/build/outputs/apk/debug/$module-debug.apk"
 
-    if [ -f "$rel" ]; then
+    if [ -f "$bin_rel" ]; then
+        echo "$bin_rel"
+    elif [ -f "$bin_uns" ]; then
+        echo "$bin_uns"
+    elif [ -f "$bin_deb" ]; then
+        echo "$bin_deb"
+    elif [ -f "$rel" ]; then
         echo "$rel"
+    elif [ -f "$uns" ]; then
+        echo "$uns"
     elif [ -f "$deb" ]; then
         echo "$deb"
     else

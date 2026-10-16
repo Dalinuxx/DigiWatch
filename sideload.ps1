@@ -52,14 +52,27 @@ function Get-ApkPath {
         [string]$moduleName
     )
     $scriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
-    $releaseApk = Join-Path $scriptDir "$moduleName\build\outputs\apk\release\$($moduleName)-release-unsigned.apk"
-    $debugApk = Join-Path $scriptDir "$moduleName\build\outputs\apk\debug\$($moduleName)-debug.apk"
 
-    if (Test-Path $releaseApk) {
-        return $releaseApk
-    } elseif (Test-Path $debugApk) {
-        return $debugApk
-    }
+    # 1. Check release_bin folder (distributed release binaries)
+    $binRelease = Join-Path $scriptDir "release_bin\$($moduleName)-release.apk"
+    if (Test-Path $binRelease) { return $binRelease }
+
+    $binUnsigned = Join-Path $scriptDir "release_bin\$($moduleName)-release-unsigned.apk"
+    if (Test-Path $binUnsigned) { return $binUnsigned }
+
+    $binDebug = Join-Path $scriptDir "release_bin\$($moduleName)-debug.apk"
+    if (Test-Path $binDebug) { return $binDebug }
+
+    # 2. Check local Gradle build outputs
+    $releaseApk = Join-Path $scriptDir "$moduleName\build\outputs\apk\release\$($moduleName)-release.apk"
+    if (Test-Path $releaseApk) { return $releaseApk }
+
+    $unsignedApk = Join-Path $scriptDir "$moduleName\build\outputs\apk\release\$($moduleName)-release-unsigned.apk"
+    if (Test-Path $unsignedApk) { return $unsignedApk }
+
+    $debugApk = Join-Path $scriptDir "$moduleName\build\outputs\apk\debug\$($moduleName)-debug.apk"
+    if (Test-Path $debugApk) { return $debugApk }
+
     return $null
 }
 

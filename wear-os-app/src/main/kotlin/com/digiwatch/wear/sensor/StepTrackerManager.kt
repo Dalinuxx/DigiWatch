@@ -28,8 +28,7 @@ class StepTrackerManager(
 
     fun startListening() {
         stepCounterSensor?.let {
-            // Enable 5-second hardware FIFO batching (5,000,000 us) to avoid waking AP on every single step
-            sensorManager.registerListener(this, it, SensorManager.SENSOR_DELAY_UI, 5_000_000)
+            sensorManager.registerListener(this, it, SensorManager.SENSOR_DELAY_NORMAL)
         }
     }
 

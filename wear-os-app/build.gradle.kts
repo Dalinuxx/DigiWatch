@@ -20,9 +20,22 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
+    signingConfigs {
+        create("release") {
+            val keystoreFile = rootProject.file(System.getenv("KEYSTORE_FILE") ?: "signing/digiwatch-release.jks")
+            if (keystoreFile.exists()) {
+                storeFile = keystoreFile
+                storePassword = System.getenv("KEYSTORE_PASSWORD") ?: "digiwatch"
+                keyAlias = System.getenv("KEY_ALIAS") ?: "digiwatch"
+                keyPassword = System.getenv("KEY_PASSWORD") ?: "digiwatch"
+            }
+        }
+    }
+
     buildTypes {
         release {
             isMinifyEnabled = false
+            signingConfig = signingConfigs.getByName("release")
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
