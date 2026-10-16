@@ -38,11 +38,18 @@ fun AmbientController(
     var lastHardwareTickMs by remember { mutableLongStateOf(0L) }
 
     val isWearableSharedLibraryAvailable = remember {
-        try {
-            Class.forName("com.google.android.wearable.compat.WearableActivityController")
-            true
-        } catch (_: Throwable) {
+        if (!activity.packageManager.hasSystemFeature(android.content.pm.PackageManager.FEATURE_WATCH)) {
             false
+        } else {
+            try {
+                val clazz = Class.forName("androidx.wear.ambient.SharedLibraryVersion")
+                val method = clazz.getDeclaredMethod("verifySharedLibraryPresent")
+                method.isAccessible = true
+                method.invoke(null)
+                true
+            } catch (_: Throwable) {
+                false
+            }
         }
     }
 

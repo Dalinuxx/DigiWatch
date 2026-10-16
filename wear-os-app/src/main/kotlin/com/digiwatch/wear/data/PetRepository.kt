@@ -372,7 +372,9 @@ class PetRepository private constructor(private val context: Context) {
             return instance ?: synchronized(this) {
                 instance ?: PetRepository(context.applicationContext).also {
                     instance = it
-                    it.scheduleBackgroundWorkers()
+                    CoroutineScope(Dispatchers.IO).launch {
+                        it.scheduleBackgroundWorkers()
+                    }
                 }
             }
         }
