@@ -9,7 +9,7 @@ import org.junit.Test
 
 class SpriteMatrixRegistryTest {
 
-    private val validChars = setOf('.', '#', 'B', 'E', 'W', 'T', 'S', 'R', 'G', 'C')
+    private val validChars = setOf('.', '#', 'B', 'K', 'E', 'W', 'T', 'S', 'R', 'G', 'C')
 
     @Test
     fun testAllSpeciesHaveValid16x16Matrices() {
