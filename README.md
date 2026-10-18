@@ -49,11 +49,20 @@ DigiWatch is engineered from the ground up to run natively on **both** Google **
 | **Manifest Hardware Flag** | `android.hardware.type.watch` (`required="false"`) | Installs cleanly via standard Android PackageInstaller / ADB without Wear OS flags |
 | **Wearable Shared Library** | `<uses-library android:name="com.google.android.wearable" android:required="false" />` | Dynamically guarded via reflection in `AmbientController` — zero crash when absent |
 | **Pedometer & Step Engine** | **Tier 1**: `Sensor.TYPE_STEP_COUNTER` / **Tier 2**: `TYPE_STEP_DETECTOR` | **Tier 3 Fallback**: Automatic **AOSP Wrist Accelerometer Gait Peak Detector** (`1.24g` threshold, `330ms` debounce) + `+100 Steps` bench button |
-| **Display Geometry (`WatchDisplayConfig`)** | Round OLED inset padding (`isScreenRound = true`) + Ambient OPR ≤ 15% | Adaptive Square/Rectangular & High-DPI Round AOSP scaling (`screenWidthDp` auto-scale) |
-| **Hardware Buttons & Crown** | `STEM_PRIMARY`, `STEM_1..3`, Rotary Bezel / Crown (`ACTION_SCROLL`) | Standard Android `VOLUME_UP` (`[A]`), `ENTER`/`DPAD_CENTER` (`[B]`), `BACK`/`VOLUME_DOWN` (`[C]`) + on-screen `[A][B][C]` V-Pet bezel buttons |
-| **Multiplayer & Sync** | NFC Tap-to-Duel + Wearable Data Layer Phone Sync | NFC Tap-to-Duel (if hardware present), Optical/Barcode Wild Scan, and offline 16/26-char `DigiROM` / `CommCode` entry |
+| **Display Geometry (`WatchDisplayConfig`)** | Round OLED inset padding (`isScreenRound = true`) + Ambient OPR ≤ 15% | Adaptive Square/Rectangular & High-DPI Round AOSP scaling + **Display Shape Override (`AUTO` / `ROUND` / `SQUARE`)** in Settings |
+| **Hardware Buttons & Navigation** | `STEM_PRIMARY`, `STEM_1..3`, Rotary Bezel / Crown (`ACTION_SCROLL`) | Standard Android `VOLUME_UP` / `F1` (`[A]`), `ENTER` / `CAMERA` / `F2` (`[B]`), `BACK` / `ESCAPE` (`[C]`), native `BackHandler` edge-swipe support |
+| **Phone-to-Watch Sync** | Google Play Services Wearable Data Layer (`/sync/*`) | **AOSP LAN Bridge**: Direct TCP port `45820` + UDP auto-discovery on port `45821` over local Wi-Fi or Phone Hotspot (zero GMS required) |
+| **Multiplayer & Battles** | NFC Tap-to-Duel, Wild Barcode/NFC Scan, A-Com Relay, Comm Codes | NFC Tap-to-Duel (if hardware present), Optical/Barcode Wild Scan, and offline 16/26-char `DigiROM` / `CommCode` entry |
 
----
+### AOSP Smartwatch Wi-Fi & Hotspot LAN Bridge
+For Full Android Watches without Google Play Services:
+1. Connect your AOSP smartwatch and your Android phone to the same Wi-Fi network (or turn on your phone's Wi-Fi Hotspot and connect your watch).
+2. Open DigiWatch on your watch, navigate to **Settings**, and locate **AOSP LAN BRIDGE** to see the watch's IP and port (e.g. `192.168.43.112:45820`).
+3. Open the Companion App on your phone, head to **Pet Dashboard → Smartwatch Shell & Hardware Settings → AOSP / Android Watch Wi-Fi & Hotspot Bridge**, and tap **`🔍 LINK AOSP`**.
+4. The companion app automatically broadcasts a UDP discovery probe on port `45821` to link your watch. If your watch has a static IP, you can also enter it manually. Once linked, all live state pulls, 1-tap Jogress beams, remote care actions, custom campaigns, and setting pushes sync in real-time over TCP.
+
+### Display Shape Override for Round AOSP Watches
+Many round AOSP watches (Kospet, Lokmat, Lemfo, Zeblaze) run customized smartphone ROMs where Android misreports `isScreenRound = false`. DigiWatch provides a 1-tap **Display Shape Override** (`AUTO` / `ROUND` / `SQUARE`) in both the Watch Settings and Phone Companion App. Setting this to `ROUND` enforces circular OLED safety margins to prevent any UI truncation on circular bezels.
 
 ## 🏛 System Architecture
 
@@ -230,9 +239,12 @@ Because external simulators inspect only the resulting species, Omnimon (`#510`)
 | **Apocalymon** (`#529`) | Super Ult | Free | Piedmon (`#509`) + Machinedramon (`#502`) | DNA Jogress |
 | **Susanoomon** (`#549`) | Super Ult | Vaccine | WarGreymon (`#501`) + Magnamon (`#521`) | DNA Jogress |
 
-#### Two Ways to Fuse:
-1. **Solo DigiVault Fusion**: Combine your active partner with any stored partner in your phone's cryo-vault with interactive 3-way animated visualizer and +10% DNA Harmony HP bonuses.
-2. **Friend Comm Code Jogress**: Connect with a friend via Comm Code on watch or phone; if your partner and their code match a canonical recipe, a dedicated **`[⚡ DNA DIGIVOLVE]`** button unlocks on the spot!
+#### Easy 1-Tap Jogress, DigiXros & Mode Change (Across Watch & Phone):
+1. **Watch Status Screen Chamber (`StatusScreen.kt`)**: Scroll to `EVO GUIDE & LINEAGE` on your wrist. Whenever your active partner matches a fusion recipe, the **⚡ DNA JOGRESS / DIGIXROS READY** chamber renders the `[Partner Sprite] → [Target Sprite]` equation with a 1-tap **`⚡ FUSE`** button right on the watch. If your Digimon is a lower stage (Child/Adult), it displays a **Next Stage Jogress / Xros Unlocks** preview so you know what to aim for.
+2. **Watch Battle Transceiver (`BattleScreen.kt`)**: Below the CommCode input keypad, the **⚡ DNA JOGRESS / DIGIXROS** matrix card automatically lists all recipes for your active partner with **`[CODE]`** (auto-populates partner 128-bit CommCode) and **`[⚡FUSE]`** (1-tap fusion execution with fanfare).
+3. **Phone Dashboard Fusion Chamber (`PetDashboardScreen.kt`)**: The main dashboard contains a dedicated **`▸ ⚡ DNA JOGRESS, DIGIXROS & MODE CHANGE CHAMBER`** showing 3-sprite equations (`[Active] + [Partner] ══▶ [Target]`) with a 1-tap **`⚡ AWAKEN & BEAM TO WATCH`** button that awakens the evolved form and syncs it immediately to your wrist. Also includes a toggleable 44-recipe catalog.
+4. **Phone Battle Hub Live Auto-Decoder (`BattleHubScreen.kt`)**: Entering or scanning a friend's CommCode automatically decodes the species and immediately reveals the **⚡ DNA DIGIVOLVE WITH FRIEND'S CODE!** button without having to fight a match first. In addition, 1-tap partner code chips are provided for instant loading.
+5. **Phone Cryo-Vault Fusion Lab (`DigiVaultScreen.kt`)**: Displays all compatible partner recipes for your active Digimon with **`+VAULT`** (spawns partner into storage) and **`⚡ FUSE`** (opens interactive 3-way fusion awakening dialog and beams the result to your watch).
 
 > 📖 **Complete 205-Species Digivolution Guide & Lineage Chart**: See [**`DIGIVOLUTION_GUIDE.md`**](DIGIVOLUTION_GUIDE.md) for the complete stage-by-stage evolution requirements, Starter Digi-Egg paths, and all 44 DNA Jogress / Mode Change recipes.
 

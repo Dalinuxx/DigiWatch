@@ -323,3 +323,15 @@ Combine any two compatible Digimon via **Watch D-Com Battle Link**, **Phone Batt
 | 42 | `#407` **Garudamon** | `#406` **Lillymon** | `#505` **Rosemon** | `DNA Jogress` | Garudamon and Lillymon blossom in winds of beauty into Rosemon. |
 | 43 | `#408` **MegaKabuterimon** | `#415` **Ex-Tyrannomon** | `#507` **HerculesKabuterimon** | `DNA Jogress` | MegaKabuterimon and Ex-Tyrannomon awaken golden insectoid HerculesKabuterimon. |
 | 44 | `#422` **AeroVeedramon** | `#436` **Knightmon** | `#522` **UlforceVeedramon** | `DNA Jogress` | AeroVeedramon and Knightmon ascend in Blue Digizoid armor to UlforceVeedramon. |
+
+---
+
+## ⚡ How to Trigger DNA Jogress, DigiXros & Mode Change (5 Ways)
+
+DigiWatch provides 5 instant, visual ways to execute any of the 44 recipes across both watch and phone:
+
+1. **Watch Status Screen (`StatusScreen.kt`)**: Scroll down to the `EVO GUIDE & LINEAGE` section. When your active Digimon has a compatible fusion partner, an interactive **⚡ DNA JOGRESS / DIGIXROS READY** chamber renders the `[Partner] → [Target]` equation with a 1-tap **`⚡ FUSE`** button right on your wrist. For earlier stages, it previews **Next Stage Jogress / Xros Unlocks**.
+2. **Watch Battle Transceiver (`BattleScreen.kt`)**: Below the CommCode keypad, the **⚡ DNA JOGRESS / DIGIXROS** matrix card lists every compatible recipe with **`[CODE]`** (auto-populates partner 128-bit CommCode into the transceiver) and **`[⚡FUSE]`** (1-tap fusion execution with fanfare).
+3. **Phone Main Dashboard (`PetDashboardScreen.kt`)**: The **`▸ ⚡ DNA JOGRESS, DIGIXROS & MODE CHANGE CHAMBER`** displays 3-sprite equations (`[Active] + [Partner] ══▶ [Target]`) with a 1-tap **`⚡ AWAKEN & BEAM TO WATCH`** button that awakens the evolved form and syncs it immediately to your watch.
+4. **Phone Battle Hub Live Auto-Decoder (`BattleHubScreen.kt`)**: Entering, pasting, or scanning a friend's CommCode automatically decodes the species and surfaces the **⚡ DNA DIGIVOLVE WITH FRIEND'S CODE!** button without having to fight a match first. 1-tap partner code generator chips are also provided.
+5. **Phone Cryo-Vault Fusion Lab (`DigiVaultScreen.kt`)**: Displays all compatible partner recipes for your active Digimon with **`+VAULT`** (spawns partner into cryo-storage) and **`⚡ FUSE`** (opens the interactive 3-way fusion awakening dialog and syncs the result to your watch).
