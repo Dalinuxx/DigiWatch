@@ -3,6 +3,7 @@ package com.digiwatch.core.render
 import com.digiwatch.core.model.PetSpecies
 import com.digiwatch.core.model.SpriteFrame
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNotEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
@@ -12,10 +13,14 @@ class SpriteMatrixRegistryTest {
     private val validChars = setOf('.', '#', 'B', 'K', 'E', 'W', 'T', 'S', 'R', 'G', 'C')
 
     @Test
-    fun testAllSpeciesHaveValid16x16Matrices() {
+    fun testAll205SpeciesHaveValidNonHollow16x16Matrices() {
+        assertEquals(205, PetSpecies.SPECIES_REGISTRY.size)
         for ((speciesId, species) in PetSpecies.SPECIES_REGISTRY) {
             val matrix = SpriteMatrixRegistry.getMatrix(speciesId, SpriteFrame.IDLE_A)
             assertEquals("Matrix row count for species $speciesId (${species.name}) must be 16", 16, matrix.size)
+            var outlineCount = 0
+            var fillCount = 0
+            var dotCount = 0
             for (r in 0 until 16) {
                 val row = matrix[r]
                 assertEquals("Row $r in species $speciesId (${species.name}) must be 16 cols wide", 16, row.length)
@@ -25,31 +30,77 @@ class SpriteMatrixRegistryTest {
                         "Char '$ch' at ($r,$c) in species $speciesId (${species.name}) must be valid dot character",
                         ch in validChars
                     )
+                    if (ch != '.') dotCount++
+                    if (ch == 'B' || ch == 'K') outlineCount++
+                    if (ch in setOf('#', 'S', 'T', 'R', 'G', 'C', 'W')) fillCount++
                 }
             }
+            assertTrue("Species $speciesId (${species.name}) must have at least 20 active pixels (had $dotCount)", dotCount >= 20)
+            assertTrue("Species $speciesId (${species.name}) must not be a solid 256-pixel box (had $dotCount)", dotCount <= 245)
+            assertTrue("Species $speciesId (${species.name}) must have outline pixels", outlineCount > 0)
+            assertTrue("Species $speciesId (${species.name}) must have multi-tone interior fill pixels", fillCount > 0)
         }
     }
 
     @Test
-    fun testAllSpeciesHaveValidPalettes() {
+    fun testZeroDuplicateMatricesAcrossAll205Species() {
+        val seen = mutableMapOf<String, Int>()
+        for ((speciesId, species) in PetSpecies.SPECIES_REGISTRY) {
+            val sig = SpriteMatrixRegistry.getMatrix(speciesId, SpriteFrame.IDLE_A).joinToString("\n")
+            val existing = seen[sig]
+            assertTrue(
+                "Species $speciesId (${species.name}) shares identical matrix with species $existing",
+                existing == null
+            )
+            seen[sig] = speciesId
+        }
+        assertEquals(205, seen.size)
+    }
+
+    @Test
+    fun testZeroDuplicatePalettesAcrossAll205Species() {
+        val seen = mutableMapOf<SpritePalette, Int>()
         for ((speciesId, species) in PetSpecies.SPECIES_REGISTRY) {
             val palette = SpriteMatrixRegistry.getPalette(speciesId)
             assertNotNull("Palette for species $speciesId must not be null", palette)
-            // Check that alpha channel is 0xFF
             assertEquals("Alpha channel of primary must be 0xFF", 0xFF, (palette.primary ushr 24) and 0xFF)
+            assertEquals("Alpha channel of secondary must be 0xFF", 0xFF, (palette.secondary ushr 24) and 0xFF)
+            assertEquals("Alpha channel of tertiary must be 0xFF", 0xFF, (palette.tertiary ushr 24) and 0xFF)
+            val existing = seen[palette]
+            assertTrue(
+                "Species $speciesId (${species.name}) shares identical palette with species $existing",
+                existing == null
+            )
+            seen[palette] = speciesId
+        }
+        assertEquals(205, seen.size)
+    }
+
+    @Test
+    fun testAll12FramesProduceValidAndDifferentiatedAnimations() {
+        for ((speciesId, species) in PetSpecies.SPECIES_REGISTRY) {
+            val frames = SpriteFrame.entries.map { frame ->
+                val m = SpriteMatrixRegistry.getMatrix(speciesId, frame)
+                assertEquals(16, m.size)
+                m.forEach { assertEquals(16, it.length) }
+                m.joinToString("\n")
+            }
+            assertNotEquals("IDLE_A and IDLE_B must differ for ${species.name}", frames[0], frames[1])
+            assertNotEquals("WALK_A and WALK_B must differ for ${species.name}", frames[2], frames[3])
+            assertNotEquals("ATTACK_CHARGE and ATTACK_RELEASE must differ for ${species.name}", frames[8], frames[9])
         }
     }
 
     @Test
-    fun testAgumonMatricesFidelity() {
-        val idleA = SpriteMatrixRegistry.getMatrix(201, SpriteFrame.IDLE_A)
-        val idleB = SpriteMatrixRegistry.getMatrix(201, SpriteFrame.IDLE_B)
-        val sleep = SpriteMatrixRegistry.getMatrix(201, SpriteFrame.SLEEP_A)
-        val attack = SpriteMatrixRegistry.getMatrix(201, SpriteFrame.ATTACK_RELEASE)
-
-        assertEquals(16, idleA.size)
-        assertEquals(16, idleB.size)
-        assertEquals(16, sleep.size)
-        assertEquals(16, attack.size)
+    fun testAmbientModeOprUnder15PercentForAll205Species() {
+        for ((speciesId, species) in PetSpecies.SPECIES_REGISTRY) {
+            for (frame in SpriteFrame.entries) {
+                val opr = SpriteMatrixRegistry.calculateAmbientOpr(speciesId, frame)
+                assertTrue(
+                    "Ambient OPR for $speciesId (${species.name}) frame $frame was $opr (must be <= 0.15f)",
+                    opr in 0.01f..0.15f
+                )
+            }
+        }
     }
 }

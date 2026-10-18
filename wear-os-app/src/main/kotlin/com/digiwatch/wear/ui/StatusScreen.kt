@@ -196,6 +196,99 @@ fun StatusScreen(
             }
         }
 
+        // Evolution Targets & Lineage Guide Card
+        item {
+            val lineagePath = remember(species.id) { EvolutionEngine.findEggLineagePath(species.id).map { PetSpecies.getById(it) } }
+            val jogressRecipes = remember(species.id) { com.digiwatch.core.fusion.JogressEngine.getCompatibleRecipesFor(species.id) }
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = displayConfig.horizontalPadding, vertical = 2.dp)
+                    .background(Color(0xFF161D28), RoundedCornerShape(8.dp))
+                    .border(0.5.dp, Color(0x44FFD54F), RoundedCornerShape(8.dp))
+                    .padding(6.dp)
+            ) {
+                Text(
+                    text = "EVO GUIDE & LINEAGE",
+                    fontSize = 8.sp,
+                    fontWeight = FontWeight.Black,
+                    color = Color(0xFFFFD54F),
+                    fontFamily = FontFamily.Monospace
+                )
+                if (lineagePath.isNotEmpty()) {
+                    Text(
+                        text = lineagePath.joinToString("→") { it.name.take(6) },
+                        fontSize = 7.sp,
+                        color = Color(0xFF80CBC4),
+                        fontFamily = FontFamily.Monospace
+                    )
+                }
+                Spacer(modifier = Modifier.height(3.dp))
+                if (species.evolutionRules.isEmpty()) {
+                    Text(
+                        text = "Apex Stage Reached!",
+                        fontSize = 7.sp,
+                        color = Color.LightGray,
+                        fontFamily = FontFamily.Monospace
+                    )
+                } else {
+                    species.evolutionRules.forEach { rule ->
+                        val target = PetSpecies.getById(rule.targetSpeciesId)
+                        val isReady = nextEvo?.id == target.id
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 1.5.dp)
+                                .background(
+                                    if (isReady) Color(0xFF142E24) else Color(0xFF0F151D),
+                                    RoundedCornerShape(4.dp)
+                                )
+                                .padding(horizontal = 4.dp, vertical = 2.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            SpriteCanvasRenderer(
+                                speciesId = target.id,
+                                isAmbient = false,
+                                overrideFrame = SpriteFrame.IDLE_A,
+                                size = 20.dp
+                            )
+                            Spacer(modifier = Modifier.width(4.dp))
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text(
+                                    text = "→ ${target.name} ${if (isReady) "[READY]" else ""}",
+                                    fontSize = 7.5.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = if (isReady) Color(0xFF00E676) else Color.White,
+                                    fontFamily = FontFamily.Monospace
+                                )
+                                Text(
+                                    text = EvolutionEngine.describeRule(rule),
+                                    fontSize = 6.5.sp,
+                                    color = Color(0xFFB0BEC5),
+                                    fontFamily = FontFamily.Monospace
+                                )
+                            }
+                        }
+                    }
+                }
+                if (jogressRecipes.isNotEmpty()) {
+                    Spacer(modifier = Modifier.height(2.dp))
+                    jogressRecipes.take(2).forEach { recipe ->
+                        val partnerId = if (recipe.primarySpeciesId == species.id) recipe.secondarySpeciesId else recipe.primarySpeciesId
+                        val partner = PetSpecies.getById(partnerId)
+                        val target = PetSpecies.getById(recipe.targetSpeciesId)
+                        Text(
+                            text = "⚡DNA: +${partner.name.take(7)} → ${target.name.take(9)}",
+                            fontSize = 7.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color(0xFFFFD54F),
+                            fontFamily = FontFamily.Monospace
+                        )
+                    }
+                }
+            }
+        }
+
         item {
             Spacer(modifier = Modifier.height(4.dp))
             Button(

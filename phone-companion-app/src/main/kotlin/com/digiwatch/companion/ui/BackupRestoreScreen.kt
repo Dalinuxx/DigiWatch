@@ -28,6 +28,7 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -44,17 +45,31 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.digiwatch.companion.data.CustomCampaignEntity
 import com.digiwatch.companion.data.PhoneDatabase
+import com.digiwatch.companion.data.StoredDigimonEntity
+import com.digiwatch.companion.data.SyncedPetEntity
 import com.digiwatch.companion.datalayer.PhoneWearableManager
 import com.digiwatch.companion.render.SpriteCanvasRenderer
+import com.digiwatch.companion.widget.DigiWatchAppWidgetProvider
+import com.digiwatch.core.model.PetSpecies
 import com.digiwatch.core.model.PetState
 import com.digiwatch.core.model.SpriteFrame
 import kotlinx.coroutines.launch
+import kotlinx.serialization.Serializable
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+
+@Serializable
+data class FullCompanionArchive(
+    val activePet: PetState = PetState(),
+    val vaultPets: List<StoredDigimonEntity> = emptyList(),
+    val customCampaigns: List<CustomCampaignEntity> = emptyList(),
+    val exportedAtUtc: Long = System.currentTimeMillis() / 1000L
+)
 
 @Composable
 fun BackupRestoreScreen(
@@ -62,6 +77,8 @@ fun BackupRestoreScreen(
     wearableManager: PhoneWearableManager
 ) {
     val snapshots by db.phoneDao().getAllSnapshotsFlow().collectAsState(initial = emptyList())
+    val vaultPets by db.phoneDao().getAllVaultPetsFlow().collectAsState(initial = emptyList())
+    val customCampaigns by db.phoneDao().getAllCampaignsFlow().collectAsState(initial = emptyList())
     val json = remember { Json { prettyPrint = true; ignoreUnknownKeys = true } }
     val scope = rememberCoroutineScope()
     val scrollState = rememberScrollState()
@@ -70,6 +87,50 @@ fun BackupRestoreScreen(
 
     var jsonExportString by remember { mutableStateOf(json.encodeToString(PetState())) }
     var statusMessage by remember { mutableStateOf<String?>(null) }
+
+    LaunchedEffect(Unit) {
+        val latest = db.phoneDao().getLatestSnapshot()
+        if (latest != null) {
+            val loadedState = PetState(
+                speciesId = latest.speciesId,
+                currentHp = latest.currentHp,
+                maxHp = latest.maxHp,
+                hunger = latest.hunger,
+                strength = latest.strength,
+                weight = latest.weight,
+                ageSeconds = latest.ageSeconds,
+                careMistakes = latest.careMistakes,
+                effort = latest.effort,
+                overfeedCount = latest.overfeedCount,
+                totalBattles = latest.totalBattles,
+                victories = latest.victories
+            )
+            jsonExportString = json.encodeToString(loadedState)
+        }
+    }
+
+    val persistStateSnapshot: suspend (PetState) -> Unit = { state ->
+        val sp = PetSpecies.getById(state.speciesId)
+        db.phoneDao().insertSnapshot(
+            SyncedPetEntity(
+                syncedTimestampUtc = System.currentTimeMillis() / 1000L,
+                speciesId = state.speciesId,
+                speciesName = sp.name,
+                currentHp = state.currentHp,
+                maxHp = state.maxHp,
+                hunger = state.hunger,
+                strength = state.strength,
+                weight = state.weight,
+                ageSeconds = state.ageSeconds,
+                careMistakes = state.careMistakes,
+                effort = state.effort,
+                overfeedCount = state.overfeedCount,
+                totalBattles = state.totalBattles,
+                victories = state.victories
+            )
+        )
+        DigiWatchAppWidgetProvider.updateAllWidgets(context)
+    }
 
     Column(
         modifier = Modifier
@@ -82,7 +143,7 @@ fun BackupRestoreScreen(
         DigiSectionHeader(
             tag = "SYSTEM ARCHIVE // BACKUP & RECOVERY",
             title = "State Persistence & JSON",
-            subtitle = "Room database snapshot history & unified JSON serialization",
+            subtitle = "Room database snapshot history, Vault archive & unified JSON serialization",
             accentColor = Color(0xFFCE93D8)
         )
 
@@ -97,7 +158,7 @@ fun BackupRestoreScreen(
         ) {
             Column(modifier = Modifier.padding(16.dp)) {
                 Text(
-                    text = "▸ SYNCED WATCH STATE HISTORY (${snapshots.size} SNAPSHOTS)",
+                    text = "▸ SYNCED WATCH STATE HISTORY (${snapshots.size} SNAPSHOTS • ${vaultPets.size} VAULT)",
                     fontSize = 11.sp,
                     fontWeight = FontWeight.Bold,
                     color = Color(0xFFE1BEE7),
@@ -181,16 +242,49 @@ fun BackupRestoreScreen(
                         color = Color(0xFFCE93D8),
                         fontFamily = FontFamily.Monospace
                     )
-                    OutlinedButton(
-                        onClick = {
-                            clipboardManager.setText(AnnotatedString(jsonExportString))
-                            Toast.makeText(context, "PetState JSON copied!", Toast.LENGTH_SHORT).show()
-                        },
-                        modifier = Modifier.height(30.dp)
-                    ) {
-                        Icon(Icons.Default.ContentCopy, contentDescription = "Copy JSON", modifier = Modifier.size(13.dp))
-                        Spacer(modifier = Modifier.width(4.dp))
-                        Text("COPY", fontSize = 9.sp, fontFamily = FontFamily.Monospace)
+                    Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                        OutlinedButton(
+                            onClick = {
+                                val latest = snapshots.firstOrNull()
+                                val activePet = if (latest != null) {
+                                    PetState(
+                                        speciesId = latest.speciesId,
+                                        currentHp = latest.currentHp,
+                                        maxHp = latest.maxHp,
+                                        hunger = latest.hunger,
+                                        strength = latest.strength,
+                                        weight = latest.weight,
+                                        ageSeconds = latest.ageSeconds,
+                                        careMistakes = latest.careMistakes,
+                                        effort = latest.effort,
+                                        overfeedCount = latest.overfeedCount,
+                                        totalBattles = latest.totalBattles,
+                                        victories = latest.victories
+                                    )
+                                } else PetState()
+                                val archive = FullCompanionArchive(
+                                    activePet = activePet,
+                                    vaultPets = vaultPets.map { it.copy(id = 0) },
+                                    customCampaigns = customCampaigns
+                                )
+                                jsonExportString = json.encodeToString(archive)
+                                statusMessage = "Generated Full Companion Archive (${vaultPets.size} Vault pets, ${customCampaigns.size} Campaigns)!"
+                            },
+                            modifier = Modifier.height(30.dp)
+                        ) {
+                            Text("FULL ARCHIVE", fontSize = 9.sp, fontFamily = FontFamily.Monospace)
+                        }
+                        OutlinedButton(
+                            onClick = {
+                                clipboardManager.setText(AnnotatedString(jsonExportString))
+                                Toast.makeText(context, "JSON Backup copied!", Toast.LENGTH_SHORT).show()
+                            },
+                            modifier = Modifier.height(30.dp)
+                        ) {
+                            Icon(Icons.Default.ContentCopy, contentDescription = "Copy JSON", modifier = Modifier.size(13.dp))
+                            Spacer(modifier = Modifier.width(4.dp))
+                            Text("COPY", fontSize = 9.sp, fontFamily = FontFamily.Monospace)
+                        }
                     }
                 }
                 Spacer(modifier = Modifier.height(8.dp))
@@ -216,27 +310,49 @@ fun BackupRestoreScreen(
                 ) {
                     OutlinedButton(
                         onClick = {
-                            try {
-                                val state = json.decodeFromString<PetState>(jsonExportString)
-                                scope.launch {
-                                    val ok = wearableManager.sendPetStateToWatch(state)
-                                    statusMessage = if (ok) "Restored state to Smartwatch!" else "Saved locally (Watch offline)"
+                            scope.launch {
+                                try {
+                                    if (jsonExportString.contains("\"vaultPets\"") || jsonExportString.contains("\"activePet\"")) {
+                                        val archive = json.decodeFromString<FullCompanionArchive>(jsonExportString)
+                                        persistStateSnapshot(archive.activePet)
+                                        archive.vaultPets.forEach { db.phoneDao().insertVaultPet(it.copy(id = 0)) }
+                                        archive.customCampaigns.forEach { db.phoneDao().insertOrUpdateCampaign(it) }
+                                        val ok = wearableManager.sendPetStateToWatch(archive.activePet)
+                                        statusMessage = if (ok) {
+                                            "Restored Full Archive (${archive.vaultPets.size} Vault pets) + Synced Watch!"
+                                        } else {
+                                            "Restored Full Archive locally (${archive.vaultPets.size} Vault pets)!"
+                                        }
+                                    } else {
+                                        val state = json.decodeFromString<PetState>(jsonExportString)
+                                        persistStateSnapshot(state)
+                                        val ok = wearableManager.sendPetStateToWatch(state)
+                                        statusMessage = if (ok) "Restored state to Phone & Smartwatch!" else "Saved locally to Phone & Widget (Watch offline)"
+                                    }
+                                } catch (e: Exception) {
+                                    statusMessage = "Invalid JSON: ${e.message}"
                                 }
-                            } catch (e: Exception) {
-                                statusMessage = "Invalid JSON: ${e.message}"
                             }
                         }
                     ) {
-                        Text("RESTORE TO WATCH", fontSize = 10.sp, fontFamily = FontFamily.Monospace)
+                        Text("RESTORE BACKUP", fontSize = 10.sp, fontFamily = FontFamily.Monospace)
                     }
 
                     Button(
                         onClick = {
-                            val eggState = PetState(speciesId = 101, weight = 5, ageSeconds = 0L)
+                            val botamon = PetSpecies.getById(101)
+                            val eggState = PetState(
+                                speciesId = 101,
+                                currentHp = botamon.baseHp,
+                                maxHp = botamon.baseHp,
+                                weight = botamon.baselineWeight,
+                                ageSeconds = 0L
+                            )
                             jsonExportString = json.encodeToString(eggState)
                             scope.launch {
+                                persistStateSnapshot(eggState)
                                 wearableManager.sendPetStateToWatch(eggState)
-                                statusMessage = "New Digi-Egg (Botamon) initialized!"
+                                statusMessage = "New Digi-Egg (Botamon) hatched & saved!"
                             }
                         },
                         colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF8E24AA))

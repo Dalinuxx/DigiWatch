@@ -111,7 +111,7 @@ State decay strictly follows the original Bandai virtual pet timing schedules ba
 - **Metabolic Sleep Preservation**: Turning off lights when the pet enters its designated sleep window halts hunger and strength decay clocks.
 - **Care Mistakes**: Triggered only if hunger/strength calls or unextinguished sleep lights are ignored beyond the stage grace window.
 - **Overfeeding Mechanic**: Feeding up to 5 additional meals beyond full satiety increases weight and fulfills specific evolution branch criteria without prematurely sickening the pet.
-- **7 Starter Digi-Eggs**: Choose from Botamon, Punimon, Poyomon, Yuramon, Zurumon, Mokumon, or Kuramon upon birth or reset.
+- **10 Starter Digi-Eggs**: Choose from Botamon (`#101`), Punimon (`#102`), Poyomon (`#103`), Yuramon (`#104`), Zurumon (`#105`), Mokumon (`#106`), Kuramon (`#107`), Pitchmon (`#108`), Nyokimon (`#109`), or Choromon (`#110`) upon birth or reset.
 
 ---
 
@@ -138,14 +138,14 @@ DigiWatch provides both classic physical handheld controls and modern touch ergo
    - Switchable at any time from Watch Settings or Companion App Settings.
 5. **Authentic 8-Bit Bandai Piezo Buzzer Sound Engine**:
    - Faithful recreation of the classic 4-beep attention call (`pip-pip-pip-pip`), button clicks, hit chirps, and 8-bit victory fanfares via low-overhead `ToneGenerator`.
-   - Toggleable directly in Watch Settings (muted by default for discreet wrist wear).
+   - Toggleable directly in Watch Settings or Companion App Settings (muted by default for discreet wrist wear).
 6. **Battle Critical Strike Reflex Window**:
    - A 500ms reflex window during combat rounds that grants a +25% Critical Strike boost on physical keypress or screen tap.
 
 ---
 
 ### 3. Full-Color Sprite Engine (205 Authentic Species)
-Every monster is rendered via a uniform 64 × 64 px matrix canvas at `FilterQuality.None` for crisp, authentic pixel art across round and square screens:
+Every monster is rendered via a uniform 64 × 64 px matrix canvas at `FilterQuality.None` for crisp, authentic pixel art across round and square screens, with 205 unique bespoke 16 × 16 multi-tone matrices and 205 canonical color palettes:
 
 ```
 +-----------------------------------------------------------------------+
@@ -157,12 +157,12 @@ Every monster is rendered via a uniform 64 × 64 px matrix canvas at `FilterQual
 ```
 
 #### Roster Distribution (205 Species):
-- **Baby I (7)**: Botamon, Punimon, Poyomon, Yuramon, Zurumon, Mokumon, Kuramon.
-- **Baby II (11)**: Koromon, Tsunomon, Tokomon, Tanemon, Pagumon, DemiMeramon, DemiVeemon, Gigimon, Viximon, Gummymon, Chocomon, Yaamon.
-- **Child (22)**: Agumon, Betamon, Gabumon, Elecmon, Patamon, Biyomon, Palmon, Tentomon, Gazimon, Gizamon, Kunemon, Veemon, Wormmon, Guilmon, Renamon, Terriermon, Lopmon, Impmon, BlackAgumon, BlackGabumon, Lucemon, Hackmon.
-- **Adult (40)**: Greymon, Tyrannomon, Devimon, Meramon, Numemon, Garurumon, Angemon, Togemon, Birdramon, Kabuterimon, Monochromon, Ogremon, Leomon, Seadramon, Sukamon, DarkTyrannomon, Devidramon, Cyclonemon, Tuskmon, Flymon, Raremon, Kuwagamon, Kokatorimon, Coelamon, Nanimon, Bakemon, Shellmon, Unimon, Frigimon, Vegiemon, Veedramon, Flamedramon, Stingmon, Growlmon, Kyubimon, Gargomon, Wizardmon, Gatomon, BlackGreymon, BlackGarurumon, BaoHackmon.
-- **Perfect (34)**: MetalGreymon, Monzaemon, SkullGreymon, WereGarurumon, MagnaAngemon, Lillymon, Garudamon, MegaKabuterimon, MegaSeadramon, Myotismon, Etemon, Mamemon, MetalMamemon, MetalTyrannomon, Ex-Tyrannomon, Megadramon, Piximon, Andromon, Giromon, Vademon, SkullMamemon, AeroVeedramon, Paildramon, WarGrowlmon, Taomon, Rapidmon, Angewomon, LadyDevimon, BlackMetalGreymon, BlackWereGarurumon, Cyberdramon, Antylamon, SaviorHackmon, Lucemon Chaos Mode.
-- **Ultimate & Super Ultimate (49)**: WarGreymon, Machinedramon, MetalGarurumon, Seraphimon, Rosemon, Phoenixmon, HerculesKabuterimon, Plesiomon, Piedmon, Omnimon, MetalEtemon, Imperialdramon Dragon Mode, Imperialdramon Fighter Mode, Imperialdramon Paladin Mode, Gallantmon, Gallantmon Crimson Mode, Sakuyamon, MegaGargomon, Beelzemon, Beelzemon Blast Mode, Magnamon, UlforceVeedramon, Alphamon, Alphamon Ouryuken, BlackWarGreymon, ChaosBlackWarGreymon, Diaboromon, Armaggeddemon, Apocalymon, Belphemon, Lilithmon, Daemon, Leviamon, Barbamon, Omnimon Alter-S, Omnimon Zwart, Mastemon, Jesmon, Gankoomon, Dynasmon, LordKnightmon, Craniummon, Sleipmon, Duftmon, Examon, Millenniummon, MoonMillenniummon, ZeedMillenniummon, Susanoomon.
+- **Baby I (10 — `#101`–`#110`)**: Botamon, Punimon, Poyomon, Yuramon, Zurumon, Mokumon, Kuramon, Pitchmon, Nyokimon, Choromon.
+- **Baby II (15 — `#111`–`#125`)**: Koromon, Tsunomon, Tokomon, Tanemon, Pagumon, DemiMeramon, DemiVeemon, Gigimon, Viximon, Gummymon, Chocomon, Yaamon, Bukamon, Pyocomon, Kapurimon.
+- **Child (30 — `#201`–`#230`)**: Agumon, Betamon, Gabumon, Elecmon, Patamon, Biyomon, Palmon, Tentomon, Gazimon, Gizamon, Kunemon, Veemon, Wormmon, Guilmon, Renamon, Terriermon, Lopmon, Impmon, BlackAgumon, BlackGabumon, Lucemon, Hackmon, Salamon, Gomamon, Armadillomon, Hawkmon,Hagurumon, Kotemon, Monodramon, Keramon.
+- **Adult (50 — `#301`–`#350`)**: Greymon, Tyrannomon, Devimon, Meramon, Numemon, Garurumon, Angemon, Togemon, Birdramon, Kabuterimon, Monochromon, Ogremon, Leomon, Seadramon, Sukamon, DarkTyrannomon, Devidramon, Cyclonemon, Tuskmon, Flymon, Raremon, Kuwagamon, Kokatorimon, Coelamon, Nanimon, Bakemon, Shellmon, Unimon, Frigimon, Vegiemon, Veedramon, Flamedramon, Stingmon, Growlmon, Kyubimon, Gargomon, Wizardmon, Gatomon, BlackGreymon, BlackGarurumon, BaoHackmon, Ikkakumon, ExVeemon, Aquilamon, Ankylomon, Guardromon, Dinohumon, Strikedramon, Chrysalimon,Sorcerymon.
+- **Perfect (42 — `#401`–`#442`)**: MetalGreymon, Monzaemon, SkullGreymon, WereGarurumon, MagnaAngemon, Lillymon, Garudamon, MegaKabuterimon, MegaSeadramon, Myotismon, Etemon, Mamemon, MetalMamemon, MetalTyrannomon, Ex-Tyrannomon, Megadramon, Piximon, Andromon, Giromon, Vademon, SkullMamemon, AeroVeedramon, Paildramon, WarGrowlmon, Taomon, Rapidmon, Angewomon, LadyDevimon, BlackMetalGreymon, BlackWereGarurumon, Cyberdramon, Antylamon, SaviorHackmon, Lucemon Chaos Mode, Zudomon, Dinobeemon, Silphymon, Knightmon,Butenmon,Infermon, Shakkoumon, Panjyamon.
+- **Ultimate & Super Ultimate (58 — `#501`–`#558`)**: WarGreymon, Machinedramon, MetalGarurumon, Seraphimon, Rosemon, Phoenixmon, HerculesKabuterimon, Plesiomon, Piedmon, Omnimon, MetalEtemon, Imperialdramon Dragon Mode, Imperialdramon Fighter Mode, Imperialdramon Paladin Mode, Gallantmon, Gallantmon Crimson Mode, Sakuyamon, MegaGargomon, Beelzemon, Beelzemon Blast Mode, Magnamon, UlforceVeedramon, Alphamon, Alphamon Ouryuken, BlackWarGreymon, ChaosBlackWarGreymon, Diaboromon, Armaggeddemon, Apocalymon, Belphemon, Lilithmon, Daemon, Leviamon, Barbamon, Omnimon Alter-S, Omnimon Zwart, Mastemon, Jesmon, Gankoomon, Dynasmon, LordKnightmon, Craniummon, Sleipmon, Duftmon, Examon, Millenniummon, MoonMillenniummon, ZeedMillenniummon, Susanoomon, MarineAngemon, SaberLeomon, Ophanimon, Vikemon, GranKuwagamon, Valkyriemon, Magnadramon, Cherubimon,Kentaurosmon.
 
 ---
 
@@ -178,14 +178,16 @@ Payload = { MonsterID, Stage, Attribute, BasePowerHP, Victories, Effort, Seed, S
 ```
 Because external simulators inspect only the resulting species, Omnimon (`#510`), Paildramon (`#423`), and Mastemon (`#537`) transmit as standard canonical monsters with valid base power, Stage 6 (Ultimate), and elemental attributes.
 
-#### Canonical Fusion Catalog:
+#### Canonical Fusion Catalog (44 Total Recipes — Featured Highlights):
 
 | Target Species | Stage | Attribute | Fusion Recipe | Type |
 |---|---|---|---|---|
 | **Omnimon** (`#510`) | Ultimate | Vaccine | WarGreymon (`#501`) + MetalGarurumon (`#503`) | DNA Jogress |
 | **Omnimon Zwart** (`#536`) | Ultimate | Vaccine | BlackWarGreymon (`#525`) + BlackWereGarurumon (`#430`) | DNA Jogress |
 | **Omnimon Alter-S** (`#535`) | Ultimate | Vaccine | WarGreymon (`#501`) + Machinedramon (`#502`) | DigiXros |
-| **Paildramon** (`#423`) | Perfect | Free | Flamedramon (`#332`) / Veedramon (`#331`) + Stingmon (`#333`) | DNA Jogress |
+| **Paildramon** (`#423`) | Perfect | Free | ExVeemon (`#343`) / Flamedramon (`#332`) / Veedramon (`#331`) + Stingmon (`#333`) | DNA Jogress |
+| **Silphymon** (`#437`) | Perfect | Free | Gatomon (`#338`) + Aquilamon (`#344`) | DNA Jogress |
+| **Shakkoumon** (`#441`) | Perfect | Free | Angemon (`#307`) + Ankylomon (`#345`) | DNA Jogress |
 | **Imperialdramon DM** (`#512`) | Ultimate | Free | Paildramon (`#423`) + MetalGreymon (`#401`) / Megadramon (`#416`) | Mode Change |
 | **Imperialdramon PM** (`#514`) | Super Ult | Vaccine | Imperialdramon FM (`#513`) + Omnimon (`#510`) | Mode Change |
 | **Mastemon** (`#537`) | Ultimate | Vaccine | Angewomon (`#427`) + LadyDevimon (`#428`) | DNA Jogress |
@@ -202,16 +204,38 @@ Because external simulators inspect only the resulting species, Omnimon (`#510`)
 1. **Solo DigiVault Fusion**: Combine your active partner with any stored partner in your phone's cryo-vault with interactive 3-way animated visualizer and +10% DNA Harmony HP bonuses.
 2. **Friend Comm Code Jogress**: Connect with a friend via Comm Code on watch or phone; if your partner and their code match a canonical recipe, a dedicated **`[⚡ DNA DIGIVOLVE]`** button unlocks on the spot!
 
+> 📖 **Complete 205-Species Digivolution Guide & Lineage Chart**: See [**`DIGIVOLUTION_GUIDE.md`**](DIGIVOLUTION_GUIDE.md) for the complete stage-by-stage evolution requirements, Starter Digi-Egg paths, and all 44 DNA Jogress / Mode Change recipes.
+
 ---
 
-### 5. 128-Bit Comm Code & Deterministic Battle Engine
+### 5. 4-Mode Battle System, Canonical V-Pet Formulas & 128-Bit Comm Code
 
-To allow seamless player-versus-player combat between disconnected smartwatches, companion apps, or web emulators without server dependency:
+DigiWatch features **full face-to-face animated battle rendering** (`flipHorizontal = true` on the left fighter so both Digimon face each other, animated projectile clashes `●━━▶` / `⚡MEGA HIT⚡`, live HP bars, and QTE reflex boosts) across **4 distinct, separated Battle Modes** on both Watch and Phone:
+
+1. **🏟 Mode 1 — Adventure Colosseum (`BattleMode.ADVENTURE`)**:
+   - 30-Sector Pedometer Quest & Colosseum Boss Gates with sector weather hazards (`Thunderstorm`, `Magma Heat`, `Tidal Current`, `Miasma Fog`, `Zero Gravity`, `Apocalymon Void`) and live turn-by-turn face-to-face arena combat.
+2. **📡 Mode 2 — Wild NFC & Barcode Scanner (`BattleMode.WILD_SCAN`)**:
+   - Scan any physical NFC tag/card/transit pass/amiibo on Watch or Phone, or scan/enter any **UPC/EAN-13 product barcode or QR code** in the Companion App (`WildScanEncounterGenerator`) to deterministically discover Wild Digimon scaled to a Digital World Habitat Zone (`File Island Coast`, `Folder Continent`, `Net Ocean Trench`, `Dark Area Abyss`), with an 18% Rare Boss Anomaly escalation!
+3. **📶 Mode 3 — NFC Tap-to-Duel P2P (`BattleMode.NFC_TAP_DUEL`)**:
+   - Tap Watch-to-Watch, Watch-to-Phone, or Phone-to-Phone via NFC Reader/NDEF (`application/vnd.com.digiwatch.battle`) or 128-bit Crockford Base32 CommCodes for instant peer-to-peer duels and DNA Jogress fusions.
+4. **🌐 Mode 4 — A-Com / D-Com / WiFiCom + Watch NFC Relay (`BattleMode.ACOM_DCOM_WIFICOM`)**:
+   - Full `V1-XXXX-XXXX-XXXX` (48-bit) and `V1-XXXX-XXXX` (32-bit) DigiROM transceiver for Digimon 0nl1ne, w0rld, Alpha Terminal, A-Com, D-Com, and WiFiCom.
+   - **Watch-to-Phone NFC & DataLayer Relay**: Tap your Smartwatch to your Phone (or tap **`📲 RELAY DIGIROM TO PHONE`** on the Watch) to bridge your Watch Partner's live DigiROM into the Phone Companion App's A-Com / WiFiCom Online Tamer Lobby, and beam opponents right back to your wrist!
+
+#### Canonical Bandai V-Pet Battle Formulas (`DeterministicBattleSolver`):
+- **Effective Power (`EFF PWR`)**: `BasePower + (Effort × 8) + min(Victories, 50) × 2 + StageBonus`
+- **Hit Rate (`HIT%`)**: `clamp(50% + ((AttackerEffPower - DefenderEffPower) / (AttackerEffPower + DefenderEffPower)) × 35% + AttributeBonus(±10%) + CritBoost(+12%), 20%, 95%)`
+- **Attack Tiers**:
+  - `SINGLE` (Standard Shot)
+  - `DOUBLE` (Twin Barrage on favorable PRNG roll)
+  - `MEGA_HIT` (Triggered by QTE / Pendulum Shake Reflex Boost `+25%` or natural Critical Strike `1.35×`)
+- **Elemental Triangle (`1.2×` Damage & `+10%` Hit Rate)**: `Vaccine > Virus > Data > Vaccine` (`Free` is neutral).
+- **Environmental Sector Modifiers (`1.15×` Damage)**: Weather hazards amplify matching elemental attributes during Adventure & Wild Scan battles.
 
 #### Bit Allocation Table (128 Bits / 16 Bytes):
 ```
 Bit 000-007: Protocol Version (8-bit, 0x01)
-Bit 008-023: Monster ID (16-bit, species index 101..549)
+Bit 008-023: Monster ID (16-bit, species index 101..558)
 Bit 024-027: Stage Index (4-bit, 0x1=Baby I .. 0x6=Ultimate)
 Bit 028-031: Attribute (4-bit, 0=Vaccine, 1=Data, 2=Virus, 3=Free)
 Bit 032-047: Base Power / HP (16-bit)
@@ -221,17 +245,6 @@ Bit 080-095: Battle PRNG Seed (16-bit)
 Bit 096-111: Timestamp Salt (16-bit)
 Bit 112-127: HMAC-16 Cryptographic Checksum (16-bit)
 ```
-
-- **Crockford Base32 Alphabet**: Encoded into an error-tolerant 26-character (128-bit) or 16-character (80-bit) alphanumeric string using `0123456789ABCDEFGHJKMNPQRSTVWXYZ` with HMAC-16 cryptographic verification. Ambiguous characters are automatically corrected (`O` → `0`, `I`/`L` → `1`).
-- **Native Digimon 0nl1ne / D-Com / A-Com DigiROM Support**: Automatically generates and decodes `V1-XXXX-XXXX-XXXX` (48-bit) and `V1-XXXX-XXXX` (32-bit) hexadecimal DigiROM packets (`encodeDigiRom` / `decodeDigiRom` / `decodeAuto`) for direct interoperability with Digimon 0nl1ne, w0rld, Alpha Terminal, and 2-prong / 3-prong hardware serial tools.
-- **NFC Tap-to-Duel (Phone & Wear OS)**:
-  - Touch two NFC-equipped devices (or tap the back of a companion phone to a smartwatch) on the Battle screen to instantly beam combatant DigiROM packets via Android Beam / NDEF records (`application/vnd.com.digiwatch.battle`).
-  - Includes real-time haptic feedback and instant combat resolution with 0 latency.
-- **Universal NFC Tag Challenger**:
-  - Scan *any* physical NFC chip, transit card, hotel keycard, amiibo, or NFC sticker: `deriveDigiRomFromBytes(uidBytes)` deterministically seeds an authentic wild Digimon 0nl1ne combatant based on the hardware UID!
-  - Write your active partner to physical NTAG213/215/216 stickers or NFC cards with one click from the Companion App Battle Hub ("WRITE TO NFC TAG") to challenge friends in the real world.
-- **Deterministic Turns**: Combines both combatant PRNG seeds into a unified sequence.
-- **Elemental Triangle (1.2× Damage)**: Vaccine defeats Virus, Virus defeats Data, Data defeats Vaccine.
 
 ---
 
@@ -248,7 +261,7 @@ graph LR
 
 - **Persistent Hardware Step Baseline**: `StepTrackerManager` persists the hardware step counter baseline in `SharedPreferences` across app restarts and screen-off periods (automatically detecting device reboots), ensuring every background step is credited toward sector progression.
 - **Deterministic Boss & Wild Encounter Combat**: Both Sector Boss gates and random Wild Digimon encounters resolve real turn-by-turn combat via `DeterministicBattleSolver` (`[B]` button or touch), crediting victories directly toward partner evolution requirements.
-- **Environmental Weather Hazards**: Dynamic hazards (`glitch_fog`, `subzero_frost`, `pyroclastic_flow`, `cosmic_nihilism`) alter battle variables.
+- **Environmental Weather Hazards**: Dynamic hazards (`glitch_fog`, `subzero_frost`, `pyroclastic_flow`, `cosmic_nihilism`) alter elemental combat damage variables in real time.
 - **Boss Clear Flags**: Defeating sector bosses awards permanent campaign progress flags (`FLAG_INFINITY_CLEARED`, `FLAG_GENESIS_CLEARED`).
 
 ---
@@ -257,11 +270,11 @@ graph LR
 
 The mobile application (`:phone-companion-app`) serves as a full-featured management hub connected via 6 bidirectional Wearable Data Layer endpoints (`/sync/request_pet_state`, `/sync/response_pet_state`, `/sync/update_pet_state`, `/sync/update_settings`, `/sync/battle_code`, `/sync/campaign_data`):
 - **DigiVault Cryo-Preservation**: Archive raised Digimon in zero-decay cryostasis. Browse stored partners with live animated pixel art, search/filter by stage, deploy back to the watch & phone dashboard with one click, or generate dual 128-bit Base32 Comm Codes and `V1-XXXX-XXXX-XXXX` DigiROM packets.
-- **Android Home Screen AppWidget**: Built with standard `RemoteViews` rendering the live 64 × 64 color pixel-art sprite, stage, weight, hunger hearts (`♥♥♥♥`), and strength stars (`★★★★`). Refreshes automatically on watch sync, DigiDex morph, and DigiVault deployment.
+- **Android Home Screen AppWidget**: Built with standard `RemoteViews` rendering the live 64 × 64 color pixel-art sprite, stage, weight, hunger hearts (`♥♥♥♥`), and strength stars (`★★★★`). Refreshes automatically on watch sync, DigiDex morph, DNA Jogress fusion, backup restore, and DigiVault deployment.
 - **205-Species DigiDex, Evolution Encyclopedia & 6-Mode Sprite Studio**: Search and filter all 205 species by stage or ID, inspect all 12 animation frames across 6 live preview modes (`IDLE`, `WALK`, `FEED`, `SLEEP`, `ATTACK`, `STATUS`) with authentic V-Pet pixel overlays, browse interactive pre-evolutions, branching evolutions, and DNA Jogress recipes, and morph your active partner or synthesize into DigiVault.
 - **30-Sector Story Architect**: Create and customize custom campaign sagas and push them directly to the watch's active adventure engine via `/sync/campaign_data`.
-- **JSON Cloud Portability**: Export and import entire partner archives and settings with one-click JSON backup.
-- **Remote Watch Settings & Live Pull Sync**: Wirelessly pull live `PetState` from the watch or push 8 procedural background themes (`classic_vpet_lcd`, `digital_matrix`, `file_island_cyber`, `dark_oled_minimal`, `retro_amber_lcd`, `deep_sea_ocean`, `volcanic_magma`, `cyber_grid_purple`), haptic vibration motor, and 3-button mode.
+- **JSON Cloud Portability**: Export and import either single `PetState` JSON snapshots or a Full Companion Archive (`FullCompanionArchive`: Active Pet + DigiVault Cryo-Storage + Custom Campaigns) with one-click JSON backup and restore.
+- **Remote Watch Settings & Live Pull Sync**: Wirelessly pull live `PetState` from the watch or push 5 authentic LCD & shell themes (`classic_vpet_lcd`, `amber_pendulum_lcd`, `digivice_ic_blue`, `file_island_day`, `dark_oled_minimal`), haptic vibration motor, 1997 piezo chiptune buzzer, 3-button mode, and pendulum shake mode.
 
 ---
 
@@ -305,10 +318,10 @@ All modules assemble cleanly with 0 errors:
 
 | Module | Build Variant | Size | Output File Location |
 |---|---|---|---|
-| **Wear OS & AOSP Smartwatch** | Release (Signed) | **21.03 MB** | `wear-os-app/build/outputs/apk/release/wear-os-app-release.apk` *(also in `release_bin/`)* |
-| **Wear OS & AOSP Smartwatch** | Debug | **25.96 MB** | `wear-os-app/build/outputs/apk/debug/wear-os-app-debug.apk` |
-| **Phone Companion** | Release (Signed) | **12.06 MB** | `phone-companion-app/build/outputs/apk/release/phone-companion-app-release.apk` *(also in `release_bin/`)* |
-| **Phone Companion** | Debug | **17.95 MB** | `phone-companion-app/build/outputs/apk/debug/phone-companion-app-debug.apk` |
+| **Wear OS & AOSP Smartwatch** | Release (Signed) | **21.05 MB** | `wear-os-app/build/outputs/apk/release/wear-os-app-release.apk` *(also in `release_bin/`)* |
+| **Wear OS & AOSP Smartwatch** | Debug | **26.14 MB** | `wear-os-app/build/outputs/apk/debug/wear-os-app-debug.apk` *(also in `release_bin/`)* |
+| **Phone Companion** | Release (Signed) | **12.09 MB** | `phone-companion-app/build/outputs/apk/release/phone-companion-app-release.apk` *(also in `release_bin/`)* |
+| **Phone Companion** | Debug | **17.67 MB** | `phone-companion-app/build/outputs/apk/debug/phone-companion-app-debug.apk` *(also in `release_bin/`)* |
 
 ---
 
@@ -359,10 +372,14 @@ adb install -r phone-companion-app/build/outputs/apk/release/phone-companion-app
 
 ## 🧪 Verification & Test Suite
 
-The shared core logic includes complete unit test coverage across 5 dedicated test suites:
+The shared core logic includes complete unit test coverage across 9 dedicated test suites:
+- **`SpriteMatrixRegistryTest`**: Audits all 205 species for 16 × 16 bounds, valid pixel character tokens, non-hollow multi-tone fills, zero duplicate matrices, zero duplicate palettes, 12-frame stance differentiation, and Ambient Mode On-Pixel Ratio (OPR ≤ 15%).
+- **`RosterAuditTest`**: Audits all 205 species for ID-to-stage integrity, evolution graph validity, Perfect → Ultimate ascension criteria (≥ 3 days age, ≥ 25 battles), all 44 Jogress/DigiXros recipes, and 100% Digimon 0nl1ne / D-Com wire roundtrip compatibility.
+- **`ExpandedRosterTest`**: Validates roster stage distribution and starter Digi-Egg evolutionary trees.
 - **`CommCodeCodecTest`**: 128-bit payload binary serialization, Crockford Base32 alphabet validation, error-tolerant character mapping (`O` → `0`, `I`/`L` → `1`), and HMAC-16 tamper detection.
-- **`DeterministicBattleSolverTest`**: Combined PRNG seed turn reproducibility, 1.2× elemental advantage damage calculations, and 10-round combat termination.
+- **`DeterministicBattleSolverTest`**: Combined PRNG seed turn reproducibility, 1.2× elemental advantage damage calculations, +25% QTE Critical Strike reflex boost, environmental weather hazard modifiers, and 10-round combat termination.
 - **`PetSimulationEngineTest`**: Physiological decay math across all 6 stages, metabolic sleep freezing, and care mistake grace windows.
+- **`EvolutionEngineTest`**: Multi-variable branching evolution evaluation across age, care mistakes, effort, overfeeds, and battle win ratios.
 - **`AdventureEngineTest`**: 30-node step accumulation, hazard weather mechanics, and final boss victory flag recording (`Node 130` ZeedMillenniummon).
 - **`JogressEngineTest`**: Commutative fusion recipe matching (WarGreymon + MetalGarurumon == MetalGarurumon + WarGreymon → Omnimon), inherited stat bonuses, and Digimon 0nl1ne Comm Code roundtrip verification.
 

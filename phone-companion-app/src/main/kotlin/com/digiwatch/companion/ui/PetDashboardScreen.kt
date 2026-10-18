@@ -56,6 +56,7 @@ import com.digiwatch.companion.datalayer.PhoneWearableManager
 import com.digiwatch.companion.render.SpriteCanvasRenderer
 import com.digiwatch.companion.widget.DigiWatchAppWidgetProvider
 import com.digiwatch.core.engine.EvolutionEngine
+import com.digiwatch.core.engine.PetSimulationEngine
 import com.digiwatch.core.model.BackgroundTheme
 import com.digiwatch.core.model.PetSpecies
 import com.digiwatch.core.model.PetState
@@ -72,23 +73,49 @@ fun PetDashboardScreen(
     var syncStatus by remember { mutableStateOf<String?>(null) }
     var isSyncing by remember { mutableStateOf(false) }
     var vaultDepositSuccess by remember { mutableStateOf<String?>(null) }
+    var showStarterEggPicker by remember { mutableStateOf(false) }
 
     // Interactive V-Pet Brick Shell State
     var selectedShellIcon by remember { mutableIntStateOf(0) }
     var shellPreviewStance by remember { mutableIntStateOf(0) } // 0=IDLE, 1=WALK, 2=HAPPY, 3=ATTACK
 
-    // Watch Settings State
+    // Watch Settings State (100% parity with Watch SettingsScreen)
     var selectedTheme by remember { mutableStateOf(BackgroundTheme.CLASSIC_VPET_LCD) }
     var vibrationEnabled by remember { mutableStateOf(true) }
-    var threeButtonMode by remember { mutableStateOf(false) }
+    var soundEnabled by remember { mutableStateOf(false) }
+    var threeButtonMode by remember { mutableStateOf(true) }
     var pendulumShakeMode by remember { mutableStateOf(false) }
+    var nfcBridgeMode by remember { mutableStateOf("NFC_DUEL") }
 
     val scope = rememberCoroutineScope()
     val species = remember(petState.speciesId) { PetSpecies.getById(petState.speciesId) }
     val scrollState = rememberScrollState()
     val context = LocalContext.current
 
-    // Load latest snapshot on start if available
+    val persistPhoneSnapshot: suspend (PetState) -> Unit = { updated ->
+        val sp = PetSpecies.getById(updated.speciesId)
+        db.phoneDao().insertSnapshot(
+            SyncedPetEntity(
+                syncedTimestampUtc = System.currentTimeMillis() / 1000L,
+                speciesId = updated.speciesId,
+                speciesName = sp.name,
+                currentHp = updated.currentHp,
+                maxHp = updated.maxHp,
+                hunger = updated.hunger,
+                strength = updated.strength,
+                weight = updated.weight,
+                ageSeconds = updated.ageSeconds,
+                careMistakes = updated.careMistakes,
+                effort = updated.effort,
+                overfeedCount = updated.overfeedCount,
+                totalBattles = updated.totalBattles,
+                victories = updated.victories
+            )
+        )
+        DigiWatchAppWidgetProvider.updateAllWidgets(context)
+    }
+
+    // Load latest snapshot & watch settings on start if available
     LaunchedEffect(Unit) {
         val latest = db.phoneDao().getLatestSnapshot()
         if (latest != null) {
@@ -106,6 +133,15 @@ fun PetDashboardScreen(
                 totalBattles = latest.totalBattles,
                 victories = latest.victories
             )
+        }
+        val watchSettings = wearableManager.requestSettingsFromWatch()
+        if (watchSettings != null) {
+            watchSettings["theme"]?.let { selectedTheme = BackgroundTheme.fromId(it) }
+            watchSettings["vibration"]?.let { vibrationEnabled = it.toBoolean() }
+            watchSettings["vpet_3button_mode"]?.let { threeButtonMode = it.toBoolean() }
+            watchSettings["pendulum_shake_mode"]?.let { pendulumShakeMode = it.toBoolean() }
+            watchSettings["sound_enabled"]?.let { soundEnabled = it.toBoolean() }
+            watchSettings["nfc_bridge_mode"]?.let { nfcBridgeMode = it }
         }
     }
 
@@ -151,33 +187,24 @@ fun PetDashboardScreen(
                                 if (liveWatchState != null) {
                                     petState = liveWatchState
                                 }
+                                val watchSettings = wearableManager.requestSettingsFromWatch()
+                                if (watchSettings != null) {
+                                    watchSettings["theme"]?.let { selectedTheme = BackgroundTheme.fromId(it) }
+                                    watchSettings["vibration"]?.let { vibrationEnabled = it.toBoolean() }
+                                    watchSettings["vpet_3button_mode"]?.let { threeButtonMode = it.toBoolean() }
+                                    watchSettings["pendulum_shake_mode"]?.let { pendulumShakeMode = it.toBoolean() }
+                                    watchSettings["sound_enabled"]?.let { soundEnabled = it.toBoolean() }
+                                    watchSettings["nfc_bridge_mode"]?.let { nfcBridgeMode = it }
+                                }
                                 val syncedSpecies = PetSpecies.getById(petState.speciesId)
                                 syncStatus = if (liveWatchState != null) {
-                                    "Synced live ${syncedSpecies.name} from Smartwatch!"
+                                    "Synced live ${syncedSpecies.name} & settings from Smartwatch!"
                                 } else {
                                     "Connected to ${nodes.size} Smartwatch Node(s)"
                                 }
-                                db.phoneDao().insertSnapshot(
-                                    SyncedPetEntity(
-                                        syncedTimestampUtc = System.currentTimeMillis() / 1000L,
-                                        speciesId = petState.speciesId,
-                                        speciesName = syncedSpecies.name,
-                                        currentHp = petState.currentHp,
-                                        maxHp = petState.maxHp,
-                                        hunger = petState.hunger,
-                                        strength = petState.strength,
-                                        weight = petState.weight,
-                                        ageSeconds = petState.ageSeconds,
-                                        careMistakes = petState.careMistakes,
-                                        effort = petState.effort,
-                                        overfeedCount = petState.overfeedCount,
-                                        totalBattles = petState.totalBattles,
-                                        victories = petState.victories
-                                    )
-                                )
-                                DigiWatchAppWidgetProvider.updateAllWidgets(context)
+                                persistPhoneSnapshot(petState)
                             } else {
-                                syncStatus = "No Bluetooth Watch connected (Offline Mode)"
+                                syncStatus = "No Bluetooth Watch connected (Offline Companion Mode)"
                             }
                             isSyncing = false
                         }
@@ -387,6 +414,170 @@ fun PetDashboardScreen(
 
         Spacer(modifier = Modifier.height(16.dp))
 
+        // Remote Care & Egg Hatch Deck Card (executes on Phone & Paired Watch)
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            colors = CardDefaults.cardColors(containerColor = DigiWatchPalette.CardSurface),
+            shape = RoundedCornerShape(16.dp),
+            border = BorderStroke(1.dp, DigiWatchPalette.CardBorder)
+        ) {
+            Column(modifier = Modifier.padding(16.dp)) {
+                Text(
+                    text = "▸ REMOTE V-PET CARE & DIGI-EGG DECK",
+                    fontSize = 11.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color(0xFF00E676),
+                    fontFamily = FontFamily.Monospace
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+
+                val executeCareAction: (String, (PetState) -> PetState, String) -> Unit = { remoteCmd, localTransform, label ->
+                    scope.launch {
+                        val watchUpdated = wearableManager.sendRemoteCareCommand(remoteCmd)
+                        val nextState = watchUpdated ?: localTransform(petState)
+                        val evolved = EvolutionEngine.evaluateEvolution(nextState)
+                        val finalState = if (evolved != null) {
+                            EvolutionEngine.evolve(nextState, evolved, System.currentTimeMillis() / 1000L)
+                        } else nextState
+                        petState = finalState
+                        persistPhoneSnapshot(finalState)
+                        if (watchUpdated == null) {
+                            wearableManager.sendPetStateToWatch(finalState)
+                        }
+                        syncStatus = if (evolved != null) {
+                            "✨ DIGIVOLUTION! Partner evolved into ${evolved.name}!"
+                        } else {
+                            "$label applied (${if (watchUpdated != null) "Watch + Phone" else "Phone Local"})"
+                        }
+                    }
+                }
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(6.dp)
+                ) {
+                    OutlinedButton(
+                        onClick = {
+                            executeCareAction("FEED_MEAL", { PetSimulationEngine.feedMeal(it, System.currentTimeMillis() / 1000L) }, "🍖 Fed Ration Meat")
+                            shellPreviewStance = 2
+                        },
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        Text("🍖 MEAT", fontSize = 10.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
+                    }
+                    OutlinedButton(
+                        onClick = {
+                            executeCareAction("FEED_PROTEIN", { PetSimulationEngine.feedProtein(it, System.currentTimeMillis() / 1000L) }, "💊 Fed Protein Vitamin")
+                            shellPreviewStance = 2
+                        },
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        Text("💊 VITAMIN", fontSize = 10.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
+                    }
+                    OutlinedButton(
+                        onClick = {
+                            executeCareAction("TRAIN_WIN", { PetSimulationEngine.train(it, true, System.currentTimeMillis() / 1000L) }, "🥊 Mega Hit Training")
+                            shellPreviewStance = 3
+                        },
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        Text("🥊 TRAIN", fontSize = 10.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(6.dp))
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(6.dp)
+                ) {
+                    OutlinedButton(
+                        onClick = {
+                            executeCareAction("CLEAN_WASTE", { PetSimulationEngine.cleanWaste(it) }, "🧹 Flushed Bio-Waste")
+                        },
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        Text("🧹 CLEAN", fontSize = 10.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
+                    }
+                    OutlinedButton(
+                        onClick = {
+                            executeCareAction("TOGGLE_LIGHTS", { PetSimulationEngine.toggleLights(it, System.currentTimeMillis() / 1000L) }, "💡 Toggled Sleep Lights")
+                        },
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        Text("💡 LIGHTS", fontSize = 10.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
+                    }
+                    OutlinedButton(
+                        onClick = {
+                            executeCareAction("CURE_INJURY", { PetSimulationEngine.cureInjury(it) }, "💉 Administered Med-Shot")
+                        },
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        Text("💉 HEAL", fontSize = 10.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                OutlinedButton(
+                    onClick = { showStarterEggPicker = !showStarterEggPicker },
+                    modifier = Modifier.fillMaxWidth(),
+                    border = BorderStroke(1.dp, DigiWatchPalette.CrestGold)
+                ) {
+                    Text(
+                        text = if (showStarterEggPicker) "HIDE DIGI-EGG INCUBATOR" else "🥚 HATCH NEW STARTER DIGI-EGG (10 LINEAGES)",
+                        fontSize = 10.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = DigiWatchPalette.CrestGold,
+                        fontFamily = FontFamily.Monospace
+                    )
+                }
+
+                if (showStarterEggPicker) {
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .horizontalScroll(rememberScrollState()),
+                        horizontalArrangement = Arrangement.spacedBy(6.dp)
+                    ) {
+                        EvolutionEngine.STARTER_EGG_IDS.forEach { eggId ->
+                            val eggSp = PetSpecies.getById(eggId)
+                            Column(
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                                modifier = Modifier
+                                    .background(DigiWatchPalette.CardInner, RoundedCornerShape(8.dp))
+                                    .border(1.dp, Color(0xFF455A64), RoundedCornerShape(8.dp))
+                                    .clickable {
+                                        executeCareAction(
+                                            "HATCH_EGG:$eggId",
+                                            {
+                                                PetState(
+                                                    speciesId = eggId,
+                                                    currentHp = eggSp.baseHp,
+                                                    maxHp = eggSp.baseHp,
+                                                    hunger = 4,
+                                                    strength = 4,
+                                                    weight = eggSp.baselineWeight
+                                                )
+                                            },
+                                            "🥚 Hatched ${eggSp.name}!"
+                                        )
+                                        showStarterEggPicker = false
+                                    }
+                                    .padding(horizontal = 10.dp, vertical = 6.dp)
+                            ) {
+                                SpriteCanvasRenderer(speciesId = eggId, frame = SpriteFrame.IDLE_A, size = 32.dp)
+                                Text(eggSp.name, fontSize = 9.sp, fontWeight = FontWeight.Bold, color = Color.White, fontFamily = FontFamily.Monospace)
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
         // Watch Settings & Background Customizer Card
         Card(
             modifier = Modifier.fillMaxWidth(),
@@ -399,7 +590,7 @@ fun PetDashboardScreen(
                     Icon(Icons.Default.Palette, contentDescription = "Themes", tint = DigiWatchPalette.CrestGold, modifier = Modifier.size(18.dp))
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
-                        text = "▸ SMARTWATCH SHELL & LCD THEMES",
+                        text = "▸ SMARTWATCH SHELL & HARDWARE SETTINGS",
                         fontSize = 11.sp,
                         fontWeight = FontWeight.Bold,
                         color = DigiWatchPalette.CrestGold,
@@ -466,6 +657,22 @@ fun PetDashboardScreen(
                     )
                 }
 
+                // Piezo Chiptune Buzzer Toggle
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Column {
+                        Text(text = "1997 Piezo Chiptune Buzzer", fontSize = 12.sp, color = Color.White)
+                        Text(text = "Synthesizes square-wave LCD beeps & fanfare on watch", fontSize = 10.sp, color = Color.Gray)
+                    }
+                    Switch(
+                        checked = soundEnabled,
+                        onCheckedChange = { soundEnabled = it }
+                    )
+                }
+
                 // 3-Button V-Pet Mode Toggle
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -474,7 +681,7 @@ fun PetDashboardScreen(
                 ) {
                     Column {
                         Text(text = "3-Button Authentic V-Pet Mode", fontSize = 12.sp, color = Color.White)
-                        Text(text = "Shows [A•SEL] [B•OK] [C•ESC] LCD shell on watch", fontSize = 10.sp, color = Color.Gray)
+                        Text(text = "Shows [A•SEL] [B•OK] [C•ESC] LCD shell + Rotary/Stem keys", fontSize = 10.sp, color = Color.Gray)
                     }
                     Switch(
                         checked = threeButtonMode,
@@ -498,6 +705,55 @@ fun PetDashboardScreen(
                     )
                 }
 
+                Spacer(modifier = Modifier.height(8.dp))
+
+                // NFC Tap Bridge Mode Selector (Parity with Watch SettingsScreen)
+                Text(
+                    text = "Watch NFC Tap Bridge Mode:",
+                    fontSize = 11.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color(0xFF80D8FF),
+                    fontFamily = FontFamily.Monospace
+                )
+                Spacer(modifier = Modifier.height(4.dp))
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(6.dp)
+                ) {
+                    val nfcOptions = listOf(
+                        "NFC_DUEL" to "📶 Tap-to-Duel",
+                        "WILD_SCAN" to "📡 Wild Scan",
+                        "ACOM_RELAY" to "🌐 Phone A-Com"
+                    )
+                    nfcOptions.forEach { (modeId, label) ->
+                        val active = nfcBridgeMode == modeId
+                        Box(
+                            modifier = Modifier
+                                .weight(1f)
+                                .background(
+                                    if (active) Color(0xFF00695C) else DigiWatchPalette.CardInner,
+                                    RoundedCornerShape(8.dp)
+                                )
+                                .border(
+                                    1.dp,
+                                    if (active) Color(0xFF00E676) else Color(0xFF263238),
+                                    RoundedCornerShape(8.dp)
+                                )
+                                .clickable { nfcBridgeMode = modeId }
+                                .padding(vertical = 8.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                text = label,
+                                fontSize = 9.5.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = if (active) Color.White else Color.LightGray,
+                                fontFamily = FontFamily.Monospace
+                            )
+                        }
+                    }
+                }
+
                 Spacer(modifier = Modifier.height(12.dp))
 
                 // Apply Settings to Smartwatch Button
@@ -508,9 +764,11 @@ fun PetDashboardScreen(
                                 themeId = selectedTheme.id,
                                 vibrationEnabled = vibrationEnabled,
                                 threeButtonMode = threeButtonMode,
-                                pendulumShakeMode = pendulumShakeMode
+                                pendulumShakeMode = pendulumShakeMode,
+                                soundEnabled = soundEnabled,
+                                nfcBridgeMode = nfcBridgeMode
                             )
-                            syncStatus = if (ok) "Settings applied to Smartwatch!" else "Failed to apply (watch offline)"
+                            syncStatus = if (ok) "All Settings applied to Smartwatch!" else "Saved locally (Smartwatch offline)"
                         }
                     },
                     modifier = Modifier.fillMaxWidth(),
@@ -525,7 +783,7 @@ fun PetDashboardScreen(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Branching Evolution Radar with Miniature Target Sprites
+        // Branching Evolution Radar with Starter Egg Lineage & Miniature Target Sprites
         Card(
             modifier = Modifier.fillMaxWidth(),
             colors = CardDefaults.cardColors(containerColor = DigiWatchPalette.CardSurface),
@@ -534,12 +792,22 @@ fun PetDashboardScreen(
         ) {
             Column(modifier = Modifier.padding(16.dp)) {
                 Text(
-                    text = "▸ EVOLUTION BRANCHING RADAR",
+                    text = "▸ EVOLUTION BRANCHING RADAR & LINEAGE",
                     fontSize = 11.sp,
                     fontWeight = FontWeight.Bold,
                     color = DigiWatchPalette.CrestGold,
                     fontFamily = FontFamily.Monospace
                 )
+                val lineagePath = remember(species.id) { EvolutionEngine.findEggLineagePath(species.id).map { PetSpecies.getById(it) } }
+                if (lineagePath.isNotEmpty()) {
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        text = "EGG LINEAGE: " + lineagePath.joinToString(" → ") { "${it.name} (${it.stage.displayName})" },
+                        fontSize = 9.5.sp,
+                        color = Color(0xFF80CBC4),
+                        fontFamily = FontFamily.Monospace
+                    )
+                }
                 Spacer(modifier = Modifier.height(8.dp))
 
                 if (species.evolutionRules.isEmpty()) {
@@ -595,8 +863,8 @@ fun PetDashboardScreen(
                                         color = if (matches) Color(0xFF69F0AE) else Color.White
                                     )
                                     Text(
-                                        text = "CM: ${rule.minCareMistakes}-${rule.maxCareMistakes} • Btl: ${rule.minBattles}+ • Win: ${(rule.minWinRatio * 100).toInt()}%",
-                                        fontSize = 10.sp,
+                                        text = EvolutionEngine.describeRule(rule),
+                                        fontSize = 9.5.sp,
                                         color = Color(0xFFB0BEC5),
                                         fontFamily = FontFamily.Monospace
                                     )

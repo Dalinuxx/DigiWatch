@@ -40,6 +40,13 @@ class WearDataSyncService : WearableListenerService() {
                     } catch (_: Exception) {}
                 }
             }
+            "/sync/request_settings" -> {
+                scope.launch {
+                    val settingsPayload = json.encodeToString(repo.getSettingsMap()).toByteArray(Charsets.UTF_8)
+                    Wearable.getMessageClient(applicationContext)
+                        .sendMessage(messageEvent.sourceNodeId, "/sync/response_settings", settingsPayload)
+                }
+            }
             "/sync/update_settings" -> {
                 scope.launch {
                     try {
@@ -57,6 +64,35 @@ class WearDataSyncService : WearableListenerService() {
                         map["pendulum_shake_mode"]?.let { shakeStr ->
                             repo.setPendulumShakeMode(shakeStr.toBoolean())
                         }
+                        map["sound_enabled"]?.let { soundStr ->
+                            repo.setSoundEnabled(soundStr.toBoolean())
+                        }
+                        map["nfc_bridge_mode"]?.let { nfcMode ->
+                            repo.setNfcBridgeMode(nfcMode)
+                        }
+                    } catch (_: Exception) {}
+                }
+            }
+            "/sync/remote_care_action" -> {
+                scope.launch {
+                    try {
+                        val action = String(messageEvent.data, Charsets.UTF_8).trim()
+                        val updatedState = when {
+                            action == "FEED_MEAL" -> repo.feedMeal()
+                            action == "FEED_PROTEIN" -> repo.feedProtein()
+                            action == "CLEAN_WASTE" -> repo.cleanWaste()
+                            action == "TOGGLE_LIGHTS" -> repo.toggleLights()
+                            action == "CURE_INJURY" -> repo.cureInjury()
+                            action == "TRAIN_WIN" -> repo.train(won = true)
+                            action.startsWith("HATCH_EGG:") -> {
+                                val eggId = action.substringAfter("HATCH_EGG:").toIntOrNull() ?: 101
+                                repo.hatchNewEgg(eggId)
+                            }
+                            else -> repo.getPetState()
+                        }
+                        val payload = json.encodeToString(updatedState).toByteArray(Charsets.UTF_8)
+                        Wearable.getMessageClient(applicationContext)
+                            .sendMessage(messageEvent.sourceNodeId, "/sync/response_pet_state", payload)
                     } catch (_: Exception) {}
                 }
             }

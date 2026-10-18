@@ -68,6 +68,11 @@ class PetRepository private constructor(context: Context) {
     )
     val soundEnabledFlow: StateFlow<Boolean> = _soundEnabledFlow.asStateFlow()
 
+    private val _nfcBridgeModeFlow = MutableStateFlow(
+        prefs.getString("nfc_bridge_mode", "NFC_DUEL") ?: "NFC_DUEL"
+    )
+    val nfcBridgeModeFlow: StateFlow<String> = _nfcBridgeModeFlow.asStateFlow()
+
     private val _beamedCommCodeFlow = MutableStateFlow<String?>(null)
     val beamedCommCodeFlow: StateFlow<String?> = _beamedCommCodeFlow.asStateFlow()
 
@@ -103,6 +108,20 @@ class PetRepository private constructor(context: Context) {
         prefs.edit().putBoolean("sound_enabled", enabled).apply()
         _soundEnabledFlow.value = enabled
     }
+
+    fun setNfcBridgeMode(mode: String) {
+        prefs.edit().putString("nfc_bridge_mode", mode).apply()
+        _nfcBridgeModeFlow.value = mode
+    }
+
+    fun getSettingsMap(): Map<String, String> = mapOf(
+        "theme" to _themeFlow.value.id,
+        "vibration" to _vibrationFlow.value.toString(),
+        "vpet_3button_mode" to _threeButtonModeFlow.value.toString(),
+        "pendulum_shake_mode" to _pendulumShakeModeFlow.value.toString(),
+        "sound_enabled" to _soundEnabledFlow.value.toString(),
+        "nfc_bridge_mode" to _nfcBridgeModeFlow.value
+    )
 
     fun setBeamedCommCode(code: String?) {
         _beamedCommCodeFlow.value = code

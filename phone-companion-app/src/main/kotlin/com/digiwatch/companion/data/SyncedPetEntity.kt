@@ -2,7 +2,9 @@ package com.digiwatch.companion.data
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import kotlinx.serialization.Serializable
 
+@Serializable
 @Entity(tableName = "synced_pet_history")
 data class SyncedPetEntity(
     @PrimaryKey(autoGenerate = true)
@@ -23,6 +25,7 @@ data class SyncedPetEntity(
     val syncedTimestampUtc: Long = System.currentTimeMillis() / 1000L
 )
 
+@Serializable
 @Entity(tableName = "custom_campaigns")
 data class CustomCampaignEntity(
     @PrimaryKey
@@ -32,6 +35,7 @@ data class CustomCampaignEntity(
     val updatedAtUtc: Long = System.currentTimeMillis() / 1000L
 )
 
+@Serializable
 @Entity(tableName = "digi_vault")
 data class StoredDigimonEntity(
     @PrimaryKey(autoGenerate = true)

@@ -361,7 +361,7 @@ fun SpriteStudioScreen(
         ) {
             Column(modifier = Modifier.padding(16.dp)) {
                 Text(
-                    text = "▸ EVOLUTION & JOGRESS ENCYCLOPEDIA",
+                    text = "▸ EVOLUTION, STARTER EGG LINEAGE & JOGRESS GUIDE",
                     fontSize = 11.sp,
                     fontWeight = FontWeight.Bold,
                     color = DigiWatchPalette.CrestGold,
@@ -369,9 +369,61 @@ fun SpriteStudioScreen(
                 )
                 Spacer(modifier = Modifier.height(8.dp))
 
+                // Starter Egg Lineage Path
+                val eggLineage = remember(selectedSpeciesId) {
+                    com.digiwatch.core.engine.EvolutionEngine.findEggLineagePath(selectedSpeciesId).map { PetSpecies.getById(it) }
+                }
+                if (eggLineage.isNotEmpty()) {
+                    Text(
+                        text = "STARTER EGG LINEAGE PATH (CLICK TO JUMP):",
+                        fontSize = 10.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color(0xFF00E5FF),
+                        fontFamily = FontFamily.Monospace
+                    )
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .horizontalScroll(rememberScrollState()),
+                        horizontalArrangement = Arrangement.spacedBy(6.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        eggLineage.forEachIndexed { idx, stepSp ->
+                            val isCurrent = stepSp.id == selectedSpeciesId
+                            Row(
+                                modifier = Modifier
+                                    .background(
+                                        if (isCurrent) Color(0xFF14363D) else DigiWatchPalette.CardInner,
+                                        RoundedCornerShape(8.dp)
+                                    )
+                                    .border(
+                                        1.dp,
+                                        if (isCurrent) Color(0xFF00E5FF) else Color(0xFF263238),
+                                        RoundedCornerShape(8.dp)
+                                    )
+                                    .clickable { selectedSpeciesId = stepSp.id }
+                                    .padding(horizontal = 8.dp, vertical = 4.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                SpriteCanvasRenderer(speciesId = stepSp.id, frame = SpriteFrame.IDLE_A, size = 22.dp)
+                                Spacer(modifier = Modifier.width(4.dp))
+                                Text(
+                                    text = "${if (idx > 0) "→ " else "🥚 "}${stepSp.name} (${stepSp.stage.displayName})",
+                                    fontSize = 9.5.sp,
+                                    fontWeight = if (isCurrent) FontWeight.Bold else FontWeight.Normal,
+                                    color = if (isCurrent) Color(0xFF80D8FF) else Color.White,
+                                    fontFamily = FontFamily.Monospace
+                                )
+                            }
+                        }
+                    }
+                    Spacer(modifier = Modifier.height(10.dp))
+                }
+
                 // Pre-evolutions
                 if (preEvolutions.isNotEmpty()) {
-                    Text("EVOLVES FROM:", fontSize = 10.sp, fontWeight = FontWeight.Bold, color = Color(0xFF90CAF9), fontFamily = FontFamily.Monospace)
+                    Text("EVOLVES FROM (${preEvolutions.size} SOURCES):", fontSize = 10.sp, fontWeight = FontWeight.Bold, color = Color(0xFF90CAF9), fontFamily = FontFamily.Monospace)
                     Spacer(modifier = Modifier.height(4.dp))
                     Row(
                         modifier = Modifier
@@ -380,17 +432,28 @@ fun SpriteStudioScreen(
                         horizontalArrangement = Arrangement.spacedBy(6.dp)
                     ) {
                         preEvolutions.forEach { pre ->
+                            val rule = pre.evolutionRules.firstOrNull { it.targetSpeciesId == selectedSpeciesId }
                             Row(
                                 modifier = Modifier
                                     .background(DigiWatchPalette.CardInner, RoundedCornerShape(8.dp))
                                     .border(1.dp, Color(0xFF263238), RoundedCornerShape(8.dp))
                                     .clickable { selectedSpeciesId = pre.id }
-                                    .padding(horizontal = 8.dp, vertical = 4.dp),
+                                    .padding(horizontal = 8.dp, vertical = 5.dp),
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
-                                SpriteCanvasRenderer(speciesId = pre.id, frame = SpriteFrame.IDLE_A, size = 22.dp)
+                                SpriteCanvasRenderer(speciesId = pre.id, frame = SpriteFrame.IDLE_A, size = 24.dp)
                                 Spacer(modifier = Modifier.width(6.dp))
-                                Text("← ${pre.name} (${pre.stage.displayName})", fontSize = 10.sp, color = Color.LightGray)
+                                Column {
+                                    Text("← ${pre.name} (${pre.stage.displayName})", fontSize = 10.sp, fontWeight = FontWeight.Bold, color = Color.White)
+                                    rule?.let {
+                                        Text(
+                                            text = com.digiwatch.core.engine.EvolutionEngine.describeRule(it),
+                                            fontSize = 8.5.sp,
+                                            color = Color(0xFFB0BEC5),
+                                            fontFamily = FontFamily.Monospace
+                                        )
+                                    }
+                                }
                             }
                         }
                     }
@@ -401,7 +464,7 @@ fun SpriteStudioScreen(
                 Text("EVOLVES INTO:", fontSize = 10.sp, fontWeight = FontWeight.Bold, color = Color(0xFF81C784), fontFamily = FontFamily.Monospace)
                 Spacer(modifier = Modifier.height(4.dp))
                 if (selectedSpecies.evolutionRules.isEmpty()) {
-                    Text("Apex Stage — No standard evolution branches.", fontSize = 10.sp, color = Color.Gray)
+                    Text("Apex Stage — No standard evolution branches (check DNA Jogress below).", fontSize = 10.sp, color = Color.Gray)
                 } else {
                     selectedSpecies.evolutionRules.forEach { rule ->
                         val target = PetSpecies.getById(rule.targetSpeciesId)
@@ -424,15 +487,15 @@ fun SpriteStudioScreen(
                                 Spacer(modifier = Modifier.width(8.dp))
                                 Column {
                                     Text(
-                                        text = "→ ${target.name} (${target.stage.displayName})",
+                                        text = "→ #${target.id} ${target.name} (${target.stage.displayName} • ${target.attribute.displayName})",
                                         fontSize = 12.sp,
                                         fontWeight = FontWeight.Bold,
                                         color = Color.White
                                     )
                                     Text(
-                                        text = "CM: ${rule.minCareMistakes}-${rule.maxCareMistakes} • Battles: ${rule.minBattles}+ • Win%: ${(rule.minWinRatio * 100).toInt()}%",
+                                        text = com.digiwatch.core.engine.EvolutionEngine.describeRule(rule),
                                         fontSize = 9.sp,
-                                        color = Color.LightGray,
+                                        color = Color(0xFF80CBC4),
                                         fontFamily = FontFamily.Monospace
                                     )
                                 }

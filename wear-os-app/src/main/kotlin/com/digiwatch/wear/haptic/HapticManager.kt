@@ -37,23 +37,28 @@ class HapticManager(context: Context) {
     }
 
     var isEnabled: Boolean = true
+    var buzzerManager: com.digiwatch.wear.sound.BuzzerManager? = null
 
     fun playAttentionAlert() {
+        buzzerManager?.playAttentionBeep()
         if (!isEnabled) return
         vibrator?.vibrate(attentionAlertEffect)
     }
 
     fun playAttackImpact() {
+        buzzerManager?.playAttackImpactTone()
         if (!isEnabled) return
         vibrator?.vibrate(attackImpactEffect)
     }
 
     fun playVictoryFanfare() {
+        buzzerManager?.playVictoryFanfare()
         if (!isEnabled) return
         vibrator?.vibrate(victoryFanfareEffect)
     }
 
     fun playStepMilestone() {
+        buzzerManager?.playButtonBeep()
         if (!isEnabled) return
         vibrator?.vibrate(stepMilestoneEffect)
     }

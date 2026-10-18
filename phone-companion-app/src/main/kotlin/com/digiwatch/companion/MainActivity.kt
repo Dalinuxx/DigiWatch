@@ -61,6 +61,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 
 object NfcBattleBridge {
     val incomingCodeFlow = MutableStateFlow<String?>(null)
+    val incomingWatchRelayFlow = MutableStateFlow<String?>(null)
     var pendingTagToWrite: Tag? = null
 }
 
@@ -68,6 +69,14 @@ class MainActivity : ComponentActivity() {
 
     private lateinit var db: PhoneDatabase
     private lateinit var wearableManager: PhoneWearableManager
+    private val relayListener = com.google.android.gms.wearable.MessageClient.OnMessageReceivedListener { event ->
+        if (event.path == "/sync/watch_acom_relay") {
+            val digiRom = String(event.data, Charsets.UTF_8).trim()
+            if (digiRom.isNotEmpty()) {
+                NfcBattleBridge.incomingWatchRelayFlow.value = digiRom
+            }
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -91,6 +100,9 @@ class MainActivity : ComponentActivity() {
 
     override fun onResume() {
         super.onResume()
+        try {
+            com.google.android.gms.wearable.Wearable.getMessageClient(this).addListener(relayListener)
+        } catch (_: Exception) {}
         if (NfcDuelManager.isNfcEnabled(this)) {
             NfcDuelManager.enableReaderMode(this) { opponentCode, tag ->
                 NfcBattleBridge.pendingTagToWrite = tag
@@ -101,6 +113,9 @@ class MainActivity : ComponentActivity() {
 
     override fun onPause() {
         super.onPause()
+        try {
+            com.google.android.gms.wearable.Wearable.getMessageClient(this).removeListener(relayListener)
+        } catch (_: Exception) {}
         NfcDuelManager.disableReaderMode(this)
     }
 
@@ -230,7 +245,7 @@ fun MainPhoneApp(
             when (selectedTab) {
                 0 -> PetDashboardScreen(db, wearableManager)
                 1 -> DigiVaultScreen(db, wearableManager)
-                2 -> BattleHubScreen(wearableManager)
+                2 -> BattleHubScreen(db, wearableManager)
                 3 -> SpriteStudioScreen(db, wearableManager)
                 4 -> StoryAndBackupScreen(db, wearableManager)
             }

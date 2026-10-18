@@ -33,18 +33,26 @@ import androidx.wear.compose.foundation.lazy.ScalingLazyColumn
 import androidx.wear.compose.foundation.lazy.rememberScalingLazyListState
 import androidx.wear.compose.material.Text
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.runtime.mutableIntStateOf
 import com.digiwatch.core.adventure.AdventureEngine
 import com.digiwatch.core.battle.DeterministicBattleSolver
 import com.digiwatch.core.model.AdventureProgress
 import com.digiwatch.core.model.BattleFighter
+import com.digiwatch.core.model.BattleMode
+import com.digiwatch.core.model.BattleResult
 import com.digiwatch.core.model.BossEncounter
 import com.digiwatch.core.model.PetSpecies
 import com.digiwatch.core.model.PetState
+import com.digiwatch.core.model.SpriteFrame
 import com.digiwatch.wear.data.PetRepository
 import com.digiwatch.wear.haptic.HapticManager
 import com.digiwatch.wear.input.HardwareInputManager
 import com.digiwatch.wear.input.VPetButton
 import com.digiwatch.wear.render.SpriteCanvasRenderer
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlin.random.Random
 
@@ -68,6 +76,13 @@ fun AdventureScreen(
     var eventMessage by remember { mutableStateOf<String?>(null) }
     var wildEncounterMonsterId by remember { mutableStateOf<Int?>(null) }
 
+    // Live Adventure Combat Arena State
+    var activeBattleResult by remember { mutableStateOf<BattleResult?>(null) }
+    var currentTurnIndex by remember { mutableIntStateOf(0) }
+    var isBattling by remember { mutableStateOf(false) }
+    var qteActive by remember { mutableStateOf(false) }
+    var criticalBoostActive by remember { mutableStateOf(false) }
+
     val actLabel = when {
         currentNodeIndex < 10 -> "ACT I • FILE ISLAND"
         currentNodeIndex < 20 -> "ACT II • SERVER CONT."
@@ -80,6 +95,8 @@ fun AdventureScreen(
         val enemySpecies = PetSpecies.getById(enemySpeciesId)
         val enemyHp = hpOverride ?: enemySpecies.baseHp
         val enemyPower = powerOverride ?: enemySpecies.basePower
+        val seedA = Random.nextInt(0xFFFF)
+        val seedB = Random.nextInt(0xFFFF)
 
         val fighterA = BattleFighter(
             id = "player",
@@ -92,7 +109,7 @@ fun AdventureScreen(
             basePower = playerSpecies.basePower,
             victories = petState.victories,
             effort = petState.effort,
-            battleSeed = Random.nextInt(0xFFFF)
+            battleSeed = seedA
         )
 
         val fighterB = BattleFighter(
@@ -106,27 +123,77 @@ fun AdventureScreen(
             basePower = enemyPower,
             victories = currentNodeIndex,
             effort = (currentNodeIndex / 8).coerceIn(0, 4),
-            battleSeed = Random.nextInt(0xFFFF)
+            battleSeed = seedB
         )
 
-        val result = DeterministicBattleSolver.resolveBattle(fighterA, fighterB)
-        val won = result.winnerIndex == 0
+        val baseResult = DeterministicBattleSolver.resolveBattle(
+            fighterA = fighterA,
+            fighterB = fighterB,
+            environmentEffect = currentNode.environmentEffect,
+            attackerCritBoost = false,
+            battleMode = BattleMode.ADVENTURE
+        )
+        val critResult = DeterministicBattleSolver.resolveBattle(
+            fighterA = fighterA,
+            fighterB = fighterB,
+            environmentEffect = currentNode.environmentEffect,
+            attackerCritBoost = true,
+            battleMode = BattleMode.ADVENTURE
+        )
+
+        var chosenResult = baseResult
+        activeBattleResult = chosenResult
+        isBattling = true
+        currentTurnIndex = 0
+
+        var idx = 0
+        while (idx < chosenResult.turns.size) {
+            currentTurnIndex = idx
+            val turn = chosenResult.turns[idx]
+            criticalBoostActive = false
+            if (turn.attackerIndex == 0) {
+                qteActive = true
+                HardwareInputManager.activeQteListener = { btn ->
+                    if (btn == VPetButton.B || btn == VPetButton.A) {
+                        criticalBoostActive = true
+                        chosenResult = critResult
+                        activeBattleResult = critResult
+                        hapticManager.playAttackImpact()
+                        true
+                    } else false
+                }
+                delay(420L)
+                HardwareInputManager.activeQteListener = null
+                qteActive = false
+                if (criticalBoostActive) {
+                    chosenResult = critResult
+                    activeBattleResult = critResult
+                }
+            }
+            hapticManager.playAttackImpact()
+            delay(560L)
+            idx++
+        }
+
+        val won = chosenResult.winnerIndex == 0
         repository.recordBattleResult(won)
+        isBattling = false
+        activeBattleResult = null
 
         if (bossToClear != null) {
             if (won) {
                 hapticManager.playVictoryFanfare()
                 repository.recordBossVictory(bossToClear)
-                eventMessage = "🏆 Boss ${enemySpecies.name} Defeated (${result.turns.size} turns)! Gate Unlocked!"
+                eventMessage = "🏆 Boss ${enemySpecies.name} Defeated (${chosenResult.turns.size} turns)! Gate Unlocked!"
             } else {
                 hapticManager.playAttentionAlert()
-                eventMessage = "💀 Boss ${enemySpecies.name} held the gate (HP: ${result.fighterBFinalHp}). Train & retry!"
+                eventMessage = "💀 Boss ${enemySpecies.name} held the gate (HP: ${chosenResult.fighterBFinalHp}). Train & retry!"
             }
         } else {
             wildEncounterMonsterId = null
             if (won) {
                 hapticManager.playVictoryFanfare()
-                eventMessage = "⚔ Defeated Wild ${enemySpecies.name} (${result.turns.size} turns)! +1 Win"
+                eventMessage = "⚔ Defeated Wild ${enemySpecies.name} (${chosenResult.turns.size} turns)! +1 Win"
             } else {
                 hapticManager.playAttackImpact()
                 eventMessage = "Wild ${enemySpecies.name} fled after a fierce clash!"
@@ -134,8 +201,9 @@ fun AdventureScreen(
         }
     }
 
-    LaunchedEffect(currentNode, progress, wildEncounterMonsterId, petState) {
+    LaunchedEffect(currentNode, progress, wildEncounterMonsterId, petState, isBattling) {
         HardwareInputManager.buttonEvents.collect { button ->
+            if (isBattling) return@collect
             when (button) {
                 VPetButton.C -> onBack()
                 VPetButton.B -> {
@@ -162,6 +230,131 @@ fun AdventureScreen(
                 else -> {}
             }
         }
+    }
+
+    // Live Face-to-Face Adventure Combat Overlay
+    if (activeBattleResult != null && isBattling) {
+        val currentTurn = activeBattleResult!!.turns.getOrNull(currentTurnIndex)
+        val playerRemHp = if (currentTurn == null) {
+            activeBattleResult!!.fighterA.maxHp
+        } else if (currentTurn.attackerIndex == 1) {
+            currentTurn.defenderRemainingHp
+        } else {
+            activeBattleResult!!.turns.take(currentTurnIndex).lastOrNull { it.attackerIndex == 1 }?.defenderRemainingHp ?: activeBattleResult!!.fighterA.maxHp
+        }
+        val oppRemHp = if (currentTurn == null) {
+            activeBattleResult!!.fighterB.maxHp
+        } else if (currentTurn.attackerIndex == 0) {
+            currentTurn.defenderRemainingHp
+        } else {
+            activeBattleResult!!.turns.take(currentTurnIndex).lastOrNull { it.attackerIndex == 0 }?.defenderRemainingHp ?: activeBattleResult!!.fighterB.maxHp
+        }
+        val playerHpFrac = (playerRemHp.toFloat() / activeBattleResult!!.fighterA.maxHp.coerceAtLeast(1)).coerceIn(0f, 1f)
+        val oppHpFrac = (oppRemHp.toFloat() / activeBattleResult!!.fighterB.maxHp.coerceAtLeast(1)).coerceIn(0f, 1f)
+
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Color(0xFF0A1410)),
+            contentAlignment = Alignment.Center
+        ) {
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center,
+                modifier = Modifier.padding(horizontal = displayConfig.horizontalPadding)
+            ) {
+                Text(
+                    text = "COLOSSEUM • SEC ${currentNodeIndex + 1}",
+                    fontSize = 7.5.sp,
+                    fontWeight = FontWeight.Black,
+                    color = Color(0xFF64FFDA),
+                    fontFamily = FontFamily.Monospace
+                )
+                Text(
+                    text = "R${currentTurn?.round ?: 1}/10 • ENV: ${currentNode.environmentEffect.uppercase()}",
+                    fontSize = 7.sp,
+                    color = Color(0xFFFFD54F),
+                    fontFamily = FontFamily.Monospace
+                )
+                Spacer(modifier = Modifier.height(3.dp))
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceEvenly,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Text(playerSpecies.name.take(8), fontSize = 7.5.sp, color = Color(0xFF80D8FF), fontWeight = FontWeight.Bold, fontFamily = FontFamily.Monospace)
+                        SpriteCanvasRenderer(
+                            speciesId = petState.speciesId,
+                            isAmbient = false,
+                            overrideFrame = if (currentTurn?.attackerIndex == 0) SpriteFrame.ATTACK_RELEASE else SpriteFrame.IDLE_A,
+                            size = displayConfig.battleSpriteSize,
+                            flipHorizontal = true
+                        )
+                        Box(modifier = Modifier.width(48.dp).height(4.dp).background(Color(0xFF263238), RoundedCornerShape(2.dp))) {
+                            Box(modifier = Modifier.fillMaxWidth(playerHpFrac).height(4.dp).background(Color(0xFF00E676), RoundedCornerShape(2.dp)))
+                        }
+                        Text("$playerRemHp HP", fontSize = 6.5.sp, color = Color(0xFFB9F6CA), fontFamily = FontFamily.Monospace)
+                    }
+
+                    Text(
+                        text = when {
+                            currentTurn?.attackType == "MEGA_HIT" -> "⚡MEGA⚡"
+                            currentTurn?.attackerIndex == 0 -> "●━▶"
+                            currentTurn?.attackerIndex == 1 -> "◀━●"
+                            else -> "VS"
+                        },
+                        fontSize = 8.sp,
+                        fontWeight = FontWeight.Black,
+                        color = Color(0xFFFFD54F),
+                        fontFamily = FontFamily.Monospace
+                    )
+
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Text(activeBattleResult!!.fighterB.name.take(8), fontSize = 7.5.sp, color = Color(0xFFFF8A80), fontWeight = FontWeight.Bold, fontFamily = FontFamily.Monospace)
+                        SpriteCanvasRenderer(
+                            speciesId = activeBattleResult!!.fighterB.speciesId,
+                            isAmbient = false,
+                            overrideFrame = if (currentTurn?.attackerIndex == 1) SpriteFrame.ATTACK_RELEASE else SpriteFrame.IDLE_A,
+                            size = displayConfig.battleSpriteSize,
+                            flipHorizontal = false
+                        )
+                        Box(modifier = Modifier.width(48.dp).height(4.dp).background(Color(0xFF263238), RoundedCornerShape(2.dp))) {
+                            Box(modifier = Modifier.fillMaxWidth(oppHpFrac).height(4.dp).background(Color(0xFFFF5252), RoundedCornerShape(2.dp)))
+                        }
+                        Text("$oppRemHp HP", fontSize = 6.5.sp, color = Color(0xFFFFCDD2), fontFamily = FontFamily.Monospace)
+                    }
+                }
+
+                currentTurn?.let { turn ->
+                    Spacer(modifier = Modifier.height(2.dp))
+                    Text(
+                        text = "${turn.attackerName.take(8)} [${turn.attackType}] -${turn.damage}HP!",
+                        fontSize = 8.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = if (turn.isAdvantage) Color(0xFF00E676) else Color.White,
+                        fontFamily = FontFamily.Monospace
+                    )
+                    if (qteActive) {
+                        Box(
+                            modifier = Modifier
+                                .padding(top = 2.dp)
+                                .background(Color(0xFFFF1744), RoundedCornerShape(4.dp))
+                                .border(0.75.dp, Color.White, RoundedCornerShape(4.dp))
+                                .clickable {
+                                    criticalBoostActive = true
+                                    hapticManager.playAttackImpact()
+                                    qteActive = false
+                                }
+                                .padding(horizontal = 8.dp, vertical = 2.dp)
+                        ) {
+                            Text("⚡ STRIKE [B] / TAP! ⚡", fontSize = 7.5.sp, fontWeight = FontWeight.Black, color = Color.White, fontFamily = FontFamily.Monospace)
+                        }
+                    }
+                }
+            }
+        }
+        return
     }
 
     ScalingLazyColumn(

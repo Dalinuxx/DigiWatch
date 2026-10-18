@@ -68,11 +68,17 @@ fun SettingsScreen(
     val isThreeButtonMode by repository.threeButtonModeFlow.collectAsState(initial = false)
     val isPendulumShakeMode by repository.pendulumShakeModeFlow.collectAsState(initial = false)
     val isSoundEnabled by repository.soundEnabledFlow.collectAsState(initial = false)
+    val nfcBridgeMode by repository.nfcBridgeModeFlow.collectAsState(initial = "NFC_DUEL")
 
     var feedbackMessage by remember { mutableStateOf<String?>(null) }
     var showEggSelector by remember { mutableStateOf(false) }
 
     val themes = BackgroundTheme.entries
+    val nfcModes = listOf(
+        "NFC_DUEL" to "Tap-to-Duel (P2P)",
+        "WILD_SCAN" to "Wild Tag Scanner",
+        "ACOM_RELAY" to "Phone A-Com Relay"
+    )
 
     ScalingLazyColumn(
         modifier = Modifier
@@ -335,7 +341,56 @@ fun SettingsScreen(
         }
 
         // ==========================================
-        // 5. Hatch New Digi-Egg / Reset
+        // 5. NFC Tap Bridge Mode Selector
+        // ==========================================
+        item {
+            Spacer(modifier = Modifier.height(8.dp))
+            val currentPair = nfcModes.find { it.first == nfcBridgeMode } ?: nfcModes.first()
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = displayConfig.horizontalPadding),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = "NFC TAP MODE",
+                        fontSize = 10.sp,
+                        color = Color.White,
+                        fontFamily = FontFamily.Monospace
+                    )
+                    Text(
+                        text = currentPair.second,
+                        fontSize = 8.sp,
+                        color = Color(0xFF80D8FF)
+                    )
+                }
+                Button(
+                    onClick = {
+                        val idx = nfcModes.indexOfFirst { it.first == nfcBridgeMode }.coerceAtLeast(0)
+                        val nextMode = nfcModes[(idx + 1) % nfcModes.size].first
+                        repository.setNfcBridgeMode(nextMode)
+                        if (isVibrationEnabled) hapticManager.playStepMilestone()
+                    },
+                    modifier = Modifier.size(width = 60.dp, height = 32.dp),
+                    colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFF0277BD))
+                ) {
+                    Text(
+                        text = when (nfcBridgeMode) {
+                            "WILD_SCAN" -> "SCAN"
+                            "ACOM_RELAY" -> "A-COM"
+                            else -> "DUEL"
+                        },
+                        fontSize = 8.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+            }
+        }
+
+        // ==========================================
+        // 6. Hatch New Digi-Egg / Reset
         // ==========================================
         item {
             Spacer(modifier = Modifier.height(10.dp))

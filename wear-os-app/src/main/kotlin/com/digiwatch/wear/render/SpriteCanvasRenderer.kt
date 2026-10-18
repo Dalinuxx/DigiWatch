@@ -13,6 +13,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.FilterQuality
+import androidx.compose.ui.graphics.drawscope.withTransform
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
@@ -26,6 +27,7 @@ fun SpriteCanvasRenderer(
     overrideFrame: SpriteFrame? = null,
     isSleeping: Boolean = false,
     isInjured: Boolean = false,
+    flipHorizontal: Boolean = false,
     modifier: Modifier = Modifier,
     size: Dp = 128.dp
 ) {
@@ -65,15 +67,21 @@ fun SpriteCanvasRenderer(
     ) {
         Canvas(modifier = Modifier.size(size)) {
             val dstPx = size.roundToPx()
-            // Draw 64x64 pixel sprite scaled with FilterQuality.None to avoid bilinear blurring
-            drawImage(
-                image = imageBitmap,
-                srcOffset = IntOffset.Zero,
-                srcSize = IntSize(64, 64),
-                dstOffset = IntOffset.Zero,
-                dstSize = IntSize(dstPx, dstPx),
-                filterQuality = FilterQuality.None
-            )
+            withTransform({
+                if (flipHorizontal) {
+                    scale(scaleX = -1f, scaleY = 1f)
+                }
+            }) {
+                // Draw 64x64 pixel sprite scaled with FilterQuality.None to avoid bilinear blurring
+                drawImage(
+                    image = imageBitmap,
+                    srcOffset = IntOffset.Zero,
+                    srcSize = IntSize(64, 64),
+                    dstOffset = IntOffset.Zero,
+                    dstSize = IntSize(dstPx, dstPx),
+                    filterQuality = FilterQuality.None
+                )
+            }
         }
     }
 }

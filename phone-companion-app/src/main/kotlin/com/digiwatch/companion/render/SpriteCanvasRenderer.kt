@@ -8,6 +8,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.FilterQuality
+import androidx.compose.ui.graphics.drawscope.withTransform
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
@@ -18,6 +19,7 @@ import com.digiwatch.core.model.SpriteFrame
 fun SpriteCanvasRenderer(
     speciesId: Int,
     frame: SpriteFrame = SpriteFrame.IDLE_A,
+    flipHorizontal: Boolean = false,
     modifier: Modifier = Modifier,
     size: Dp = 100.dp
 ) {
@@ -30,14 +32,21 @@ fun SpriteCanvasRenderer(
         contentAlignment = Alignment.Center
     ) {
         Canvas(modifier = Modifier.size(size)) {
-            drawImage(
-                image = imageBitmap,
-                srcOffset = IntOffset(0, 0),
-                srcSize = IntSize(64, 64),
-                dstOffset = IntOffset(0, 0),
-                dstSize = IntSize(size.toPx().toInt(), size.toPx().toInt()),
-                filterQuality = FilterQuality.None // Crisp pixel art without blur
-            )
+            val dstPx = size.toPx().toInt()
+            withTransform({
+                if (flipHorizontal) {
+                    scale(scaleX = -1f, scaleY = 1f)
+                }
+            }) {
+                drawImage(
+                    image = imageBitmap,
+                    srcOffset = IntOffset(0, 0),
+                    srcSize = IntSize(64, 64),
+                    dstOffset = IntOffset(0, 0),
+                    dstSize = IntSize(dstPx, dstPx),
+                    filterQuality = FilterQuality.None // Crisp pixel art without blur
+                )
+            }
         }
     }
 }

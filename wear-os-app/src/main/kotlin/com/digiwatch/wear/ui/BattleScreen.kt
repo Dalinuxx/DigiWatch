@@ -39,10 +39,14 @@ import androidx.wear.compose.material.ButtonDefaults
 import androidx.wear.compose.foundation.lazy.ScalingLazyColumn
 import androidx.wear.compose.foundation.lazy.rememberScalingLazyListState
 import androidx.wear.compose.material.Text
+import androidx.compose.ui.platform.LocalContext
 import com.digiwatch.core.battle.DeterministicBattleSolver
+import com.digiwatch.core.battle.WildScanEncounter
+import com.digiwatch.core.battle.WildScanEncounterGenerator
 import com.digiwatch.core.codec.CommCodeCodec
 import com.digiwatch.core.fusion.JogressEngine
 import com.digiwatch.core.model.BattleFighter
+import com.digiwatch.core.model.BattleMode
 import com.digiwatch.core.model.BattleResult
 import com.digiwatch.core.model.ElementalAttribute
 import com.digiwatch.core.model.PetSpecies
@@ -54,8 +58,12 @@ import com.digiwatch.wear.data.PetRepository
 import com.digiwatch.wear.haptic.HapticManager
 import com.digiwatch.wear.render.SpriteCanvasRenderer
 import com.digiwatch.wear.render.SpriteFrame
+import com.google.android.gms.tasks.Tasks
+import com.google.android.gms.wearable.Wearable
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import kotlin.random.Random
 
 @Composable
@@ -65,8 +73,10 @@ fun BattleScreen(
     onBack: () -> Unit
 ) {
     val petState by repository.petStateFlow.collectAsState(initial = PetState())
+    val nfcBridgeMode by repository.nfcBridgeModeFlow.collectAsState(initial = "NFC_DUEL")
     val displayConfig = WatchDisplayConfig.current()
     val clipboardManager = LocalClipboardManager.current
+    val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val species = remember(petState.speciesId) { PetSpecies.getById(petState.speciesId) }
 
@@ -94,6 +104,16 @@ fun BattleScreen(
     }
 
     val beamedCode by repository.beamedCommCodeFlow.collectAsState()
+    var selectedBattleMode by remember {
+        mutableStateOf(
+            when (nfcBridgeMode) {
+                "WILD_SCAN" -> BattleMode.WILD_SCAN
+                "ACOM_RELAY" -> BattleMode.ACOM_DCOM_WIFICOM
+                else -> BattleMode.NFC_TAP_DUEL
+            }
+        )
+    }
+    var wildEncounter by remember { mutableStateOf<WildScanEncounter?>(null) }
     var opponentCodeInput by remember { mutableStateOf("") }
     var battleResult by remember { mutableStateOf<BattleResult?>(null) }
     var currentTurnIndex by remember { mutableIntStateOf(0) }
@@ -111,8 +131,19 @@ fun BattleScreen(
     LaunchedEffect(beamedCode) {
         val incoming = beamedCode
         if (!incoming.isNullOrBlank()) {
-            opponentCodeInput = incoming
-            battleStatusText = if (incoming.startsWith("V1-")) "📶 NFC / Beamed: DigiROM Loaded!" else "📶 NFC / Beamed: Comm Code Loaded!"
+            if (selectedBattleMode == BattleMode.WILD_SCAN) {
+                val enc = WildScanEncounterGenerator.generateFromScan(
+                    rawScanData = incoming,
+                    scanSource = "NFC_TAG",
+                    playerStage = species.stage
+                )
+                wildEncounter = enc
+                opponentCodeInput = enc.commCode128
+                battleStatusText = "📡 Wild ${enc.species.name} (${enc.habitatZone}) Scanned!"
+            } else {
+                opponentCodeInput = incoming
+                battleStatusText = if (incoming.startsWith("V1-")) "📶 NFC / Beamed: DigiROM Loaded!" else "📶 NFC / Beamed: Comm Code Loaded!"
+            }
             hapticManager.playStepMilestone()
             repository.setBeamedCommCode(null)
         }
@@ -138,7 +169,7 @@ fun BattleScreen(
         }
     }
 
-    val startBattleWithCode: (String) -> Unit = { code ->
+    val startBattleWithCode: (String, BattleMode, String) -> Unit = { code, mode, envEffect ->
         try {
             val opponentPayload = CommCodeCodec.decodeAuto(code)
             val oppSpecies = PetSpecies.getById(opponentPayload.monsterId)
@@ -165,21 +196,36 @@ fun BattleScreen(
                 attribute = opponentPayload.attribute,
                 maxHp = oppSpecies.baseHp,
                 currentHp = oppSpecies.baseHp,
-                basePower = oppSpecies.basePower,
+                basePower = opponentPayload.basePowerHp.coerceAtLeast(oppSpecies.basePower),
                 victories = opponentPayload.historicalVictories,
                 effort = opponentPayload.trainingEffort,
                 battleSeed = opponentPayload.battleRngSeed
             )
 
-            val result = DeterministicBattleSolver.resolveBattle(fighterA, fighterB)
-            battleResult = result
+            val baseResult = DeterministicBattleSolver.resolveBattle(
+                fighterA = fighterA,
+                fighterB = fighterB,
+                environmentEffect = envEffect,
+                attackerCritBoost = false,
+                battleMode = mode
+            )
+            val critResult = DeterministicBattleSolver.resolveBattle(
+                fighterA = fighterA,
+                fighterB = fighterB,
+                environmentEffect = envEffect,
+                attackerCritBoost = true,
+                battleMode = mode
+            )
+            var activeResult = baseResult
+            battleResult = activeResult
             isBattling = true
             battleStatusText = null
 
             scope.launch {
-                for (i in result.turns.indices) {
+                var i = 0
+                while (i < activeResult.turns.size) {
                     currentTurnIndex = i
-                    val turn = result.turns[i]
+                    val turn = activeResult.turns[i]
                     criticalBoostActive = false
 
                     if (turn.attackerIndex == 0) {
@@ -188,6 +234,8 @@ fun BattleScreen(
                         HardwareInputManager.activeQteListener = { button ->
                             if (button == VPetButton.B || button == VPetButton.A) {
                                 criticalBoostActive = true
+                                activeResult = critResult
+                                battleResult = critResult
                                 hapticManager.playAttackImpact()
                                 true
                             } else false
@@ -195,13 +243,18 @@ fun BattleScreen(
                         delay(500L) // QTE window
                         HardwareInputManager.activeQteListener = null
                         qteActive = false
+                        if (criticalBoostActive) {
+                            activeResult = critResult
+                            battleResult = critResult
+                        }
                     }
 
                     hapticManager.playAttackImpact()
                     delay(700L)
+                    i++
                 }
 
-                val won = result.winnerIndex == 0
+                val won = activeResult.winnerIndex == 0
                 if (won) {
                     hapticManager.playVictoryFanfare()
                 }
@@ -215,7 +268,7 @@ fun BattleScreen(
     }
 
     // ========================================================
-    // 1. Live Turn-by-Turn Combat Animation View
+    // 1. Live Turn-by-Turn Combat Animation View (Face-to-Face)
     // ========================================================
     if (battleResult != null && isBattling) {
         val currentTurn = battleResult!!.turns.getOrNull(currentTurnIndex)
@@ -251,25 +304,25 @@ fun BattleScreen(
                     modifier = Modifier
                         .background(Color(0xFF162436), RoundedCornerShape(4.dp))
                         .border(0.5.dp, Color(0xFFFFD166), RoundedCornerShape(4.dp))
-                        .padding(horizontal = 8.dp, vertical = 1.dp)
+                        .padding(horizontal = 6.dp, vertical = 1.dp)
                 ) {
                     Text(
-                        text = "ROUND ${currentTurn?.round ?: 1} / 10",
-                        fontSize = 9.sp,
+                        text = "${battleResult!!.battleMode.displayName.take(11).uppercase()} • R${currentTurn?.round ?: 1}/10",
+                        fontSize = 8.sp,
                         fontWeight = FontWeight.Black,
                         color = Color(0xFFFFD166),
                         fontFamily = FontFamily.Monospace
                     )
                 }
 
-                Spacer(modifier = Modifier.height(4.dp))
+                Spacer(modifier = Modifier.height(3.dp))
 
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceEvenly,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    // Player Monster + Live HP Bar
+                    // Player Monster (flipped horizontally to face Opponent on right)
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         Text(
                             text = species.name.take(9),
@@ -282,7 +335,8 @@ fun BattleScreen(
                             speciesId = petState.speciesId,
                             isAmbient = false,
                             overrideFrame = if (currentTurn?.attackerIndex == 0) SpriteFrame.ATTACK_RELEASE else SpriteFrame.IDLE_A,
-                            size = displayConfig.battleSpriteSize
+                            size = displayConfig.battleSpriteSize,
+                            flipHorizontal = true
                         )
                         Spacer(modifier = Modifier.height(2.dp))
                         Box(
@@ -301,9 +355,31 @@ fun BattleScreen(
                         Text("$playerRemHp HP", fontSize = 7.sp, color = Color(0xFFB9F6CA), fontFamily = FontFamily.Monospace)
                     }
 
-                    Text("VS", fontSize = 11.sp, fontWeight = FontWeight.Black, color = Color(0xFFFF5252), fontFamily = FontFamily.Monospace)
+                    // Animated Projectile Clash Indicator
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Text(
+                            text = when {
+                                currentTurn?.attackType == "MEGA_HIT" -> "⚡MEGA⚡"
+                                currentTurn?.attackerIndex == 0 -> "●━━▶"
+                                currentTurn?.attackerIndex == 1 -> "◀━━●"
+                                else -> "VS"
+                            },
+                            fontSize = 8.5.sp,
+                            fontWeight = FontWeight.Black,
+                            color = if (currentTurn?.attackType == "MEGA_HIT") Color(0xFFFFD54F) else Color(0xFFFF5252),
+                            fontFamily = FontFamily.Monospace
+                        )
+                        currentTurn?.let { t ->
+                            Text(
+                                text = "HIT ${t.hitRatePercent}%",
+                                fontSize = 6.5.sp,
+                                color = Color(0xFF90CAF9),
+                                fontFamily = FontFamily.Monospace
+                            )
+                        }
+                    }
 
-                    // Opponent Monster + Live HP Bar
+                    // Opponent Monster (faces left toward Player)
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         Text(
                             text = battleResult!!.fighterB.name.take(9),
@@ -316,7 +392,8 @@ fun BattleScreen(
                             speciesId = battleResult!!.fighterB.speciesId,
                             isAmbient = false,
                             overrideFrame = if (currentTurn?.attackerIndex == 1) SpriteFrame.ATTACK_RELEASE else SpriteFrame.IDLE_A,
-                            size = displayConfig.battleSpriteSize
+                            size = displayConfig.battleSpriteSize,
+                            flipHorizontal = false
                         )
                         Spacer(modifier = Modifier.height(2.dp))
                         Box(
@@ -339,15 +416,15 @@ fun BattleScreen(
                 currentTurn?.let { turn ->
                     Spacer(modifier = Modifier.height(3.dp))
                     Text(
-                        text = "${turn.attackerName} -> -${turn.damage} HP!",
-                        fontSize = 9.sp,
+                        text = "${turn.attackerName.take(8)} [${turn.attackType}] -> -${turn.damage} HP!",
+                        fontSize = 8.5.sp,
                         fontWeight = FontWeight.Bold,
                         color = if (turn.isAdvantage) Color(0xFF00E676) else Color.White,
                         fontFamily = FontFamily.Monospace,
                         textAlign = TextAlign.Center
                     )
                     if (turn.isAdvantage) {
-                        Text("1.2x ELEMENT ADVANTAGE!", fontSize = 7.sp, color = Color(0xFF00E676), fontWeight = FontWeight.Bold, fontFamily = FontFamily.Monospace)
+                        Text("1.2x ATTRIBUTE ADVANTAGE! • PWR ${turn.effectivePower}", fontSize = 6.5.sp, color = Color(0xFF00E676), fontWeight = FontWeight.Bold, fontFamily = FontFamily.Monospace)
                     }
 
                     if (qteActive) {
@@ -367,7 +444,7 @@ fun BattleScreen(
                         }
                     } else if (criticalBoostActive) {
                         Spacer(modifier = Modifier.height(2.dp))
-                        Text("★ CRITICAL BOOST! ★", fontSize = 8.sp, fontWeight = FontWeight.ExtraBold, color = Color(0xFFFFD54F), fontFamily = FontFamily.Monospace)
+                        Text("★ MEGA HIT BOOST! ★", fontSize = 8.sp, fontWeight = FontWeight.ExtraBold, color = Color(0xFFFFD54F), fontFamily = FontFamily.Monospace)
                     }
                 }
             }
@@ -399,6 +476,14 @@ fun BattleScreen(
                 )
             }
             item {
+                Text(
+                    text = battleResult!!.battleMode.displayName.uppercase(),
+                    fontSize = 7.5.sp,
+                    color = Color(0xFFFFD54F),
+                    fontFamily = FontFamily.Monospace
+                )
+            }
+            item {
                 Spacer(modifier = Modifier.height(2.dp))
                 Text(
                     text = "${species.name} vs ${battleResult!!.fighterB.name}",
@@ -414,6 +499,17 @@ fun BattleScreen(
                     fontSize = 8.sp,
                     fontFamily = FontFamily.Monospace,
                     color = Color(0xFF80CBC4)
+                )
+            }
+            item {
+                Spacer(modifier = Modifier.height(2.dp))
+                Text(
+                    text = battleResult!!.formulaSummary,
+                    fontSize = 7.sp,
+                    fontFamily = FontFamily.Monospace,
+                    color = Color(0xFFB0BEC5),
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.padding(horizontal = displayConfig.horizontalPadding)
                 )
             }
             item {
@@ -434,7 +530,7 @@ fun BattleScreen(
     }
 
     // ========================================================
-    // 3. Battle Hub & Keypad Entry Screen
+    // 3. 4-Mode Battle Hub & Keypad Entry Screen
     // ========================================================
     ScalingLazyColumn(
         modifier = Modifier
@@ -447,26 +543,189 @@ fun BattleScreen(
         item {
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 Text(
-                    text = "D-COM BATTLE LINK",
+                    text = "BATTLE TERMINAL",
                     fontSize = displayConfig.headerFontSize,
                     fontWeight = FontWeight.Black,
                     color = Color(0xFFFF9800),
                     fontFamily = FontFamily.Monospace
                 )
                 Spacer(modifier = Modifier.height(2.dp))
-                Box(
+                // 4-Mode Selector Pills (2x2 compact grid for Round/Rect watch)
+                val modes = listOf(
+                    BattleMode.NFC_TAP_DUEL to "📶 NFC DUEL",
+                    BattleMode.WILD_SCAN to "📡 WILD SCAN",
+                    BattleMode.ACOM_DCOM_WIFICOM to "🌐 A-COM/WIFI",
+                    BattleMode.ADVENTURE to "🏟 COLOSSEUM"
+                )
+                modes.chunked(2).forEach { pair ->
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = displayConfig.horizontalPadding, vertical = 1.dp),
+                        horizontalArrangement = Arrangement.spacedBy(3.dp)
+                    ) {
+                        pair.forEach { (mode, label) ->
+                            val active = selectedBattleMode == mode
+                            Box(
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .background(
+                                        if (active) Color(0xFF00695C) else Color(0xFF1A222D),
+                                        RoundedCornerShape(4.dp)
+                                    )
+                                    .border(
+                                        0.75.dp,
+                                        if (active) Color(0xFF00E676) else Color(0xFF37474F),
+                                        RoundedCornerShape(4.dp)
+                                    )
+                                    .clickable {
+                                        selectedBattleMode = mode
+                                        hapticManager.playStepMilestone()
+                                    }
+                                    .padding(vertical = 3.dp),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text(
+                                    text = label,
+                                    fontSize = 7.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = if (active) Color.White else Color(0xFF90A4AE),
+                                    fontFamily = FontFamily.Monospace
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        // Mode-Specific Action Panel (Wild Scan or A-Com Phone Relay)
+        if (selectedBattleMode == BattleMode.WILD_SCAN) {
+            item {
+                Column(
                     modifier = Modifier
-                        .background(Color(0x3300E676), RoundedCornerShape(4.dp))
-                        .border(0.5.dp, Color(0xFF00E676), RoundedCornerShape(4.dp))
-                        .padding(horizontal = 6.dp, vertical = 1.dp)
+                        .fillMaxWidth()
+                        .padding(horizontal = displayConfig.horizontalPadding, vertical = 2.dp)
+                        .background(Color(0xFF15251E), RoundedCornerShape(8.dp))
+                        .border(0.75.dp, Color(0xFF00E676), RoundedCornerShape(8.dp))
+                        .padding(6.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Text(
-                        text = "📶 NFC TAP-TO-DUEL READY",
-                        fontSize = 7.sp,
+                        text = "WILD NFC / BARCODE RADAR",
+                        fontSize = 8.sp,
+                        fontWeight = FontWeight.Black,
                         color = Color(0xFF69F0AE),
-                        fontWeight = FontWeight.Bold,
                         fontFamily = FontFamily.Monospace
                     )
+                    Text(
+                        text = "Tap any NFC tag or scan a barcode preset:",
+                        fontSize = 7.sp,
+                        color = Color.LightGray,
+                        textAlign = TextAlign.Center
+                    )
+                    Spacer(modifier = Modifier.height(3.dp))
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(3.dp)
+                    ) {
+                        WildScanEncounterGenerator.PRESET_BARCODES.take(3).forEach { (code, label) ->
+                            Button(
+                                onClick = {
+                                    val enc = WildScanEncounterGenerator.generateFromScan(
+                                        rawScanData = code,
+                                        scanSource = "BARCODE",
+                                        playerStage = species.stage
+                                    )
+                                    wildEncounter = enc
+                                    opponentCodeInput = enc.commCode128
+                                    hapticManager.playStepMilestone()
+                                },
+                                modifier = Modifier.weight(1f).height(24.dp),
+                                colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFF2E7D32))
+                            ) {
+                                Text(label.take(6), fontSize = 6.5.sp, fontFamily = FontFamily.Monospace)
+                            }
+                        }
+                    }
+                    wildEncounter?.let { enc ->
+                        Spacer(modifier = Modifier.height(3.dp))
+                        Text(
+                            text = "${if (enc.isRareAnomaly) "★ BOSS " else ""}${enc.species.name} (${enc.habitatZone})",
+                            fontSize = 8.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color(0xFFFFD54F),
+                            fontFamily = FontFamily.Monospace
+                        )
+                        Button(
+                            onClick = {
+                                startBattleWithCode(enc.commCode128, BattleMode.WILD_SCAN, enc.environmentHazard)
+                            },
+                            modifier = Modifier.fillMaxWidth().height(26.dp).padding(top = 2.dp),
+                            colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFFE65100))
+                        ) {
+                            Text("⚔ BATTLE WILD ${enc.species.name.take(7)} ⚔", fontSize = 7.5.sp, fontWeight = FontWeight.Black, fontFamily = FontFamily.Monospace)
+                        }
+                    }
+                }
+            }
+        } else if (selectedBattleMode == BattleMode.ACOM_DCOM_WIFICOM) {
+            item {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = displayConfig.horizontalPadding, vertical = 2.dp)
+                        .background(Color(0xFF1A1E2E), RoundedCornerShape(8.dp))
+                        .border(0.75.dp, Color(0xFFFFD54F), RoundedCornerShape(8.dp))
+                        .padding(6.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text(
+                        text = "A-COM / D-COM / WIFICOM RELAY",
+                        fontSize = 8.sp,
+                        fontWeight = FontWeight.Black,
+                        color = Color(0xFFFFD54F),
+                        fontFamily = FontFamily.Monospace
+                    )
+                    Text(
+                        text = "Tap Watch to Phone (NFC) or Beam DigiROM to Phone Companion App for Online Play:",
+                        fontSize = 6.5.sp,
+                        color = Color.LightGray,
+                        textAlign = TextAlign.Center
+                    )
+                    Spacer(modifier = Modifier.height(3.dp))
+                    Button(
+                        onClick = {
+                            scope.launch {
+                                val sent = withContext(Dispatchers.IO) {
+                                    try {
+                                        val nodes = Tasks.await(Wearable.getNodeClient(context).connectedNodes)
+                                        var ok = false
+                                        for (n in nodes) {
+                                            Tasks.await(
+                                                Wearable.getMessageClient(context).sendMessage(
+                                                    n.id,
+                                                    "/sync/watch_acom_relay",
+                                                    ownDigiRom.toByteArray(Charsets.UTF_8)
+                                                )
+                                            )
+                                            ok = true
+                                        }
+                                        ok
+                                    } catch (_: Exception) {
+                                        false
+                                    }
+                                }
+                                clipboardManager.setText(AnnotatedString(ownDigiRom))
+                                battleStatusText = if (sent) "🌐 Beamed $ownDigiRom to Phone A-Com!" else "📋 Copied $ownDigiRom (Tap Phone NFC)"
+                                hapticManager.playStepMilestone()
+                            }
+                        },
+                        modifier = Modifier.fillMaxWidth().height(26.dp),
+                        colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFF1565C0))
+                    ) {
+                        Text("📲 RELAY DIGIROM TO PHONE", fontSize = 7.5.sp, fontWeight = FontWeight.Bold, fontFamily = FontFamily.Monospace)
+                    }
                 }
             }
         }
@@ -706,7 +965,12 @@ fun BattleScreen(
             item {
                 Spacer(modifier = Modifier.height(4.dp))
                 Button(
-                    onClick = { startBattleWithCode(opponentCodeInput) },
+                    onClick = {
+                        val env = if (selectedBattleMode == BattleMode.WILD_SCAN) {
+                            wildEncounter?.environmentHazard ?: "Normal"
+                        } else "Normal"
+                        startBattleWithCode(opponentCodeInput, selectedBattleMode, env)
+                    },
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = displayConfig.horizontalPadding),
@@ -720,7 +984,7 @@ fun BattleScreen(
         // Quick Challenge Bots (authentic Base32 codes)
         item {
             Spacer(modifier = Modifier.height(6.dp))
-            Text("QUICK CHALLENGES:", fontSize = 8.sp, color = Color.Gray)
+            Text("COLOSSEUM / A-COM BOTS:", fontSize = 8.sp, color = Color.Gray)
         }
 
         item {
@@ -742,7 +1006,7 @@ fun BattleScreen(
                             trainingEffort = 3,
                             battleRngSeed = 0x55AA
                         )
-                        startBattleWithCode(botCode)
+                        startBattleWithCode(botCode, selectedBattleMode, "Normal")
                     },
                     modifier = Modifier.weight(1f).padding(2.dp),
                     colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFF8E24AA))
@@ -762,7 +1026,7 @@ fun BattleScreen(
                             trainingEffort = 3,
                             battleRngSeed = 0x1234
                         )
-                        startBattleWithCode(botCode)
+                        startBattleWithCode(botCode, selectedBattleMode, "Normal")
                     },
                     modifier = Modifier.weight(1f).padding(2.dp),
                     colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFF1E88E5))
@@ -791,7 +1055,7 @@ fun BattleScreen(
                             trainingEffort = 4,
                             battleRngSeed = 0x9876
                         )
-                        startBattleWithCode(botCode)
+                        startBattleWithCode(botCode, selectedBattleMode, "Normal")
                     },
                     modifier = Modifier.weight(1f).padding(2.dp),
                     colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFFFB8C00))
@@ -811,7 +1075,7 @@ fun BattleScreen(
                             trainingEffort = 4,
                             battleRngSeed = 0xBEEF
                         )
-                        startBattleWithCode(botCode)
+                        startBattleWithCode(botCode, selectedBattleMode, "Normal")
                     },
                     modifier = Modifier.weight(1f).padding(2.dp),
                     colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFFD32F2F))

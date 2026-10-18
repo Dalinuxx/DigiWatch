@@ -56,6 +56,11 @@ object ExpandedRoster {
         EvolutionRule(targetSpeciesId = target, minAgeSeconds = 3 * DAY, minBattles = 30, minWinRatio = 0.8f, minEffort = 4)
     )
 
+    private fun ascend(good: Int, bad: Int) = arrayOf(
+        EvolutionRule(targetSpeciesId = good, minAgeSeconds = 3 * DAY, minBattles = 30, minWinRatio = 0.8f, minCareMistakes = 0, maxCareMistakes = 3, minEffort = 3),
+        EvolutionRule(targetSpeciesId = bad, minAgeSeconds = 3 * DAY, minBattles = 30, minWinRatio = 0.75f, minCareMistakes = 4, maxCareMistakes = 999)
+    )
+
     private fun egg(target: Int) = arrayOf(EvolutionRule(targetSpeciesId = target, minAgeSeconds = 3600L))
 
 
@@ -98,15 +103,19 @@ object ExpandedRoster {
             sp(349, "Dokugumon", PetStage.ADULT, VI, 340, 96, 26, mature(440)),
 
             // ---------------- Perfect ----------------
-            sp(435, "Dorugreymon", PetStage.PERFECT, DA, 440, 130, 42, ascend(550)),
-            sp(436, "Knightmon", PetStage.PERFECT, DA, 420, 124, 40, ascend(551)),
-            sp(437, "Silphymon", PetStage.PERFECT, VA, 430, 128, 34, mature(552, 555)), // Ophanimon / Kentaurosmon
+            sp(435, "Dorugreymon", PetStage.PERFECT, DA, 440, 130, 42, ascend(523, 550)), // Alphamon / Dorugoramon
+            sp(436, "Knightmon", PetStage.PERFECT, DA, 420, 124, 40, arrayOf(
+                EvolutionRule(targetSpeciesId = 541, minAgeSeconds = 3 * DAY, minBattles = 30, minWinRatio = 0.85f, minCareMistakes = 0, maxCareMistakes = 1, minEffort = 4), // LordKnightmon
+                EvolutionRule(targetSpeciesId = 544, minAgeSeconds = 3 * DAY, minBattles = 30, minWinRatio = 0.80f, minCareMistakes = 2, maxCareMistakes = 3, minEffort = 3), // Duftmon
+                EvolutionRule(targetSpeciesId = 551, minAgeSeconds = 3 * DAY, minBattles = 25, minWinRatio = 0.75f, minCareMistakes = 4, maxCareMistakes = 999) // Gaiomon
+            )),
+            sp(437, "Silphymon", PetStage.PERFECT, VA, 430, 128, 34, ascend(552, 555)), // Ophanimon / Kentaurosmon
             sp(438, "Zudomon", PetStage.PERFECT, DA, 460, 126, 55, ascend(553)),
-            sp(439, "Panjyamon", PetStage.PERFECT, DA, 440, 128, 48, mature(553, 555)), // Vikemon / Kentaurosmon
-            sp(440, "Phantomon", PetStage.PERFECT, VI, 410, 125, 36, mature(554, 532)), // Chaosdramon / Daemon
-            sp(441, "Shakkoumon", PetStage.PERFECT, VA, 460, 128, 48, mature(553, 555)), // Vikemon / Kentaurosmon
-            sp(442, "Digitamamon", PetStage.PERFECT, VI, 470, 122, 60, mature(530, 532)), // Belphemon / Daemon
-            sp(443, "Cherrymon", PetStage.PERFECT, DA, 445, 120, 50, mature(557, 505)), // Cherubimon / Rosemon
+            sp(439, "Panjyamon", PetStage.PERFECT, DA, 440, 128, 48, ascend(544, 555)), // Duftmon / Kentaurosmon
+            sp(440, "Phantomon", PetStage.PERFECT, VI, 410, 125, 36, ascend(554, 532)), // Chaosdramon / Daemon
+            sp(441, "Shakkoumon", PetStage.PERFECT, VA, 460, 128, 48, ascend(553, 555)), // Vikemon / Kentaurosmon
+            sp(442, "Digitamamon", PetStage.PERFECT, VI, 470, 122, 60, ascend(530, 532)), // Belphemon / Daemon
+            sp(443, "Cherrymon", PetStage.PERFECT, DA, 445, 120, 50, ascend(557, 505)), // Cherubimon / Rosemon
 
             // ---------------- Ultimate ----------------
             sp(550, "Dorugoramon", PetStage.ULTIMATE, DA, 640, 200, 55, emptyArray()),
@@ -122,13 +131,23 @@ object ExpandedRoster {
 
     /** Canonical DNA Jogress / DigiXros recipes for the expanded roster. */
     val RECIPES: List<JogressRecipe> = listOf(
-        // Canonical Adventure 02 Jogress Fusions
+        // Canonical Adventure 02 & Royal Knight Jogress / DigiXros / Mode Change Fusions
         JogressRecipe(344, 338, 437, FusionType.DNA_JOGRESS, "Aquilamon and Gatomon unite sky and light into Silphymon."),
         JogressRecipe(345, 307, 441, FusionType.DNA_JOGRESS, "Ankylomon and Angemon combine earthen defense and sacred power into Shakkoumon."),
         JogressRecipe(344, 346, 437, FusionType.DNA_JOGRESS, "Aquilamon and Gaogamon unite their wind and fury into Silphymon."),
         JogressRecipe(435, 523, 550, FusionType.DIGIXROS, "Dorugreymon fuses with Alphamon's royal power into Dorugoramon."),
         JogressRecipe(552, 437, 555, FusionType.DNA_JOGRESS, "Ophanimon and Silphymon's celestial wings merge into Kentaurosmon."),
         JogressRecipe(438, 441, 553, FusionType.DNA_JOGRESS, "Zudomon and Shakkoumon channel arctic sovereignty into Vikemon."),
-        JogressRecipe(427, 437, 556, FusionType.DNA_JOGRESS, "Angewomon and Silphymon unleash heavenly radiance into Magnadramon.")
+        JogressRecipe(427, 437, 556, FusionType.DNA_JOGRESS, "Angewomon and Silphymon unleash heavenly radiance into Magnadramon."),
+        JogressRecipe(501, 507, 549, FusionType.DNA_JOGRESS, "WarGreymon and HerculesKabuterimon unite fire and thunder into Susanoomon."),
+        JogressRecipe(512, 521, 513, FusionType.MODE_CHANGE, "Imperialdramon Dragon Mode resonates with Miracle armor to awaken Fighter Mode."),
+        JogressRecipe(502, 401, 554, FusionType.DIGIXROS, "Machinedramon upgrades with Red Digizoid cybernetics into Chaosdramon."),
+        JogressRecipe(525, 554, 526, FusionType.MODE_CHANGE, "BlackWarGreymon absorbs Chaosdramon's dark core into ChaosBlackWarGreymon."),
+        JogressRecipe(527, 113, 528, FusionType.DNA_JOGRESS, "Diaboromon swarms coalesce with Kuramon into Armageddemon."),
+        JogressRecipe(501, 436, 551, FusionType.DIGIXROS, "WarGreymon and Knightmon forge eastern samurai armor into Gaiomon."),
+        JogressRecipe(504, 552, 557, FusionType.DNA_JOGRESS, "Seraphimon and Ophanimon harmonize celestial virtue into Cherubimon."),
+        JogressRecipe(407, 406, 505, FusionType.DNA_JOGRESS, "Garudamon and Lillymon blossom in winds of beauty into Rosemon."),
+        JogressRecipe(408, 415, 507, FusionType.DNA_JOGRESS, "MegaKabuterimon and Ex-Tyrannomon awaken golden insectoid HerculesKabuterimon."),
+        JogressRecipe(422, 436, 522, FusionType.DNA_JOGRESS, "AeroVeedramon and Knightmon ascend in Blue Digizoid armor to UlforceVeedramon.")
     )
 }

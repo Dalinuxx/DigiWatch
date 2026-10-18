@@ -15,6 +15,7 @@ import androidx.work.WorkerParameters
 import com.digiwatch.wear.MainActivity
 import com.digiwatch.wear.R
 import com.digiwatch.wear.data.PetRepository
+import com.digiwatch.wear.sound.BuzzerManager
 
 class PetDecayWorker(
     private val context: Context,
@@ -24,7 +25,7 @@ class PetDecayWorker(
     override suspend fun doWork(): Result {
         val repo = PetRepository.getInstance(context)
         val state = repo.processDecay(System.currentTimeMillis() / 1000L)
-        val prefs = context.getSharedPreferences("digiwatch_prefs", Context.MODE_PRIVATE)
+        val prefs = context.getSharedPreferences("digiwatch_wear_prefs", Context.MODE_PRIVATE)
 
         if (state.attentionCallActive) {
             val callTimestamp = state.attentionCallTimestampUtc ?: 0L
@@ -33,6 +34,9 @@ class PetDecayWorker(
                 prefs.edit().putLong(KEY_LAST_NOTIFIED_CALL_UTC, callTimestamp).apply()
                 if (prefs.getBoolean("vibration_enabled", true)) {
                     triggerVibrationAlert()
+                }
+                if (prefs.getBoolean("sound_enabled", false)) {
+                    BuzzerManager().apply { isEnabled = true }.playAttentionBeep()
                 }
                 postNotification()
             }

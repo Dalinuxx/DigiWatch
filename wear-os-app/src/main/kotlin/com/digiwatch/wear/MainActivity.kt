@@ -58,6 +58,7 @@ class MainActivity : ComponentActivity() {
         repository = PetRepository.getInstance(applicationContext)
         hapticManager = HapticManager(this)
         buzzerManager = com.digiwatch.wear.sound.BuzzerManager()
+        hapticManager.buzzerManager = buzzerManager
         stepTracker = StepTrackerManager(this, repository, hapticManager, activityScope)
 
         setContent {
@@ -131,6 +132,7 @@ class MainActivity : ComponentActivity() {
             KeyEvent.KEYCODE_BACK -> {
                 // If consumed by active QTE or menu cancel, intercept back
                 if (HardwareInputManager.onButtonDown(VPetButton.C)) {
+                    buzzerManager.playButtonBeep()
                     return true
                 }
                 return super.onKeyDown(keyCode, event)
@@ -144,7 +146,10 @@ class MainActivity : ComponentActivity() {
 
         if (button != null) {
             val consumed = HardwareInputManager.onButtonDown(button)
-            if (consumed) return true
+            if (consumed) {
+                buzzerManager.playButtonBeep()
+                return true
+            }
         }
 
         return super.onKeyDown(keyCode, event)
@@ -155,9 +160,11 @@ class MainActivity : ComponentActivity() {
             val delta = -event.getAxisValue(MotionEvent.AXIS_SCROLL)
             if (delta > 0.05f) {
                 HardwareInputManager.onButtonDown(VPetButton.A)
+                buzzerManager.playButtonBeep()
                 return true
             } else if (delta < -0.05f) {
                 HardwareInputManager.onButtonDown(VPetButton.PREV)
+                buzzerManager.playButtonBeep()
                 return true
             }
         }

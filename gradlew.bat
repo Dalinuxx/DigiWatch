@@ -38,6 +38,16 @@ for %%i in ("%APP_HOME%") do set APP_HOME=%%~fi
 @rem Add default JVM options here. You can also use JAVA_OPTS and GRADLE_OPTS to pass JVM options to this script.
 set DEFAULT_JVM_OPTS="-Xmx64m" "-Xms64m"
 
+@rem Auto-select Android Studio JBR 17 when JAVA_HOME is unset or points to legacy Java 8
+if exist "C:\Program Files\Android\Android Studio\jbr\bin\java.exe" (
+    if not defined JAVA_HOME (
+        set "JAVA_HOME=C:\Program Files\Android\Android Studio\jbr"
+    ) else (
+        echo "%JAVA_HOME%" | findstr /I "1.8" >NUL 2>&1
+        if not errorlevel 1 set "JAVA_HOME=C:\Program Files\Android\Android Studio\jbr"
+    )
+)
+
 @rem Find java.exe
 if defined JAVA_HOME goto findJavaFromJavaHome
 

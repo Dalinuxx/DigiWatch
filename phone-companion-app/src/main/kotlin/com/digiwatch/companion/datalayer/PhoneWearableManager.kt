@@ -82,11 +82,50 @@ class PhoneWearableManager(private val context: Context) {
         success
     }
 
+    suspend fun requestSettingsFromWatch(): Map<String, String>? = withContext(Dispatchers.IO) {
+        val nodes = getConnectedWatchNodes()
+        if (nodes.isEmpty()) return@withContext null
+
+        val deferred = CompletableDeferred<Map<String, String>?>()
+        val listener = MessageClient.OnMessageReceivedListener { event ->
+            if (event.path == "/sync/response_settings") {
+                try {
+                    val str = String(event.data, Charsets.UTF_8)
+                    val map = json.decodeFromString<Map<String, String>>(str)
+                    deferred.complete(map)
+                } catch (_: Exception) {
+                    deferred.complete(null)
+                }
+            }
+        }
+
+        try {
+            Tasks.await(messageClient.addListener(listener))
+            val emptyPayload = ByteArray(0)
+            for (node in nodes) {
+                try {
+                    Tasks.await(messageClient.sendMessage(node, "/sync/request_settings", emptyPayload))
+                } catch (_: Exception) {}
+            }
+            withTimeoutOrNull(2500L) {
+                deferred.await()
+            }
+        } catch (_: Exception) {
+            null
+        } finally {
+            try {
+                Tasks.await(messageClient.removeListener(listener))
+            } catch (_: Exception) {}
+        }
+    }
+
     suspend fun sendSettingsToWatch(
         themeId: String,
         vibrationEnabled: Boolean,
         threeButtonMode: Boolean,
-        pendulumShakeMode: Boolean = false
+        pendulumShakeMode: Boolean = false,
+        soundEnabled: Boolean = false,
+        nfcBridgeMode: String = "NFC_DUEL"
     ): Boolean = withContext(Dispatchers.IO) {
         val nodes = getConnectedWatchNodes()
         if (nodes.isEmpty()) return@withContext false
@@ -95,7 +134,9 @@ class PhoneWearableManager(private val context: Context) {
             "theme" to themeId,
             "vibration" to vibrationEnabled.toString(),
             "vpet_3button_mode" to threeButtonMode.toString(),
-            "pendulum_shake_mode" to pendulumShakeMode.toString()
+            "pendulum_shake_mode" to pendulumShakeMode.toString(),
+            "sound_enabled" to soundEnabled.toString(),
+            "nfc_bridge_mode" to nfcBridgeMode
         )
         val payload = json.encodeToString(map).toByteArray(Charsets.UTF_8)
         var success = false
@@ -106,6 +147,43 @@ class PhoneWearableManager(private val context: Context) {
             } catch (_: Exception) {}
         }
         success
+    }
+
+    suspend fun sendRemoteCareCommand(action: String): PetState? = withContext(Dispatchers.IO) {
+        val nodes = getConnectedWatchNodes()
+        if (nodes.isEmpty()) return@withContext null
+
+        val deferred = CompletableDeferred<PetState?>()
+        val listener = MessageClient.OnMessageReceivedListener { event ->
+            if (event.path == "/sync/response_pet_state") {
+                try {
+                    val str = String(event.data, Charsets.UTF_8)
+                    val state = json.decodeFromString<PetState>(str)
+                    deferred.complete(state)
+                } catch (_: Exception) {
+                    deferred.complete(null)
+                }
+            }
+        }
+
+        try {
+            Tasks.await(messageClient.addListener(listener))
+            val payload = action.toByteArray(Charsets.UTF_8)
+            for (node in nodes) {
+                try {
+                    Tasks.await(messageClient.sendMessage(node, "/sync/remote_care_action", payload))
+                } catch (_: Exception) {}
+            }
+            withTimeoutOrNull(2500L) {
+                deferred.await()
+            }
+        } catch (_: Exception) {
+            null
+        } finally {
+            try {
+                Tasks.await(messageClient.removeListener(listener))
+            } catch (_: Exception) {}
+        }
     }
 
     suspend fun sendCommCodeToWatch(code: String): Boolean = withContext(Dispatchers.IO) {
