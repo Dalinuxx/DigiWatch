@@ -488,7 +488,71 @@ fun SettingsScreen(
         }
 
         // ==========================================
-        // 5. Back Button
+        // 7. AOSP & Wear OS Hardware Compatibility Diagnostics
+        // ==========================================
+        item {
+            val context = androidx.compose.ui.platform.LocalContext.current
+            val pedometerMode = remember { com.digiwatch.wear.sensor.StepTrackerManager.getActivePedometerMode(context) }
+            val nfcAvailable = remember { com.digiwatch.wear.nfc.NfcDuelManager.isNfcAvailable(context) }
+            Spacer(modifier = Modifier.height(8.dp))
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = displayConfig.horizontalPadding)
+                    .background(Color(0xFF1A222D), RoundedCornerShape(8.dp))
+                    .padding(6.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text(
+                    text = "⌚ PLATFORM & AOSP STATUS",
+                    fontSize = 7.5.sp,
+                    fontWeight = FontWeight.Black,
+                    color = Color(0xFF80D8FF),
+                    fontFamily = FontFamily.Monospace
+                )
+                Spacer(modifier = Modifier.height(2.dp))
+                Text(
+                    text = "${displayConfig.runtimePlatformLabel} (${displayConfig.screenWidthDp}x${displayConfig.screenHeightDp}dp)",
+                    fontSize = 7.sp,
+                    color = Color.White,
+                    fontFamily = FontFamily.Monospace,
+                    textAlign = TextAlign.Center
+                )
+                Text(
+                    text = "PEDOMETER: $pedometerMode",
+                    fontSize = 6.5.sp,
+                    color = Color(0xFF69F0AE),
+                    fontFamily = FontFamily.Monospace,
+                    textAlign = TextAlign.Center
+                )
+                Text(
+                    text = "NFC RADIO: ${if (nfcAvailable) "HCE / NDEF READY" else "DIGIROM CODE MODE"}",
+                    fontSize = 6.5.sp,
+                    color = Color(0xFFFFD54F),
+                    fontFamily = FontFamily.Monospace,
+                    textAlign = TextAlign.Center
+                )
+                Spacer(modifier = Modifier.height(4.dp))
+                Button(
+                    onClick = {
+                        scope.launch {
+                            repository.addAdventureSteps(100)
+                            hapticManager.playStepMilestone()
+                            feedbackMessage = "+100 Steps Added!"
+                            delay(1500L)
+                            feedbackMessage = null
+                        }
+                    },
+                    modifier = Modifier.fillMaxWidth().height(24.dp),
+                    colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFF00695C))
+                ) {
+                    Text("👟 +100 STEPS (AOSP / BENCH)", fontSize = 7.sp, fontWeight = FontWeight.Black, fontFamily = FontFamily.Monospace)
+                }
+            }
+        }
+
+        // ==========================================
+        // 8. Back Button
         // ==========================================
         item {
             Spacer(modifier = Modifier.height(8.dp))

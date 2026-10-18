@@ -15,6 +15,8 @@ import androidx.compose.ui.unit.sp
  */
 data class WatchDisplayConfig(
     val isRound: Boolean,
+    val isWearOsSystem: Boolean,
+    val runtimePlatformLabel: String,
     val screenWidthDp: Int,
     val screenHeightDp: Int,
     val horizontalPadding: Dp,
@@ -31,36 +33,43 @@ data class WatchDisplayConfig(
         @ReadOnlyComposable
         fun current(): WatchDisplayConfig {
             val config = LocalConfiguration.current
+            val context = androidx.compose.ui.platform.LocalContext.current
             val isRound = config.isScreenRound
             val width = config.screenWidthDp
             val height = config.screenHeightDp
+            val isWearOs = context.packageManager.hasSystemFeature(android.content.pm.PackageManager.FEATURE_WATCH)
+            val platformLabel = if (isWearOs) "WEAR OS" else "AOSP WATCH"
 
             return if (isRound) {
-                // Round watches: circular curvature cuts off corners; apply curved insets
+                // Round watches (Wear OS or Round AOSP Full Android Watches): apply circular insets
                 WatchDisplayConfig(
                     isRound = true,
+                    isWearOsSystem = isWearOs,
+                    runtimePlatformLabel = "$platformLabel • ROUND",
                     screenWidthDp = width,
                     screenHeightDp = height,
                     horizontalPadding = 14.dp,
                     verticalPadding = 10.dp,
                     contentPadding = PaddingValues(horizontal = 14.dp, vertical = 24.dp),
-                    mainSpriteSize = 92.dp,
-                    battleSpriteSize = 56.dp,
+                    mainSpriteSize = if (width >= 250) 104.dp else 92.dp,
+                    battleSpriteSize = if (width >= 250) 62.dp else 56.dp,
                     headerFontSize = 11.sp,
                     buttonSize = 40.dp,
                     actionRowSpacing = 2.dp
                 )
             } else {
-                // Square & Rectangular watches (e.g. Oppo Watch, square form factors)
+                // Square & Rectangular watches (AOSP Full Android Watches, Oppo Watch, square form factors)
                 WatchDisplayConfig(
                     isRound = false,
+                    isWearOsSystem = isWearOs,
+                    runtimePlatformLabel = "$platformLabel • RECT/SQ",
                     screenWidthDp = width,
                     screenHeightDp = height,
                     horizontalPadding = 6.dp,
                     verticalPadding = 6.dp,
                     contentPadding = PaddingValues(horizontal = 6.dp, vertical = 12.dp),
-                    mainSpriteSize = 108.dp,
-                    battleSpriteSize = 64.dp,
+                    mainSpriteSize = if (width >= 260) 118.dp else 108.dp,
+                    battleSpriteSize = if (width >= 260) 70.dp else 64.dp,
                     headerFontSize = 12.sp,
                     buttonSize = 44.dp,
                     actionRowSpacing = 4.dp

@@ -1,7 +1,15 @@
-# 🧬 DigiWatch Official Digivolution & DNA Jogress Guide (205 Species)
+# 🧬 DigiWatch Official Visual Sprite Sheet Digivolution & DNA Jogress Guide (205 Species)
 
-> **100% Complete & Mathematically Verified Lineage Chart**
+> **100% Complete & Mathematically Verified Lineage Chart + Full Pixel-Art Sprite Sheets**
 > Every single one of the **205 Digimon** in DigiWatch is naturally reachable from the **10 Starter Digi-Eggs** via canonical Bandai 1997 V-Pet, Digimon Pendulum, and Digimon Color evolution rules, or via **44 DNA Jogress / DigiXros / Mode Change** combinations.
+
+## 🖼️ Visual Sprite Sheet Evolution Chart & Master 205-Species Roster
+
+### 1. Full Visual Sprite Sheet Evolution & DNA Jogress Guide Poster
+![DigiWatch Full Sprite Sheet Evolution Guide](docs/digiwatch_evolution_guide_chart.png)
+
+### 2. Complete 205-Species Master Pixel-Art Sprite Sheet
+![DigiWatch 205-Species Master Roster Sprite Sheet](docs/digiwatch_205_roster_spritesheet.png)
 
 ## 📊 Roster & Evolution Summary
 

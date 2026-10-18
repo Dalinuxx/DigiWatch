@@ -274,12 +274,27 @@ class RosterAuditTest {
     @Test
     fun generateAuthoritativeDigivolutionGuideMarkdown() {
         val registry = PetSpecies.SPECIES_REGISTRY.values.sortedBy { it.id }
+        val docsDir = java.io.File("../docs").apply { mkdirs() }
+        val rosterSheetFile = java.io.File(docsDir, "digiwatch_205_roster_spritesheet.png")
+        val evoChartFile = java.io.File(docsDir, "digiwatch_evolution_guide_chart.png")
+
+        renderMasterRosterSpriteSheetPng(registry, rosterSheetFile)
+        renderVisualEvolutionGuideChartPng(registry, evoChartFile)
+
         val sb = StringBuilder()
 
-        sb.appendLine("# 🧬 DigiWatch Official Digivolution & DNA Jogress Guide (205 Species)")
+        sb.appendLine("# 🧬 DigiWatch Official Visual Sprite Sheet Digivolution & DNA Jogress Guide (205 Species)")
         sb.appendLine()
-        sb.appendLine("> **100% Complete & Mathematically Verified Lineage Chart**")
+        sb.appendLine("> **100% Complete & Mathematically Verified Lineage Chart + Full Pixel-Art Sprite Sheets**")
         sb.appendLine("> Every single one of the **205 Digimon** in DigiWatch is naturally reachable from the **10 Starter Digi-Eggs** via canonical Bandai 1997 V-Pet, Digimon Pendulum, and Digimon Color evolution rules, or via **44 DNA Jogress / DigiXros / Mode Change** combinations.")
+        sb.appendLine()
+        sb.appendLine("## 🖼️ Visual Sprite Sheet Evolution Chart & Master 205-Species Roster")
+        sb.appendLine()
+        sb.appendLine("### 1. Full Visual Sprite Sheet Evolution & DNA Jogress Guide Poster")
+        sb.appendLine("![DigiWatch Full Sprite Sheet Evolution Guide](docs/digiwatch_evolution_guide_chart.png)")
+        sb.appendLine()
+        sb.appendLine("### 2. Complete 205-Species Master Pixel-Art Sprite Sheet")
+        sb.appendLine("![DigiWatch 205-Species Master Roster Sprite Sheet](docs/digiwatch_205_roster_spritesheet.png)")
         sb.appendLine()
         sb.appendLine("## 📊 Roster & Evolution Summary")
         sb.appendLine()
@@ -385,6 +400,404 @@ class RosterAuditTest {
         val outFile = java.io.File("../DIGIVOLUTION_GUIDE.md")
         outFile.writeText(sb.toString(), Charsets.UTF_8)
         assertTrue("DIGIVOLUTION_GUIDE.md must be written and non-empty", outFile.exists() && outFile.length() > 10_000L)
+        assertTrue("Roster spritesheet PNG must exist", rosterSheetFile.exists() && rosterSheetFile.length() > 10_000L)
+        assertTrue("Visual evolution guide chart PNG must exist", evoChartFile.exists() && evoChartFile.length() > 20_000L)
+    }
+
+    private fun drawSpeciesSprite(
+        g: java.awt.Graphics2D,
+        speciesId: Int,
+        destX: Int,
+        destY: Int,
+        pixelScale: Int
+    ) {
+        val palette = com.digiwatch.core.render.SpriteMatrixRegistry.getPalette(speciesId)
+        val matrix = com.digiwatch.core.render.SpriteMatrixRegistry.getMatrix(
+            speciesId,
+            com.digiwatch.core.model.SpriteFrame.IDLE_A
+        )
+        for (r in 0 until 16) {
+            val row = matrix[r]
+            for (c in 0 until 16) {
+                val ch = row[c]
+                if (ch == '.') continue
+                val argb = when (ch) {
+                    '#' -> palette.primary
+                    'S' -> palette.secondary
+                    'T' -> palette.tertiary
+                    'E' -> palette.eye
+                    'K', 'B' -> (0xFF shl 24) or (18 shl 16) or (20 shl 8) or 26
+                    'W' -> (0xFF shl 24) or (250 shl 16) or (250 shl 8) or 250
+                    'R' -> (0xFF shl 24) or (244 shl 16) or (67 shl 8) or 54
+                    'G' -> (0xFF shl 24) or (67 shl 16) or (185 shl 8) or 85
+                    'C' -> (0xFF shl 24) or (0 shl 16) or (229 shl 8) or 255
+                    else -> palette.primary
+                }
+                g.color = java.awt.Color(argb, true)
+                g.fillRect(destX + c * pixelScale, destY + r * pixelScale, pixelScale, pixelScale)
+            }
+        }
+    }
+
+    private fun attributeAwtColor(attr: ElementalAttribute): java.awt.Color = when (attr) {
+        ElementalAttribute.VACCINE -> java.awt.Color(0x00, 0xE5, 0xFF)
+        ElementalAttribute.DATA -> java.awt.Color(0xFF, 0xD5, 0x4F)
+        ElementalAttribute.VIRUS -> java.awt.Color(0xFF, 0x52, 0x52)
+        ElementalAttribute.FREE -> java.awt.Color(0x69, 0xF0, 0xAE)
+    }
+
+    private fun renderMasterRosterSpriteSheetPng(
+        registry: List<PetSpecies>,
+        outFile: java.io.File
+    ) {
+        val cols = 10
+        val rows = (registry.size + cols - 1) / cols
+        val cellW = 148
+        val cellH = 112
+        val headerH = 72
+        val width = cols * cellW + 24
+        val height = headerH + rows * cellH + 20
+
+        val img = java.awt.image.BufferedImage(width, height, java.awt.image.BufferedImage.TYPE_INT_ARGB)
+        val g = img.createGraphics()
+        g.setRenderingHint(java.awt.RenderingHints.KEY_TEXT_ANTIALIASING, java.awt.RenderingHints.VALUE_TEXT_ANTIALIAS_ON)
+
+        g.color = java.awt.Color(0x0D, 0x11, 0x17)
+        g.fillRect(0, 0, width, height)
+
+        g.color = java.awt.Color(0x16, 0x1B, 0x24)
+        g.fillRoundRect(10, 8, width - 20, 54, 12, 12)
+        g.color = java.awt.Color(0x00, 0xE5, 0xFF)
+        g.font = java.awt.Font(java.awt.Font.MONOSPACED, java.awt.Font.BOLD, 20)
+        g.drawString("DIGIWATCH v2.0 — COMPLETE 205-SPECIES FULL-COLOR PIXEL ART ROSTER", 24, 34)
+        g.color = java.awt.Color(0xB0, 0xBE, 0xC5)
+        g.font = java.awt.Font(java.awt.Font.MONOSPACED, java.awt.Font.PLAIN, 12)
+        g.drawString("16x16 Multi-Tone Bandai Color Palettes • Cyan = Vaccine • Gold = Data • Crimson = Virus • Emerald = Free", 24, 53)
+
+        registry.forEachIndexed { idx, sp ->
+            val col = idx % cols
+            val row = idx / cols
+            val x = 12 + col * cellW
+            val y = headerH + row * cellH
+
+            val attrCol = attributeAwtColor(sp.attribute)
+            g.color = java.awt.Color(0x18, 0x1F, 0x2C)
+            g.fillRoundRect(x + 3, y + 3, cellW - 6, cellH - 6, 10, 10)
+            g.color = attrCol
+            g.drawRoundRect(x + 3, y + 3, cellW - 6, cellH - 6, 10, 10)
+
+            // LCD inner well for sprite
+            val spriteBoxX = x + (cellW - 56) / 2
+            val spriteBoxY = y + 8
+            g.color = java.awt.Color(0x10, 0x15, 0x1E)
+            g.fillRoundRect(spriteBoxX, spriteBoxY, 56, 56, 6, 6)
+            drawSpeciesSprite(g, sp.id, spriteBoxX + 4, spriteBoxY + 4, 3)
+
+            g.color = attrCol
+            g.font = java.awt.Font(java.awt.Font.MONOSPACED, java.awt.Font.BOLD, 10)
+            g.drawString("#${sp.id} ${sp.stage.displayName.take(7).uppercase()}", x + 8, y + 76)
+
+            g.color = java.awt.Color.WHITE
+            g.font = java.awt.Font(java.awt.Font.MONOSPACED, java.awt.Font.BOLD, 11)
+            val shortName = if (sp.name.length > 15) sp.name.take(14) + "…" else sp.name
+            g.drawString(shortName, x + 8, y + 90)
+
+            g.color = java.awt.Color(0x90, 0xA4, 0xAE)
+            g.font = java.awt.Font(java.awt.Font.MONOSPACED, java.awt.Font.PLAIN, 9)
+            g.drawString("${sp.baseHp}HP / ${sp.basePower}PWR", x + 8, y + 102)
+        }
+
+        g.dispose()
+        javax.imageio.ImageIO.write(img, "PNG", outFile)
+    }
+
+    private fun renderVisualEvolutionGuideChartPng(
+        registry: List<PetSpecies>,
+        outFile: java.io.File
+    ) {
+        val width = 2220
+        val starterEggs = com.digiwatch.core.engine.EvolutionEngine.STARTER_EGG_IDS
+        val nonBabyISpecies = registry.filter { it.stage != PetStage.BABY_I }
+        val cols = 3
+        val colW = 724
+        val cardH = 122
+        val directoryRows = (nonBabyISpecies.size + cols - 1) / cols
+        val jogressCols = 4
+        val jogressColW = 540
+        val jogressCardH = 74
+        val jogressRows = (JogressEngine.RECIPES.size + jogressCols - 1) / jogressCols
+
+        val section1Y = 92
+        val section1H = starterEggs.size * 72 + 48
+        val section2Y = section1Y + section1H + 16
+        val section2H = directoryRows * cardH + 54
+        val section3Y = section2Y + section2H + 16
+        val section3H = jogressRows * jogressCardH + 64
+        val totalHeight = section3Y + section3H + 24
+
+        val img = java.awt.image.BufferedImage(width, totalHeight, java.awt.image.BufferedImage.TYPE_INT_ARGB)
+        val g = img.createGraphics()
+        g.setRenderingHint(java.awt.RenderingHints.KEY_TEXT_ANTIALIASING, java.awt.RenderingHints.VALUE_TEXT_ANTIALIAS_ON)
+
+        // Background
+        g.color = java.awt.Color(0x0B, 0x0E, 0x14)
+        g.fillRect(0, 0, width, totalHeight)
+
+        // Top Title Header
+        g.color = java.awt.Color(0x15, 0x1C, 0x28)
+        g.fillRoundRect(16, 12, width - 32, 68, 14, 14)
+        g.color = java.awt.Color(0x00, 0xE5, 0xFF)
+        g.drawRoundRect(16, 12, width - 32, 68, 14, 14)
+        g.font = java.awt.Font(java.awt.Font.MONOSPACED, java.awt.Font.BOLD, 24)
+        g.drawString("DIGIWATCH v2.0 — VISUAL SPRITE SHEET DIGIVOLUTION & DNA JOGRESS GUIDE (ALL 205 SPECIES)", 32, 42)
+        g.color = java.awt.Color(0xCF, 0xD8, 0xDC)
+        g.font = java.awt.Font(java.awt.Font.MONOSPACED, java.awt.Font.PLAIN, 13)
+        g.drawString("100% Reachable from 10 Starter Eggs • Key: Age = Min Time in Stage | CM = Care Mistakes | ♥ = Effort Hearts (0-4) | W = Min Battles & Win% | G = Weight", 32, 66)
+
+        // =========================================================================
+        // SECTION 1: THE 10 STARTER DIGI-EGGS (BABY I ──▶ BABY II ──▶ CHILD ROOKIES)
+        // =========================================================================
+        g.color = java.awt.Color(0x1E, 0x29, 0x3B)
+        g.fillRoundRect(16, section1Y, width - 32, 36, 10, 10)
+        g.color = java.awt.Color(0xFF, 0xD5, 0x4F)
+        g.font = java.awt.Font(java.awt.Font.MONOSPACED, java.awt.Font.BOLD, 16)
+        g.drawString("🥚 PART 1: THE 10 STARTER DIGI-EGG FAMILIES (BABY I ──10m──▶ BABY II ──6h──▶ CHILD ROOKIE BRANCHES)", 30, section1Y + 24)
+
+        starterEggs.forEachIndexed { idx, eggId ->
+            val rowY = section1Y + 44 + idx * 72
+            val eggSp = PetSpecies.getById(eggId)
+            val baby2Id = eggSp.evolutionRules.first().targetSpeciesId
+            val baby2Sp = PetSpecies.getById(baby2Id)
+
+            g.color = java.awt.Color(0x13, 0x18, 0x22)
+            g.fillRoundRect(20, rowY, width - 40, 66, 10, 10)
+            g.color = java.awt.Color(0x2D, 0x37, 0x48)
+            g.drawRoundRect(20, rowY, width - 40, 66, 10, 10)
+
+            // Draw Baby I Box
+            drawSpeciesSprite(g, eggSp.id, 32, rowY + 9, 3)
+            g.color = java.awt.Color(0xCE, 0x93, 0xD8)
+            g.font = java.awt.Font(java.awt.Font.MONOSPACED, java.awt.Font.BOLD, 11)
+            g.drawString("EGG #${eggSp.id}", 86, rowY + 26)
+            g.color = java.awt.Color.WHITE
+            g.font = java.awt.Font(java.awt.Font.MONOSPACED, java.awt.Font.BOLD, 13)
+            g.drawString(eggSp.name, 86, rowY + 44)
+
+            // Arrow to Baby II
+            g.color = java.awt.Color(0x64, 0xB5, 0xF6)
+            g.font = java.awt.Font(java.awt.Font.MONOSPACED, java.awt.Font.BOLD, 12)
+            g.drawString("──10m──▶", 185, rowY + 36)
+
+            // Draw Baby II Box
+            drawSpeciesSprite(g, baby2Sp.id, 255, rowY + 9, 3)
+            g.color = java.awt.Color(0x80, 0xCB, 0xC4)
+            g.font = java.awt.Font(java.awt.Font.MONOSPACED, java.awt.Font.BOLD, 11)
+            g.drawString("BABY II #${baby2Sp.id}", 308, rowY + 26)
+            g.color = java.awt.Color.WHITE
+            g.font = java.awt.Font(java.awt.Font.MONOSPACED, java.awt.Font.BOLD, 13)
+            g.drawString(baby2Sp.name, 308, rowY + 44)
+
+            // Arrow to Child Branches
+            g.color = java.awt.Color(0xFF, 0xD5, 0x4F)
+            g.font = java.awt.Font(java.awt.Font.MONOSPACED, java.awt.Font.BOLD, 12)
+            g.drawString("──6h──▶", 422, rowY + 36)
+
+            // Child branches
+            baby2Sp.evolutionRules.forEachIndexed { bIdx, rule ->
+                val childSp = PetSpecies.getById(rule.targetSpeciesId)
+                val bx = 488 + bIdx * 282
+                if (bx + 274 < width - 24) {
+                    g.color = java.awt.Color(0x1B, 0x24, 0x32)
+                    g.fillRoundRect(bx, rowY + 6, 274, 54, 8, 8)
+                    g.color = attributeAwtColor(childSp.attribute)
+                    g.drawRoundRect(bx, rowY + 6, 274, 54, 8, 8)
+                    drawSpeciesSprite(g, childSp.id, bx + 6, rowY + 9, 3)
+
+                    g.color = java.awt.Color.WHITE
+                    g.font = java.awt.Font(java.awt.Font.MONOSPACED, java.awt.Font.BOLD, 12)
+                    g.drawString("#${childSp.id} ${childSp.name}", bx + 58, rowY + 25)
+
+                    g.color = java.awt.Color(0xB0, 0xBE, 0xC5)
+                    g.font = java.awt.Font(java.awt.Font.MONOSPACED, java.awt.Font.PLAIN, 10)
+                    val cond = compactRuleSummary(rule)
+                    g.drawString(cond, bx + 58, rowY + 44)
+                }
+            }
+        }
+
+        // =========================================================================
+        // SECTION 2: COMPLETE STAGE-BY-STAGE VISUAL DIGIVOLUTION DIRECTORY
+        // =========================================================================
+        g.color = java.awt.Color(0x1E, 0x29, 0x3B)
+        g.fillRoundRect(16, section2Y, width - 32, 36, 10, 10)
+        g.color = java.awt.Color(0x00, 0xE5, 0xFF)
+        g.font = java.awt.Font(java.awt.Font.MONOSPACED, java.awt.Font.BOLD, 16)
+        g.drawString("🐾 PART 2: COMPLETE SPECIES-BY-SPECIES VISUAL DIGIVOLUTION TREE (WITH TARGET SPRITES & EXACT CONDITIONS)", 30, section2Y + 24)
+
+        nonBabyISpecies.forEachIndexed { idx, sp ->
+            val col = idx % cols
+            val row = idx / cols
+            val cx = 20 + col * colW
+            val cy = section2Y + 44 + row * cardH
+
+            val attrCol = attributeAwtColor(sp.attribute)
+            g.color = java.awt.Color(0x13, 0x18, 0x22)
+            g.fillRoundRect(cx, cy, colW - 10, cardH - 6, 10, 10)
+            g.color = attrCol
+            g.drawRoundRect(cx, cy, colW - 10, cardH - 6, 10, 10)
+
+            // Left panel: Source Digimon Sprite + Metadata
+            g.color = java.awt.Color(0x0D, 0x11, 0x18)
+            g.fillRoundRect(cx + 8, cy + 8, 54, 54, 6, 6)
+            drawSpeciesSprite(g, sp.id, cx + 11, cy + 11, 3)
+
+            g.color = attrCol
+            g.font = java.awt.Font(java.awt.Font.MONOSPACED, java.awt.Font.BOLD, 10)
+            g.drawString("#${sp.id} [${sp.stage.displayName.uppercase()}]", cx + 68, cy + 20)
+
+            g.color = java.awt.Color.WHITE
+            g.font = java.awt.Font(java.awt.Font.MONOSPACED, java.awt.Font.BOLD, 13)
+            val dispName = if (sp.name.length > 18) sp.name.take(17) + "…" else sp.name
+            g.drawString(dispName, cx + 68, cy + 36)
+
+            g.color = java.awt.Color(0x90, 0xA4, 0xAE)
+            g.font = java.awt.Font(java.awt.Font.MONOSPACED, java.awt.Font.PLAIN, 10)
+            g.drawString("${sp.attribute.displayName} • ${sp.baseHp}HP/${sp.basePower}P", cx + 68, cy + 51)
+
+            val lineageIds = com.digiwatch.core.engine.EvolutionEngine.findEggLineagePath(sp.id)
+            val eggOrigin = lineageIds.firstOrNull()?.let { PetSpecies.getById(it).name } ?: "Jogress"
+            g.color = java.awt.Color(0xCE, 0x93, 0xD8)
+            g.font = java.awt.Font(java.awt.Font.MONOSPACED, java.awt.Font.PLAIN, 9)
+            g.drawString("Origin: $eggOrigin", cx + 8, cy + 78)
+
+            val prevForms = com.digiwatch.core.engine.EvolutionEngine.getPreEvolutions(sp.id)
+            if (prevForms.isNotEmpty()) {
+                val prevText = "From: " + prevForms.take(2).joinToString(",") { "#${it.first.id}" }
+                g.color = java.awt.Color(0x80, 0xDE, 0xEA)
+                g.drawString(prevText, cx + 8, cy + 92)
+            }
+
+            // Right panel: Evolution Target Sprites + Conditions
+            val targetX = cx + 228
+            if (sp.evolutionRules.isNotEmpty()) {
+                val rulesToShow = sp.evolutionRules.take(6)
+                rulesToShow.forEachIndexed { rIdx, rule ->
+                    val targetSp = PetSpecies.getById(rule.targetSpeciesId)
+                    val subCol = rIdx % 2
+                    val subRow = rIdx / 2
+                    val tx = targetX + subCol * 240
+                    val ty = cy + 6 + subRow * 36
+
+                    g.color = java.awt.Color(0x1B, 0x22, 0x30)
+                    g.fillRoundRect(tx, ty, 234, 33, 6, 6)
+                    drawSpeciesSprite(g, targetSp.id, tx + 3, ty + 1, 2)
+
+                    g.color = java.awt.Color(0xFF, 0xD5, 0x4F)
+                    g.font = java.awt.Font(java.awt.Font.MONOSPACED, java.awt.Font.BOLD, 10)
+                    val tName = if (targetSp.name.length > 15) targetSp.name.take(14) + "…" else targetSp.name
+                    g.drawString("→#${targetSp.id} $tName", tx + 37, ty + 13)
+
+                    g.color = java.awt.Color(0xCF, 0xD8, 0xDC)
+                    g.font = java.awt.Font(java.awt.Font.MONOSPACED, java.awt.Font.PLAIN, 9)
+                    g.drawString(compactRuleSummary(rule), tx + 37, ty + 26)
+                }
+            } else {
+                val fusions = JogressEngine.getCompatibleRecipesFor(sp.id).take(3)
+                if (fusions.isNotEmpty()) {
+                    fusions.forEachIndexed { fIdx, recipe ->
+                        val partnerId = if (recipe.primarySpeciesId == sp.id) recipe.secondarySpeciesId else recipe.primarySpeciesId
+                        val partnerSp = PetSpecies.getById(partnerId)
+                        val targetSp = PetSpecies.getById(recipe.targetSpeciesId)
+                        val ty = cy + 8 + fIdx * 34
+                        g.color = java.awt.Color(0x23, 0x1B, 0x32)
+                        g.fillRoundRect(targetX, ty, 470, 31, 6, 6)
+                        drawSpeciesSprite(g, partnerSp.id, targetX + 4, ty, 2)
+                        drawSpeciesSprite(g, targetSp.id, targetX + 215, ty, 2)
+
+                        g.color = java.awt.Color(0xEA, 0x80, 0xFC)
+                        g.font = java.awt.Font(java.awt.Font.MONOSPACED, java.awt.Font.BOLD, 10)
+                        g.drawString("+ #${partnerSp.id} ${partnerSp.name.take(13)} ══▶", targetX + 38, ty + 19)
+                        g.color = java.awt.Color(0xFF, 0xD5, 0x4F)
+                        g.drawString("#${targetSp.id} ${targetSp.name.take(16)} (${recipe.fusionType.displayName.take(8)})", targetX + 250, ty + 19)
+                    }
+                } else {
+                    g.color = java.awt.Color(0x69, 0xF0, 0xAE)
+                    g.font = java.awt.Font(java.awt.Font.MONOSPACED, java.awt.Font.BOLD, 11)
+                    g.drawString("★ APEX ULTIMATE FORM (FINAL STAGE)", targetX + 12, cy + 56)
+                }
+            }
+        }
+
+        // =========================================================================
+        // SECTION 3: ALL 44 DNA DIGIVOLUTION (JOGRESS) & MODE CHANGE VISUAL RECIPES
+        // =========================================================================
+        g.color = java.awt.Color(0x1E, 0x29, 0x3B)
+        g.fillRoundRect(16, section3Y, width - 32, 36, 10, 10)
+        g.color = java.awt.Color(0xEA, 0x80, 0xFC)
+        g.font = java.awt.Font(java.awt.Font.MONOSPACED, java.awt.Font.BOLD, 16)
+        g.drawString("⚡ PART 3: ALL 44 DNA DIGIVOLUTION (JOGRESS), DIGIXROS & MODE CHANGE VISUAL RECIPES", 30, section3Y + 24)
+
+        JogressEngine.RECIPES.forEachIndexed { idx, recipe ->
+            val col = idx % jogressCols
+            val row = idx / jogressCols
+            val jx = 20 + col * jogressColW
+            val jy = section3Y + 44 + row * jogressCardH
+
+            val spA = PetSpecies.getById(recipe.primarySpeciesId)
+            val spB = PetSpecies.getById(recipe.secondarySpeciesId)
+            val target = PetSpecies.getById(recipe.targetSpeciesId)
+
+            g.color = java.awt.Color(0x16, 0x14, 0x26)
+            g.fillRoundRect(jx, jy, jogressColW - 10, jogressCardH - 6, 8, 8)
+            g.color = java.awt.Color(recipe.fusionType.badgeColorHex.toInt())
+            g.drawRoundRect(jx, jy, jogressColW - 10, jogressCardH - 6, 8, 8)
+
+            drawSpeciesSprite(g, spA.id, jx + 8, jy + 8, 2)
+            g.color = java.awt.Color.WHITE
+            g.font = java.awt.Font(java.awt.Font.MONOSPACED, java.awt.Font.BOLD, 10)
+            g.drawString("#${spA.id} ${spA.name.take(11)}", jx + 42, jy + 22)
+
+            g.color = java.awt.Color(0xFF, 0xD5, 0x4F)
+            g.font = java.awt.Font(java.awt.Font.MONOSPACED, java.awt.Font.BOLD, 12)
+            g.drawString("+", jx + 145, jy + 26)
+
+            drawSpeciesSprite(g, spB.id, jx + 160, jy + 8, 2)
+            g.color = java.awt.Color.WHITE
+            g.font = java.awt.Font(java.awt.Font.MONOSPACED, java.awt.Font.BOLD, 10)
+            g.drawString("#${spB.id} ${spB.name.take(11)}", jx + 194, jy + 22)
+
+            g.color = java.awt.Color(0x00, 0xE5, 0xFF)
+            g.font = java.awt.Font(java.awt.Font.MONOSPACED, java.awt.Font.BOLD, 11)
+            g.drawString("══▶", jx + 298, jy + 25)
+
+            drawSpeciesSprite(g, target.id, jx + 328, jy + 8, 2)
+            g.color = java.awt.Color(0x69, 0xF0, 0xAE)
+            g.font = java.awt.Font(java.awt.Font.MONOSPACED, java.awt.Font.BOLD, 11)
+            g.drawString("#${target.id} ${target.name.take(15)}", jx + 364, jy + 22)
+
+            g.color = java.awt.Color(0xCE, 0x93, 0xD8)
+            g.font = java.awt.Font(java.awt.Font.MONOSPACED, java.awt.Font.PLAIN, 9)
+            g.drawString("[${recipe.fusionType.displayName}] ${recipe.description.take(45)}", jx + 42, jy + 54)
+        }
+
+        g.dispose()
+        javax.imageio.ImageIO.write(img, "PNG", outFile)
+    }
+
+    private fun compactRuleSummary(rule: com.digiwatch.core.model.EvolutionRule): String {
+        val parts = mutableListOf<String>()
+        val hours = rule.minAgeSeconds / 3600L
+        if (hours > 0) parts.add("${hours}h") else parts.add("${rule.minAgeSeconds / 60L}m")
+        if (rule.minCareMistakes > 0 || rule.maxCareMistakes < 99) {
+            val maxStr = if (rule.maxCareMistakes >= 99) "+" else "-${rule.maxCareMistakes}"
+            parts.add("CM:${rule.minCareMistakes}$maxStr")
+        }
+        if (rule.minEffort > 0) parts.add("♥≥${rule.minEffort}")
+        if (rule.minBattles > 0) parts.add("B≥${rule.minBattles}")
+        if (rule.minWinRatio > 0f) parts.add("W≥${(rule.minWinRatio * 100).toInt()}%")
+        if (rule.minOverfeed > 0) parts.add("OF≥${rule.minOverfeed}")
+        if (rule.minWeight > 0) parts.add("G≥${rule.minWeight}")
+        return parts.joinToString(" ")
     }
 }
 

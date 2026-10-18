@@ -20,15 +20,27 @@ class StepTrackerManager(
 
     private val sensorManager = context.getSystemService(Context.SENSOR_SERVICE) as SensorManager
     private val stepCounterSensor = sensorManager.getDefaultSensor(Sensor.TYPE_STEP_COUNTER)
+    private val stepDetectorSensor = sensorManager.getDefaultSensor(Sensor.TYPE_STEP_DETECTOR)
+    private val accelerometerSensor = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
     private val prefs = context.getSharedPreferences("digiwatch_step_prefs", Context.MODE_PRIVATE)
 
     @Volatile
     private var pendingSteps: Int = 0
     private var lastFlushTimestampMs: Long = 0L
+    private var lastAccelStepTimestampMs: Long = 0L
 
     fun startListening() {
-        stepCounterSensor?.let {
-            sensorManager.registerListener(this, it, SensorManager.SENSOR_DELAY_NORMAL)
+        when {
+            stepCounterSensor != null -> {
+                sensorManager.registerListener(this, stepCounterSensor, SensorManager.SENSOR_DELAY_NORMAL)
+            }
+            stepDetectorSensor != null -> {
+                sensorManager.registerListener(this, stepDetectorSensor, SensorManager.SENSOR_DELAY_NORMAL)
+            }
+            accelerometerSensor != null -> {
+                // AOSP Standard Watch fallback: wrist accelerometer gait peak detection
+                sensorManager.registerListener(this, accelerometerSensor, SensorManager.SENSOR_DELAY_GAME)
+            }
         }
     }
 
@@ -54,31 +66,68 @@ class StepTrackerManager(
         }
     }
 
-    override fun onSensorChanged(event: SensorEvent?) {
-        if (event == null || event.sensor.type != Sensor.TYPE_STEP_COUNTER) return
-
-        val rawSteps = event.values[0].toInt()
-        val lastSavedSteps = prefs.getInt("last_hardware_step_count", -1)
-
-        // First boot or hardware counter reset after device reboot
-        if (lastSavedSteps < 0 || rawSteps < lastSavedSteps) {
-            prefs.edit().putInt("last_hardware_step_count", rawSteps).apply()
-            return
+    private fun recordStepsDelta(deltaSteps: Int) {
+        if (deltaSteps <= 0) return
+        val now = System.currentTimeMillis()
+        val shouldFlush = synchronized(this) {
+            pendingSteps += deltaSteps
+            pendingSteps >= 10 || (now - lastFlushTimestampMs >= 5_000L)
         }
+        if (shouldFlush) {
+            flushPendingSteps()
+        }
+    }
 
-        val deltaSteps = (rawSteps - lastSavedSteps).coerceAtMost(50_000)
-        if (deltaSteps > 0) {
-            prefs.edit().putInt("last_hardware_step_count", rawSteps).apply()
-            val now = System.currentTimeMillis()
-            val shouldFlush = synchronized(this) {
-                pendingSteps += deltaSteps
-                pendingSteps >= 10 || (now - lastFlushTimestampMs >= 5_000L)
+    override fun onSensorChanged(event: SensorEvent?) {
+        if (event == null) return
+
+        when (event.sensor.type) {
+            Sensor.TYPE_STEP_COUNTER -> {
+                val rawSteps = event.values[0].toInt()
+                val lastSavedSteps = prefs.getInt("last_hardware_step_count", -1)
+
+                // First boot or hardware counter reset after device reboot
+                if (lastSavedSteps < 0 || rawSteps < lastSavedSteps) {
+                    prefs.edit().putInt("last_hardware_step_count", rawSteps).apply()
+                    return
+                }
+
+                val deltaSteps = (rawSteps - lastSavedSteps).coerceAtMost(50_000)
+                if (deltaSteps > 0) {
+                    prefs.edit().putInt("last_hardware_step_count", rawSteps).apply()
+                    recordStepsDelta(deltaSteps)
+                }
             }
-            if (shouldFlush) {
-                flushPendingSteps()
+            Sensor.TYPE_STEP_DETECTOR -> {
+                val steps = event.values.firstOrNull()?.toInt()?.coerceAtLeast(1) ?: 1
+                recordStepsDelta(steps)
+            }
+            Sensor.TYPE_ACCELEROMETER -> {
+                // Lightweight gait peak detector (~1.24g threshold with 330ms step cadence debounce)
+                val ax = event.values[0]
+                val ay = event.values[1]
+                val az = event.values[2]
+                val mag = kotlin.math.sqrt((ax * ax + ay * ay + az * az).toDouble()).toFloat()
+                val now = System.currentTimeMillis()
+                if (mag in 12.15f..24.5f && (now - lastAccelStepTimestampMs) >= 330L) {
+                    lastAccelStepTimestampMs = now
+                    recordStepsDelta(1)
+                }
             }
         }
     }
 
     override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {}
+
+    companion object {
+        fun getActivePedometerMode(context: Context): String {
+            val sm = context.getSystemService(Context.SENSOR_SERVICE) as? SensorManager ?: return "MANUAL_STEP_DECK"
+            return when {
+                sm.getDefaultSensor(Sensor.TYPE_STEP_COUNTER) != null -> "HW STEP COUNTER"
+                sm.getDefaultSensor(Sensor.TYPE_STEP_DETECTOR) != null -> "HW STEP DETECTOR"
+                sm.getDefaultSensor(Sensor.TYPE_ACCELEROMETER) != null -> "AOSP ACCEL GAIT"
+                else -> "MANUAL STEP DECK"
+            }
+        }
+    }
 }

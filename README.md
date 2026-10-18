@@ -25,6 +25,36 @@ Recreating the golden era of handheld virtual pets (Generations V1 through V6, P
 
 ---
 
+## 🧬 Official Visual Sprite Sheet Digivolution & DNA Jogress Guide (All 205 Species)
+
+Every single one of the **205 Digimon** in DigiWatch is naturally reachable from the **10 Starter Digi-Eggs** via canonical Bandai 1997 V-Pet, Digimon Pendulum, and Digimon Color evolution rules, or via **44 DNA Jogress / DigiXros / Mode Change** combinations.
+
+👉 **[Read the Complete Interactive Table & Guide (`DIGIVOLUTION_GUIDE.md`)](DIGIVOLUTION_GUIDE.md)**
+
+### Visual Sprite Sheet Evolution & DNA Jogress Chart
+![DigiWatch Full Sprite Sheet Evolution Guide](docs/digiwatch_evolution_guide_chart.png)
+
+### Master 205-Species Full-Color Pixel-Art Sprite Sheet
+![DigiWatch 205-Species Master Roster Sprite Sheet](docs/digiwatch_205_roster_spritesheet.png)
+
+---
+
+## ⌚ Universal Wear OS & Standalone AOSP Standard Watch Compatibility
+
+DigiWatch is engineered from the ground up to run natively on **both** Google **Wear OS 3.0–5.0+** smartwatches **and** standalone **AOSP / Full Android Standard Watches (FAWs)** running Android 9.0–15.0+ (including Kospet, Lokmat, Lemfo, Zeblaze, Rogbid, and generic round/square AOSP Android smartwatches without Google Play Services):
+
+| Subsystem | Wear OS 3.0 / 4.0 / 5.0+ Watches | Standalone AOSP / Full Android Standard Watches |
+| :--- | :--- | :--- |
+| **APK Binary (`release_bin/`)** | `wear-os-app-release.apk` | `digiwatch-aosp-standard-watch-release.apk` (or `wear-os-app-release.apk`) |
+| **Manifest Hardware Flag** | `android.hardware.type.watch` (`required="false"`) | Installs cleanly via standard Android PackageInstaller / ADB without Wear OS flags |
+| **Wearable Shared Library** | `<uses-library android:name="com.google.android.wearable" android:required="false" />` | Dynamically guarded via reflection in `AmbientController` — zero crash when absent |
+| **Pedometer & Step Engine** | **Tier 1**: `Sensor.TYPE_STEP_COUNTER` / **Tier 2**: `TYPE_STEP_DETECTOR` | **Tier 3 Fallback**: Automatic **AOSP Wrist Accelerometer Gait Peak Detector** (`1.24g` threshold, `330ms` debounce) + `+100 Steps` bench button |
+| **Display Geometry (`WatchDisplayConfig`)** | Round OLED inset padding (`isScreenRound = true`) + Ambient OPR ≤ 15% | Adaptive Square/Rectangular & High-DPI Round AOSP scaling (`screenWidthDp` auto-scale) |
+| **Hardware Buttons & Crown** | `STEM_PRIMARY`, `STEM_1..3`, Rotary Bezel / Crown (`ACTION_SCROLL`) | Standard Android `VOLUME_UP` (`[A]`), `ENTER`/`DPAD_CENTER` (`[B]`), `BACK`/`VOLUME_DOWN` (`[C]`) + on-screen `[A][B][C]` V-Pet bezel buttons |
+| **Multiplayer & Sync** | NFC Tap-to-Duel + Wearable Data Layer Phone Sync | NFC Tap-to-Duel (if hardware present), Optical/Barcode Wild Scan, and offline 16/26-char `DigiROM` / `CommCode` entry |
+
+---
+
 ## 🏛 System Architecture
 
 The project is structured into three decoupled, high-performance Gradle modules:
