@@ -10,7 +10,7 @@ Subreddits to post to:
 ---
 
 ### Post Title
-I spent the last few months building a standalone Digimon V-Pet for Wear OS and Android watches with 205 species and cross-play, and it is finally finished and open source.
+I spent the last few months building a standalone Digimon V-Pet for Wear OS and Android watches with 300 species and cross-play, and it is finally finished and open source.
 
 ---
 
@@ -24,11 +24,11 @@ I wanted something that ran completely standalone on my wrist, felt like a real 
 
 Here is a breakdown of what is packed into this:
 
-1. All 205 authentic Digimon with full color pixel art
-Every single monster from Baby I all the way up to Super Ultimate is included. I hand-mapped 205 individual 16x16 pixel matrices with canonical multi-tone color palettes and 12 distinct animation frames each (idle, walking, eating, sleeping, sick, attack charge, attack strike, refusal). It renders at raw pixel scale with zero blurry filtering on both round and square watch displays.
+1. All 300 authentic Digimon with full color pixel art
+Every single monster from Baby I all the way up to Super Ultimate is included. I hand-mapped 300 individual 16x16 pixel matrices with canonical multi-tone color palettes and 12 distinct animation frames each (idle, walking, eating, sleeping, sick, attack charge, attack strike, refusal). It renders at raw pixel scale with zero blurry filtering on both round and square watch displays.
 
-2. 100% natural evolutionary reachability and 44 DNA Jogress recipes
-Every single one of the 205 Digimon can be reached from the 10 starter Digi-Eggs using official Bandai evolution rules (care mistakes, training effort, overfeeding, battles, and win percentages). There are no dead ends. For special evolutions like Omnimon, Mastemon, Paildramon, Imperialdramon Paladin Mode, Susanoomon, and ZeedMillenniummon, there are 44 canonical DNA Jogress, DigiXros, and Mode Change fusions. I added dedicated 1-tap fusion chambers on both the watch and phone so you can easily discover recipes and trigger fusions without guessing. I also compiled a massive visual evolution guide poster and sprite sheet and included it in the repo.
+2. 100% natural evolutionary reachability and 54 DNA Jogress recipes
+Every single one of the 300 Digimon can be reached from the 10 starter Digi-Eggs using official Bandai evolution rules (care mistakes, training effort, overfeeding, battles, and win percentages). There are no dead ends. For special evolutions like Omnimon, Mastemon, Paildramon, Imperialdramon Paladin Mode, Susanoomon, GraceNovamon, Chaosmon, Jesmon GX, and ZeedMillenniummon, there are 54 canonical DNA Jogress, DigiXros, and Mode Change fusions. I added dedicated 1-tap fusion chambers on both the watch and phone so you can easily discover recipes and trigger fusions without guessing. I also compiled a massive visual evolution guide poster and sprite sheet and included it in the repo.
 
 3. True standalone simulation on your wrist
 The watch app runs its own deterministic simulation clock using UTC timestamp deltas. Your Digimon lives, digests, poops, calls for care, and sleeps on its own schedule on your wrist even if your phone is turned off or left at home. In ambient mode, the screen drops into a low-bit monochrome outline that uses under 15% on-pixel ratio to protect battery life and prevent OLED burn-in.
@@ -46,7 +46,7 @@ You can play using the touch screen with the classic 8 Bandai LCD icons, or you 
 It runs great on Wear OS 3, 4, and 5 (Galaxy Watch 4/5/6/7, Pixel Watch 1/2/3, TicWatch, etc.), but I also made sure it works on standalone full-Android AOSP watches like Kospet, Lemfo, Lokmat, and Zeblaze that don't have Google Play Services. For AOSP watches, the watch runs a local Wi-Fi and Hotspot LAN sync server that the companion phone app auto-discovers with UDP. There is also a 3-tier pedometer fallback (step counter, step detector, and raw accelerometer peak detection) and a Display Shape Override in settings so circular AOSP watches running square phone ROMs don't get their corners clipped.
 
 7. Android companion app, DigiVault, and Home Screen Widget
-The phone app includes a Cryo-Vault where you can preserve raised Digimon in zero-decay cold storage, a 205-species animated Sprite Studio, a custom 30-sector story campaign editor, JSON backup and restore, and an Android Home Screen Widget that displays your active partner's live sprite, stage, weight, hunger hearts, and strength stars.
+The phone app includes a Cryo-Vault where you can preserve raised Digimon in zero-decay cold storage, a 300-species animated Sprite Studio, a custom 30-sector story campaign editor, JSON backup and restore, and an Android Home Screen Widget that displays your active partner's live sprite, stage, weight, hunger hearts, and strength stars.
 
 The project is completely free, licensed under MIT, and contains zero ads, zero trackers, and zero microtransactions.
 

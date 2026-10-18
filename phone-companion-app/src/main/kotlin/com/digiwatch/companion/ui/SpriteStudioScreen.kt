@@ -180,7 +180,7 @@ fun SpriteStudioScreen(
     ) {
         DigiSectionHeader(
             tag = "DIGIDEX // COLOR SPRITE STUDIO",
-            title = "205-Species Encyclopedia",
+            title = "${PetSpecies.SPECIES_REGISTRY.size}-Species Encyclopedia",
             subtitle = "64x64px Digimon Color / 0nl1ne Matrix (FilterQuality.None)",
             accentColor = DigiWatchPalette.CrestGold
         )
@@ -192,7 +192,7 @@ fun SpriteStudioScreen(
             value = searchQuery,
             onValueChange = { searchQuery = it },
             modifier = Modifier.fillMaxWidth(),
-            placeholder = { Text("Search 205 Digimon by name or ID...", color = Color.Gray, fontSize = 12.sp) },
+            placeholder = { Text("Search ${PetSpecies.SPECIES_REGISTRY.size} Digimon by name or ID...", color = Color.Gray, fontSize = 12.sp) },
             leadingIcon = { Icon(Icons.Default.Search, contentDescription = "Search", tint = Color.Gray) },
             singleLine = true
         )

@@ -7,17 +7,17 @@ DigiWatch v2.0 represents a complete, exhaustive overhaul across both the standa
 
 ### Highlights & New Features
 
-#### 1. 205-Species Complete Canonical Roster
-- 205 authentic Digimon from Baby I to Super Ultimate.
-- 205 bespoke 16x16 pixel matrices with 12 distinct animation frames per monster (idle, walk, feed, chew, sleep, sick, attack charge, attack strike, refusal).
+#### 1. 300-Species Complete Canonical Roster
+- 300 authentic Digimon from Baby I to Super Ultimate.
+- 300 bespoke 16x16 pixel matrices with 12 distinct animation frames per monster (idle, walk, feed, chew, sleep, sick, attack charge, attack strike, refusal).
 - Rendered on a 64x64 matrix at `FilterQuality.None` for pristine pixel sharpness across round and square watch displays.
 - 10 Starter Digi-Eggs covering every historical generation and evolutionary lineage.
 
-#### 2. 100% Evolutionary Reachability & 44 DNA Jogress / DigiXros Recipes
-- Every single one of the 205 species can be naturally reached from the 10 starter eggs.
+#### 2. 100% Evolutionary Reachability & 54 DNA Jogress / DigiXros Recipes
+- Every single one of the 300 species can be naturally reached from the 10 starter eggs.
 - Zero orphaned species and zero dead ends.
-- 44 canonical DNA Jogress, DigiXros, and Mode Change fusions with dedicated 1-tap chambers on both watch and companion app.
-- Full visual sprite sheet evolution poster (`docs/digiwatch_evolution_guide_chart.png`) and 205-species master sprite sheet (`docs/digiwatch_205_roster_spritesheet.png`).
+- 54 canonical DNA Jogress, DigiXros, and Mode Change fusions with dedicated 1-tap chambers on both watch and companion app.
+- Full visual sprite sheet evolution poster (`docs/digiwatch_evolution_guide_chart.png`) and 300-species master sprite sheet (`docs/digiwatch_roster_spritesheet.png`).
 
 #### 3. 4-Mode Battle System with Face-to-Face Animated Arena
 - **Adventure Colosseum**: 30 sectors of physical-step exploration and turn-by-turn boss combat with environmental weather hazards.
@@ -35,7 +35,7 @@ DigiWatch v2.0 represents a complete, exhaustive overhaul across both the standa
 
 #### 5. Complete Android Companion App & Home Screen Widget
 - **DigiVault Cryo-Storage**: Zero-decay cold storage for raised Digimon with instant deployment and dual CommCode/DigiROM export.
-- **205-Species Sprite Studio**: 12-frame animation viewer with authentic Bandai LCD screen overlays.
+- **300-Species Sprite Studio**: 12-frame animation viewer with authentic Bandai LCD screen overlays.
 - **Story Campaign Architect**: 30-sector custom campaign editor with direct wireless push to watch.
 - **Android Home Screen AppWidget**: Live 64x64 pixel art sprite, stage, weight, hunger hearts, and strength stars updated in real-time.
 - **Cloud JSON Backup & Restore**: Full archive import/export.

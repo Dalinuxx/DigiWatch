@@ -608,7 +608,7 @@ fun PetDashboardScreen(
                         fontFamily = FontFamily.Monospace
                     )
                     Text(
-                        text = if (activeJogressRecipes.isNotEmpty()) "${activeJogressRecipes.size} READY" else "44 RECIPES",
+                        text = if (activeJogressRecipes.isNotEmpty()) "${activeJogressRecipes.size} READY" else "${com.digiwatch.core.fusion.JogressEngine.RECIPES.size} RECIPES",
                         fontSize = 10.sp,
                         fontWeight = FontWeight.Black,
                         color = DigiWatchPalette.CrestGold,
@@ -706,7 +706,7 @@ fun PetDashboardScreen(
                     }
                 } else {
                     Text(
-                        text = "${species.name} (${species.stage.displayName}) has not reached its Adult/Perfect/Ultimate Jogress stage yet. Evolve your partner or browse all 44 DNA Jogress & DigiXros combinations below:",
+                        text = "${species.name} (${species.stage.displayName}) has not reached its Adult/Perfect/Ultimate Jogress stage yet. Evolve your partner or browse all ${com.digiwatch.core.fusion.JogressEngine.RECIPES.size} DNA Jogress & DigiXros combinations below:",
                         fontSize = 11.sp,
                         color = Color.LightGray
                     )
@@ -720,7 +720,7 @@ fun PetDashboardScreen(
                     border = BorderStroke(1.dp, Color(0xFFCE93D8))
                 ) {
                     Text(
-                        text = if (showAllJogressCatalog) "HIDE 44-RECIPE JOGRESS / DIGIXROS MATRIX" else "⚡ BROWSE ALL 44 DNA JOGRESS, DIGIXROS & MODE CHANGE RECIPES",
+                        text = if (showAllJogressCatalog) "HIDE ${com.digiwatch.core.fusion.JogressEngine.RECIPES.size}-RECIPE JOGRESS / DIGIXROS MATRIX" else "⚡ BROWSE ALL ${com.digiwatch.core.fusion.JogressEngine.RECIPES.size} DNA JOGRESS, DIGIXROS & MODE CHANGE RECIPES",
                         fontSize = 10.sp,
                         fontWeight = FontWeight.Bold,
                         color = Color(0xFFEA80FC),

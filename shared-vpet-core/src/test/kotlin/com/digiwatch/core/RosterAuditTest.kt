@@ -33,7 +33,7 @@ class RosterAuditTest {
             assertTrue("Species ${sp.name} basePower must be > 0", sp.basePower > 0)
             assertTrue("Species ${sp.name} baselineWeight must be > 0", sp.baselineWeight > 0)
 
-            // Verify strict ID-to-stage range mapping across all 205 species
+            // Verify strict ID-to-stage range mapping across all 300 species
             when (sp.id) {
                 in 100..199 -> assertTrue("${sp.name} (${sp.id}) must be Baby", sp.stage == PetStage.BABY_I || sp.stage == PetStage.BABY_II)
                 in 200..299 -> assertEquals("${sp.name} (${sp.id}) must be Child", PetStage.CHILD, sp.stage)
