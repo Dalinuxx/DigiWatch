@@ -996,12 +996,68 @@ fun BattleHubScreen(
                     onValueChange = {
                         inputCode = it
                         validationError = null
-                        decodedOpponent = null
+                        decodedOpponent = try {
+                            CommCodeCodec.decodeAuto(it)
+                        } catch (_: Exception) {
+                            null
+                        }
                     },
                     label = { Text("Paste 26-Char Base32 or V1-XXXX-XXXX-XXXX DigiROM", fontSize = 11.sp) },
                     modifier = Modifier.fillMaxWidth(),
                     singleLine = true
                 )
+
+                val compatibleHubFusions = remember(ownMonsterId) {
+                    JogressEngine.getCompatibleRecipesFor(ownMonsterId)
+                }
+                if (compatibleHubFusions.isNotEmpty()) {
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(
+                        text = "⚡ 1-TAP JOGRESS / DIGIXROS PARTNER CODES FOR ${ownSpecies.name.uppercase()}:",
+                        fontSize = 9.5.sp,
+                        fontWeight = FontWeight.Black,
+                        color = Color(0xFFEA80FC),
+                        fontFamily = FontFamily.Monospace
+                    )
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .horizontalScroll(rememberScrollState()),
+                        horizontalArrangement = Arrangement.spacedBy(6.dp)
+                    ) {
+                        compatibleHubFusions.forEach { recipe ->
+                            val partnerId = if (recipe.primarySpeciesId == ownMonsterId) recipe.secondarySpeciesId else recipe.primarySpeciesId
+                            val partnerSp = PetSpecies.getById(partnerId)
+                            val targetSp = PetSpecies.getById(recipe.targetSpeciesId)
+                            OutlinedButton(
+                                onClick = {
+                                    val code = CommCodeCodec.encode128(
+                                        monsterId = partnerSp.id,
+                                        stage = partnerSp.stage,
+                                        attribute = partnerSp.attribute,
+                                        basePowerHp = partnerSp.basePower,
+                                        historicalVictories = 18,
+                                        trainingEffort = 4,
+                                        battleRngSeed = 0x7777
+                                    )
+                                    inputCode = CommCodeCodec.formatWithHyphens(code)
+                                    decodedOpponent = try { CommCodeCodec.decodeAuto(code) } catch (_: Exception) { null }
+                                    validationError = null
+                                },
+                                border = BorderStroke(1.dp, Color(recipe.fusionType.badgeColorHex))
+                            ) {
+                                Text(
+                                    text = "⚡ +${partnerSp.name} → ${targetSp.name} (${recipe.fusionType.displayName})",
+                                    fontSize = 9.5.sp,
+                                    color = Color(recipe.fusionType.badgeColorHex),
+                                    fontWeight = FontWeight.Bold,
+                                    fontFamily = FontFamily.Monospace
+                                )
+                            }
+                        }
+                    }
+                }
 
                 Spacer(modifier = Modifier.height(8.dp))
 
@@ -1021,6 +1077,7 @@ fun BattleHubScreen(
                                 battleRngSeed = 0xBEEF
                             )
                             inputCode = CommCodeCodec.formatWithHyphens(devimonCode)
+                            decodedOpponent = try { CommCodeCodec.decodeAuto(devimonCode) } catch (_: Exception) { null }
                         },
                         modifier = Modifier.weight(1f)
                     ) {
@@ -1039,6 +1096,7 @@ fun BattleHubScreen(
                                 battleRngSeed = 0xCAFE
                             )
                             inputCode = CommCodeCodec.formatWithHyphens(metalGaruruCode)
+                            decodedOpponent = try { CommCodeCodec.decodeAuto(metalGaruruCode) } catch (_: Exception) { null }
                         },
                         modifier = Modifier.weight(1f)
                     ) {

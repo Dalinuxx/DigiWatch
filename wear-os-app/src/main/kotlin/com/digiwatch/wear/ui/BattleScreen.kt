@@ -981,6 +981,103 @@ fun BattleScreen(
             }
         }
 
+        // DNA Jogress / DigiXros / Mode Change Quick Matrix
+        val compatibleFusions = JogressEngine.getCompatibleRecipesFor(petState.speciesId)
+        if (compatibleFusions.isNotEmpty()) {
+            item {
+                Spacer(modifier = Modifier.height(6.dp))
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = displayConfig.horizontalPadding)
+                        .background(Color(0xFF1F1630), RoundedCornerShape(8.dp))
+                        .border(0.75.dp, Color(0xFFEA80FC), RoundedCornerShape(8.dp))
+                        .padding(6.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text(
+                        text = "⚡ DNA JOGRESS / DIGIXROS (${compatibleFusions.size})",
+                        fontSize = 8.sp,
+                        fontWeight = FontWeight.Black,
+                        color = Color(0xFFEA80FC),
+                        fontFamily = FontFamily.Monospace
+                    )
+                    Spacer(modifier = Modifier.height(3.dp))
+                    compatibleFusions.forEach { recipe ->
+                        val partnerId = if (recipe.primarySpeciesId == petState.speciesId) recipe.secondarySpeciesId else recipe.primarySpeciesId
+                        val partnerSp = PetSpecies.getById(partnerId)
+                        val targetSp = PetSpecies.getById(recipe.targetSpeciesId)
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 2.dp)
+                                .background(Color(0xFF141020), RoundedCornerShape(6.dp))
+                                .padding(4.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text(
+                                    text = "+${partnerSp.name.take(8)} → ${targetSp.name.take(9)}",
+                                    fontSize = 7.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = Color.White,
+                                    fontFamily = FontFamily.Monospace
+                                )
+                                Text(
+                                    text = recipe.fusionType.displayName,
+                                    fontSize = 6.sp,
+                                    color = Color(recipe.fusionType.badgeColorHex),
+                                    fontFamily = FontFamily.Monospace
+                                )
+                            }
+                            Row(horizontalArrangement = Arrangement.spacedBy(3.dp)) {
+                                Button(
+                                    onClick = {
+                                        val code = CommCodeCodec.encode128(
+                                            monsterId = partnerSp.id,
+                                            stage = partnerSp.stage,
+                                            attribute = partnerSp.attribute,
+                                            basePowerHp = partnerSp.basePower,
+                                            historicalVictories = 15,
+                                            trainingEffort = 4,
+                                            battleRngSeed = 0x7777
+                                        )
+                                        opponentCodeInput = code
+                                        hapticManager.playStepMilestone()
+                                        battleStatusText = "Loaded ${partnerSp.name} for ${recipe.fusionType.displayName}!"
+                                    },
+                                    modifier = Modifier.height(22.dp),
+                                    colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFF37474F))
+                                ) {
+                                    Text("CODE", fontSize = 6.sp, fontWeight = FontWeight.Bold, fontFamily = FontFamily.Monospace)
+                                }
+                                Button(
+                                    onClick = {
+                                        scope.launch {
+                                            val fusedState = JogressEngine.executeFusion(
+                                                primary = petState,
+                                                secondarySpeciesId = partnerSp.id,
+                                                secondaryVictories = 15,
+                                                secondaryEffort = 4
+                                            )
+                                            repository.savePetState(fusedState)
+                                            hapticManager.playVictoryFanfare()
+                                            battleStatusText = "⚡ Awakened ${targetSp.name}!"
+                                        }
+                                    },
+                                    modifier = Modifier.height(22.dp),
+                                    colors = ButtonDefaults.buttonColors(backgroundColor = Color(recipe.fusionType.badgeColorHex))
+                                ) {
+                                    Text("⚡FUSE", fontSize = 6.sp, fontWeight = FontWeight.Black, color = Color.Black, fontFamily = FontFamily.Monospace)
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
         // Quick Challenge Bots (authentic Base32 codes)
         item {
             Spacer(modifier = Modifier.height(6.dp))

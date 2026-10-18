@@ -192,7 +192,128 @@ fun DigiVaultScreen(
             }
         }
 
-        Spacer(modifier = Modifier.height(12.dp))
+        Spacer(modifier = Modifier.height(10.dp))
+
+        // Active Partner DNA Jogress & DigiXros Quick-Fusion / Partner Spawner Banner
+        val activePet = activePetForDeposit ?: PetState(speciesId = 201)
+        val activeSp = remember(activePet.speciesId) { PetSpecies.getById(activePet.speciesId) }
+        val vaultCompatibleRecipes = remember(activeSp.id) { JogressEngine.getCompatibleRecipesFor(activeSp.id) }
+
+        if (vaultCompatibleRecipes.isNotEmpty()) {
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                colors = CardDefaults.cardColors(containerColor = Color(0xFF1A1426)),
+                shape = RoundedCornerShape(12.dp),
+                border = BorderStroke(1.dp, Color(0xFFAB47BC))
+            ) {
+                Column(modifier = Modifier.padding(10.dp)) {
+                    Text(
+                        text = "⚡ ACTIVE ${activeSp.name.uppercase()} — DNA JOGRESS & DIGIXROS LAB (${vaultCompatibleRecipes.size})",
+                        fontSize = 10.sp,
+                        fontWeight = FontWeight.Black,
+                        color = Color(0xFFEA80FC),
+                        fontFamily = FontFamily.Monospace
+                    )
+                    Spacer(modifier = Modifier.height(6.dp))
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .horizontalScroll(rememberScrollState()),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        vaultCompatibleRecipes.forEach { recipe ->
+                            val partnerId = if (recipe.primarySpeciesId == activeSp.id) recipe.secondarySpeciesId else recipe.primarySpeciesId
+                            val partnerSp = PetSpecies.getById(partnerId)
+                            val targetSp = PetSpecies.getById(recipe.targetSpeciesId)
+                            Row(
+                                modifier = Modifier
+                                    .background(Color(0xFF120E1C), RoundedCornerShape(8.dp))
+                                    .border(0.75.dp, Color(recipe.fusionType.badgeColorHex), RoundedCornerShape(8.dp))
+                                    .padding(8.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(6.dp)
+                            ) {
+                                SpriteCanvasRenderer(speciesId = partnerSp.id, frame = SpriteFrame.IDLE_A, size = 28.dp)
+                                Text("→", fontSize = 11.sp, color = DigiWatchPalette.CrestGold, fontWeight = FontWeight.Bold)
+                                SpriteCanvasRenderer(speciesId = targetSp.id, frame = SpriteFrame.IDLE_A, size = 32.dp)
+                                Column {
+                                    Text(
+                                        text = "+${partnerSp.name} → ${targetSp.name}",
+                                        fontSize = 10.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        color = Color.White
+                                    )
+                                    Text(
+                                        text = recipe.fusionType.displayName,
+                                        fontSize = 8.5.sp,
+                                        color = Color(recipe.fusionType.badgeColorHex),
+                                        fontFamily = FontFamily.Monospace
+                                    )
+                                    Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                                        OutlinedButton(
+                                            onClick = {
+                                                scope.launch {
+                                                    db.phoneDao().insertVaultPet(
+                                                        StoredDigimonEntity(
+                                                            speciesId = partnerSp.id,
+                                                            speciesName = partnerSp.name,
+                                                            customNickname = "${recipe.fusionType.displayName} Partner",
+                                                            stageName = partnerSp.stage.displayName,
+                                                            attributeName = partnerSp.attribute.displayName,
+                                                            currentHp = partnerSp.baseHp,
+                                                            maxHp = partnerSp.baseHp,
+                                                            hunger = 4,
+                                                            strength = 4,
+                                                            weight = partnerSp.baselineWeight,
+                                                            ageSeconds = 259200L,
+                                                            careMistakes = 0,
+                                                            effort = 4,
+                                                            overfeedCount = 0,
+                                                            totalBattles = 20,
+                                                            victories = 16
+                                                        )
+                                                    )
+                                                    actionStatusMessage = "Added ${partnerSp.name} to DigiVault — tap 'DNA / XROS FUSE' on its card below!"
+                                                }
+                                            }
+                                        ) {
+                                            Text("+VAULT", fontSize = 8.5.sp, fontFamily = FontFamily.Monospace)
+                                        }
+                                        Button(
+                                            onClick = {
+                                                val tempEntity = StoredDigimonEntity(
+                                                    speciesId = partnerSp.id,
+                                                    speciesName = partnerSp.name,
+                                                    customNickname = partnerSp.name,
+                                                    stageName = partnerSp.stage.displayName,
+                                                    attributeName = partnerSp.attribute.displayName,
+                                                    currentHp = partnerSp.baseHp,
+                                                    maxHp = partnerSp.baseHp,
+                                                    hunger = 4,
+                                                    strength = 4,
+                                                    weight = partnerSp.baselineWeight,
+                                                    ageSeconds = 259200L,
+                                                    careMistakes = 0,
+                                                    effort = 4,
+                                                    overfeedCount = 0,
+                                                    totalBattles = 20,
+                                                    victories = 16
+                                                )
+                                                pendingFusionPair = tempEntity to recipe
+                                            },
+                                            colors = ButtonDefaults.buttonColors(containerColor = Color(recipe.fusionType.badgeColorHex))
+                                        ) {
+                                            Text("⚡ FUSE", fontSize = 8.5.sp, fontWeight = FontWeight.Black, color = Color.Black, fontFamily = FontFamily.Monospace)
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            Spacer(modifier = Modifier.height(10.dp))
+        }
 
         // Stored Pets List
         if (filteredPets.isEmpty()) {

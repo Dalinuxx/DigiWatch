@@ -18,7 +18,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
+import kotlinx.coroutines.launch
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -51,6 +55,8 @@ fun StatusScreen(
     val species = remember(petState.speciesId) { PetSpecies.getById(petState.speciesId) }
     val nextEvo = remember(petState) { EvolutionEngine.evaluateEvolution(petState) }
     val listState = rememberScalingLazyListState()
+    val scope = rememberCoroutineScope()
+    var fusionFeedback by remember { mutableStateOf<String?>(null) }
 
     LaunchedEffect(Unit) {
         HardwareInputManager.buttonEvents.collect { button ->
@@ -272,18 +278,119 @@ fun StatusScreen(
                     }
                 }
                 if (jogressRecipes.isNotEmpty()) {
-                    Spacer(modifier = Modifier.height(2.dp))
-                    jogressRecipes.take(2).forEach { recipe ->
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        text = "⚡ DNA JOGRESS / DIGIXROS READY (${jogressRecipes.size})",
+                        fontSize = 7.5.sp,
+                        fontWeight = FontWeight.Black,
+                        color = Color(0xFFEA80FC),
+                        fontFamily = FontFamily.Monospace
+                    )
+                    fusionFeedback?.let { msg ->
+                        Text(
+                            text = msg,
+                            fontSize = 7.5.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color(0xFF00E676),
+                            fontFamily = FontFamily.Monospace
+                        )
+                    }
+                    jogressRecipes.forEach { recipe ->
                         val partnerId = if (recipe.primarySpeciesId == species.id) recipe.secondarySpeciesId else recipe.primarySpeciesId
                         val partner = PetSpecies.getById(partnerId)
                         val target = PetSpecies.getById(recipe.targetSpeciesId)
+                        val isSelfModeChange = recipe.primarySpeciesId == recipe.secondarySpeciesId
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 2.dp)
+                                .background(Color(0xFF1F1630), RoundedCornerShape(6.dp))
+                                .border(0.5.dp, Color(recipe.fusionType.badgeColorHex), RoundedCornerShape(6.dp))
+                                .padding(4.dp)
+                        ) {
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.SpaceBetween
+                            ) {
+                                Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.weight(1f)) {
+                                    SpriteCanvasRenderer(
+                                        speciesId = partner.id,
+                                        isAmbient = false,
+                                        overrideFrame = SpriteFrame.IDLE_A,
+                                        size = 18.dp
+                                    )
+                                    Text(" → ", fontSize = 7.sp, color = Color(0xFFFFD54F), fontWeight = FontWeight.Black)
+                                    SpriteCanvasRenderer(
+                                        speciesId = target.id,
+                                        isAmbient = false,
+                                        overrideFrame = SpriteFrame.IDLE_A,
+                                        size = 20.dp
+                                    )
+                                    Spacer(modifier = Modifier.width(3.dp))
+                                    Column {
+                                        Text(
+                                            text = if (isSelfModeChange) "MODE: ${target.name.take(10)}" else "+${partner.name.take(7)} → ${target.name.take(8)}",
+                                            fontSize = 7.sp,
+                                            fontWeight = FontWeight.Bold,
+                                            color = Color.White,
+                                            fontFamily = FontFamily.Monospace
+                                        )
+                                        Text(
+                                            text = recipe.fusionType.displayName,
+                                            fontSize = 6.sp,
+                                            color = Color(recipe.fusionType.badgeColorHex),
+                                            fontFamily = FontFamily.Monospace
+                                        )
+                                    }
+                                }
+                                Button(
+                                    onClick = {
+                                        scope.launch {
+                                            val fused = com.digiwatch.core.fusion.JogressEngine.executeFusion(
+                                                primary = petState,
+                                                secondarySpeciesId = partner.id,
+                                                secondaryVictories = 15,
+                                                secondaryEffort = 4
+                                            )
+                                            repository.savePetState(fused)
+                                            fusionFeedback = "⚡ Awakened ${target.name}!"
+                                        }
+                                    },
+                                    modifier = Modifier.height(22.dp),
+                                    colors = ButtonDefaults.buttonColors(backgroundColor = Color(recipe.fusionType.badgeColorHex))
+                                ) {
+                                    Text("⚡ FUSE", fontSize = 6.5.sp, fontWeight = FontWeight.Black, color = Color.Black, fontFamily = FontFamily.Monospace)
+                                }
+                            }
+                        }
+                    }
+                } else {
+                    // Show upcoming Jogress/DigiXros in immediate evolution branch
+                    val nextBranchJogress = remember(species.id) {
+                        species.evolutionRules.flatMap { r ->
+                            com.digiwatch.core.fusion.JogressEngine.getCompatibleRecipesFor(r.targetSpeciesId)
+                                .map { recipe -> PetSpecies.getById(r.targetSpeciesId) to recipe }
+                        }.take(2)
+                    }
+                    if (nextBranchJogress.isNotEmpty()) {
+                        Spacer(modifier = Modifier.height(3.dp))
                         Text(
-                            text = "⚡DNA: +${partner.name.take(7)} → ${target.name.take(9)}",
-                            fontSize = 7.sp,
+                            text = "⚡ NEXT STAGE JOGRESS / XROS UNLOCKS:",
+                            fontSize = 6.5.sp,
                             fontWeight = FontWeight.Bold,
-                            color = Color(0xFFFFD54F),
+                            color = Color(0xFFEA80FC),
                             fontFamily = FontFamily.Monospace
                         )
+                        nextBranchJogress.forEach { (branchSp, recipe) ->
+                            val targetSp = PetSpecies.getById(recipe.targetSpeciesId)
+                            Text(
+                                text = "• Evolve to ${branchSp.name.take(8)} → ${targetSp.name.take(10)} (${recipe.fusionType.displayName.take(8)})",
+                                fontSize = 6.sp,
+                                color = Color(0xFFCE93D8),
+                                fontFamily = FontFamily.Monospace
+                            )
+                        }
                     }
                 }
             }

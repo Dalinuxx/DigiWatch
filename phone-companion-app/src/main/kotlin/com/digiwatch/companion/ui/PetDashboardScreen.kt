@@ -578,6 +578,226 @@ fun PetDashboardScreen(
 
         Spacer(modifier = Modifier.height(16.dp))
 
+        // DNA Jogress, DigiXros & Mode Change Chamber Card
+        val activeJogressRecipes = remember(species.id) {
+            com.digiwatch.core.fusion.JogressEngine.getCompatibleRecipesFor(species.id)
+        }
+        var showAllJogressCatalog by remember { mutableStateOf(false) }
+
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            colors = CardDefaults.cardColors(containerColor = DigiWatchPalette.CardSurface),
+            shape = RoundedCornerShape(16.dp),
+            border = BorderStroke(1.dp, Color(0xFFAB47BC))
+        ) {
+            Column(modifier = Modifier.padding(16.dp)) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = "▸ ⚡ DNA JOGRESS, DIGIXROS & MODE CHANGE CHAMBER",
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color(0xFFEA80FC),
+                        fontFamily = FontFamily.Monospace
+                    )
+                    Text(
+                        text = if (activeJogressRecipes.isNotEmpty()) "${activeJogressRecipes.size} READY" else "44 RECIPES",
+                        fontSize = 10.sp,
+                        fontWeight = FontWeight.Black,
+                        color = DigiWatchPalette.CrestGold,
+                        fontFamily = FontFamily.Monospace
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(6.dp))
+
+                if (activeJogressRecipes.isNotEmpty()) {
+                    Text(
+                        text = "Your active ${species.name} is compatible with ${activeJogressRecipes.size} canonical DNA Jogress / DigiXros / Mode Change awakening(s):",
+                        fontSize = 11.sp,
+                        color = Color.LightGray
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    activeJogressRecipes.forEach { recipe ->
+                        val partnerId = if (recipe.primarySpeciesId == species.id) recipe.secondarySpeciesId else recipe.primarySpeciesId
+                        val partnerSp = PetSpecies.getById(partnerId)
+                        val targetSp = PetSpecies.getById(recipe.targetSpeciesId)
+                        val isSelfMode = recipe.primarySpeciesId == recipe.secondarySpeciesId
+
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 4.dp)
+                                .background(Color(0xFF1A1426), RoundedCornerShape(12.dp))
+                                .border(1.dp, Color(recipe.fusionType.badgeColorHex), RoundedCornerShape(12.dp))
+                                .padding(10.dp)
+                        ) {
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.SpaceBetween
+                            ) {
+                                Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.weight(1f)) {
+                                    SpriteCanvasRenderer(speciesId = species.id, frame = SpriteFrame.IDLE_A, size = 36.dp)
+                                    Text(if (isSelfMode) " ══▶ " else " + ", fontSize = 13.sp, fontWeight = FontWeight.Black, color = DigiWatchPalette.CrestGold)
+                                    if (!isSelfMode) {
+                                        SpriteCanvasRenderer(speciesId = partnerSp.id, frame = SpriteFrame.IDLE_A, size = 36.dp)
+                                        Text(" ══▶ ", fontSize = 13.sp, fontWeight = FontWeight.Black, color = Color(0xFF00E5FF))
+                                    }
+                                    SpriteCanvasRenderer(speciesId = targetSp.id, frame = SpriteFrame.IDLE_A, size = 42.dp)
+                                    Spacer(modifier = Modifier.width(8.dp))
+                                    Column {
+                                        Text(
+                                            text = "${targetSp.name} (#${targetSp.id})",
+                                            fontSize = 12.sp,
+                                            fontWeight = FontWeight.Black,
+                                            color = Color(0xFF69F0AE)
+                                        )
+                                        Text(
+                                            text = if (isSelfMode) "${recipe.fusionType.displayName} Awakening" else "+ #${partnerSp.id} ${partnerSp.name} (${recipe.fusionType.displayName})",
+                                            fontSize = 10.sp,
+                                            color = Color(recipe.fusionType.badgeColorHex),
+                                            fontFamily = FontFamily.Monospace
+                                        )
+                                        Text(
+                                            text = recipe.description,
+                                            fontSize = 9.5.sp,
+                                            color = Color.LightGray
+                                        )
+                                    }
+                                }
+                            }
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Button(
+                                onClick = {
+                                    scope.launch {
+                                        val fused = com.digiwatch.core.fusion.JogressEngine.executeFusion(
+                                            primary = petState,
+                                            secondarySpeciesId = partnerSp.id,
+                                            secondaryVictories = 15,
+                                            secondaryEffort = 4
+                                        )
+                                        petState = fused
+                                        persistPhoneSnapshot(fused)
+                                        val beamed = wearableManager.sendPetStateToWatch(fused)
+                                        syncStatus = "⚡ ${recipe.fusionType.displayName}: Awakened ${targetSp.name}! (${if (beamed) "Synced to Watch" else "Saved on Phone"})"
+                                    }
+                                },
+                                modifier = Modifier.fillMaxWidth(),
+                                colors = ButtonDefaults.buttonColors(containerColor = Color(recipe.fusionType.badgeColorHex))
+                            ) {
+                                Text(
+                                    text = "⚡ AWAKEN ${targetSp.name.uppercase()} (${recipe.fusionType.displayName.uppercase()}) & BEAM TO WATCH",
+                                    fontSize = 10.sp,
+                                    fontWeight = FontWeight.Black,
+                                    color = Color.Black,
+                                    fontFamily = FontFamily.Monospace
+                                )
+                            }
+                        }
+                    }
+                } else {
+                    Text(
+                        text = "${species.name} (${species.stage.displayName}) has not reached its Adult/Perfect/Ultimate Jogress stage yet. Evolve your partner or browse all 44 DNA Jogress & DigiXros combinations below:",
+                        fontSize = 11.sp,
+                        color = Color.LightGray
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                OutlinedButton(
+                    onClick = { showAllJogressCatalog = !showAllJogressCatalog },
+                    modifier = Modifier.fillMaxWidth(),
+                    border = BorderStroke(1.dp, Color(0xFFCE93D8))
+                ) {
+                    Text(
+                        text = if (showAllJogressCatalog) "HIDE 44-RECIPE JOGRESS / DIGIXROS MATRIX" else "⚡ BROWSE ALL 44 DNA JOGRESS, DIGIXROS & MODE CHANGE RECIPES",
+                        fontSize = 10.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color(0xFFEA80FC),
+                        fontFamily = FontFamily.Monospace
+                    )
+                }
+
+                if (showAllJogressCatalog) {
+                    Spacer(modifier = Modifier.height(8.dp))
+                    com.digiwatch.core.fusion.JogressEngine.RECIPES.forEach { recipe ->
+                        val spA = PetSpecies.getById(recipe.primarySpeciesId)
+                        val spB = PetSpecies.getById(recipe.secondarySpeciesId)
+                        val targetSp = PetSpecies.getById(recipe.targetSpeciesId)
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 3.dp)
+                                .background(DigiWatchPalette.CardInner, RoundedCornerShape(8.dp))
+                                .border(0.75.dp, Color(recipe.fusionType.badgeColorHex).copy(alpha = 0.6f), RoundedCornerShape(8.dp))
+                                .padding(8.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.weight(1f)) {
+                                SpriteCanvasRenderer(speciesId = spA.id, frame = SpriteFrame.IDLE_A, size = 28.dp)
+                                Text("+", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = DigiWatchPalette.CrestGold, modifier = Modifier.padding(horizontal = 2.dp))
+                                SpriteCanvasRenderer(speciesId = spB.id, frame = SpriteFrame.IDLE_A, size = 28.dp)
+                                Text("→", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = Color(0xFF00E5FF), modifier = Modifier.padding(horizontal = 3.dp))
+                                SpriteCanvasRenderer(speciesId = targetSp.id, frame = SpriteFrame.IDLE_A, size = 32.dp)
+                                Spacer(modifier = Modifier.width(6.dp))
+                                Column {
+                                    Text(
+                                        text = "${spA.name} + ${spB.name} → ${targetSp.name}",
+                                        fontSize = 10.5.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        color = Color.White
+                                    )
+                                    Text(
+                                        text = "${recipe.fusionType.displayName} • ${recipe.description}",
+                                        fontSize = 9.sp,
+                                        color = Color(recipe.fusionType.badgeColorHex),
+                                        fontFamily = FontFamily.Monospace
+                                    )
+                                }
+                            }
+                            Button(
+                                onClick = {
+                                    scope.launch {
+                                        val baseState = PetState(
+                                            speciesId = spA.id,
+                                            currentHp = spA.baseHp,
+                                            maxHp = spA.baseHp,
+                                            weight = spA.baselineWeight,
+                                            victories = 20,
+                                            totalBattles = 25,
+                                            effort = 4
+                                        )
+                                        val fused = com.digiwatch.core.fusion.JogressEngine.executeFusion(
+                                            primary = baseState,
+                                            secondarySpeciesId = spB.id,
+                                            secondaryVictories = 20,
+                                            secondaryEffort = 4
+                                        )
+                                        petState = fused
+                                        persistPhoneSnapshot(fused)
+                                        val beamed = wearableManager.sendPetStateToWatch(fused)
+                                        syncStatus = "⚡ Awakened ${targetSp.name} (${recipe.fusionType.displayName})! (${if (beamed) "Synced to Watch" else "Phone Local"})"
+                                    }
+                                },
+                                colors = ButtonDefaults.buttonColors(containerColor = Color(recipe.fusionType.badgeColorHex))
+                            ) {
+                                Text("⚡ FUSE", fontSize = 9.5.sp, fontWeight = FontWeight.Black, color = Color.Black, fontFamily = FontFamily.Monospace)
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
         // Watch Settings & Background Customizer Card
         Card(
             modifier = Modifier.fillMaxWidth(),
