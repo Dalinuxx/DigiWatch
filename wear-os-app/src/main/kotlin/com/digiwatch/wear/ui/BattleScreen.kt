@@ -149,6 +149,12 @@ fun BattleScreen(
         }
     }
 
+    androidx.compose.runtime.DisposableEffect(Unit) {
+        onDispose {
+            HardwareInputManager.activeQteListener = null
+        }
+    }
+
     LaunchedEffect(Unit) {
         HardwareInputManager.buttonEvents.collect { button ->
             when (button) {

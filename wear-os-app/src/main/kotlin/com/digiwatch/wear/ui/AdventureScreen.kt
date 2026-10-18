@@ -83,6 +83,12 @@ fun AdventureScreen(
     var qteActive by remember { mutableStateOf(false) }
     var criticalBoostActive by remember { mutableStateOf(false) }
 
+    androidx.compose.runtime.DisposableEffect(Unit) {
+        onDispose {
+            HardwareInputManager.activeQteListener = null
+        }
+    }
+
     val actLabel = when {
         currentNodeIndex < 10 -> "ACT I • FILE ISLAND"
         currentNodeIndex < 20 -> "ACT II • SERVER CONT."

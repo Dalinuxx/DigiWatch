@@ -175,7 +175,7 @@ fun BattleHubScreen(
                 } else {
                     inputCode = scannedCode
                     validationError = null
-                    decodedOpponent = null
+                    decodedOpponent = try { CommCodeCodec.decodeAuto(scannedCode) } catch (_: Exception) { null }
                     beamStatus = "📶 Opponent scanned via NFC Tap-to-Duel!"
                 }
                 NfcBattleBridge.incomingCodeFlow.value = null
