@@ -61,6 +61,12 @@ class MainActivity : ComponentActivity() {
         hapticManager.buzzerManager = buzzerManager
         stepTracker = StepTrackerManager(this, repository, hapticManager, activityScope)
 
+        // Start AOSP Wi-Fi / Hotspot LAN Sync Bridge & UDP Discovery Responder
+        com.digiwatch.wear.datalayer.AospLanSyncServer.start(applicationContext)
+
+        // Request ACTIVITY_RECOGNITION / POST_NOTIFICATIONS on AOSP & Android 10+ watches
+        requestWatchRuntimePermissionsIfNeeded()
+
         setContent {
             AmbientController(
                 activity = this,
@@ -74,6 +80,28 @@ class MainActivity : ComponentActivity() {
                 }
             ) {
                 WearNavigationHost(repository, hapticManager, buzzerManager)
+            }
+        }
+    }
+
+    private fun requestWatchRuntimePermissionsIfNeeded() {
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
+            val perms = mutableListOf<String>()
+            if (checkSelfPermission(android.Manifest.permission.ACTIVITY_RECOGNITION) !=
+                android.content.pm.PackageManager.PERMISSION_GRANTED
+            ) {
+                perms.add(android.Manifest.permission.ACTIVITY_RECOGNITION)
+            }
+            if (android.os.Build.VERSION.SDK_INT >= 33 &&
+                checkSelfPermission(android.Manifest.permission.POST_NOTIFICATIONS) !=
+                android.content.pm.PackageManager.PERMISSION_GRANTED
+            ) {
+                perms.add(android.Manifest.permission.POST_NOTIFICATIONS)
+            }
+            if (perms.isNotEmpty()) {
+                try {
+                    requestPermissions(perms.toTypedArray(), 1001)
+                } catch (_: Exception) {}
             }
         }
     }
@@ -110,6 +138,7 @@ class MainActivity : ComponentActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
+        com.digiwatch.wear.datalayer.AospLanSyncServer.stop()
         buzzerManager.release()
         activityScope.coroutineContext[kotlinx.coroutines.Job]?.cancel()
     }
@@ -119,15 +148,21 @@ class MainActivity : ComponentActivity() {
             KeyEvent.KEYCODE_STEM_1,
             KeyEvent.KEYCODE_STEM_PRIMARY,
             KeyEvent.KEYCODE_DPAD_UP,
-            KeyEvent.KEYCODE_VOLUME_UP -> VPetButton.A
+            KeyEvent.KEYCODE_VOLUME_UP,
+            KeyEvent.KEYCODE_PAGE_UP,
+            KeyEvent.KEYCODE_F1 -> VPetButton.A
 
             KeyEvent.KEYCODE_STEM_2,
             KeyEvent.KEYCODE_ENTER,
             KeyEvent.KEYCODE_DPAD_CENTER,
-            KeyEvent.KEYCODE_SPACE -> VPetButton.B
+            KeyEvent.KEYCODE_SPACE,
+            KeyEvent.KEYCODE_CAMERA,
+            KeyEvent.KEYCODE_MENU,
+            KeyEvent.KEYCODE_F2 -> VPetButton.B
 
             KeyEvent.KEYCODE_STEM_3,
-            KeyEvent.KEYCODE_ESCAPE -> VPetButton.C
+            KeyEvent.KEYCODE_ESCAPE,
+            KeyEvent.KEYCODE_SYSRQ -> VPetButton.C
 
             KeyEvent.KEYCODE_BACK -> {
                 // If consumed by active QTE or menu cancel, intercept back
@@ -139,7 +174,8 @@ class MainActivity : ComponentActivity() {
             }
 
             KeyEvent.KEYCODE_DPAD_DOWN,
-            KeyEvent.KEYCODE_VOLUME_DOWN -> VPetButton.PREV
+            KeyEvent.KEYCODE_VOLUME_DOWN,
+            KeyEvent.KEYCODE_PAGE_DOWN -> VPetButton.PREV
 
             else -> null
         }
@@ -180,6 +216,12 @@ fun WearNavigationHost(
 ) {
     val ambientState = LocalAmbientState.current
     var currentScreen by remember { mutableStateOf(WearScreen.MAIN) }
+
+    // Intercept system back gesture / back button on AOSP & Wear OS watches when on a sub-screen
+    androidx.activity.compose.BackHandler(enabled = currentScreen != WearScreen.MAIN) {
+        buzzerManager.playButtonBeep()
+        currentScreen = WearScreen.MAIN
+    }
 
     LaunchedEffect(Unit) {
         repository.vibrationFlow.collect { enabled ->

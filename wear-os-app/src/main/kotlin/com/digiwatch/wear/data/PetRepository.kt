@@ -73,6 +73,11 @@ class PetRepository private constructor(context: Context) {
     )
     val nfcBridgeModeFlow: StateFlow<String> = _nfcBridgeModeFlow.asStateFlow()
 
+    private val _displayShapeOverrideFlow = MutableStateFlow(
+        prefs.getString("display_shape_override", "AUTO") ?: "AUTO"
+    )
+    val displayShapeOverrideFlow: StateFlow<String> = _displayShapeOverrideFlow.asStateFlow()
+
     private val _beamedCommCodeFlow = MutableStateFlow<String?>(null)
     val beamedCommCodeFlow: StateFlow<String?> = _beamedCommCodeFlow.asStateFlow()
 
@@ -114,13 +119,19 @@ class PetRepository private constructor(context: Context) {
         _nfcBridgeModeFlow.value = mode
     }
 
+    fun setDisplayShapeOverride(mode: String) {
+        prefs.edit().putString("display_shape_override", mode).apply()
+        _displayShapeOverrideFlow.value = mode
+    }
+
     fun getSettingsMap(): Map<String, String> = mapOf(
         "theme" to _themeFlow.value.id,
         "vibration" to _vibrationFlow.value.toString(),
         "vpet_3button_mode" to _threeButtonModeFlow.value.toString(),
         "pendulum_shake_mode" to _pendulumShakeModeFlow.value.toString(),
         "sound_enabled" to _soundEnabledFlow.value.toString(),
-        "nfc_bridge_mode" to _nfcBridgeModeFlow.value
+        "nfc_bridge_mode" to _nfcBridgeModeFlow.value,
+        "display_shape_override" to _displayShapeOverrideFlow.value
     )
 
     fun setBeamedCommCode(code: String?) {

@@ -70,6 +70,9 @@ class WearDataSyncService : WearableListenerService() {
                         map["nfc_bridge_mode"]?.let { nfcMode ->
                             repo.setNfcBridgeMode(nfcMode)
                         }
+                        map["display_shape_override"]?.let { shapeMode ->
+                            repo.setDisplayShapeOverride(shapeMode)
+                        }
                     } catch (_: Exception) {}
                 }
             }

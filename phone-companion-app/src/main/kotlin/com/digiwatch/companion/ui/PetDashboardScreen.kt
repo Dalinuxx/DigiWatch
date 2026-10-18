@@ -86,6 +86,8 @@ fun PetDashboardScreen(
     var threeButtonMode by remember { mutableStateOf(true) }
     var pendulumShakeMode by remember { mutableStateOf(false) }
     var nfcBridgeMode by remember { mutableStateOf("NFC_DUEL") }
+    var displayShapeOverride by remember { mutableStateOf("AUTO") }
+    var aospWatchIp by remember { mutableStateOf(wearableManager.getConfiguredAospWatchIp()) }
 
     val scope = rememberCoroutineScope()
     val species = remember(petState.speciesId) { PetSpecies.getById(petState.speciesId) }
@@ -142,7 +144,9 @@ fun PetDashboardScreen(
             watchSettings["pendulum_shake_mode"]?.let { pendulumShakeMode = it.toBoolean() }
             watchSettings["sound_enabled"]?.let { soundEnabled = it.toBoolean() }
             watchSettings["nfc_bridge_mode"]?.let { nfcBridgeMode = it }
+            watchSettings["display_shape_override"]?.let { displayShapeOverride = it }
         }
+        aospWatchIp = wearableManager.getConfiguredAospWatchIp()
     }
 
     // Sprite animation ticker
@@ -974,6 +978,128 @@ fun PetDashboardScreen(
                     }
                 }
 
+                Spacer(modifier = Modifier.height(10.dp))
+
+                // Watch Display Shape Override (for Round AOSP Watches reporting Square ROMs)
+                Text(
+                    text = "Watch Display Shape Override (Wear OS & AOSP):",
+                    fontSize = 11.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = DigiWatchPalette.CrestGold,
+                    fontFamily = FontFamily.Monospace
+                )
+                Spacer(modifier = Modifier.height(4.dp))
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(6.dp)
+                ) {
+                    val shapeOptions = listOf(
+                        "AUTO" to "⚙ Auto-Detect",
+                        "ROUND" to "⭕ Round Bezel",
+                        "SQUARE" to "⬜ Square / Rect"
+                    )
+                    shapeOptions.forEach { (shapeId, label) ->
+                        val active = displayShapeOverride == shapeId
+                        Box(
+                            modifier = Modifier
+                                .weight(1f)
+                                .background(
+                                    if (active) Color(0xFF3949AB) else DigiWatchPalette.CardInner,
+                                    RoundedCornerShape(8.dp)
+                                )
+                                .border(
+                                    1.dp,
+                                    if (active) Color(0xFF82B1FF) else Color(0xFF263238),
+                                    RoundedCornerShape(8.dp)
+                                )
+                                .clickable { displayShapeOverride = shapeId }
+                                .padding(vertical = 8.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                text = label,
+                                fontSize = 9.5.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = if (active) Color.White else Color.LightGray,
+                                fontFamily = FontFamily.Monospace
+                            )
+                        }
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                // AOSP & Standard Android Watch Wi-Fi / Hotspot LAN Bridge
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(Color(0xFF141E2B), RoundedCornerShape(10.dp))
+                        .border(1.dp, Color(0xFF00B0FF), RoundedCornerShape(10.dp))
+                        .padding(10.dp)
+                ) {
+                    Text(
+                        text = "⌚ AOSP / ANDROID WATCH WI-FI & HOTSPOT BRIDGE",
+                        fontSize = 10.sp,
+                        fontWeight = FontWeight.Black,
+                        color = Color(0xFF80D8FF),
+                        fontFamily = FontFamily.Monospace
+                    )
+                    Text(
+                        text = "Pairs standalone AOSP Android watches (Kospet, Zeblaze, Lokmat, Lemfo, etc.) without Google Wear OS services over local Wi-Fi or Phone Hotspot (TCP 45820 / UDP 45821).",
+                        fontSize = 9.5.sp,
+                        color = Color.LightGray
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(6.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        androidx.compose.material3.OutlinedTextField(
+                            value = aospWatchIp,
+                            onValueChange = {
+                                aospWatchIp = it
+                                wearableManager.setConfiguredAospWatchIp(it)
+                            },
+                            label = { Text("AOSP Watch IP (optional — auto-discovers if blank)", fontSize = 9.5.sp) },
+                            singleLine = true,
+                            modifier = Modifier.weight(1f)
+                        )
+                        Button(
+                            onClick = {
+                                scope.launch {
+                                    syncStatus = "Scanning Wi-Fi / Hotspot for AOSP Watch (UDP 45821)..."
+                                    val foundIp = wearableManager.discoverAospWatchOnLan(800)
+                                    if (foundIp != null) {
+                                        aospWatchIp = foundIp
+                                        val state = wearableManager.requestPetStateFromWatch()
+                                        if (state != null) {
+                                            petState = state
+                                            persistPhoneSnapshot(state)
+                                        }
+                                        syncStatus = "✅ Linked to AOSP Watch at $foundIp:45820!"
+                                    } else if (aospWatchIp.isNotBlank()) {
+                                        wearableManager.setConfiguredAospWatchIp(aospWatchIp)
+                                        val state = wearableManager.requestPetStateFromWatch()
+                                        if (state != null) {
+                                            petState = state
+                                            persistPhoneSnapshot(state)
+                                            syncStatus = "✅ Linked to AOSP Watch at $aospWatchIp:45820!"
+                                        } else {
+                                            syncStatus = "Saved IP $aospWatchIp (ensure Watch app is open on same Wi-Fi/Hotspot)"
+                                        }
+                                    } else {
+                                        syncStatus = "No AOSP Watch auto-discovered; check Watch Settings -> AOSP LAN BRIDGE IP"
+                                    }
+                                }
+                            },
+                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF0277BD))
+                        ) {
+                            Text("🔍 LINK AOSP", fontSize = 9.5.sp, fontWeight = FontWeight.Black, fontFamily = FontFamily.Monospace)
+                        }
+                    }
+                }
+
                 Spacer(modifier = Modifier.height(12.dp))
 
                 // Apply Settings to Smartwatch Button
@@ -986,7 +1112,8 @@ fun PetDashboardScreen(
                                 threeButtonMode = threeButtonMode,
                                 pendulumShakeMode = pendulumShakeMode,
                                 soundEnabled = soundEnabled,
-                                nfcBridgeMode = nfcBridgeMode
+                                nfcBridgeMode = nfcBridgeMode,
+                                displayShapeOverride = displayShapeOverride
                             )
                             syncStatus = if (ok) "All Settings applied to Smartwatch!" else "Saved locally (Smartwatch offline)"
                         }

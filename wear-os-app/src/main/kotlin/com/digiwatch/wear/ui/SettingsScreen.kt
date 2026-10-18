@@ -69,6 +69,7 @@ fun SettingsScreen(
     val isPendulumShakeMode by repository.pendulumShakeModeFlow.collectAsState(initial = false)
     val isSoundEnabled by repository.soundEnabledFlow.collectAsState(initial = false)
     val nfcBridgeMode by repository.nfcBridgeModeFlow.collectAsState(initial = "NFC_DUEL")
+    val displayShapeOverride by repository.displayShapeOverrideFlow.collectAsState(initial = "AUTO")
 
     var feedbackMessage by remember { mutableStateOf<String?>(null) }
     var showEggSelector by remember { mutableStateOf(false) }
@@ -488,12 +489,14 @@ fun SettingsScreen(
         }
 
         // ==========================================
-        // 7. AOSP & Wear OS Hardware Compatibility Diagnostics
+        // 7. AOSP & Wear OS Hardware Compatibility Diagnostics + Display Shape + LAN Sync
         // ==========================================
         item {
             val context = androidx.compose.ui.platform.LocalContext.current
             val pedometerMode = remember { com.digiwatch.wear.sensor.StepTrackerManager.getActivePedometerMode(context) }
             val nfcAvailable = remember { com.digiwatch.wear.nfc.NfcDuelManager.isNfcAvailable(context) }
+            val lanIp = remember { com.digiwatch.wear.datalayer.AospLanSyncServer.getLocalIpAddress() }
+            val shapeModes = listOf("AUTO", "ROUND", "SQUARE")
             Spacer(modifier = Modifier.height(8.dp))
             Column(
                 modifier = Modifier
@@ -532,21 +535,45 @@ fun SettingsScreen(
                     fontFamily = FontFamily.Monospace,
                     textAlign = TextAlign.Center
                 )
+                Text(
+                    text = "AOSP LAN BRIDGE: $lanIp:${com.digiwatch.wear.datalayer.AospLanSyncServer.TCP_PORT}",
+                    fontSize = 6.5.sp,
+                    color = Color(0xFFEA80FC),
+                    fontFamily = FontFamily.Monospace,
+                    textAlign = TextAlign.Center
+                )
                 Spacer(modifier = Modifier.height(4.dp))
-                Button(
-                    onClick = {
-                        scope.launch {
-                            repository.addAdventureSteps(100)
-                            hapticManager.playStepMilestone()
-                            feedbackMessage = "+100 Steps Added!"
-                            delay(1500L)
-                            feedbackMessage = null
-                        }
-                    },
-                    modifier = Modifier.fillMaxWidth().height(24.dp),
-                    colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFF00695C))
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(4.dp)
                 ) {
-                    Text("👟 +100 STEPS (AOSP / BENCH)", fontSize = 7.sp, fontWeight = FontWeight.Black, fontFamily = FontFamily.Monospace)
+                    Button(
+                        onClick = {
+                            val idx = shapeModes.indexOf(displayShapeOverride).coerceAtLeast(0)
+                            val nextShape = shapeModes[(idx + 1) % shapeModes.size]
+                            repository.setDisplayShapeOverride(nextShape)
+                            if (isVibrationEnabled) hapticManager.playStepMilestone()
+                        },
+                        modifier = Modifier.weight(1f).height(24.dp),
+                        colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFF3949AB))
+                    ) {
+                        Text("SHAPE: $displayShapeOverride", fontSize = 6.5.sp, fontWeight = FontWeight.Black, fontFamily = FontFamily.Monospace)
+                    }
+                    Button(
+                        onClick = {
+                            scope.launch {
+                                repository.addAdventureSteps(100)
+                                hapticManager.playStepMilestone()
+                                feedbackMessage = "+100 Steps Added!"
+                                delay(1500L)
+                                feedbackMessage = null
+                            }
+                        },
+                        modifier = Modifier.weight(1f).height(24.dp),
+                        colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFF00695C))
+                    ) {
+                        Text("👟 +100 STEPS", fontSize = 6.5.sp, fontWeight = FontWeight.Black, fontFamily = FontFamily.Monospace)
+                    }
                 }
             }
         }
