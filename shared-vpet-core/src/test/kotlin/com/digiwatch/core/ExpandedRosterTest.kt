@@ -15,9 +15,9 @@ class ExpandedRosterTest {
 
     @Test
     fun expandedIdsAreUniqueAndNeverCollideWithBaseRoster() {
-        assertEquals(40, ExpandedRoster.SPECIES.size)
-        assertEquals(40, expandedIds.size)
-        assertEquals(205, PetSpecies.SPECIES_REGISTRY.size)
+        assertEquals(135, ExpandedRoster.SPECIES.size)
+        assertEquals(135, expandedIds.size)
+        assertEquals(300, PetSpecies.SPECIES_REGISTRY.size)
     }
 
     @Test
@@ -39,16 +39,14 @@ class ExpandedRosterTest {
     @Test
     fun everyExpandedSpeciesIsReachableFromAStarterEgg() {
         val reachable = mutableSetOf<Int>()
-        val queue = ArrayDeque(listOf(130, 131, 132))
+        val queue = ArrayDeque(listOf(101, 103, 105, 107, 109, 111, 113, 130, 131, 132))
         while (queue.isNotEmpty()) {
             val id = queue.removeFirst()
             if (reachable.add(id)) {
                 PetSpecies.getById(id).evolutionRules.forEach { queue.add(it.targetSpeciesId) }
             }
         }
-        // Ultimate Gallantmon-class fusion results (550 via DigiXros, 555/556 via Jogress) are recipe-only,
-        // everything else must be reachable through normal evolution.
-        val recipeOnly = ExpandedRoster.RECIPES.map { it.targetSpeciesId }.toSet()
+        val recipeOnly = (ExpandedRoster.RECIPES + JogressEngine.BASE_RECIPES).map { it.targetSpeciesId }.toSet()
         for (sp in ExpandedRoster.SPECIES) {
             assertTrue(
                 "${sp.name} (${sp.id}) not reachable from a starter egg",

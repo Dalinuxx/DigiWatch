@@ -118,7 +118,7 @@ class RosterAuditTest {
     @Test
     fun auditDigimon0nl1neCompatibilityForAllSpecies() {
         val registry = PetSpecies.SPECIES_REGISTRY
-        assertEquals(205, registry.size)
+        assertEquals(300, registry.size)
 
         for (sp in registry.values) {
             // Guarantee 12-bit monster ID for Digimon 0nl1ne / D-Com wire packets (0x001..0xFFF)
@@ -189,8 +189,8 @@ class RosterAuditTest {
             }
         }
 
-        // Verify all 44 Jogress / DigiXros / Mode Change recipes reference valid species
-        assertEquals(44, JogressEngine.RECIPES.size)
+        // Verify all 54 Jogress / DigiXros / Mode Change recipes reference valid species
+        assertEquals(54, JogressEngine.RECIPES.size)
         for (recipe in JogressEngine.RECIPES) {
             assertTrue("Missing primary species ${recipe.primarySpeciesId}", registry.containsKey(recipe.primarySpeciesId))
             assertTrue("Missing secondary species ${recipe.secondarySpeciesId}", registry.containsKey(recipe.secondarySpeciesId))
@@ -213,7 +213,7 @@ class RosterAuditTest {
             }
         }
         assertTrue(
-            "All 205 species must be reachable from the 10 starter eggs! Unreachable: $unreachableSpecies",
+            "All 300 species must be reachable from the 10 starter eggs! Unreachable: $unreachableSpecies",
             unreachableSpecies.isEmpty()
         )
 
@@ -275,26 +275,28 @@ class RosterAuditTest {
     fun generateAuthoritativeDigivolutionGuideMarkdown() {
         val registry = PetSpecies.SPECIES_REGISTRY.values.sortedBy { it.id }
         val docsDir = java.io.File("../docs").apply { mkdirs() }
-        val rosterSheetFile = java.io.File(docsDir, "digiwatch_205_roster_spritesheet.png")
+        val rosterSheetFile = java.io.File(docsDir, "digiwatch_roster_spritesheet.png")
+        val rosterSheetLegacyFile = java.io.File(docsDir, "digiwatch_205_roster_spritesheet.png")
         val evoChartFile = java.io.File(docsDir, "digiwatch_evolution_guide_chart.png")
 
         renderMasterRosterSpriteSheetPng(registry, rosterSheetFile)
+        renderMasterRosterSpriteSheetPng(registry, rosterSheetLegacyFile)
         renderVisualEvolutionGuideChartPng(registry, evoChartFile)
 
         val sb = StringBuilder()
 
-        sb.appendLine("# 🧬 DigiWatch Official Visual Sprite Sheet Digivolution & DNA Jogress Guide (205 Species)")
+        sb.appendLine("# 🧬 DigiWatch Official Visual Sprite Sheet Digivolution & DNA Jogress Guide (300 Species)")
         sb.appendLine()
         sb.appendLine("> **100% Complete & Mathematically Verified Lineage Chart + Full Pixel-Art Sprite Sheets**")
-        sb.appendLine("> Every single one of the **205 Digimon** in DigiWatch is naturally reachable from the **10 Starter Digi-Eggs** via canonical Bandai 1997 V-Pet, Digimon Pendulum, and Digimon Color evolution rules, or via **44 DNA Jogress / DigiXros / Mode Change** combinations.")
+        sb.appendLine("> Every single one of the **300 Digimon** in DigiWatch is naturally reachable from the **10 Starter Digi-Eggs** via canonical Bandai 1997 V-Pet, Digimon Pendulum, and Digimon Color evolution rules, or via **54 DNA Jogress / DigiXros / Mode Change** combinations.")
         sb.appendLine()
-        sb.appendLine("## 🖼️ Visual Sprite Sheet Evolution Chart & Master 205-Species Roster")
+        sb.appendLine("## 🖼️ Visual Sprite Sheet Evolution Chart & Master 300-Species Roster")
         sb.appendLine()
         sb.appendLine("### 1. Full Visual Sprite Sheet Evolution & DNA Jogress Guide Poster")
         sb.appendLine("![DigiWatch Full Sprite Sheet Evolution Guide](docs/digiwatch_evolution_guide_chart.png)")
         sb.appendLine()
-        sb.appendLine("### 2. Complete 205-Species Master Pixel-Art Sprite Sheet")
-        sb.appendLine("![DigiWatch 205-Species Master Roster Sprite Sheet](docs/digiwatch_205_roster_spritesheet.png)")
+        sb.appendLine("### 2. Complete 300-Species Master Pixel-Art Sprite Sheet")
+        sb.appendLine("![DigiWatch 300-Species Master Roster Sprite Sheet](docs/digiwatch_roster_spritesheet.png)")
         sb.appendLine()
         sb.appendLine("## 📊 Roster & Evolution Summary")
         sb.appendLine()
@@ -384,9 +386,9 @@ class RosterAuditTest {
         sb.appendLine()
         sb.appendLine("---")
         sb.appendLine()
-        sb.appendLine("## ⚡ DNA Digivolution, Mode Change & DigiXros Recipes (All 44 Combinations)")
+        sb.appendLine("## ⚡ DNA Digivolution, Mode Change & DigiXros Recipes (All 54 Combinations)")
         sb.appendLine()
-        sb.appendLine("Combine any two compatible Digimon via **Watch D-Com Battle Link**, **Phone Battle Command Center**, or **Phone DigiVault** to awaken these 44 special forms:")
+        sb.appendLine("Combine any two compatible Digimon via **Watch D-Com Battle Link**, **Phone Battle Command Center**, or **Phone DigiVault** to awaken these 54 special forms:")
         sb.appendLine()
         sb.appendLine("| # | Primary Partner | Secondary Partner | Awakened Form | Fusion Type | Lore / Description |")
         sb.appendLine("| :---: | :--- | :--- | :--- | :---: | :--- |")
@@ -469,7 +471,7 @@ class RosterAuditTest {
         g.fillRoundRect(10, 8, width - 20, 54, 12, 12)
         g.color = java.awt.Color(0x00, 0xE5, 0xFF)
         g.font = java.awt.Font(java.awt.Font.MONOSPACED, java.awt.Font.BOLD, 20)
-        g.drawString("DIGIWATCH v2.0 — COMPLETE 205-SPECIES FULL-COLOR PIXEL ART ROSTER", 24, 34)
+        g.drawString("DIGIWATCH v2.0 — COMPLETE 300-SPECIES FULL-COLOR PIXEL ART ROSTER", 24, 34)
         g.color = java.awt.Color(0xB0, 0xBE, 0xC5)
         g.font = java.awt.Font(java.awt.Font.MONOSPACED, java.awt.Font.PLAIN, 12)
         g.drawString("16x16 Multi-Tone Bandai Color Palettes • Cyan = Vaccine • Gold = Data • Crimson = Virus • Emerald = Free", 24, 53)
@@ -549,7 +551,7 @@ class RosterAuditTest {
         g.color = java.awt.Color(0x00, 0xE5, 0xFF)
         g.drawRoundRect(16, 12, width - 32, 68, 14, 14)
         g.font = java.awt.Font(java.awt.Font.MONOSPACED, java.awt.Font.BOLD, 24)
-        g.drawString("DIGIWATCH v2.0 — VISUAL SPRITE SHEET DIGIVOLUTION & DNA JOGRESS GUIDE (ALL 205 SPECIES)", 32, 42)
+        g.drawString("DIGIWATCH v2.0 — VISUAL SPRITE SHEET DIGIVOLUTION & DNA JOGRESS GUIDE (ALL 300 SPECIES)", 32, 42)
         g.color = java.awt.Color(0xCF, 0xD8, 0xDC)
         g.font = java.awt.Font(java.awt.Font.MONOSPACED, java.awt.Font.PLAIN, 13)
         g.drawString("100% Reachable from 10 Starter Eggs • Key: Age = Min Time in Stage | CM = Care Mistakes | ♥ = Effort Hearts (0-4) | W = Min Battles & Win% | G = Weight", 32, 66)
@@ -735,7 +737,7 @@ class RosterAuditTest {
         g.fillRoundRect(16, section3Y, width - 32, 36, 10, 10)
         g.color = java.awt.Color(0xEA, 0x80, 0xFC)
         g.font = java.awt.Font(java.awt.Font.MONOSPACED, java.awt.Font.BOLD, 16)
-        g.drawString("⚡ PART 3: ALL 44 DNA DIGIVOLUTION (JOGRESS), DIGIXROS & MODE CHANGE VISUAL RECIPES", 30, section3Y + 24)
+        g.drawString("⚡ PART 3: ALL 54 DNA DIGIVOLUTION (JOGRESS), DIGIXROS & MODE CHANGE VISUAL RECIPES", 30, section3Y + 24)
 
         JogressEngine.RECIPES.forEachIndexed { idx, recipe ->
             val col = idx % jogressCols

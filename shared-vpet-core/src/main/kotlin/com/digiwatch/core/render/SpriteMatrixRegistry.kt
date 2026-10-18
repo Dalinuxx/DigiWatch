@@ -4436,6 +4436,7 @@ object SpriteMatrixRegistry {
     }
 
     private fun getBaseMatrix(sid: Int): Array<String> {
+        MasterRosterMatrices.getMatrix(sid)?.let { return it }
         return when (sid) {
             101 -> BOTAMON_IDLE
             102 -> KOROMON_IDLE
@@ -4652,6 +4653,7 @@ object SpriteMatrixRegistry {
      */
     fun getPalette(speciesId: Int): SpritePalette {
         val sid = if (speciesId <= 1) 201 else speciesId
+        MasterRosterMatrices.getPalette(sid)?.let { return it }
         return when (sid) {
             // ---------------- Baby I & Baby II (101 - 132) ----------------
             101 -> SpritePalette(SpritePalette.rgb(45, 48, 55), SpritePalette.rgb(75, 80, 90), SpritePalette.rgb(245, 205, 55), SpritePalette.rgb(220, 35, 35)) // Botamon: Obsidian fur + Yellow eyes

@@ -13,8 +13,8 @@ class SpriteMatrixRegistryTest {
     private val validChars = setOf('.', '#', 'B', 'K', 'E', 'W', 'T', 'S', 'R', 'G', 'C')
 
     @Test
-    fun testAll205SpeciesHaveValidNonHollow16x16Matrices() {
-        assertEquals(205, PetSpecies.SPECIES_REGISTRY.size)
+    fun testAll300SpeciesHaveValidNonHollow16x16Matrices() {
+        assertEquals(300, PetSpecies.SPECIES_REGISTRY.size)
         for ((speciesId, species) in PetSpecies.SPECIES_REGISTRY) {
             val matrix = SpriteMatrixRegistry.getMatrix(speciesId, SpriteFrame.IDLE_A)
             assertEquals("Matrix row count for species $speciesId (${species.name}) must be 16", 16, matrix.size)
@@ -43,22 +43,26 @@ class SpriteMatrixRegistryTest {
     }
 
     @Test
-    fun testZeroDuplicateMatricesAcrossAll205Species() {
+    fun testZeroDuplicateMatricesAcrossAll300Species() {
         val seen = mutableMapOf<String, Int>()
+        val duplicates = mutableListOf<String>()
         for ((speciesId, species) in PetSpecies.SPECIES_REGISTRY) {
             val sig = SpriteMatrixRegistry.getMatrix(speciesId, SpriteFrame.IDLE_A).joinToString("\n")
             val existing = seen[sig]
-            assertTrue(
-                "Species $speciesId (${species.name}) shares identical matrix with species $existing",
-                existing == null
-            )
+            if (existing != null) {
+                duplicates.add("Species $speciesId (${species.name}) shares matrix with species $existing (${PetSpecies.getById(existing).name})")
+            }
             seen[sig] = speciesId
         }
-        assertEquals(205, seen.size)
+        if (duplicates.isNotEmpty()) {
+            println("DUPLICATES FOUND (${duplicates.size}):\n" + duplicates.joinToString("\n"))
+        }
+        assertTrue("Found ${duplicates.size} duplicate matrices:\n" + duplicates.joinToString("\n"), duplicates.isEmpty())
+        assertEquals(300, seen.size)
     }
 
     @Test
-    fun testZeroDuplicatePalettesAcrossAll205Species() {
+    fun testZeroDuplicatePalettesAcrossAll300Species() {
         val seen = mutableMapOf<SpritePalette, Int>()
         for ((speciesId, species) in PetSpecies.SPECIES_REGISTRY) {
             val palette = SpriteMatrixRegistry.getPalette(speciesId)
@@ -73,7 +77,7 @@ class SpriteMatrixRegistryTest {
             )
             seen[palette] = speciesId
         }
-        assertEquals(205, seen.size)
+        assertEquals(300, seen.size)
     }
 
     @Test
@@ -92,7 +96,7 @@ class SpriteMatrixRegistryTest {
     }
 
     @Test
-    fun testAmbientModeOprUnder15PercentForAll205Species() {
+    fun testAmbientModeOprUnder15PercentForAll300Species() {
         for ((speciesId, species) in PetSpecies.SPECIES_REGISTRY) {
             for (frame in SpriteFrame.entries) {
                 val opr = SpriteMatrixRegistry.calculateAmbientOpr(speciesId, frame)

@@ -34,6 +34,7 @@ data class PetSpecies(
                     baselineWeight = 5,
                     spriteKey = "botamon",
                     evolutionRules = listOf(
+                        EvolutionRule(targetSpeciesId = 129, minAgeSeconds = 3600L, minCareMistakes = 0, maxCareMistakes = 1, minEffort = 2), // Ketomon
                         EvolutionRule(targetSpeciesId = 102, minAgeSeconds = 3600L) // 1 hr -> Koromon
                     )
                 ),
@@ -61,6 +62,7 @@ data class PetSpecies(
                     baselineWeight = 5,
                     spriteKey = "poyomon",
                     evolutionRules = listOf(
+                        EvolutionRule(targetSpeciesId = 128, minAgeSeconds = 3600L, minCareMistakes = 0, maxCareMistakes = 0, minEffort = 3), // Moonmon
                         EvolutionRule(targetSpeciesId = 117, minAgeSeconds = 3600L, minCareMistakes = 0, maxCareMistakes = 1, minEffort = 2), // Gummymon
                         EvolutionRule(targetSpeciesId = 106, minAgeSeconds = 3600L) // 1 hr -> Tokomon
                     )
@@ -75,6 +77,7 @@ data class PetSpecies(
                     baselineWeight = 5,
                     spriteKey = "yuramon",
                     evolutionRules = listOf(
+                        EvolutionRule(targetSpeciesId = 126, minAgeSeconds = 3600L, minCareMistakes = 0, maxCareMistakes = 0, minEffort = 3), // Minomon
                         EvolutionRule(targetSpeciesId = 116, minAgeSeconds = 3600L, minCareMistakes = 0, maxCareMistakes = 1, minEffort = 2), // Viximon
                         EvolutionRule(targetSpeciesId = 108, minAgeSeconds = 3600L) // 1 hr -> Tanemon
                     )
@@ -785,6 +788,7 @@ data class PetSpecies(
                     baselineWeight = 5,
                     spriteKey = "zurumon",
                     evolutionRules = listOf(
+                        EvolutionRule(targetSpeciesId = 125, minAgeSeconds = 3600L, minCareMistakes = 0, maxCareMistakes = 0, minEffort = 3), // Kapurimon
                         EvolutionRule(targetSpeciesId = 119, minAgeSeconds = 3600L, minCareMistakes = 0, maxCareMistakes = 1, minEffort = 2), // Yaamon
                         EvolutionRule(targetSpeciesId = 110, minAgeSeconds = 3600L) // Pagumon
                     )
@@ -799,7 +803,9 @@ data class PetSpecies(
                     baselineWeight = 5,
                     spriteKey = "mokumon",
                     evolutionRules = listOf(
-                        EvolutionRule(targetSpeciesId = 115, minAgeSeconds = 3600L, minCareMistakes = 0, maxCareMistakes = 1, minEffort = 2), // Gigimon
+                        EvolutionRule(targetSpeciesId = 127, minAgeSeconds = 3600L, minCareMistakes = 0, maxCareMistakes = 0, minEffort = 3), // Sunmon
+                        EvolutionRule(targetSpeciesId = 124, minAgeSeconds = 3600L, minCareMistakes = 0, maxCareMistakes = 1, minEffort = 2), // Hopmon
+                        EvolutionRule(targetSpeciesId = 115, minAgeSeconds = 3600L, minCareMistakes = 0, maxCareMistakes = 2, minEffort = 1), // Gigimon
                         EvolutionRule(targetSpeciesId = 112, minAgeSeconds = 3600L) // DemiMeramon
                     )
                 ),
@@ -813,7 +819,8 @@ data class PetSpecies(
                     baselineWeight = 5,
                     spriteKey = "kuramon",
                     evolutionRules = listOf(
-                        EvolutionRule(targetSpeciesId = 114, minAgeSeconds = 3600L)
+                        EvolutionRule(targetSpeciesId = 123, minAgeSeconds = 3600L, minCareMistakes = 0, maxCareMistakes = 1, minEffort = 2), // Tsumemon
+                        EvolutionRule(targetSpeciesId = 114, minAgeSeconds = 3600L) // DemiVeemon
                     )
                 ),
                 PetSpecies(
@@ -982,7 +989,9 @@ data class PetSpecies(
                     baselineWeight = 20,
                     spriteKey = "veemon",
                     evolutionRules = listOf(
-                        EvolutionRule(targetSpeciesId = 331, minAgeSeconds = 86400L, minCareMistakes = 0, maxCareMistakes = 3, minBattles = 10, minWinRatio = 0.6f),
+                        EvolutionRule(targetSpeciesId = 371, minAgeSeconds = 86400L, minCareMistakes = 0, maxCareMistakes = 1, minBattles = 15, minWinRatio = 0.7f),
+                        EvolutionRule(targetSpeciesId = 359, minAgeSeconds = 86400L, minCareMistakes = 0, maxCareMistakes = 2, minBattles = 10, minWinRatio = 0.6f),
+                        EvolutionRule(targetSpeciesId = 331, minAgeSeconds = 86400L, minCareMistakes = 0, maxCareMistakes = 3),
                         EvolutionRule(targetSpeciesId = 332, minAgeSeconds = 86400L, minCareMistakes = 4, maxCareMistakes = 999)
                     )
                 ),

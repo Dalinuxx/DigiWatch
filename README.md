@@ -5,7 +5,7 @@
 [![Kotlin](https://img.shields.io/badge/Kotlin-1.9.22-purple?logo=kotlin&logoColor=white)](https://kotlinlang.org)
 [![Compose](https://img.shields.io/badge/Jetpack%20Compose-Wear%20%2B%20M3-4285F4?logo=jetpackcompose&logoColor=white)](https://developer.android.com/jetpack/compose)
 [![Protocol](https://img.shields.io/badge/Digimon%200nl1ne-100%25%20Compatible-00C853?logo=codersrank&logoColor=white)](https://github.com)
-[![Roster](https://img.shields.io/badge/Species%20Roster-205%20Authentic%20Digimon-FF6D00)](https://humulos.com/digimon/)
+[![Roster](https://img.shields.io/badge/Species%20Roster-300%20Authentic%20Digimon-FF6D00)](https://humulos.com/digimon/)
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
 ---
@@ -21,21 +21,21 @@ Recreating the golden era of handheld virtual pets (Generations V1 through V6, P
 - **Digimon 0nl1ne / D-Com / A-Com Compatibility**: Full cryptographic 128-bit Crockford Base32 Comm Code codec with HMAC-16 verification for offline and asynchronous pvp battles.
 - **DNA Digivolution (Jogress) & DigiXros**: Canonical multi-partner fusions across both solo vault storage and friend Comm Codes without altering external wire protocol compliance.
 - **30-Sector Adventure Campaign**: Connects real-world physical step tracking directly to narrative progression across 4 expansive story arcs with 28 boss checkpoints.
-- **Rich Companion Android Hub**: DigiVault partner cryo-storage, 205-species animated Sprite Studio, Battle Hub & Code Scanner, Campaign Story Architect, Android Home Screen AppWidget, and remote watch settings sync.
+- **Rich Companion Android Hub**: DigiVault partner cryo-storage, 300-species animated Sprite Studio, Battle Hub & Code Scanner, Campaign Story Architect, Android Home Screen AppWidget, and remote watch settings sync.
 
 ---
 
-## 🧬 Official Visual Sprite Sheet Digivolution & DNA Jogress Guide (All 205 Species)
+## 🧬 Official Visual Sprite Sheet Digivolution & DNA Jogress Guide (All 300 Species)
 
-Every single one of the **205 Digimon** in DigiWatch is naturally reachable from the **10 Starter Digi-Eggs** via canonical Bandai 1997 V-Pet, Digimon Pendulum, and Digimon Color evolution rules, or via **44 DNA Jogress / DigiXros / Mode Change** combinations.
+Every single one of the **300 Digimon** in DigiWatch is naturally reachable from the **10 Starter Digi-Eggs** via canonical Bandai 1997 V-Pet, Digimon Pendulum, and Digimon Color evolution rules, or via **54 DNA Jogress / DigiXros / Mode Change** combinations.
 
 👉 **[Read the Complete Interactive Table & Guide (`DIGIVOLUTION_GUIDE.md`)](DIGIVOLUTION_GUIDE.md)**
 
 ### Visual Sprite Sheet Evolution & DNA Jogress Chart
 ![DigiWatch Full Sprite Sheet Evolution Guide](docs/digiwatch_evolution_guide_chart.png)
 
-### Master 205-Species Full-Color Pixel-Art Sprite Sheet
-![DigiWatch 205-Species Master Roster Sprite Sheet](docs/digiwatch_205_roster_spritesheet.png)
+### Master 300-Species Full-Color Pixel-Art Sprite Sheet
+![DigiWatch 300-Species Master Roster Sprite Sheet](docs/digiwatch_roster_spritesheet.png)
 
 ---
 
@@ -77,7 +77,7 @@ graph TD
         CC["CommCodeCodec<br/>128-bit Crockford Base32 + HMAC-16"]
         BS["DeterministicBattleSolver<br/>PRNG Combat & 1.2x Elemental Triangle"]
         AE["AdventureEngine<br/>30-Sector Step Campaign Parser"]
-        Catalog["PetSpecies Registry<br/>205 Authentic Species"]
+        Catalog["PetSpecies Registry<br/>300 Authentic Species"]
     end
 
     subgraph WearApp ["Wear OS Smartwatch Application (:wear-os-app)"]
@@ -97,7 +97,7 @@ graph TD
         UI_P["Material Design 3 Compose"]
         Vault["DigiVault Cryo-Storage<br/>Multi-Partner Preservation & Fusion"]
         Widget["Android Home Screen AppWidget<br/>Live Pixel Art & Physiological Meters"]
-        Studio["205-Species Sprite Studio<br/>12-Frame Uniform Animation Viewer"]
+        Studio["300-Species Sprite Studio<br/>12-Frame Uniform Animation Viewer"]
         Hub["Battle Hub & Comm Code Scanner"]
         StoryEd["30-Sector Story Architect<br/>Custom JSON Campaign Editor"]
         Backup["Cloud JSON State Backup & Transfer"]
@@ -183,8 +183,8 @@ DigiWatch provides both classic physical handheld controls and modern touch ergo
 
 ---
 
-### 3. Full-Color Sprite Engine (205 Authentic Species)
-Every monster is rendered via a uniform 64 × 64 px matrix canvas at `FilterQuality.None` for crisp, authentic pixel art across round and square screens, with 205 unique bespoke 16 × 16 multi-tone matrices and 205 canonical color palettes:
+### 3. Full-Color Sprite Engine (300 Authentic Species)
+Every monster is rendered via a uniform 64 × 64 px matrix canvas at `FilterQuality.None` for crisp, authentic pixel art across round and square screens, with 300 unique bespoke 16 × 16 multi-tone matrices and 300 canonical color palettes:
 
 ```
 +-----------------------------------------------------------------------+
@@ -195,13 +195,13 @@ Every monster is rendered via a uniform 64 × 64 px matrix canvas at `FilterQual
 +-----------------------------------------------------------------------+
 ```
 
-#### Roster Distribution (205 Species):
+#### Roster Distribution (300 Species):
 - **Baby I (10 — `#101`–`#110`)**: Botamon, Punimon, Poyomon, Yuramon, Zurumon, Mokumon, Kuramon, Pitchmon, Nyokimon, Choromon.
-- **Baby II (15 — `#111`–`#125`)**: Koromon, Tsunomon, Tokomon, Tanemon, Pagumon, DemiMeramon, DemiVeemon, Gigimon, Viximon, Gummymon, Chocomon, Yaamon, Bukamon, Pyocomon, Kapurimon.
-- **Child (30 — `#201`–`#230`)**: Agumon, Betamon, Gabumon, Elecmon, Patamon, Biyomon, Palmon, Tentomon, Gazimon, Gizamon, Kunemon, Veemon, Wormmon, Guilmon, Renamon, Terriermon, Lopmon, Impmon, BlackAgumon, BlackGabumon, Lucemon, Hackmon, Salamon, Gomamon, Armadillomon, Hawkmon,Hagurumon, Kotemon, Monodramon, Keramon.
-- **Adult (50 — `#301`–`#350`)**: Greymon, Tyrannomon, Devimon, Meramon, Numemon, Garurumon, Angemon, Togemon, Birdramon, Kabuterimon, Monochromon, Ogremon, Leomon, Seadramon, Sukamon, DarkTyrannomon, Devidramon, Cyclonemon, Tuskmon, Flymon, Raremon, Kuwagamon, Kokatorimon, Coelamon, Nanimon, Bakemon, Shellmon, Unimon, Frigimon, Vegiemon, Veedramon, Flamedramon, Stingmon, Growlmon, Kyubimon, Gargomon, Wizardmon, Gatomon, BlackGreymon, BlackGarurumon, BaoHackmon, Ikkakumon, ExVeemon, Aquilamon, Ankylomon, Guardromon, Dinohumon, Strikedramon, Chrysalimon,Sorcerymon.
-- **Perfect (42 — `#401`–`#442`)**: MetalGreymon, Monzaemon, SkullGreymon, WereGarurumon, MagnaAngemon, Lillymon, Garudamon, MegaKabuterimon, MegaSeadramon, Myotismon, Etemon, Mamemon, MetalMamemon, MetalTyrannomon, Ex-Tyrannomon, Megadramon, Piximon, Andromon, Giromon, Vademon, SkullMamemon, AeroVeedramon, Paildramon, WarGrowlmon, Taomon, Rapidmon, Angewomon, LadyDevimon, BlackMetalGreymon, BlackWereGarurumon, Cyberdramon, Antylamon, SaviorHackmon, Lucemon Chaos Mode, Zudomon, Dinobeemon, Silphymon, Knightmon,Butenmon,Infermon, Shakkoumon, Panjyamon.
-- **Ultimate & Super Ultimate (58 — `#501`–`#558`)**: WarGreymon, Machinedramon, MetalGarurumon, Seraphimon, Rosemon, Phoenixmon, HerculesKabuterimon, Plesiomon, Piedmon, Omnimon, MetalEtemon, Imperialdramon Dragon Mode, Imperialdramon Fighter Mode, Imperialdramon Paladin Mode, Gallantmon, Gallantmon Crimson Mode, Sakuyamon, MegaGargomon, Beelzemon, Beelzemon Blast Mode, Magnamon, UlforceVeedramon, Alphamon, Alphamon Ouryuken, BlackWarGreymon, ChaosBlackWarGreymon, Diaboromon, Armaggeddemon, Apocalymon, Belphemon, Lilithmon, Daemon, Leviamon, Barbamon, Omnimon Alter-S, Omnimon Zwart, Mastemon, Jesmon, Gankoomon, Dynasmon, LordKnightmon, Craniummon, Sleipmon, Duftmon, Examon, Millenniummon, MoonMillenniummon, ZeedMillenniummon, Susanoomon, MarineAngemon, SaberLeomon, Ophanimon, Vikemon, GranKuwagamon, Valkyriemon, Magnadramon, Cherubimon,Kentaurosmon.
+- **Baby II (22 — `#111`–`#129`, `#130`–`#132`)**: Koromon, Tsunomon, Tokomon, Tanemon, Pagumon, DemiMeramon, DemiVeemon, Gigimon, Viximon, Gummymon, Chocomon, Yaamon, Bukamon, Pyocomon, Kapurimon, Nyaromon, Dorimon, Minomon, Hopmon, Tsumemon, Moonmon, Sunmon.
+- **Child (50 — `#201`–`#250`)**: Agumon, Betamon, Gabumon, Elecmon, Patamon, Biyomon, Palmon, Tentomon, Gazimon, Gizamon, Kunemon, Veemon, Wormmon, Guilmon, Renamon, Terriermon, Lopmon, Impmon, BlackAgumon, BlackGabumon, Lucemon, Hackmon, Salamon, Gaomon, Hawkmon, Armadillomon, Dorumon, Kotemon, Monodramon, Floramon, Goblimon, Gomamon, Gotsumon, Otamamon, Candlemon, Bakumon, Hagurumon, Mushroomon, Crabmon, Syakomon, Lalamon, Falcomon, Kudamon, Ryudamon, Dracomon, Kamemon, Coronamon, Lunamon, ToyAgumon, Keramon.
+- **Adult (72 — `#301`–`#372`)**: Greymon, Tyrannomon, Devimon, Meramon, Numemon, Garurumon, Angemon, Togemon, Birdramon, Kabuterimon, Monochromon, Ogremon, Leomon, Seadramon, Sukamon, DarkTyrannomon, Devidramon, Cyclonemon, Tuskmon, Flymon, Raremon, Kuwagamon, Kokatorimon, Coelamon, Nanimon, Bakemon, Shellmon, Unimon, Frigimon, Vegiemon, Veedramon, Flamedramon, Stingmon, Growlmon, Kyubimon, Gargomon, Wizardmon, Gatomon, BlackGreymon, BlackGarurumon, BaoHackmon, Dorugamon, Sorcerymon, Aquilamon, Ankylomon, Gaogamon, Mojyamon, Starmon, Dokugumon, Ikkakumon, Golemon, Gekomon, Clockmon, Guardromon, Woodmon, Octomon, Gesomon, Ebidramon, Raidramon, Digmon, Shurimon, Submarimon, Peckmon, Sunflowmon, Reppamon, Ginryumon, Coredramon, Chrysalimon, Firamon, Lekismon, ExVeemon, Lynxmon.
+- **Perfect (64 — `#401`–`#464`)**: MetalGreymon, Monzaemon, SkullGreymon, WereGarurumon, MagnaAngemon, Lillymon, Garudamon, MegaKabuterimon, MegaSeadramon, Myotismon, Etemon, Mamemon, MetalMamemon, MetalTyrannomon, Ex-Tyrannomon, Megadramon, Piximon, Andromon, Giromon, Vademon, SkullMamemon, AeroVeedramon, Paildramon, WarGrowlmon, Taomon, Rapidmon, Angewomon, LadyDevimon, BlackMetalGreymon, BlackWereGarurumon, Cyberdramon, Antylamon, SaviorHackmon, Lucemon Chaos Mode, Dorugreymon, Knightmon, Silphymon, Zudomon, Shakkoumon, Dinobeemon, Cherrymon, Garbagemon, Digitamamon, ShogunGekomon, Volcamon, MarineDevimon, Triceramon, Infermon, Chirinmon, Hisyaryumon, Wingdramon, Yatagaramon, MachGaogamon, Flaremon, Crescemon, SkullSatamon, Mummymon, Arukenimon, Grademon, Astamon, Gargoylemon, Mammothmon, MetalGreymon (Virus), Cyberdramon (Savers).
+- **Ultimate & Super Ultimate (82 — `#501`–`#582`)**: WarGreymon, Machinedramon, MetalGarurumon, Seraphimon, Rosemon, Phoenixmon, HerculesKabuterimon, Plesiomon, Piedmon, Omnimon, MetalEtemon, Imperialdramon Dragon Mode, Imperialdramon Fighter Mode, Imperialdramon Paladin Mode, Gallantmon, Gallantmon Crimson Mode, Sakuyamon, MegaGargomon, Beelzemon, Beelzemon Blast Mode, Magnamon, UlforceVeedramon, Alphamon, Alphamon Ouryuken, BlackWarGreymon, ChaosBlackWarGreymon, Diaboromon, Armaggeddemon, Apocalymon, Belphemon, Lilithmon, Daemon, Leviamon, Barbamon, Omnimon Alter-S, Omnimon Zwart, Mastemon, Jesmon, Gankoomon, Dynasmon, LordKnightmon, Craniummon, Sleipmon, Duftmon, Examon, Millenniummon, MoonMillenniummon, ZeedMillenniummon, Susanoomon, Dorugoramon, Gaiomon, Ophanimon, Vikemon, Chaosdramon, Kentaurosmon, Magnadramon, Cherubimon, RustTyrannomon, BlitzGreymon, CresGarurumon, Ouryumon, Slayerdramon, Apollomon, Dianamon, GraceNovamon, Lucemon Satan Mode, Chaosmon, BanchoLeomon, Darkdramon, MarineAngemon, TigerVespamon, Kuzuhamon, BlackSeraphimon, Ophanimon Falldown Mode, Ravemon, ShineGreymon, MirageGaogamon, Jesmon GX, Gallantmon X, WarGreymon X, MetalGarurumon X, Beelzemon X.
 
 ---
 
@@ -217,24 +217,30 @@ Payload = { MonsterID, Stage, Attribute, BasePowerHP, Victories, Effort, Seed, S
 ```
 Because external simulators inspect only the resulting species, Omnimon (`#510`), Paildramon (`#423`), and Mastemon (`#537`) transmit as standard canonical monsters with valid base power, Stage 6 (Ultimate), and elemental attributes.
 
-#### Canonical Fusion Catalog (44 Total Recipes — Featured Highlights):
+#### Canonical Fusion Catalog (54 Total Recipes — Featured Highlights):
 
 | Target Species | Stage | Attribute | Fusion Recipe | Type |
 |---|---|---|---|---|
 | **Omnimon** (`#510`) | Ultimate | Vaccine | WarGreymon (`#501`) + MetalGarurumon (`#503`) | DNA Jogress |
 | **Omnimon Zwart** (`#536`) | Ultimate | Vaccine | BlackWarGreymon (`#525`) + BlackWereGarurumon (`#430`) | DNA Jogress |
-| **Omnimon Alter-S** (`#535`) | Ultimate | Vaccine | WarGreymon (`#501`) + Machinedramon (`#502`) | DigiXros |
-| **Paildramon** (`#423`) | Perfect | Free | ExVeemon (`#343`) / Flamedramon (`#332`) / Veedramon (`#331`) + Stingmon (`#333`) | DNA Jogress |
-| **Silphymon** (`#437`) | Perfect | Free | Gatomon (`#338`) + Aquilamon (`#344`) | DNA Jogress |
+| **Omnimon Alter-S** (`#535`) | Ultimate | Vaccine | BlitzGreymon (`#559`) + CresGarurumon (`#560`) / WarGreymon (`#501`) + Machinedramon (`#502`) | DNA Jogress / Xros |
+| **Paildramon** (`#423`) | Perfect | Free | ExVeemon (`#371`) / Flamedramon (`#332`) / Veedramon (`#331`) + Stingmon (`#333`) | DNA Jogress |
+| **Silphymon** (`#437`) | Perfect | Free | Gatomon (`#338`) / Gaogamon (`#346`) + Aquilamon (`#344`) | DNA Jogress |
 | **Shakkoumon** (`#441`) | Perfect | Free | Angemon (`#307`) + Ankylomon (`#345`) | DNA Jogress |
 | **Imperialdramon DM** (`#512`) | Ultimate | Free | Paildramon (`#423`) + MetalGreymon (`#401`) / Megadramon (`#416`) | Mode Change |
 | **Imperialdramon PM** (`#514`) | Super Ult | Vaccine | Imperialdramon FM (`#513`) + Omnimon (`#510`) | Mode Change |
 | **Mastemon** (`#537`) | Ultimate | Vaccine | Angewomon (`#427`) + LadyDevimon (`#428`) | DNA Jogress |
+| **GraceNovamon** (`#565`) | Super Ult | Vaccine | Apollomon (`#563`) + Dianamon (`#564`) | DNA Jogress |
+| **Chaosmon** (`#567`) | Super Ult | Vaccine | BanchoLeomon (`#568`) + Darkdramon (`#569`) | DNA Jogress |
+| **Jesmon GX** (`#578`) | Super Ult | Data | Jesmon (`#538`) + Gankoomon (`#539`) | DigiXros |
+| **Examon** (`#545`) | Super Ult | Data | Wingdramon (`#451`) + Slayerdramon (`#562`) | DNA Jogress |
+| **RustTyrannomon** (`#558`) | Ultimate | Virus | MetalTyrannomon (`#414`) + Volcamon (`#445`) | DigiXros |
 | **Millenniummon** (`#546`) | Ultimate | Virus | Machinedramon (`#502`) + DarkTyrannomon (`#316`) | DNA Jogress |
 | **MoonMillenniummon** (`#547`)| Ultimate | Virus | Millenniummon (`#546`) + Diaboromon (`#527`) | Mode Change |
 | **ZeedMillenniummon** (`#548`)| Super Ult | Virus | MoonMillenniummon (`#547`) + Apocalymon (`#529`) | DNA Jogress |
-| **Alphamon Ouryuken** (`#524`) | Super Ult | Vaccine | Alphamon (`#523`) + Cyberdramon (`#431`) / WarGrowlmon (`#424`) | DigiXros |
+| **Alphamon Ouryuken** (`#524`) | Super Ult | Vaccine | Alphamon (`#523`) + Ouryumon (`#561`) / Cyberdramon (`#431`) | DigiXros |
 | **Gallantmon CM** (`#516`) | Super Ult | Vaccine | Gallantmon (`#515`) + Phoenixmon (`#506`) / AeroVeedramon (`#422`) | Mode Change |
+| **Gallantmon X** (`#579`) | Super Ult | Vaccine | Gallantmon (`#515`) + Dorumon (`#227`) | Mode Change |
 | **Beelzemon BM** (`#520`) | Super Ult | Virus | Beelzemon (`#519`) + Andromon (`#418`) / Megadramon (`#416`) | DigiXros |
 | **Apocalymon** (`#529`) | Super Ult | Free | Piedmon (`#509`) + Machinedramon (`#502`) | DNA Jogress |
 | **Susanoomon** (`#549`) | Super Ult | Vaccine | WarGreymon (`#501`) + Magnamon (`#521`) | DNA Jogress |
@@ -242,11 +248,11 @@ Because external simulators inspect only the resulting species, Omnimon (`#510`)
 #### Easy 1-Tap Jogress, DigiXros & Mode Change (Across Watch & Phone):
 1. **Watch Status Screen Chamber (`StatusScreen.kt`)**: Scroll to `EVO GUIDE & LINEAGE` on your wrist. Whenever your active partner matches a fusion recipe, the **⚡ DNA JOGRESS / DIGIXROS READY** chamber renders the `[Partner Sprite] → [Target Sprite]` equation with a 1-tap **`⚡ FUSE`** button right on the watch. If your Digimon is a lower stage (Child/Adult), it displays a **Next Stage Jogress / Xros Unlocks** preview so you know what to aim for.
 2. **Watch Battle Transceiver (`BattleScreen.kt`)**: Below the CommCode input keypad, the **⚡ DNA JOGRESS / DIGIXROS** matrix card automatically lists all recipes for your active partner with **`[CODE]`** (auto-populates partner 128-bit CommCode) and **`[⚡FUSE]`** (1-tap fusion execution with fanfare).
-3. **Phone Dashboard Fusion Chamber (`PetDashboardScreen.kt`)**: The main dashboard contains a dedicated **`▸ ⚡ DNA JOGRESS, DIGIXROS & MODE CHANGE CHAMBER`** showing 3-sprite equations (`[Active] + [Partner] ══▶ [Target]`) with a 1-tap **`⚡ AWAKEN & BEAM TO WATCH`** button that awakens the evolved form and syncs it immediately to your wrist. Also includes a toggleable 44-recipe catalog.
+3. **Phone Dashboard Fusion Chamber (`PetDashboardScreen.kt`)**: The main dashboard contains a dedicated **`▸ ⚡ DNA JOGRESS, DIGIXROS & MODE CHANGE CHAMBER`** showing 3-sprite equations (`[Active] + [Partner] ══▶ [Target]`) with a 1-tap **`⚡ AWAKEN & BEAM TO WATCH`** button that awakens the evolved form and syncs it immediately to your wrist. Also includes a toggleable 54-recipe catalog.
 4. **Phone Battle Hub Live Auto-Decoder (`BattleHubScreen.kt`)**: Entering or scanning a friend's CommCode automatically decodes the species and immediately reveals the **⚡ DNA DIGIVOLVE WITH FRIEND'S CODE!** button without having to fight a match first. In addition, 1-tap partner code chips are provided for instant loading.
 5. **Phone Cryo-Vault Fusion Lab (`DigiVaultScreen.kt`)**: Displays all compatible partner recipes for your active Digimon with **`+VAULT`** (spawns partner into storage) and **`⚡ FUSE`** (opens interactive 3-way fusion awakening dialog and beams the result to your watch).
 
-> 📖 **Complete 205-Species Digivolution Guide & Lineage Chart**: See [**`DIGIVOLUTION_GUIDE.md`**](DIGIVOLUTION_GUIDE.md) for the complete stage-by-stage evolution requirements, Starter Digi-Egg paths, and all 44 DNA Jogress / Mode Change recipes.
+> 📖 **Complete 300-Species Digivolution Guide & Lineage Chart**: See [**`DIGIVOLUTION_GUIDE.md`**](DIGIVOLUTION_GUIDE.md) for the complete stage-by-stage evolution requirements, Starter Digi-Egg paths, and all 54 DNA Jogress / Mode Change recipes.
 
 ---
 
@@ -313,7 +319,7 @@ graph LR
 The mobile application (`:phone-companion-app`) serves as a full-featured management hub connected via 6 bidirectional Wearable Data Layer endpoints (`/sync/request_pet_state`, `/sync/response_pet_state`, `/sync/update_pet_state`, `/sync/update_settings`, `/sync/battle_code`, `/sync/campaign_data`):
 - **DigiVault Cryo-Preservation**: Archive raised Digimon in zero-decay cryostasis. Browse stored partners with live animated pixel art, search/filter by stage, deploy back to the watch & phone dashboard with one click, or generate dual 128-bit Base32 Comm Codes and `V1-XXXX-XXXX-XXXX` DigiROM packets.
 - **Android Home Screen AppWidget**: Built with standard `RemoteViews` rendering the live 64 × 64 color pixel-art sprite, stage, weight, hunger hearts (`♥♥♥♥`), and strength stars (`★★★★`). Refreshes automatically on watch sync, DigiDex morph, DNA Jogress fusion, backup restore, and DigiVault deployment.
-- **205-Species DigiDex, Evolution Encyclopedia & 6-Mode Sprite Studio**: Search and filter all 205 species by stage or ID, inspect all 12 animation frames across 6 live preview modes (`IDLE`, `WALK`, `FEED`, `SLEEP`, `ATTACK`, `STATUS`) with authentic V-Pet pixel overlays, browse interactive pre-evolutions, branching evolutions, and DNA Jogress recipes, and morph your active partner or synthesize into DigiVault.
+- **300-Species DigiDex, Evolution Encyclopedia & 6-Mode Sprite Studio**: Search and filter all 300 species by stage or ID, inspect all 12 animation frames across 6 live preview modes (`IDLE`, `WALK`, `FEED`, `SLEEP`, `ATTACK`, `STATUS`) with authentic V-Pet pixel overlays, browse interactive pre-evolutions, branching evolutions, and DNA Jogress recipes, and morph your active partner or synthesize into DigiVault.
 - **30-Sector Story Architect**: Create and customize custom campaign sagas and push them directly to the watch's active adventure engine via `/sync/campaign_data`.
 - **JSON Cloud Portability**: Export and import either single `PetState` JSON snapshots or a Full Companion Archive (`FullCompanionArchive`: Active Pet + DigiVault Cryo-Storage + Custom Campaigns) with one-click JSON backup and restore.
 - **Remote Watch Settings & Live Pull Sync**: Wirelessly pull live `PetState` from the watch or push 5 authentic LCD & shell themes (`classic_vpet_lcd`, `amber_pendulum_lcd`, `digivice_ic_blue`, `file_island_day`, `dark_oled_minimal`), haptic vibration motor, 1997 piezo chiptune buzzer, 3-button mode, and pendulum shake mode.
@@ -415,8 +421,8 @@ adb install -r phone-companion-app/build/outputs/apk/release/phone-companion-app
 ## 🧪 Verification & Test Suite
 
 The shared core logic includes complete unit test coverage across 9 dedicated test suites:
-- **`SpriteMatrixRegistryTest`**: Audits all 205 species for 16 × 16 bounds, valid pixel character tokens, non-hollow multi-tone fills, zero duplicate matrices, zero duplicate palettes, 12-frame stance differentiation, and Ambient Mode On-Pixel Ratio (OPR ≤ 15%).
-- **`RosterAuditTest`**: Audits all 205 species for ID-to-stage integrity, evolution graph validity, Perfect → Ultimate ascension criteria (≥ 3 days age, ≥ 25 battles), all 44 Jogress/DigiXros recipes, and 100% Digimon 0nl1ne / D-Com wire roundtrip compatibility.
+- **`SpriteMatrixRegistryTest`**: Audits all 300 species for 16 × 16 bounds, valid pixel character tokens, non-hollow multi-tone fills, zero duplicate matrices, zero duplicate palettes, 12-frame stance differentiation, and Ambient Mode On-Pixel Ratio (OPR ≤ 15%).
+- **`RosterAuditTest`**: Audits all 300 species for ID-to-stage integrity, evolution graph validity, Perfect → Ultimate ascension criteria (≥ 3 days age, ≥ 25 battles), all 54 Jogress/DigiXros recipes, and 100% Digimon 0nl1ne / D-Com wire roundtrip compatibility.
 - **`ExpandedRosterTest`**: Validates roster stage distribution and starter Digi-Egg evolutionary trees.
 - **`CommCodeCodecTest`**: 128-bit payload binary serialization, Crockford Base32 alphabet validation, error-tolerant character mapping (`O` → `0`, `I`/`L` → `1`), and HMAC-16 tamper detection.
 - **`DeterministicBattleSolverTest`**: Combined PRNG seed turn reproducibility, 1.2× elemental advantage damage calculations, +25% QTE Critical Strike reflex boost, environmental weather hazard modifiers, and 10-round combat termination.
