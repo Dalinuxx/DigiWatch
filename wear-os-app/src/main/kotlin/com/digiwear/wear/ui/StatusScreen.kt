@@ -29,6 +29,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -52,6 +53,7 @@ fun StatusScreen(
     onBack: () -> Unit
 ) {
     val petState by repository.petStateFlow.collectAsState(initial = PetState())
+    val memorials by repository.memorialsFlow.collectAsState(initial = emptyList())
     val displayConfig = WatchDisplayConfig.current()
     val species = remember(petState.speciesId) { PetSpecies.getById(petState.speciesId) }
     val nextEvo = remember(petState) { EvolutionEngine.evaluateEvolution(petState) }
@@ -59,6 +61,7 @@ fun StatusScreen(
     val scope = rememberCoroutineScope()
     var fusionFeedback by remember { mutableStateOf<String?>(null) }
     var showCutInPortrait by remember { mutableStateOf(false) }
+    var showMemorials by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
         HardwareInputManager.buttonEvents.collect { button ->
@@ -100,6 +103,51 @@ fun StatusScreen(
                 color = Color(0xFF00E676),
                 fontFamily = FontFamily.Monospace
             )
+        }
+
+        if (petState.isDeceased) {
+            item {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = displayConfig.horizontalPadding, vertical = 3.dp)
+                        .background(Color(0xFF381216), RoundedCornerShape(8.dp))
+                        .border(1.dp, Color(0xFFFF5252), RoundedCornerShape(8.dp))
+                        .padding(6.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text(
+                        text = "🪦 REST IN PEACE 🪦",
+                        fontSize = 9.sp,
+                        fontWeight = FontWeight.Black,
+                        color = Color(0xFFFF5252),
+                        fontFamily = FontFamily.Monospace
+                    )
+                    Text(
+                        text = "Partner of Generation ${petState.generation} has completed its digital journey. A Traited Digitama awaits!",
+                        fontSize = 6.5.sp,
+                        color = Color.LightGray,
+                        textAlign = TextAlign.Center
+                    )
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Button(
+                        onClick = {
+                            scope.launch {
+                                repository.hatchTraitedEgg()
+                            }
+                        },
+                        colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFF00C853)),
+                        modifier = Modifier.height(26.dp)
+                    ) {
+                        Text(
+                            text = "🥚 HATCH TRAITED EGG (GEN ${petState.generation + 1})",
+                            fontSize = 7.sp,
+                            fontWeight = FontWeight.Black,
+                            fontFamily = FontFamily.Monospace
+                        )
+                    }
+                }
+            }
         }
 
         // Framed Partner Header Card with Static LCD Preview
@@ -210,6 +258,7 @@ fun StatusScreen(
                     .background(Color(0xFF141C24), RoundedCornerShape(8.dp))
                     .padding(6.dp)
             ) {
+                StatusRow("GENERATION", "Gen ${petState.generation} (+${petState.traitedEggBonus} Trait)", Color(0xFFFFD54F))
                 StatusRow("AGE / WT", "${ageDays}d ${remHours}h • ${petState.weight}g", Color.White)
                 StatusRow("MISTAKES", "${petState.careMistakes} Care / ${petState.overfeedCount} Overfeed", Color(0xFFFFCC80))
                 StatusRow("RECORD", "${petState.victories}W / ${petState.totalBattles}B ($winPct%)", Color(0xFF69F0AE))
@@ -416,6 +465,26 @@ fun StatusScreen(
         }
 
         item {
+            Spacer(modifier = Modifier.height(3.dp))
+            Button(
+                onClick = { showMemorials = true },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(28.dp)
+                    .padding(horizontal = displayConfig.horizontalPadding),
+                colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFF37474F))
+            ) {
+                Text(
+                    text = "🪦 MEMORIAL GRAVEYARD (${memorials.size})",
+                    fontSize = 7.5.sp,
+                    fontWeight = FontWeight.Bold,
+                    fontFamily = FontFamily.Monospace,
+                    color = Color(0xFF80D8FF)
+                )
+            }
+        }
+
+        item {
             Spacer(modifier = Modifier.height(4.dp))
             Button(
                 onClick = onBack,
@@ -426,6 +495,128 @@ fun StatusScreen(
                 colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFF263238))
             ) {
                 Text("BACK [B / C]", fontSize = 9.sp, fontWeight = FontWeight.Bold, fontFamily = FontFamily.Monospace)
+            }
+        }
+    }
+
+    if (showMemorials) {
+        val memListState = rememberScalingLazyListState()
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Color(0xFF03080E).copy(alpha = 0.96f)),
+            contentAlignment = Alignment.Center
+        ) {
+            ScalingLazyColumn(
+                modifier = Modifier.fillMaxSize(),
+                state = memListState,
+                contentPadding = displayConfig.contentPadding,
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                item {
+                    Text(
+                        text = "DIGI-MEMORIAL",
+                        fontSize = 10.sp,
+                        fontWeight = FontWeight.Black,
+                        color = Color(0xFF00E5FF),
+                        fontFamily = FontFamily.Monospace
+                    )
+                    Text(
+                        text = "Departed Partners • Hall of Fame",
+                        fontSize = 7.sp,
+                        color = Color.LightGray
+                    )
+                    Spacer(modifier = Modifier.height(4.dp))
+                }
+
+                if (memorials.isEmpty()) {
+                    item {
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(12.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            Text(text = "🪦", fontSize = 24.sp)
+                            Spacer(modifier = Modifier.height(4.dp))
+                            Text(
+                                text = "No Departed Partners Yet",
+                                fontSize = 8.sp,
+                                color = Color.Gray,
+                                fontFamily = FontFamily.Monospace
+                            )
+                            Text(
+                                text = "Current Gen ${petState.generation} lives on!",
+                                fontSize = 7.sp,
+                                color = Color(0xFF81C784),
+                                fontFamily = FontFamily.Monospace
+                            )
+                        }
+                    }
+                } else {
+                    items(memorials.size) { idx ->
+                        val m = memorials[idx]
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = displayConfig.horizontalPadding, vertical = 2.dp)
+                                .background(Color(0xFF101922), RoundedCornerShape(6.dp))
+                                .border(0.5.dp, Color(0x5580D8FF), RoundedCornerShape(6.dp))
+                                .padding(6.dp)
+                        ) {
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    SpriteCanvasRenderer(
+                                        speciesId = m.speciesId,
+                                        isAmbient = false,
+                                        overrideFrame = SpriteFrame.IDLE_A,
+                                        size = 18.dp
+                                    )
+                                    Spacer(modifier = Modifier.width(4.dp))
+                                    Text(
+                                        text = "${m.speciesName.take(10)} [GEN ${m.generation}]",
+                                        fontSize = 7.5.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        color = Color.White,
+                                        fontFamily = FontFamily.Monospace
+                                    )
+                                }
+                                Text(text = "🪦", fontSize = 11.sp)
+                            }
+                            Spacer(modifier = Modifier.height(2.dp))
+                            Text(
+                                text = "${m.finalStage} • Age: ${m.ageDays}d • ${m.battlesWon}/${m.battlesTotal} Wins (${(m.winRatio * 100).toInt()}%)",
+                                fontSize = 6.5.sp,
+                                color = Color(0xFFB0BEC5),
+                                fontFamily = FontFamily.Monospace
+                            )
+                            Text(
+                                text = "\"${m.epitaph}\"",
+                                fontSize = 6.sp,
+                                color = Color(0xFF80CBC4),
+                                fontFamily = FontFamily.Monospace
+                            )
+                        }
+                    }
+                }
+
+                item {
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Button(
+                        onClick = { showMemorials = false },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(26.dp)
+                            .padding(horizontal = displayConfig.horizontalPadding),
+                        colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFF263238))
+                    ) {
+                        Text("CLOSE [C]", fontSize = 8.sp, fontFamily = FontFamily.Monospace)
+                    }
+                }
             }
         }
     }

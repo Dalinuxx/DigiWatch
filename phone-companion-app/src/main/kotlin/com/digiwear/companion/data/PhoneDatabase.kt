@@ -38,11 +38,20 @@ interface PhoneDao {
 
     @Query("DELETE FROM digi_vault WHERE id = :id")
     suspend fun deleteVaultPet(id: Long)
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertMemorial(memorial: CompanionMemorialEntity): Long
+
+    @Query("SELECT * FROM companion_memorial_graveyard ORDER BY timestampUtc DESC")
+    fun getAllMemorialsFlow(): Flow<List<CompanionMemorialEntity>>
+
+    @Query("SELECT * FROM companion_memorial_graveyard ORDER BY timestampUtc DESC")
+    suspend fun getAllMemorials(): List<CompanionMemorialEntity>
 }
 
 @Database(
-    entities = [SyncedPetEntity::class, CustomCampaignEntity::class, StoredDigimonEntity::class],
-    version = 2,
+    entities = [SyncedPetEntity::class, CustomCampaignEntity::class, StoredDigimonEntity::class, CompanionMemorialEntity::class],
+    version = 3,
     exportSchema = false
 )
 abstract class PhoneDatabase : RoomDatabase() {

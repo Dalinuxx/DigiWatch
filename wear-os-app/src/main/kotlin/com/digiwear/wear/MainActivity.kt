@@ -1,4 +1,4 @@
-﻿package com.digiwear.wear
+package com.digiwear.wear
 
 import android.content.Intent
 import android.nfc.NfcAdapter
@@ -26,6 +26,7 @@ import com.digiwear.wear.ui.BattleScreen
 import com.digiwear.wear.ui.MainPetScreen
 import com.digiwear.wear.ui.SettingsScreen
 import com.digiwear.wear.ui.StatusScreen
+import com.digiwear.wear.ui.WorkoutScreen
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -41,8 +42,10 @@ enum class WearScreen {
     BATTLE,
     ADVENTURE,
     STATUS,
-    SETTINGS
+    SETTINGS,
+    WORKOUT
 }
+
 
 class MainActivity : ComponentActivity() {
 
@@ -245,6 +248,8 @@ fun WearNavigationHost(
         return
     }
 
+    var activeWorkoutType by remember { mutableStateOf(com.digiwear.core.workout.WorkoutType.FREE_TRAINING) }
+
     when (currentScreen) {
         WearScreen.MAIN -> MainPetScreen(
             repository = repository,
@@ -253,7 +258,11 @@ fun WearNavigationHost(
             onNavigateBattle = { currentScreen = WearScreen.BATTLE },
             onNavigateAdventure = { currentScreen = WearScreen.ADVENTURE },
             onNavigateStatus = { currentScreen = WearScreen.STATUS },
-            onNavigateSettings = { currentScreen = WearScreen.SETTINGS }
+            onNavigateSettings = { currentScreen = WearScreen.SETTINGS },
+            onNavigateWorkout = { type ->
+                activeWorkoutType = type
+                currentScreen = WearScreen.WORKOUT
+            }
         )
         WearScreen.BATTLE -> BattleScreen(
             repository = repository,
@@ -263,6 +272,10 @@ fun WearNavigationHost(
         WearScreen.ADVENTURE -> AdventureScreen(
             repository = repository,
             hapticManager = hapticManager,
+            onNavigateWorkout = {
+                activeWorkoutType = com.digiwear.core.workout.WorkoutType.EXPEDITION_TREK
+                currentScreen = WearScreen.WORKOUT
+            },
             onBack = { currentScreen = WearScreen.MAIN }
         )
         WearScreen.STATUS -> StatusScreen(
@@ -274,5 +287,13 @@ fun WearNavigationHost(
             hapticManager = hapticManager,
             onBack = { currentScreen = WearScreen.MAIN }
         )
+        WearScreen.WORKOUT -> WorkoutScreen(
+            repository = repository,
+            hapticManager = hapticManager,
+            buzzerManager = buzzerManager,
+            workoutType = activeWorkoutType,
+            onFinish = { currentScreen = WearScreen.MAIN }
+        )
     }
+
 }

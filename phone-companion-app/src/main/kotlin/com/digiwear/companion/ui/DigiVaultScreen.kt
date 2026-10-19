@@ -1,4 +1,4 @@
-﻿package com.digiwear.companion.ui
+package com.digiwear.companion.ui
 
 import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
@@ -46,6 +46,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -83,10 +84,12 @@ fun DigiVaultScreen(
     wearableManager: PhoneWearableManager
 ) {
     val vaultPets by db.phoneDao().getAllVaultPetsFlow().collectAsState(initial = emptyList())
+    val memorials by db.phoneDao().getAllMemorialsFlow().collectAsState(initial = emptyList())
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
     val clipboardManager = LocalClipboardManager.current
 
+    var activeTab by remember { mutableIntStateOf(0) } // 0: CRYO-VAULT, 1: MEMORIAL GRAVEYARD
     var searchQuery by remember { mutableStateOf("") }
     var selectedStageFilter by remember { mutableStateOf<PetStage?>(null) }
     var activePetForDeposit by remember { mutableStateOf<PetState?>(null) }
@@ -166,8 +169,48 @@ fun DigiVaultScreen(
 
         Spacer(modifier = Modifier.height(12.dp))
 
-        // Search Bar & Stage Filter Chips
-        OutlinedTextField(
+        // Tab selector: CRYO-VAULT vs MEMORIAL GRAVEYARD
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            Button(
+                onClick = { activeTab = 0 },
+                modifier = Modifier.weight(1f),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = if (activeTab == 0) Color(0xFF00897B) else Color(0xFF1E2630)
+                )
+            ) {
+                Text(
+                    text = "🛡 CRYO-VAULT (${vaultPets.size})",
+                    fontSize = 11.sp,
+                    fontWeight = FontWeight.Bold,
+                    fontFamily = FontFamily.Monospace,
+                    color = if (activeTab == 0) Color.White else Color(0xFF90A4AE)
+                )
+            }
+            Button(
+                onClick = { activeTab = 1 },
+                modifier = Modifier.weight(1f),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = if (activeTab == 1) Color(0xFF455A64) else Color(0xFF1E2630)
+                )
+            ) {
+                Text(
+                    text = "🪦 MEMORIAL (${memorials.size})",
+                    fontSize = 11.sp,
+                    fontWeight = FontWeight.Bold,
+                    fontFamily = FontFamily.Monospace,
+                    color = if (activeTab == 1) Color.White else Color(0xFF90A4AE)
+                )
+            }
+        }
+
+        Spacer(modifier = Modifier.height(10.dp))
+
+        if (activeTab == 0) {
+            // Search Bar & Stage Filter Chips
+            OutlinedTextField(
             value = searchQuery,
             onValueChange = { searchQuery = it },
             modifier = Modifier.fillMaxWidth(),
@@ -425,7 +468,103 @@ fun DigiVaultScreen(
                 }
             }
         }
+    } else {
+        // Memorial Graveyard View
+        if (memorials.isEmpty()) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f),
+                contentAlignment = Alignment.Center
+            ) {
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Text(text = "🪦", fontSize = 36.sp)
+                    Spacer(modifier = Modifier.height(6.dp))
+                    Text(
+                        text = "NO DEPARTED PARTNERS YET",
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.Gray,
+                        fontFamily = FontFamily.Monospace
+                    )
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        text = "Departed partners that complete their canonical lifecycle\nwill be respectfully commemorated in this Hall of Fame.",
+                        fontSize = 11.sp,
+                        color = Color.DarkGray,
+                        textAlign = TextAlign.Center
+                    )
+                }
+            }
+        } else {
+            LazyColumn(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.spacedBy(10.dp)
+            ) {
+                items(memorials, key = { it.id }) { m ->
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = CardDefaults.cardColors(containerColor = Color(0xFF131B24)),
+                        shape = RoundedCornerShape(12.dp),
+                        border = BorderStroke(1.dp, Color(0x5580CBC4))
+                    ) {
+                        Row(
+                            modifier = Modifier.padding(12.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .size(48.dp)
+                                    .background(Color(0xFF0A1016), RoundedCornerShape(8.dp))
+                                    .border(1.dp, Color(0x3380CBC4), RoundedCornerShape(8.dp)),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                SpriteCanvasRenderer(
+                                    speciesId = m.speciesId,
+                                    frame = SpriteFrame.IDLE_A,
+                                    size = 36.dp
+                                )
+                            }
+                            Spacer(modifier = Modifier.width(12.dp))
+                            Column(modifier = Modifier.weight(1f)) {
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Text(
+                                        text = "${m.speciesName} • GEN ${m.generation}",
+                                        fontSize = 13.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        color = Color.White
+                                    )
+                                    Text(
+                                        text = "🪦 ${m.causeOfDeath}",
+                                        fontSize = 9.sp,
+                                        fontFamily = FontFamily.Monospace,
+                                        color = Color(0xFFFF8A80)
+                                    )
+                                }
+                                Text(
+                                    text = "${m.finalStage} • Age: ${m.ageDays}d • Record: ${m.battlesWon}/${m.battlesTotal} (${(m.winRatio * 100).toInt()}%)",
+                                    fontSize = 10.5.sp,
+                                    color = Color(0xFFB0BEC5),
+                                    fontFamily = FontFamily.Monospace
+                                )
+                                Text(
+                                    text = "\"${m.epitaph}\"",
+                                    fontSize = 10.sp,
+                                    color = Color(0xFF80CBC4),
+                                    fontFamily = FontFamily.Monospace
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+        }
     }
+}
 
     // Deposit Active Partner Dialog
     if (showDepositDialog) {

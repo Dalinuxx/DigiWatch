@@ -140,6 +140,8 @@ fun BattleHubScreen(
     val scrollState = rememberScrollState()
     val context = LocalContext.current
     val clipboardManager = LocalClipboardManager.current
+    val buzzerManager = remember { com.digiwear.companion.sound.BuzzerManager(context) }
+    var retroSoundEnabled by remember { mutableStateOf(buzzerManager.isEnabled) }
 
     val ownSpecies = remember(ownMonsterId) { PetSpecies.getById(ownMonsterId) }
 
@@ -291,6 +293,7 @@ fun BattleHubScreen(
             scope.launch {
                 // Dramatic Encounter Flash Sequence
                 encounterFlashEnemyId = fB.speciesId
+                buzzerManager.playAttentionBeep()
                 delay(1050L)
                 encounterFlashEnemyId = null
 
@@ -314,12 +317,18 @@ fun BattleHubScreen(
                         val attackerId = if (turn.attackerIndex == 0) fA.speciesId else fB.speciesId
                         activeCutInTitle = if (turn.attackType == "MEGA_HIT") "MEGA HIT" else "CRITICAL HIT"
                         activeCutInSpeciesId = attackerId
+                        buzzerManager.playCriticalCutInTone()
                         delay(850L)
                         activeCutInSpeciesId = null
+                    } else {
+                        buzzerManager.playAttackImpactTone()
                     }
 
                     delay(520L)
                     idx++
+                }
+                if (activeRes.winnerIndex == 0) {
+                    buzzerManager.playVictoryFanfare()
                 }
                 isAnimatingBattle = false
             }
@@ -343,6 +352,34 @@ fun BattleHubScreen(
             subtitle = "Canonical V-Pet battle formulas, Face-to-Face LCD Arena & Watch Relay",
             accentColor = Color(0xFFEF5350)
         )
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.End,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Box(
+                modifier = Modifier
+                    .background(if (retroSoundEnabled) Color(0xFF1B3B2B) else Color(0xFF263238), RoundedCornerShape(8.dp))
+                    .border(1.dp, if (retroSoundEnabled) Color(0xFF00E676) else Color(0xFF546E7A), RoundedCornerShape(8.dp))
+                    .clickable {
+                        buzzerManager.isEnabled = !buzzerManager.isEnabled
+                        retroSoundEnabled = buzzerManager.isEnabled
+                        if (retroSoundEnabled) buzzerManager.playButtonBeep()
+                    }
+                    .padding(horizontal = 10.dp, vertical = 5.dp)
+            ) {
+                Text(
+                    text = if (retroSoundEnabled) "🔊 RETRO BUZZER: ON" else "🔇 RETRO BUZZER: MUTED",
+                    fontSize = 10.sp,
+                    fontFamily = FontFamily.Monospace,
+                    color = if (retroSoundEnabled) Color(0xFF00E676) else Color(0xFFB0BEC5),
+                    fontWeight = FontWeight.Bold
+                )
+            }
+        }
 
         Spacer(modifier = Modifier.height(10.dp))
 
@@ -1296,6 +1333,7 @@ fun BattleHubScreen(
                                         onClick = {
                                             critBoostTriggered = true
                                             qteActive = false
+                                            buzzerManager.playButtonBeep()
                                         },
                                         colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFF1744))
                                     ) {

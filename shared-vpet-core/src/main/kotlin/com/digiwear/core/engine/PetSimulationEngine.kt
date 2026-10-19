@@ -1,4 +1,4 @@
-﻿package com.digiwear.core.engine
+package com.digiwear.core.engine
 
 import com.digiwear.core.model.PetSpecies
 import com.digiwear.core.model.PetStage
@@ -22,8 +22,11 @@ object PetSimulationEngine {
     fun processDelta(
         currentState: PetState,
         currentTimestampUtc: Long,
-        timeZoneOffset: ZoneOffset = ZoneOffset.UTC
+        timeZoneOffset: ZoneOffset = ZoneOffset.UTC,
+        isCanonicalLifespanEnabled: Boolean = false
     ): PetState {
+        if (currentState.isDeceased) return currentState
+
         val lastTime = if (currentState.lastProcessedTimestampUtc <= 0L) {
             currentTimestampUtc
         } else {
@@ -38,6 +41,17 @@ object PetSimulationEngine {
 
         // Update accumulated live age
         var updatedAge = currentState.ageSeconds + deltaSeconds
+
+        // Check canonical lifespan limit
+        val maxLifespanSec = currentState.lifespanDays * 86400L
+        val isPerished = isCanonicalLifespanEnabled && (updatedAge >= maxLifespanSec || (currentState.careMistakes >= 20 && currentState.isInjured))
+        if (isPerished) {
+            return currentState.copy(
+                ageSeconds = updatedAge,
+                isDeceased = true,
+                lastProcessedTimestampUtc = currentTimestampUtc
+            )
+        }
 
         // Calculate sleep window status based on wall clock time
         val zonedDateTime = Instant.ofEpochSecond(currentTimestampUtc).atZone(timeZoneOffset)
@@ -237,5 +251,64 @@ object PetSimulationEngine {
         } else {
             state
         }
+    }
+
+    /**
+     * Hatches a Generation N+1 Traited Digitama inheriting stat and lifespan bonuses from the departed partner.
+     */
+    fun createTraitedEggState(
+        departedState: PetState,
+        starterSpeciesId: Int = 101,
+        nowUtc: Long = System.currentTimeMillis() / 1000L
+    ): PetState {
+        val nextGen = departedState.generation + 1
+        val bonus = (departedState.traitedEggBonus + 1).coerceAtMost(5)
+        return PetState(
+            speciesId = starterSpeciesId,
+            currentHp = 50 + (bonus * 5),
+            maxHp = 50 + (bonus * 5),
+            hunger = 4,
+            strength = 4,
+            weight = 5,
+            ageSeconds = 0L,
+            careMistakes = 0,
+            effort = 0,
+            overfeedCount = 0,
+            totalBattles = 0,
+            victories = 0,
+            wasteCount = 0,
+            isSleeping = false,
+            lightsOff = false,
+            isInjured = false,
+            lastProcessedTimestampUtc = nowUtc,
+            generation = nextGen,
+            lifespanDays = 14 + (bonus * 2),
+            isDeceased = false,
+            traitedEggBonus = bonus
+        )
+    }
+
+    /**
+     * Creates an immortalized Memorial Graveyard record of a departed partner.
+     */
+    fun createMemorialRecord(
+        state: PetState,
+        causeOfDeath: String = "OLD_AGE",
+        epitaph: String = "Beloved partner of Generation ${state.generation}."
+    ): com.digiwear.core.model.MemorialRecord {
+        val species = PetSpecies.getById(state.speciesId)
+        return com.digiwear.core.model.MemorialRecord(
+            speciesId = state.speciesId,
+            speciesName = species.name,
+            generation = state.generation,
+            finalStage = species.stage.displayName,
+            ageDays = (state.ageSeconds / 86400L).toInt(),
+            battlesWon = state.victories,
+            battlesTotal = state.totalBattles,
+            causeOfDeath = causeOfDeath,
+            epitaph = epitaph,
+            timestampUtc = System.currentTimeMillis() / 1000L,
+            traitedEggBonusGiven = state.traitedEggBonus + 1
+        )
     }
 }

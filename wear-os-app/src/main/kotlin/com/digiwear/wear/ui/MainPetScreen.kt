@@ -97,7 +97,8 @@ fun MainPetScreen(
     onNavigateBattle: () -> Unit,
     onNavigateAdventure: () -> Unit,
     onNavigateStatus: () -> Unit,
-    onNavigateSettings: () -> Unit
+    onNavigateSettings: () -> Unit,
+    onNavigateWorkout: (com.digiwear.core.workout.WorkoutType) -> Unit = {}
 ) {
     val ambientState = LocalAmbientState.current
     val petState by repository.petStateFlow.collectAsState(initial = PetState())
@@ -120,6 +121,18 @@ fun MainPetScreen(
 
     // Training Minigame Quick Time Event state
     var isTrainingActive by remember { mutableStateOf(false) }
+    var showTrainingPicker by remember { mutableStateOf(false) }
+    var flushAnimationProgress by remember { mutableFloatStateOf(-1f) }
+    var medsAnimationProgress by remember { mutableFloatStateOf(-1f) }
+    var lastObservedSpeciesId by remember { mutableIntStateOf(petState.speciesId) }
+    var evolvingFromSpeciesId by remember { mutableStateOf<Int?>(null) }
+
+    LaunchedEffect(petState.speciesId) {
+        if (lastObservedSpeciesId != 0 && petState.speciesId != lastObservedSpeciesId) {
+            evolvingFromSpeciesId = lastObservedSpeciesId
+        }
+        lastObservedSpeciesId = petState.speciesId
+    }
 
     // Periodic time-delta refresh while interactive (strictly paused during Ambient Mode)
     LaunchedEffect(ambientState.isAmbient) {
@@ -172,10 +185,16 @@ fun MainPetScreen(
             }
             VPetMenu.FLUSH -> {
                 scope.launch {
-                    repository.cleanWaste()
                     hapticManager.playStepMilestone()
+                    buzzerManager.playButtonBeep()
+                    for (i in 0..10) {
+                        flushAnimationProgress = i / 10f
+                        delay(60L)
+                    }
+                    repository.cleanWaste()
                     actionFeedback = "Cleaned!"
-                    delay(1000L)
+                    flushAnimationProgress = -1f
+                    delay(800L)
                     actionFeedback = null
                 }
             }
@@ -183,21 +202,28 @@ fun MainPetScreen(
                 onNavigateStatus()
             }
             VPetMenu.TRAIN -> {
-                isTrainingActive = true
+                showTrainingPicker = true
             }
             VPetMenu.MEDS -> {
                 scope.launch {
                     if (petState.isInjured) {
-                        repository.cureInjury()
                         hapticManager.playStepMilestone()
+                        buzzerManager.playButtonBeep()
+                        for (i in 0..10) {
+                            medsAnimationProgress = i / 10f
+                            delay(70L)
+                        }
+                        repository.cureInjury()
                         actionFeedback = "Cured!"
+                        medsAnimationProgress = -1f
                     } else {
                         actionFeedback = "Not Sick"
                     }
-                    delay(1000L)
+                    delay(800L)
                     actionFeedback = null
                 }
             }
+
             VPetMenu.ATTENTION -> {
                 if (petState.attentionCallActive) {
                     val needReason = when {
@@ -393,7 +419,12 @@ fun MainPetScreen(
                 },
                 onNavigateSettings = onNavigateSettings,
                 onNavigateStatus = onNavigateStatus,
-                onNavigateAdventure = onNavigateAdventure
+                onNavigateAdventure = onNavigateAdventure,
+                onHatchTraitedEgg = {
+                    scope.launch {
+                        repository.hatchTraitedEgg()
+                    }
+                }
             )
         } else {
             // ========================================================
@@ -419,8 +450,128 @@ fun MainPetScreen(
                 onSetFeedback = { fb -> actionFeedback = fb }
             )
         }
+
+        // Sweeping Flush Water Wave Animation
+        if (flushAnimationProgress in 0f..1f) {
+            androidx.compose.foundation.Canvas(modifier = Modifier.fillMaxSize()) {
+                val sweepX = size.width * flushAnimationProgress
+                drawRect(
+                    color = Color(0x7700E5FF),
+                    topLeft = androidx.compose.ui.geometry.Offset(0f, 0f),
+                    size = androidx.compose.ui.geometry.Size(sweepX, size.height)
+                )
+                drawLine(
+                    color = Color(0xFF00E5FF),
+                    start = androidx.compose.ui.geometry.Offset(sweepX, 0f),
+                    end = androidx.compose.ui.geometry.Offset(sweepX, size.height),
+                    strokeWidth = 4.dp.toPx()
+                )
+            }
+        }
+
+        // Medical Syringe & Healing Sparkle Animation
+        if (medsAnimationProgress in 0f..1f) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(Color(0x55000000)),
+                contentAlignment = Alignment.Center
+            ) {
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Text("💉", fontSize = 24.sp)
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        text = "✚ ✚ ✚",
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Black,
+                        fontFamily = FontFamily.Monospace,
+                        color = Color(0xFF00E676)
+                    )
+                }
+            }
+        }
+
+        // Training Mode Selector Modal
+        if (showTrainingPicker) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(Color(0xDD070B0E))
+                    .clickable { showTrainingPicker = false },
+                contentAlignment = Alignment.Center
+            ) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth(0.9f)
+                        .background(Color(0xFF111822), RoundedCornerShape(12.dp))
+                        .border(1.dp, Color(0xFF00E5FF), RoundedCornerShape(12.dp))
+                        .padding(10.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(6.dp)
+                ) {
+                    Text(
+                        text = "SELECT TRAINING",
+                        fontSize = 9.sp,
+                        fontWeight = FontWeight.Black,
+                        fontFamily = FontFamily.Monospace,
+                        color = Color(0xFF00E5FF)
+                    )
+
+                    Button(
+                        onClick = {
+                            showTrainingPicker = false
+                            isTrainingActive = true
+                        },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(28.dp),
+                        colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFF2E7D32)),
+                        shape = RoundedCornerShape(14.dp)
+                    ) {
+                        Text("🥊 MINI-GAME", fontSize = 8.sp, fontWeight = FontWeight.Bold, fontFamily = FontFamily.Monospace)
+                    }
+
+                    Button(
+                        onClick = {
+                            showTrainingPicker = false
+                            onNavigateWorkout(com.digiwear.core.workout.WorkoutType.FREE_TRAINING)
+                        },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(28.dp),
+                        colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFFE65100)),
+                        shape = RoundedCornerShape(14.dp)
+                    ) {
+                        Text("⚡ FREE WORKOUT", fontSize = 8.sp, fontWeight = FontWeight.Bold, fontFamily = FontFamily.Monospace)
+                    }
+
+                    Button(
+                        onClick = { showTrainingPicker = false },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(22.dp),
+                        colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFF37474F)),
+                        shape = RoundedCornerShape(11.dp)
+                    ) {
+                        Text("CANCEL", fontSize = 7.sp, fontFamily = FontFamily.Monospace, color = Color.LightGray)
+                    }
+                }
+            }
+        }
+
+        // Evolution Celebration Overlay
+        evolvingFromSpeciesId?.let { prevId ->
+            EvolutionCelebrationOverlay(
+                previousSpeciesId = prevId,
+                newSpeciesId = petState.speciesId,
+                buzzerManager = buzzerManager,
+                hapticManager = hapticManager,
+                onDismiss = { evolvingFromSpeciesId = null }
+            )
+        }
     }
 }
+
 
 /**
  * Authentic Bandai LCD style 3-Button layout with recessed top & bottom 4-icon LCD rails,
@@ -440,7 +591,8 @@ private fun ThreeButtonPetView(
     onPressC: () -> Unit,
     onNavigateSettings: () -> Unit,
     onNavigateStatus: () -> Unit,
-    onNavigateAdventure: () -> Unit
+    onNavigateAdventure: () -> Unit,
+    onHatchTraitedEgg: () -> Unit = {}
 ) {
     val attrColor = when (species.attribute.displayName) {
         "Vaccine" -> Color(0xFF00E5FF)
@@ -654,27 +806,48 @@ private fun ThreeButtonPetView(
                 }
 
                 // Active Menu Prompt or Action Feedback Pill
-                val promptText = if (selectedMenuIndex != null) {
-                    "► ${VPetMenu.entries[selectedMenuIndex].label} ◄"
-                } else actionFeedback ?: if (petState.isSleeping) "ZZZ... SLEEPING" else null
-
-                if (promptText != null) {
+                if (petState.isDeceased) {
                     Box(
                         modifier = Modifier
-                            .background(Color(0x66091016), RoundedCornerShape(4.dp))
-                            .padding(horizontal = 6.dp, vertical = 1.dp)
+                            .background(Color(0xD9381216), RoundedCornerShape(6.dp))
+                            .border(1.dp, Color(0xFFFF5252), RoundedCornerShape(6.dp))
+                            .clickable {
+                                onHatchTraitedEgg()
+                            }
+                            .padding(horizontal = 6.dp, vertical = 2.dp)
                     ) {
                         Text(
-                            text = promptText,
-                            fontSize = 8.sp,
-                            color = if (selectedMenuIndex != null) Color(0xFFFFD54F) else Color(0xFFB9F6CA),
-                            fontWeight = FontWeight.Bold,
+                            text = "🪦 REST IN PEACE • TAP TO HATCH EGG (GEN ${petState.generation + 1})",
+                            fontSize = 7.sp,
+                            fontWeight = FontWeight.Black,
+                            color = Color(0xFFFF8A80),
                             fontFamily = FontFamily.Monospace,
                             textAlign = TextAlign.Center
                         )
                     }
                 } else {
-                    Spacer(modifier = Modifier.height(10.dp))
+                    val promptText = if (selectedMenuIndex != null) {
+                        "► ${VPetMenu.entries[selectedMenuIndex].label} ◄"
+                    } else actionFeedback ?: if (petState.isSleeping) "ZZZ... SLEEPING" else null
+
+                    if (promptText != null) {
+                        Box(
+                            modifier = Modifier
+                                .background(Color(0x66091016), RoundedCornerShape(4.dp))
+                                .padding(horizontal = 6.dp, vertical = 1.dp)
+                        ) {
+                            Text(
+                                text = promptText,
+                                fontSize = 8.sp,
+                                color = if (selectedMenuIndex != null) Color(0xFFFFD54F) else Color(0xFFB9F6CA),
+                                fontWeight = FontWeight.Bold,
+                                fontFamily = FontFamily.Monospace,
+                                textAlign = TextAlign.Center
+                            )
+                        }
+                    } else {
+                        Spacer(modifier = Modifier.height(10.dp))
+                    }
                 }
             }
 
@@ -852,6 +1025,34 @@ private fun ModernTouchPetView(
                         colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFF263238))
                     ) {
                         Text("⚙", fontSize = 10.sp)
+                    }
+                }
+            }
+
+            if (petState.isDeceased) {
+                item {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = displayConfig.horizontalPadding, vertical = 2.dp)
+                            .background(Color(0xD9381216), RoundedCornerShape(8.dp))
+                            .border(1.dp, Color(0xFFFF5252), RoundedCornerShape(8.dp))
+                            .clickable {
+                                scope.launch {
+                                    repository.hatchTraitedEgg()
+                                }
+                            }
+                            .padding(horizontal = 8.dp, vertical = 4.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = "🪦 REST IN PEACE • TAP TO HATCH EGG (GEN ${petState.generation + 1})",
+                            fontSize = 8.sp,
+                            fontWeight = FontWeight.Black,
+                            color = Color(0xFFFF8A80),
+                            fontFamily = FontFamily.Monospace,
+                            textAlign = TextAlign.Center
+                        )
                     }
                 }
             }
@@ -1177,6 +1378,8 @@ private fun ModernTouchPetView(
         }
     }
 }
+
+
 
 /**
  * Authentic Training Minigame featuring a dynamic power gauge Quick Time Event (QTE).

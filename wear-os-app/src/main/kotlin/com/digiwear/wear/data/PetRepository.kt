@@ -108,6 +108,11 @@ class PetRepository private constructor(context: Context) {
     )
     val clockFormatFlow: StateFlow<Boolean> = _clockFormatFlow.asStateFlow()
 
+    private val _lifespanCanonicalEnabledFlow = MutableStateFlow(
+        prefs.getBoolean("lifespan_canonical_enabled", false)
+    )
+    val lifespanCanonicalEnabledFlow: StateFlow<Boolean> = _lifespanCanonicalEnabledFlow.asStateFlow()
+
     private val _beamedCommCodeFlow = MutableStateFlow<String?>(null)
     val beamedCommCodeFlow: StateFlow<String?> = _beamedCommCodeFlow.asStateFlow()
 
@@ -184,6 +189,11 @@ class PetRepository private constructor(context: Context) {
         _clockFormatFlow.value = is24h
     }
 
+    fun setLifespanCanonicalEnabled(enabled: Boolean) {
+        prefs.edit().putBoolean("lifespan_canonical_enabled", enabled).apply()
+        _lifespanCanonicalEnabledFlow.value = enabled
+    }
+
     fun getSettingsMap(): Map<String, String> = mapOf(
         "theme" to _themeFlow.value.id,
         "vibration" to _vibrationFlow.value.toString(),
@@ -197,7 +207,8 @@ class PetRepository private constructor(context: Context) {
         "sleep_schedule" to _sleepScheduleFlow.value,
         "ambient_display_style" to _ambientStyleFlow.value,
         "hazard_alerts_enabled" to _hazardAlertsFlow.value.toString(),
-        "clock_format_24h" to _clockFormatFlow.value.toString()
+        "clock_format_24h" to _clockFormatFlow.value.toString(),
+        "lifespan_canonical_enabled" to _lifespanCanonicalEnabledFlow.value.toString()
     )
 
     fun setBeamedCommCode(code: String?) {
@@ -269,8 +280,43 @@ class PetRepository private constructor(context: Context) {
         dao.getPetState()?.toDomain() ?: PetState()
     }
 
+    suspend fun getAdventureProgress(): AdventureProgress = withContext(Dispatchers.IO) {
+        val currentEntity = dao.getAdventureState()
+        if (currentEntity != null) {
+            val flags = if (currentEntity.clearedFlagsCsv.isBlank()) emptySet() else currentEntity.clearedFlagsCsv.split(",").toSet()
+            val eggs = if (currentEntity.unlockedEggsCsv.isBlank()) emptySet() else currentEntity.unlockedEggsCsv.split(",").mapNotNull { it.toIntOrNull() }.toSet()
+            val items = if (currentEntity.collectedItemsCsv.isBlank()) emptySet() else currentEntity.collectedItemsCsv.split(",").filter { it.isNotBlank() }.toSet()
+            val campaigns = if (currentEntity.unlockedCampaignsCsv.isBlank()) emptySet() else currentEntity.unlockedCampaignsCsv.split(",").filter { it.isNotBlank() }.toSet()
+            AdventureProgress(
+                campaignId = currentEntity.campaignId,
+                currentNodeIndex = currentEntity.currentNodeIndex,
+                accumulatedStepsCurrentNode = currentEntity.accumulatedStepsCurrentNode,
+                totalAdventureSteps = currentEntity.totalAdventureSteps,
+                clearedFlags = flags,
+                isCompleted = currentEntity.isCompleted,
+                unlockedEggs = eggs,
+                collectedItems = items,
+                unlockedCampaigns = campaigns
+            )
+        } else {
+            AdventureProgress()
+        }
+    }
+
     suspend fun savePetState(state: PetState) = withContext(Dispatchers.IO) {
         dao.insertOrUpdatePet(PetEntity.fromDomain(state))
+    }
+
+    val memorialsFlow: Flow<List<com.digiwear.core.model.MemorialRecord>> = dao.getAllMemorialsFlow().map { list ->
+        list.map { it.toDomain() }
+    }.distinctUntilChanged()
+
+    suspend fun getMemorials(): List<com.digiwear.core.model.MemorialRecord> = withContext(Dispatchers.IO) {
+        dao.getAllMemorials().map { it.toDomain() }
+    }
+
+    suspend fun recordMemorial(record: com.digiwear.core.model.MemorialRecord): Long = withContext(Dispatchers.IO) {
+        dao.insertMemorial(MemorialEntity.fromDomain(record))
     }
 
     /**
@@ -304,14 +350,35 @@ class PetRepository private constructor(context: Context) {
     }
 
     /**
+     * Hatches a Generation N+1 Traited Digitama inheriting stat and lifespan bonuses from the departed partner.
+     */
+    suspend fun hatchTraitedEgg(starterSpeciesId: Int = 101): PetState = withContext(Dispatchers.IO) {
+        val current = getPetState()
+        val memorial = PetSimulationEngine.createMemorialRecord(current)
+        dao.insertMemorial(MemorialEntity.fromDomain(memorial))
+        val nextPet = PetSimulationEngine.createTraitedEggState(current, starterSpeciesId)
+        dao.insertOrUpdatePet(PetEntity.fromDomain(nextPet))
+        nextPet
+    }
+
+    /**
      * Processes time-delta decay based on UTC timestamps.
      * Coalesces SQLite writes so flash storage is only written when physiological metrics change
      * or at least 60 seconds have elapsed since the last persisted checkpoint.
      */
     suspend fun processDecay(currentUtc: Long = System.currentTimeMillis() / 1000L): PetState = withContext(Dispatchers.IO) {
         val current = getPetState()
-        val updated = PetSimulationEngine.processDelta(current, currentUtc)
-        val evolved = EvolutionEngine.evaluateEvolution(updated)
+        val isCanonical = _lifespanCanonicalEnabledFlow.value
+        val updated = PetSimulationEngine.processDelta(
+            currentState = current,
+            currentTimestampUtc = currentUtc,
+            isCanonicalLifespanEnabled = isCanonical
+        )
+        if (updated.isDeceased && !current.isDeceased) {
+            val memorial = PetSimulationEngine.createMemorialRecord(updated)
+            dao.insertMemorial(MemorialEntity.fromDomain(memorial))
+        }
+        val evolved = if (!updated.isDeceased) EvolutionEngine.evaluateEvolution(updated) else null
         val finalState = if (evolved != null) {
             EvolutionEngine.evolve(updated, evolved, currentUtc)
         } else {
@@ -326,6 +393,7 @@ class PetRepository private constructor(context: Context) {
             finalState.careMistakes != current.careMistakes ||
             finalState.isSleeping != current.isSleeping ||
             finalState.isInjured != current.isInjured ||
+            finalState.isDeceased != current.isDeceased ||
             finalState.attentionCallActive != current.attentionCallActive ||
             finalState.attentionCallTimestampUtc != current.attentionCallTimestampUtc
 

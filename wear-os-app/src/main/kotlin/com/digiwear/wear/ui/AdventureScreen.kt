@@ -60,6 +60,7 @@ import kotlin.random.Random
 fun AdventureScreen(
     repository: PetRepository,
     hapticManager: HapticManager,
+    onNavigateWorkout: () -> Unit = {},
     onBack: () -> Unit
 ) {
     val progress by repository.adventureStateFlow.collectAsState(initial = AdventureProgress())
@@ -620,6 +621,30 @@ fun AdventureScreen(
                     fontSize = 7.sp,
                     color = Color.Gray,
                     fontFamily = FontFamily.Monospace
+                )
+            }
+        }
+
+        // Start Expedition Workout Action
+        item {
+            Button(
+                onClick = {
+                    hapticManager.playStepMilestone()
+                    onNavigateWorkout()
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = displayConfig.horizontalPadding, vertical = 2.dp)
+                    .height(28.dp),
+                colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFF00B0FF)),
+                shape = RoundedCornerShape(14.dp)
+            ) {
+                Text(
+                    text = "⚡ START EXPEDITION WORKOUT",
+                    fontSize = 8.sp,
+                    fontWeight = FontWeight.Bold,
+                    fontFamily = FontFamily.Monospace,
+                    color = Color.Black
                 )
             }
         }

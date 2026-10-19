@@ -105,7 +105,10 @@ fun PhoneCutInOverlay(
         label = "Glint"
     )
 
+    val buzzerManager = remember { com.digiwear.companion.sound.BuzzerManager(context) }
+
     LaunchedEffect(speciesId, autoDismissMs) {
+        buzzerManager.playCriticalCutInTone()
         if (autoDismissMs != null && autoDismissMs > 0L) {
             delay(autoDismissMs)
             onDismiss?.invoke()

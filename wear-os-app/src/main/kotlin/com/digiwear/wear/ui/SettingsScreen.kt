@@ -75,6 +75,7 @@ fun SettingsScreen(
     val ambientStyle by repository.ambientStyleFlow.collectAsState(initial = "MINIMAL_DOT")
     val hazardAlertsEnabled by repository.hazardAlertsFlow.collectAsState(initial = true)
     val clockFormat24h by repository.clockFormatFlow.collectAsState(initial = false)
+    val isLifespanCanonical by repository.lifespanCanonicalEnabledFlow.collectAsState(initial = false)
 
     var feedbackMessage by remember { mutableStateOf<String?>(null) }
     var showEggSelector by remember { mutableStateOf(false) }
@@ -636,7 +637,52 @@ fun SettingsScreen(
         }
 
         // ==========================================
-        // 12. NFC Tap Bridge Mode Selector
+        // 12. Lifespan & Canonical Death / Traited Digitama
+        // ==========================================
+        item {
+            Spacer(modifier = Modifier.height(6.dp))
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = displayConfig.horizontalPadding),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = "LIFESPAN & DEATH",
+                        fontSize = 9.sp,
+                        color = Color.White,
+                        fontFamily = FontFamily.Monospace
+                    )
+                    Text(
+                        text = if (isLifespanCanonical) "Canonical 1997 (Traited Egg on Death)" else "Immortal (Modern No-Perish)",
+                        fontSize = 7.5.sp,
+                        color = if (isLifespanCanonical) Color(0xFFFF8A80) else Color(0xFF80D8FF)
+                    )
+                }
+                Button(
+                    onClick = {
+                        val next = !isLifespanCanonical
+                        repository.setLifespanCanonicalEnabled(next)
+                        if (isVibrationEnabled) hapticManager.playStepMilestone()
+                    },
+                    modifier = Modifier.size(width = 58.dp, height = 30.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        backgroundColor = if (isLifespanCanonical) Color(0xFFC62828) else Color(0xFF00695C)
+                    )
+                ) {
+                    Text(
+                        text = if (isLifespanCanonical) "CANON" else "IMMRT",
+                        fontSize = 8.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+            }
+        }
+
+        // ==========================================
+        // 13. NFC Tap Bridge Mode Selector
         // ==========================================
         item {
             Spacer(modifier = Modifier.height(6.dp))

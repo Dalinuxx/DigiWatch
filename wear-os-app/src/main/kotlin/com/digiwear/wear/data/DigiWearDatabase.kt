@@ -28,9 +28,18 @@ interface PetDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertOrUpdateAdventure(adventure: AdventureEntity)
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertMemorial(memorial: MemorialEntity): Long
+
+    @Query("SELECT * FROM memorial_graveyard ORDER BY timestampUtc DESC")
+    fun getAllMemorialsFlow(): Flow<List<MemorialEntity>>
+
+    @Query("SELECT * FROM memorial_graveyard ORDER BY timestampUtc DESC")
+    suspend fun getAllMemorials(): List<MemorialEntity>
 }
 
-@Database(entities = [PetEntity::class, AdventureEntity::class], version = 2, exportSchema = false)
+@Database(entities = [PetEntity::class, AdventureEntity::class, MemorialEntity::class], version = 3, exportSchema = false)
 abstract class DigiWearDatabase : RoomDatabase() {
     abstract fun petDao(): PetDao
 }
