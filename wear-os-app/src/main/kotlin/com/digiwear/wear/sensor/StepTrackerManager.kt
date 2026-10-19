@@ -1,4 +1,4 @@
-﻿package com.digiwear.wear.sensor
+package com.digiwear.wear.sensor
 
 import android.content.Context
 import android.hardware.Sensor
@@ -32,14 +32,25 @@ class StepTrackerManager(
     fun startListening() {
         when {
             stepCounterSensor != null -> {
-                sensorManager.registerListener(this, stepCounterSensor, SensorManager.SENSOR_DELAY_NORMAL)
+                // Batch up to 10s in hardware sensor hub to allow AP to sleep
+                sensorManager.registerListener(
+                    this,
+                    stepCounterSensor,
+                    SensorManager.SENSOR_DELAY_NORMAL,
+                    10_000_000
+                )
             }
             stepDetectorSensor != null -> {
-                sensorManager.registerListener(this, stepDetectorSensor, SensorManager.SENSOR_DELAY_NORMAL)
+                sensorManager.registerListener(
+                    this,
+                    stepDetectorSensor,
+                    SensorManager.SENSOR_DELAY_NORMAL,
+                    10_000_000
+                )
             }
             accelerometerSensor != null -> {
-                // AOSP Standard Watch fallback: wrist accelerometer gait peak detection
-                sensorManager.registerListener(this, accelerometerSensor, SensorManager.SENSOR_DELAY_GAME)
+                // AOSP Standard Watch fallback: SENSOR_DELAY_UI (~16Hz) is optimal for gait cadence while saving >60% CPU interrupts
+                sensorManager.registerListener(this, accelerometerSensor, SensorManager.SENSOR_DELAY_UI)
             }
         }
     }
@@ -65,7 +76,7 @@ class StepTrackerManager(
      */
     fun onExitAmbient() {
         if (stepCounterSensor == null && accelerometerSensor != null) {
-            sensorManager.registerListener(this, accelerometerSensor, SensorManager.SENSOR_DELAY_GAME)
+            sensorManager.registerListener(this, accelerometerSensor, SensorManager.SENSOR_DELAY_UI)
         }
     }
 

@@ -12,11 +12,12 @@ build/
 captures/
 .externalNativeBuild/
 .cxx/
-*.apk
 *.aab
 *.dex
 *.class
 *.dm
+*.apk
+!release_bin/*.apk
 
 # Sensitive Signing Keys & Release Keystores
 signing/
@@ -47,6 +48,7 @@ docs/REDDIT_POST.md
 docs/*REDDIT*
 *REDDIT*
 *reddit*
+*.reddit.md
 marketing/
 social/
 release_notes_draft*
@@ -59,8 +61,19 @@ scratch/
 *.tmp
 *.bak
 *.swp
+*~
+*.hprof
+*.pyc
+__pycache__/
 
-# IDE & OS Metadata
+# IDE, OS & Emulator Metadata
 /.idea/
+.idea/
+*.iws
+*.ipr
+*.avd
 .DS_Store
 Thumbs.db
+ehthumbs.db
+[Dd]esktop.ini
+$RECYCLE.BIN/
