@@ -1,4 +1,4 @@
-package com.digiwear.wear.ui
+﻿package com.digiwear.wear.ui
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -70,6 +70,7 @@ import kotlin.random.Random
 fun BattleScreen(
     repository: PetRepository,
     hapticManager: HapticManager,
+    buzzerManager: com.digiwear.wear.sound.BuzzerManager = remember { com.digiwear.wear.sound.BuzzerManager() },
     onBack: () -> Unit
 ) {
     val petState by repository.petStateFlow.collectAsState(initial = PetState())
@@ -116,6 +117,7 @@ fun BattleScreen(
     var wildEncounter by remember { mutableStateOf<WildScanEncounter?>(null) }
     var opponentCodeInput by remember { mutableStateOf("") }
     var battleResult by remember { mutableStateOf<BattleResult?>(null) }
+    var activeEnvEffect by remember { mutableStateOf("none") }
     var currentTurnIndex by remember { mutableIntStateOf(0) }
     var isBattling by remember { mutableStateOf(false) }
     var battleStatusText by remember { mutableStateOf<String?>(null) }
@@ -180,6 +182,7 @@ fun BattleScreen(
 
     val startBattleWithCode: (String, BattleMode, String) -> Unit = { code, mode, envEffect ->
         try {
+            activeEnvEffect = envEffect
             val opponentPayload = CommCodeCodec.decodeAuto(code)
             val oppSpecies = PetSpecies.getById(opponentPayload.monsterId)
 
@@ -233,6 +236,7 @@ fun BattleScreen(
             scope.launch {
                 // Dramatic Encounter Flash Sequence
                 encounterFlashEnemyId = oppSpecies.id
+                buzzerManager.playEncounterAlarm()
                 hapticManager.playAttentionAlert()
                 delay(1050L)
                 encounterFlashEnemyId = null
@@ -251,6 +255,7 @@ fun BattleScreen(
                                 criticalBoostActive = true
                                 activeResult = critResult
                                 battleResult = critResult
+                                buzzerManager.playQteClickTone()
                                 hapticManager.playAttackImpact()
                                 true
                             } else false
@@ -270,11 +275,13 @@ fun BattleScreen(
                         val attackerId = if (turn.attackerIndex == 0) petState.speciesId else oppSpecies.id
                         activeCutInTitle = if (turn.attackType == "MEGA_HIT") "MEGA HIT" else "CRITICAL HIT"
                         activeCutInSpeciesId = attackerId
+                        buzzerManager.playCriticalCutInTone()
                         hapticManager.playAttackImpact()
                         delay(750L)
                         activeCutInSpeciesId = null
                     }
 
+                    buzzerManager.playAttackImpactTone()
                     hapticManager.playAttackImpact()
                     delay(700L)
                     i++
@@ -282,6 +289,7 @@ fun BattleScreen(
 
                 val won = activeResult.winnerIndex == 0
                 if (won) {
+                    buzzerManager.playVictoryFanfare()
                     hapticManager.playVictoryFanfare()
                 }
                 repository.recordBattleResult(won)
@@ -321,6 +329,7 @@ fun BattleScreen(
                 .background(Color(0xFF0A1420)),
             contentAlignment = Alignment.Center
         ) {
+            EnvironmentParticleCanvas(environmentEffect = activeEnvEffect)
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center,

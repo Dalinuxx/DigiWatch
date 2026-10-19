@@ -1,4 +1,4 @@
-package com.digiwear.companion.ui
+﻿package com.digiwear.companion.ui
 
 import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
@@ -1219,6 +1219,7 @@ fun BattleHubScreen(
                             .border(1.dp, Color(0xFF4CAF50), RoundedCornerShape(12.dp))
                             .padding(12.dp)
                     ) {
+                        EnvironmentParticleCanvas(environmentEffect = selectedEnvironment)
                         Column(horizontalAlignment = Alignment.CenterHorizontally) {
                             Text(
                                 text = "${selectedBattleMode.displayName.uppercase()} • ENV: ${selectedEnvironment.uppercase()}",

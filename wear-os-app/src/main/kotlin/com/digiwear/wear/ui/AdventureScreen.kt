@@ -1,4 +1,4 @@
-package com.digiwear.wear.ui
+﻿package com.digiwear.wear.ui
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -60,6 +60,7 @@ import kotlin.random.Random
 fun AdventureScreen(
     repository: PetRepository,
     hapticManager: HapticManager,
+    buzzerManager: com.digiwear.wear.sound.BuzzerManager = remember { com.digiwear.wear.sound.BuzzerManager() },
     onNavigateWorkout: () -> Unit = {},
     onBack: () -> Unit
 ) {
@@ -162,6 +163,7 @@ fun AdventureScreen(
         encounterFlashEnemyId = enemySpeciesId
         encounterFlashIsBoss = (bossToClear != null)
         encounterFlashBossTitle = bossToClear?.bossName
+        buzzerManager.playEncounterAlarm()
         hapticManager.playAttentionAlert()
         delay(1050L)
         encounterFlashEnemyId = null
@@ -183,6 +185,7 @@ fun AdventureScreen(
                         criticalBoostActive = true
                         chosenResult = critResult
                         activeBattleResult = critResult
+                        buzzerManager.playQteClickTone()
                         hapticManager.playAttackImpact()
                         true
                     } else false
@@ -202,11 +205,13 @@ fun AdventureScreen(
                 val attackerSpeciesId = if (turn.attackerIndex == 0) petState.speciesId else enemySpecies.id
                 activeCutInTitle = if (turn.attackType == "MEGA_HIT") "MEGA HIT" else "CRITICAL HIT"
                 activeCutInSpeciesId = attackerSpeciesId
+                buzzerManager.playCriticalCutInTone()
                 hapticManager.playAttackImpact()
                 delay(750L)
                 activeCutInSpeciesId = null
             }
 
+            buzzerManager.playAttackImpactTone()
             hapticManager.playAttackImpact()
             delay(560L)
             idx++
@@ -219,6 +224,7 @@ fun AdventureScreen(
 
         if (bossToClear != null) {
             if (won) {
+                buzzerManager.playVictoryFanfare()
                 hapticManager.playVictoryFanfare()
                 repository.recordBossVictory(bossToClear)
                 val eggRewardMsg = bossToClear.rewardEggId?.let { eggId ->
@@ -238,6 +244,7 @@ fun AdventureScreen(
         } else {
             wildEncounterMonsterId = null
             if (won) {
+                buzzerManager.playVictoryFanfare()
                 hapticManager.playVictoryFanfare()
                 eventMessage = "⚔ Defeated Wild ${enemySpecies.name} (${chosenResult.turns.size} turns)! +1 Win"
             } else {
@@ -311,6 +318,7 @@ fun AdventureScreen(
                 .background(Color(0xFF070B10)),
             contentAlignment = Alignment.Center
         ) {
+            EnvironmentParticleCanvas(environmentEffect = currentNode.environmentEffect)
             Column(
                 modifier = Modifier
                     .fillMaxSize()
@@ -498,10 +506,14 @@ fun AdventureScreen(
         return
     }
 
-    ScalingLazyColumn(
+    Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xFF0B1410)),
+            .background(Color(0xFF0B1410))
+    ) {
+        EnvironmentParticleCanvas(environmentEffect = currentNode.environmentEffect)
+        ScalingLazyColumn(
+            modifier = Modifier.fillMaxSize(),
         state = listState,
         contentPadding = displayConfig.contentPadding,
         horizontalAlignment = Alignment.CenterHorizontally
@@ -896,6 +908,7 @@ fun AdventureScreen(
                 Text("BACK", fontSize = 10.sp)
             }
         }
+    }
     }
 
     // High-Impact Battle Cut-In Overlay

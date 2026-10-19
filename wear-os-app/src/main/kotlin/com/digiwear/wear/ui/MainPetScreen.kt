@@ -186,7 +186,7 @@ fun MainPetScreen(
             VPetMenu.FLUSH -> {
                 scope.launch {
                     hapticManager.playStepMilestone()
-                    buzzerManager.playButtonBeep()
+                    buzzerManager.playFlushTone()
                     for (i in 0..10) {
                         flushAnimationProgress = i / 10f
                         delay(60L)
@@ -208,7 +208,7 @@ fun MainPetScreen(
                 scope.launch {
                     if (petState.isInjured) {
                         hapticManager.playStepMilestone()
-                        buzzerManager.playButtonBeep()
+                        buzzerManager.playHealTone()
                         for (i in 0..10) {
                             medsAnimationProgress = i / 10f
                             delay(70L)

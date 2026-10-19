@@ -267,11 +267,13 @@ fun WearNavigationHost(
         WearScreen.BATTLE -> BattleScreen(
             repository = repository,
             hapticManager = hapticManager,
+            buzzerManager = buzzerManager,
             onBack = { currentScreen = WearScreen.MAIN }
         )
         WearScreen.ADVENTURE -> AdventureScreen(
             repository = repository,
             hapticManager = hapticManager,
+            buzzerManager = buzzerManager,
             onNavigateWorkout = {
                 activeWorkoutType = com.digiwear.core.workout.WorkoutType.EXPEDITION_TREK
                 currentScreen = WearScreen.WORKOUT

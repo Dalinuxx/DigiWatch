@@ -1,4 +1,4 @@
-﻿package com.digiwear.wear.sound
+package com.digiwear.wear.sound
 
 import android.media.AudioManager
 import android.media.ToneGenerator
@@ -10,7 +10,7 @@ import kotlinx.coroutines.launch
 /**
  * Authentic 1997 Bandai Piezo Buzzer Sound Engine.
  * Produces the signature 8-bit high-pitch square-wave beeps for Call signals,
- * button presses, attack hits, and victory fanfares.
+ * button presses, attack hits, critical cut-ins, and victory fanfares.
  * Completely optional: Muted by default so users in meetings are not disturbed.
  */
 class BuzzerManager {
@@ -63,6 +63,88 @@ class BuzzerManager {
         scope.launch {
             try {
                 toneGenerator?.startTone(ToneGenerator.TONE_PROP_BEEP2, 100)
+            } catch (_: Exception) {}
+        }
+    }
+
+    /**
+     * Dramatic battle encounter alarm siren for wild scans and boss clashes.
+     */
+    fun playEncounterAlarm() {
+        if (!isEnabled) return
+        scope.launch {
+            val gen = toneGenerator ?: return@launch
+            try {
+                for (i in 0 until 3) {
+                    gen.startTone(ToneGenerator.TONE_CDMA_EMERGENCY_RINGBACK, 120)
+                    delay(140L)
+                }
+            } catch (_: Exception) {}
+        }
+    }
+
+    /**
+     * Dramatic double-impact chord for Critical Hit cut-ins and mega hits.
+     */
+    fun playCriticalCutInTone() {
+        if (!isEnabled) return
+        scope.launch {
+            val gen = toneGenerator ?: return@launch
+            try {
+                gen.startTone(ToneGenerator.TONE_CDMA_HIGH_L, 120)
+                delay(140L)
+                gen.startTone(ToneGenerator.TONE_PROP_PROMPT, 180)
+            } catch (_: Exception) {}
+        }
+    }
+
+    /**
+     * Tactile QTE reflex confirmation chirp.
+     */
+    fun playQteClickTone() {
+        if (!isEnabled) return
+        scope.launch {
+            try {
+                toneGenerator?.startTone(ToneGenerator.TONE_PROP_ACK, 40)
+            } catch (_: Exception) {}
+        }
+    }
+
+    /**
+     * Digital evolution code glitch frequency.
+     */
+    fun playEvolutionGlitchTone() {
+        if (!isEnabled) return
+        scope.launch {
+            try {
+                toneGenerator?.startTone(ToneGenerator.TONE_CDMA_NETWORK_USA_RINGBACK, 80)
+            } catch (_: Exception) {}
+        }
+    }
+
+    /**
+     * Sweeping water flush wave tone.
+     */
+    fun playFlushTone() {
+        if (!isEnabled) return
+        scope.launch {
+            try {
+                toneGenerator?.startTone(ToneGenerator.TONE_CDMA_CALL_SIGNAL_ISDN_NORMAL, 160)
+            } catch (_: Exception) {}
+        }
+    }
+
+    /**
+     * Medical recovery chime.
+     */
+    fun playHealTone() {
+        if (!isEnabled) return
+        scope.launch {
+            val gen = toneGenerator ?: return@launch
+            try {
+                gen.startTone(ToneGenerator.TONE_PROP_BEEP2, 90)
+                delay(100L)
+                gen.startTone(ToneGenerator.TONE_PROP_PROMPT, 150)
             } catch (_: Exception) {}
         }
     }

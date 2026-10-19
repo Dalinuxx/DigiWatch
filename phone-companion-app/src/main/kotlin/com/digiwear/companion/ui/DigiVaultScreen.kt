@@ -1,4 +1,4 @@
-package com.digiwear.companion.ui
+﻿package com.digiwear.companion.ui
 
 import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
@@ -88,6 +88,9 @@ fun DigiVaultScreen(
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
     val clipboardManager = LocalClipboardManager.current
+    val buzzerManager = remember { com.digiwear.companion.sound.BuzzerManager(context) }
+    var activeCelebrationSpeciesId by remember { mutableStateOf<Int?>(null) }
+    var activeCelebrationTitle by remember { mutableStateOf<String?>(null) }
 
     var activeTab by remember { mutableIntStateOf(0) } // 0: CRYO-VAULT, 1: MEMORIAL GRAVEYARD
     var searchQuery by remember { mutableStateOf("") }
@@ -854,6 +857,9 @@ fun DigiVaultScreen(
                             DigiWearAppWidgetProvider.updateAllWidgets(context)
 
                             pendingFusionPair = null
+                            activeCelebrationSpeciesId = targetSp.id
+                            activeCelebrationTitle = "DNA JOGRESS AWAKENING"
+                            buzzerManager.playVictoryFanfare()
                             actionStatusMessage = "Awakened ${targetSp.name} via ${recipe.fusionType.displayName}!"
                         }
                     },
@@ -866,6 +872,18 @@ fun DigiVaultScreen(
                 TextButton(onClick = { pendingFusionPair = null }) {
                     Text("Cancel", color = Color.Gray)
                 }
+            }
+        )
+    }
+
+    activeCelebrationSpeciesId?.let { celebrateId ->
+        PhoneCutInOverlay(
+            speciesId = celebrateId,
+            title = activeCelebrationTitle ?: "DNA JOGRESS AWAKENING",
+            autoDismissMs = 2200L,
+            onDismiss = {
+                activeCelebrationSpeciesId = null
+                activeCelebrationTitle = null
             }
         )
     }

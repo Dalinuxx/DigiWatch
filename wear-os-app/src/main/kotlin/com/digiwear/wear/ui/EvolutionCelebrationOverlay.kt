@@ -85,13 +85,7 @@ fun EvolutionCelebrationOverlay(
 
     // High-resolution Reference Book character portrait
     val highResBitmap: ImageBitmap? = remember(newSpeciesId) {
-        try {
-            context.assets.open("portraits/$newSpeciesId.png").use { stream ->
-                BitmapFactory.decodeStream(stream)?.asImageBitmap()
-            }
-        } catch (_: Exception) {
-            null
-        }
+        com.digiwear.wear.render.PortraitAssetCache.getPortrait(context, newSpeciesId)
     }
 
     // Sequence orchestrator

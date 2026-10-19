@@ -75,13 +75,7 @@ fun CutInOverlay(
     val context = LocalContext.current
 
     val highResBitmap = remember(speciesId) {
-        try {
-            context.assets.open("portraits/$speciesId.png").use { stream ->
-                BitmapFactory.decodeStream(stream)?.asImageBitmap()
-            }
-        } catch (_: Exception) {
-            null
-        }
+        com.digiwear.wear.render.PortraitAssetCache.getPortrait(context, speciesId)
     }
 
     val infiniteTransition = rememberInfiniteTransition(label = "CutInAnim")

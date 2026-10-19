@@ -1,4 +1,4 @@
-package com.digiwear.companion.ui
+﻿package com.digiwear.companion.ui
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
@@ -100,6 +100,7 @@ fun PetDashboardScreen(
     val species = remember(petState.speciesId) { PetSpecies.getById(petState.speciesId) }
     val scrollState = rememberScrollState()
     val context = LocalContext.current
+    val buzzerManager = remember { com.digiwear.companion.sound.BuzzerManager(context) }
 
     val persistPhoneSnapshot: suspend (PetState) -> Unit = { updated ->
         val sp = PetSpecies.getById(updated.speciesId)
@@ -149,7 +150,7 @@ fun PetDashboardScreen(
             watchSettings["vibration"]?.let { vibrationEnabled = it.toBoolean() }
             watchSettings["vpet_3button_mode"]?.let { threeButtonMode = it.toBoolean() }
             watchSettings["pendulum_shake_mode"]?.let { pendulumShakeMode = it.toBoolean() }
-            watchSettings["sound_enabled"]?.let { soundEnabled = it.toBoolean() }
+            watchSettings["sound_enabled"]?.let { soundEnabled = it.toBoolean(); buzzerManager.isEnabled = it.toBoolean() }
             watchSettings["nfc_bridge_mode"]?.let { nfcBridgeMode = it }
             watchSettings["display_shape_override"]?.let { displayShapeOverride = it }
             watchSettings["daily_step_goal"]?.toIntOrNull()?.let { dailyStepGoal = it }
@@ -211,7 +212,7 @@ fun PetDashboardScreen(
                                     watchSettings["vibration"]?.let { vibrationEnabled = it.toBoolean() }
                                     watchSettings["vpet_3button_mode"]?.let { threeButtonMode = it.toBoolean() }
                                     watchSettings["pendulum_shake_mode"]?.let { pendulumShakeMode = it.toBoolean() }
-                                    watchSettings["sound_enabled"]?.let { soundEnabled = it.toBoolean() }
+                                    watchSettings["sound_enabled"]?.let { soundEnabled = it.toBoolean(); buzzerManager.isEnabled = it.toBoolean() }
                                     watchSettings["nfc_bridge_mode"]?.let { nfcBridgeMode = it }
                                     watchSettings["display_shape_override"]?.let { displayShapeOverride = it }
                                     watchSettings["daily_step_goal"]?.toIntOrNull()?.let { dailyStepGoal = it }
@@ -471,6 +472,7 @@ fun PetDashboardScreen(
                             wearableManager.sendPetStateToWatch(finalState)
                         }
                         syncStatus = if (evolved != null) {
+                            buzzerManager.playVictoryFanfare()
                             "✨ DIGIVOLUTION! Partner evolved into ${evolved.name}!"
                         } else {
                             "$label applied (${if (watchUpdated != null) "Watch + Phone" else "Phone Local"})"
@@ -484,6 +486,7 @@ fun PetDashboardScreen(
                 ) {
                     OutlinedButton(
                         onClick = {
+                            buzzerManager.playButtonBeep()
                             executeCareAction("FEED_MEAL", { PetSimulationEngine.feedMeal(it, System.currentTimeMillis() / 1000L) }, "🍖 Fed Ration Meat")
                             shellPreviewStance = 2
                         },
@@ -493,6 +496,7 @@ fun PetDashboardScreen(
                     }
                     OutlinedButton(
                         onClick = {
+                            buzzerManager.playButtonBeep()
                             executeCareAction("FEED_PROTEIN", { PetSimulationEngine.feedProtein(it, System.currentTimeMillis() / 1000L) }, "💊 Fed Protein Vitamin")
                             shellPreviewStance = 2
                         },
@@ -502,6 +506,7 @@ fun PetDashboardScreen(
                     }
                     OutlinedButton(
                         onClick = {
+                            buzzerManager.playAttackImpactTone()
                             executeCareAction("TRAIN_WIN", { PetSimulationEngine.train(it, true, System.currentTimeMillis() / 1000L) }, "🥊 Mega Hit Training")
                             shellPreviewStance = 3
                         },
@@ -519,6 +524,7 @@ fun PetDashboardScreen(
                 ) {
                     OutlinedButton(
                         onClick = {
+                            buzzerManager.playFlushTone()
                             executeCareAction("CLEAN_WASTE", { PetSimulationEngine.cleanWaste(it) }, "🧹 Flushed Bio-Waste")
                         },
                         modifier = Modifier.weight(1f)
@@ -535,6 +541,7 @@ fun PetDashboardScreen(
                     }
                     OutlinedButton(
                         onClick = {
+                            buzzerManager.playHealTone()
                             executeCareAction("CURE_INJURY", { PetSimulationEngine.cureInjury(it) }, "💉 Administered Med-Shot")
                         },
                         modifier = Modifier.weight(1f)
