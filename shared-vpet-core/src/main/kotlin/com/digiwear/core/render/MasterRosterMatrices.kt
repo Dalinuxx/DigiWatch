@@ -1,9 +1,9 @@
-﻿package com.digiwear.core.render
+package com.digiwear.core.render
 
 /**
- * Dot-matrix pixel art matrices and palettes for the 95 master expansion species (#123..#129, #232..#250, #350..#372, #444..#464, #558..#582).
+ * Dot-matrix pixel art matrices and palettes for all master expansion species.
  * Every sprite is a 16x16 authentic dot-matrix array with distinct silhouette, outline, and multi-tone shading.
- * Together with the base 205 species, DigiWear features exactly 300 unique canonical Digimon.
+ * Together with the base species, DigiWear features exactly 350 unique canonical Digimon.
  */
 object MasterRosterMatrices {
 

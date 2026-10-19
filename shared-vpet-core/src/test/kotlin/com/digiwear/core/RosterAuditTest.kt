@@ -33,7 +33,7 @@ class RosterAuditTest {
             assertTrue("Species ${sp.name} basePower must be > 0", sp.basePower > 0)
             assertTrue("Species ${sp.name} baselineWeight must be > 0", sp.baselineWeight > 0)
 
-            // Verify strict ID-to-stage range mapping across all 300 species
+            // Verify strict ID-to-stage range mapping across all 350 species
             when (sp.id) {
                 in 100..199 -> assertTrue("${sp.name} (${sp.id}) must be Baby", sp.stage == PetStage.BABY_I || sp.stage == PetStage.BABY_II)
                 in 200..299 -> assertEquals("${sp.name} (${sp.id}) must be Child", PetStage.CHILD, sp.stage)
@@ -327,8 +327,8 @@ class RosterAuditTest {
         sb.appendLine()
         sb.appendLine("You can hatch any of these **10 Starter Digi-Eggs** at any time from **Watch Settings → Hatch New Digi-Egg** or **Phone Companion → Remote Care Deck**:")
         sb.appendLine()
-        sb.appendLine("| Egg ID | Baby I (Fresh) | Evolves Into (Baby II) | Version / Family Origin | Condition |")
-        sb.appendLine("| :---: | :--- | :--- | :--- | :--- |")
+        sb.appendLine("| Egg ID | Baby I (Fresh) | Evolves Into (Baby II Targets & Conditions) | Version / Family Origin |")
+        sb.appendLine("| :---: | :--- | :--- | :--- |")
         val eggOrigins = mapOf(
             101 to "Digital Monster Ver. 1",
             103 to "Digital Monster Ver. 2",
@@ -343,9 +343,11 @@ class RosterAuditTest {
         )
         for (eggId in com.digiwear.core.engine.EvolutionEngine.STARTER_EGG_IDS) {
             val eggSp = PetSpecies.getById(eggId)
-            val rule = eggSp.evolutionRules.first()
-            val nextSp = PetSpecies.getById(rule.targetSpeciesId)
-            sb.appendLine("| `#$eggId` | **${eggSp.name}** | `#${nextSp.id}` **${nextSp.name}** | ${eggOrigins[eggId] ?: "Classic V-Pet"} | ${com.digiwear.core.engine.EvolutionEngine.describeRule(rule)} |")
+            val targetsDesc = eggSp.evolutionRules.joinToString("<br>") { r ->
+                val nextSp = PetSpecies.getById(r.targetSpeciesId)
+                "→ **`#${nextSp.id}` ${nextSp.name}**: `${com.digiwear.core.engine.EvolutionEngine.describeRule(r)}`"
+            }
+            sb.appendLine("| `#$eggId` | **${eggSp.name}** | $targetsDesc | ${eggOrigins[eggId] ?: "Classic V-Pet"} |")
         }
 
         for (stage in listOf(PetStage.BABY_II, PetStage.CHILD, PetStage.ADULT, PetStage.PERFECT, PetStage.ULTIMATE)) {
@@ -381,12 +383,13 @@ class RosterAuditTest {
             }
         }
 
+        val totalJogress = JogressEngine.RECIPES.size
         sb.appendLine()
         sb.appendLine("---")
         sb.appendLine()
-        sb.appendLine("## ⚡ DNA Digivolution, Mode Change & DigiXros Recipes (All 54 Combinations)")
+        sb.appendLine("## ⚡ DNA Digivolution, Mode Change & DigiXros Recipes (All $totalJogress Combinations)")
         sb.appendLine()
-        sb.appendLine("Combine any two compatible Digimon via **Watch D-Com Battle Link**, **Phone Battle Command Center**, or **Phone DigiVault** to awaken these 54 special forms:")
+        sb.appendLine("Combine any two compatible Digimon via **Watch D-Com Battle Link**, **Phone Battle Command Center**, or **Phone DigiVault** to awaken these $totalJogress special forms:")
         sb.appendLine()
         sb.appendLine("| # | Primary Partner | Secondary Partner | Awakened Form | Fusion Type | Lore / Description |")
         sb.appendLine("| :---: | :--- | :--- | :--- | :---: | :--- |")

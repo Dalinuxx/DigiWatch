@@ -1,4 +1,4 @@
-﻿package com.digiwear.companion.data
+package com.digiwear.companion.data
 
 import android.content.Context
 import androidx.room.Dao
@@ -57,7 +57,7 @@ abstract class PhoneDatabase : RoomDatabase() {
                 instance ?: Room.databaseBuilder(
                     context.applicationContext,
                     PhoneDatabase::class.java,
-                    "digiwatch_companion.db"
+                    "digiwear_companion.db"
                 )
                     .fallbackToDestructiveMigration()
                     .build().also { instance = it }

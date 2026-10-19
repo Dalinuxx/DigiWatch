@@ -1,4 +1,4 @@
-﻿package com.digiwear.companion.datalayer
+package com.digiwear.companion.datalayer
 
 import android.content.Context
 import com.digiwear.core.model.PetState
@@ -38,7 +38,7 @@ class PhoneWearableManager(private val context: Context) {
         private const val AOSP_NODE_PREFIX = "aosp://"
     }
 
-    private val prefs = context.getSharedPreferences("digiwatch_companion_prefs", Context.MODE_PRIVATE)
+    private val prefs = context.getSharedPreferences("digiwear_companion_prefs", Context.MODE_PRIVATE)
     private val json = Json { ignoreUnknownKeys = true }
 
     private val nodeClient by lazy {

@@ -1,10 +1,10 @@
-﻿package com.digiwear.core.model
+package com.digiwear.core.model
 
 import com.digiwear.core.fusion.FusionType
 import com.digiwear.core.fusion.JogressRecipe
 
 /**
- * Expanded roster of 135 additional species layered on top of the base 165-species catalog (bringing the total to 300).
+ * Expanded roster of 185 additional species layered on top of the base 165-species catalog (bringing the total to 350).
  *
  * All IDs are < 0xFFF, so they transmit through both the 128-bit Base32 Comm Code (16-bit monster ID)
  * and the Digimon 0nl1ne / D-Com `V1-XXXX-XXXX-XXXX` DigiROM (12-bit monster ID) without any protocol change.
@@ -17,8 +17,8 @@ import com.digiwear.core.fusion.JogressRecipe
  *  - 109 Zurumon -> Pagumon / Yaamon / Kapurimon
  *  - 111 Mokumon -> DemiMeramon / Gigimon / Hopmon / Sunmon
  *  - 113 Kuramon -> DemiVeemon / Tsumemon
- *  - 130 Nyokimon -> Nyaromon
- *  - 131 Pichimon -> Pyocomon
+ *  - 130 Nyokimon -> Nyaromon / Poromon
+ *  - 131 Pichimon -> Pyocomon / Upamon
  *  - 132 Pukamon  -> Dorimon
  */
 object ExpandedRoster {

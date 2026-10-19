@@ -1,4 +1,4 @@
-﻿# DigiWear 📟⌚
+# DigiWear 📟⌚
 ### Dual-Device Standalone Wear OS Virtual Pet System & Android Companion Ecosystem
 
 [![Platform](https://img.shields.io/badge/Platform-Wear%20OS%203.0%2B%20%7C%20Android%2013%2B-blue?logo=android&logoColor=white)](https://developer.android.com/wear)
@@ -150,7 +150,7 @@ State decay strictly follows the original Bandai virtual pet timing schedules ba
 - **Metabolic Sleep Preservation**: Turning off lights when the pet enters its designated sleep window halts hunger and strength decay clocks.
 - **Care Mistakes**: Triggered only if hunger/strength calls or unextinguished sleep lights are ignored beyond the stage grace window.
 - **Overfeeding Mechanic**: Feeding up to 5 additional meals beyond full satiety increases weight and fulfills specific evolution branch criteria without prematurely sickening the pet.
-- **10 Starter Digi-Eggs**: Choose from Botamon (`#101`), Punimon (`#102`), Poyomon (`#103`), Yuramon (`#104`), Zurumon (`#105`), Mokumon (`#106`), Kuramon (`#107`), Pitchmon (`#108`), Nyokimon (`#109`), or Choromon (`#110`) upon birth or reset.
+- **10 Starter Digi-Eggs**: Choose from Botamon (`#101`), Punimon (`#103`), Poyomon (`#105`), Yuramon (`#107`), Zurumon (`#109`), Mokumon (`#111`), Kuramon (`#113`), Nyokimon (`#130`), Pichimon (`#131`), or Pukamon (`#132`) upon birth or reset.
 
 ---
 
@@ -196,8 +196,8 @@ Every monster is rendered via a uniform 64 × 64 px matrix canvas at `FilterQual
 ```
 
 #### Roster Distribution (350 Species):
-- **Baby I (10 — `#101`–`#110`)**: Botamon, Punimon, Poyomon, Yuramon, Zurumon, Mokumon, Kuramon, Pitchmon, Nyokimon, Choromon.
-- **Baby II (24 — `#111`–`#129`, `#130`–`#134`)**: Koromon, Tsunomon, Tokomon, Tanemon, Pagumon, DemiMeramon, DemiVeemon, Gigimon, Viximon, Gummymon, Chocomon, Yaamon, Bukamon, Pyocomon, Kapurimon, Nyaromon, Dorimon, Minomon, Hopmon, Tsumemon, Moonmon, Sunmon, Poromon, Upamon.
+- **Baby I (10 — `#101`, `#103`, `#105`, `#107`, `#109`, `#111`, `#113`, `#130`, `#131`, `#132`)**: Botamon, Punimon, Poyomon, Yuramon, Zurumon, Mokumon, Kuramon, Nyokimon, Pichimon, Pukamon.
+- **Baby II (24 — `#102`, `#104`, `#106`, `#108`, `#110`, `#112`, `#114`–`#129`, `#133`–`#134`)**: Koromon, Tsunomon, Tokomon, Tanemon, Pagumon, DemiMeramon, DemiVeemon, Gigimon, Viximon, Gummymon, Chocomon, Yaamon, Bukamon, Pyocomon, Dorimon, Tsumemon, Nyaromon, Kapurimon, Minomon, Sunmon, Moonmon, Ketomon, Poromon, Upamon.
 - **Child (60 — `#201`–`#260`)**: Agumon, Betamon, Gabumon, Elecmon, Patamon, Biyomon, Palmon, Tentomon, Gazimon, Gizamon, Kunemon, Veemon, Wormmon, Guilmon, Renamon, Terriermon, Lopmon, Impmon, BlackAgumon, BlackGabumon, Lucemon, Hackmon, Salamon, Gaomon, Hawkmon, Armadillomon, Dorumon, Kotemon, Monodramon, Floramon, Goblimon, Gomamon, Gotsumon, Otamamon, Candlemon, Bakumon, Hagurumon, Mushroomon, Crabmon, Syakomon, Lalamon, Falcomon, Kudamon, Ryudamon, Dracomon, Kamemon, Coronamon, Lunamon, ToyAgumon, Keramon, Pulsemon, Gammamon, Angoramon, Jellymon, Loogamon, Shoutmon, Gumdramon, Agunimon, Lobomon, Gazimon (Modern).
 - **Adult (87 — `#301`–`#387`)**: Greymon, Tyrannomon, Devimon, Meramon, Numemon, Garurumon, Angemon, Togemon, Birdramon, Kabuterimon, Monochromon, Ogremon, Leomon, Seadramon, Sukamon, DarkTyrannomon, Devidramon, Cyclonemon, Tuskmon, Flymon, Raremon, Kuwagamon, Kokatorimon, Coelamon, Nanimon, Bakemon, Shellmon, Unimon, Frigimon, Vegiemon, Veedramon, Flamedramon, Stingmon, Growlmon, Kyubimon, Gargomon, Wizardmon, Gatomon, BlackGreymon, BlackGarurumon, BaoHackmon, Dorugamon, Sorcerymon, Aquilamon, Ankylomon, Gaogamon, Mojyamon, Starmon, Dokugumon, Ikkakumon, Golemon, Gekomon, Clockmon, Guardromon, Woodmon, Octomon, Gesomon, Ebidramon, Raidramon, Digmon, Shurimon, Submarimon, Peckmon, Sunflowmon, Reppamon, Ginryumon, Coredramon, Chrysalimon, Firamon, Lekismon, ExVeemon, Lynxmon, GeoGreymon, Bulkmon, BetelGammamon, KausGammamon, WezenGammamon, GulusGammamon, SymbareAngoramon, TeslaJellymon, Loogarmon, Pegasusmon, Nefertimon, Strikedramon, Dobermon, Sangloupmon, DarkKnightmon.
 - **Perfect (77 — `#401`–`#477`)**: MetalGreymon, Monzaemon, SkullGreymon, WereGarurumon, MagnaAngemon, Lillymon, Garudamon, MegaKabuterimon, MegaSeadramon, Myotismon, Etemon, Mamemon, MetalMamemon, MetalTyrannomon, Ex-Tyrannomon, Megadramon, Piximon, Andromon, Giromon, Vademon, SkullMamemon, AeroVeedramon, Paildramon, WarGrowlmon, Taomon, Rapidmon, Angewomon, LadyDevimon, BlackMetalGreymon, BlackWereGarurumon, Cyberdramon, Antylamon, SaviorHackmon, Lucemon Chaos Mode, Dorugreymon, Knightmon, Silphymon, Zudomon, Shakkoumon, Dinobeemon, Cherrymon, Garbagemon, Digitamamon, ShogunGekomon, Volcamon, MarineDevimon, Triceramon, Infermon, Chirinmon, Hisyaryumon, Wingdramon, Yatagaramon, MachGaogamon, Flaremon, Crescemon, SkullSatamon, Mummymon, Arukenimon, Grademon, Astamon, Gargoylemon, Mammothmon, MetalGreymon (Virus), Cyberdramon (Savers), RizeGreymon, MachGaogamon (Savers), Boutmon, Canoweissmon, Regulusmon, Lamortemon, Thetismon, Soloogarmon, Baalmon, JewelBeemon, Dinobeemon (Chimera), SkullMeramon, Cerberusmon.
@@ -283,7 +283,7 @@ DigiWear features **full face-to-face animated battle rendering** (`flipHorizont
 #### Bit Allocation Table (128 Bits / 16 Bytes):
 ```
 Bit 000-007: Protocol Version (8-bit, 0x01)
-Bit 008-023: Monster ID (16-bit, species index 101..558)
+Bit 008-023: Monster ID (16-bit, species index 101..592)
 Bit 024-027: Stage Index (4-bit, 0x1=Baby I .. 0x6=Ultimate)
 Bit 028-031: Attribute (4-bit, 0=Vaccine, 1=Data, 2=Virus, 3=Free)
 Bit 032-047: Base Power / HP (16-bit)
@@ -366,10 +366,11 @@ All modules assemble cleanly with 0 errors:
 
 | Module | Build Variant | Size | Output File Location |
 |---|---|---|---|
-| **Wear OS & AOSP Smartwatch** | Release (Signed) | **21.05 MB** | `wear-os-app/build/outputs/apk/release/wear-os-app-release.apk` *(also in `release_bin/`)* |
-| **Wear OS & AOSP Smartwatch** | Debug | **26.14 MB** | `wear-os-app/build/outputs/apk/debug/wear-os-app-debug.apk` *(also in `release_bin/`)* |
-| **Phone Companion** | Release (Signed) | **12.09 MB** | `phone-companion-app/build/outputs/apk/release/phone-companion-app-release.apk` *(also in `release_bin/`)* |
-| **Phone Companion** | Debug | **17.67 MB** | `phone-companion-app/build/outputs/apk/debug/phone-companion-app-debug.apk` *(also in `release_bin/`)* |
+| **Wear OS Smartwatch** | Release (Signed) | **21.26 MB** | `release_bin/DigiWear-WearOS-release.apk` *(also `wear-os-app-release.apk`)* |
+| **Standalone AOSP Smartwatch** | Release (Signed) | **21.26 MB** | `release_bin/digiwear-aosp-standard-watch-release.apk` |
+| **Wear OS & AOSP Smartwatch** | Debug | **26.16 MB** | `release_bin/wear-os-app-debug.apk` |
+| **Phone Companion** | Release (Signed) | **12.18 MB** | `release_bin/DigiWear-Companion-release.apk` *(also `phone-companion-app-release.apk`)* |
+| **Phone Companion** | Debug | **17.61 MB** | `release_bin/phone-companion-app-debug.apk` |
 
 ---
 
@@ -407,13 +408,13 @@ The wizard guides you through:
    ```bash
    adb pair <WATCH_IP>:<PAIRING_PORT>
    adb connect <WATCH_IP>:<CONNECT_PORT>
-   adb -s <WATCH_IP>:<CONNECT_PORT> install -r wear-os-app/build/outputs/apk/release/wear-os-app-release.apk
+   adb -s <WATCH_IP>:<CONNECT_PORT> install -r release_bin/DigiWear-WearOS-release.apk
    ```
 
 ##### Installing Phone Companion App:
 Connect your Android phone via USB with USB Debugging enabled:
 ```bash
-adb install -r phone-companion-app/build/outputs/apk/release/phone-companion-app-release.apk
+adb install -r release_bin/DigiWear-Companion-release.apk
 ```
 
 ---

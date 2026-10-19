@@ -28,18 +28,18 @@
 
 You can hatch any of these **10 Starter Digi-Eggs** at any time from **Watch Settings → Hatch New Digi-Egg** or **Phone Companion → Remote Care Deck**:
 
-| Egg ID | Baby I (Fresh) | Evolves Into (Baby II) | Version / Family Origin | Condition |
-| :---: | :--- | :--- | :--- | :--- |
-| `#101` | **Botamon** | `#129` **Ketomon** | Digital Monster Ver. 1 | Age ≥ 1h • CM 0–1 • Effort ≥ 2♥ |
-| `#103` | **Punimon** | `#118` **Chocomon** | Digital Monster Ver. 2 | Age ≥ 1h • CM 0–1 • Effort ≥ 2♥ |
-| `#105` | **Poyomon** | `#128` **Moonmon** | Digital Monster Ver. 3 | Age ≥ 1h • CM = 0 • Effort ≥ 3♥ |
-| `#107` | **Yuramon** | `#126` **Minomon** | Digital Monster Ver. 4 | Age ≥ 1h • CM = 0 • Effort ≥ 3♥ |
-| `#109` | **Zurumon** | `#125` **Kapurimon** | Digital Monster Ver. 5 | Age ≥ 1h • CM = 0 • Effort ≥ 3♥ |
-| `#111` | **Mokumon** | `#127` **Sunmon** | Digimon Pendulum 1.0 Nature Spirits | Age ≥ 1h • CM = 0 • Effort ≥ 3♥ |
-| `#113` | **Kuramon** | `#123` **Tsumemon** | Armageddon Army / Virus Busters | Age ≥ 1h • CM 0–1 • Effort ≥ 2♥ |
-| `#130` | **Nyokimon** | `#133` **Poromon** | Wind Guardians / Floramon Line | Age ≥ 1h • CM 0–1 • Effort ≥ 2♥ |
-| `#131` | **Pichimon** | `#134` **Upamon** | Deep Savers / Marine Line | Age ≥ 1h • CM 0–1 • Effort ≥ 2♥ |
-| `#132` | **Pukamon** | `#122` **Dorimon** | Deep Savers II / Gomamon Line | Age ≥ 1h |
+| Egg ID | Baby I (Fresh) | Evolves Into (Baby II Targets & Conditions) | Version / Family Origin |
+| :---: | :--- | :--- | :--- |
+| `#101` | **Botamon** | → **`#129` Ketomon**: `Age ≥ 1h • CM 0–1 • Effort ≥ 2♥`<br>→ **`#102` Koromon**: `Age ≥ 1h` | Digital Monster Ver. 1 |
+| `#103` | **Punimon** | → **`#118` Chocomon**: `Age ≥ 1h • CM 0–1 • Effort ≥ 2♥`<br>→ **`#104` Tsunomon**: `Age ≥ 1h` | Digital Monster Ver. 2 |
+| `#105` | **Poyomon** | → **`#128` Moonmon**: `Age ≥ 1h • CM = 0 • Effort ≥ 3♥`<br>→ **`#117` Gummymon**: `Age ≥ 1h • CM 0–1 • Effort ≥ 2♥`<br>→ **`#106` Tokomon**: `Age ≥ 1h` | Digital Monster Ver. 3 |
+| `#107` | **Yuramon** | → **`#126` Minomon**: `Age ≥ 1h • CM = 0 • Effort ≥ 3♥`<br>→ **`#116` Viximon**: `Age ≥ 1h • CM 0–1 • Effort ≥ 2♥`<br>→ **`#108` Tanemon**: `Age ≥ 1h` | Digital Monster Ver. 4 |
+| `#109` | **Zurumon** | → **`#125` Kapurimon**: `Age ≥ 1h • CM = 0 • Effort ≥ 3♥`<br>→ **`#119` Yaamon**: `Age ≥ 1h • CM 0–1 • Effort ≥ 2♥`<br>→ **`#110` Pagumon**: `Age ≥ 1h` | Digital Monster Ver. 5 |
+| `#111` | **Mokumon** | → **`#127` Sunmon**: `Age ≥ 1h • CM = 0 • Effort ≥ 3♥`<br>→ **`#124` Hopmon**: `Age ≥ 1h • CM 0–1 • Effort ≥ 2♥`<br>→ **`#115` Gigimon**: `Age ≥ 1h • CM 0–2 • Effort ≥ 1♥`<br>→ **`#112` DemiMeramon**: `Age ≥ 1h` | Digimon Pendulum 1.0 Nature Spirits |
+| `#113` | **Kuramon** | → **`#123` Tsumemon**: `Age ≥ 1h • CM 0–1 • Effort ≥ 2♥`<br>→ **`#114` DemiVeemon**: `Age ≥ 1h` | Armageddon Army / Virus Busters |
+| `#130` | **Nyokimon** | → **`#133` Poromon**: `Age ≥ 1h • CM 0–1 • Effort ≥ 2♥`<br>→ **`#120` Nyaromon**: `Age ≥ 1h` | Wind Guardians / Floramon Line |
+| `#131` | **Pichimon** | → **`#134` Upamon**: `Age ≥ 1h • CM 0–1 • Effort ≥ 2♥`<br>→ **`#121` Pyocomon**: `Age ≥ 1h` | Deep Savers / Marine Line |
+| `#132` | **Pukamon** | → **`#122` Dorimon**: `Age ≥ 1h` | Deep Savers II / Gomamon Line |
 
 ---
 
@@ -418,9 +418,9 @@ You can hatch any of these **10 Starter Digi-Eggs** at any time from **Watch Set
 
 ---
 
-## ⚡ DNA Digivolution, Mode Change & DigiXros Recipes (All 54 Combinations)
+## ⚡ DNA Digivolution, Mode Change & DigiXros Recipes (All 65 Combinations)
 
-Combine any two compatible Digimon via **Watch D-Com Battle Link**, **Phone Battle Command Center**, or **Phone DigiVault** to awaken these 54 special forms:
+Combine any two compatible Digimon via **Watch D-Com Battle Link**, **Phone Battle Command Center**, or **Phone DigiVault** to awaken these 65 special forms:
 
 | # | Primary Partner | Secondary Partner | Awakened Form | Fusion Type | Lore / Description |
 | :---: | :--- | :--- | :--- | :---: | :--- |
