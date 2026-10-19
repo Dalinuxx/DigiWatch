@@ -1,4 +1,4 @@
-﻿package com.digiwear.wear.ui
+package com.digiwear.wear.ui
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -127,6 +127,9 @@ fun BattleScreen(
 
     var qteActive by remember { mutableStateOf(false) }
     var criticalBoostActive by remember { mutableStateOf(false) }
+    var activeCutInSpeciesId by remember { mutableStateOf<Int?>(null) }
+    var activeCutInTitle by remember { mutableStateOf("CRITICAL HIT") }
+    var encounterFlashEnemyId by remember { mutableStateOf<Int?>(null) }
 
     LaunchedEffect(beamedCode) {
         val incoming = beamedCode
@@ -228,6 +231,12 @@ fun BattleScreen(
             battleStatusText = null
 
             scope.launch {
+                // Dramatic Encounter Flash Sequence
+                encounterFlashEnemyId = oppSpecies.id
+                hapticManager.playAttentionAlert()
+                delay(1050L)
+                encounterFlashEnemyId = null
+
                 var i = 0
                 while (i < activeResult.turns.size) {
                     currentTurnIndex = i
@@ -253,6 +262,17 @@ fun BattleScreen(
                             activeResult = critResult
                             battleResult = critResult
                         }
+                    }
+
+                    // Authentic Color V-Pet Cut-In on Critical Hit / Mega Hit
+                    val isCrit = turn.attackType == "MEGA_HIT" || (turn.attackerIndex == 0 && criticalBoostActive)
+                    if (isCrit) {
+                        val attackerId = if (turn.attackerIndex == 0) petState.speciesId else oppSpecies.id
+                        activeCutInTitle = if (turn.attackType == "MEGA_HIT") "MEGA HIT" else "CRITICAL HIT"
+                        activeCutInSpeciesId = attackerId
+                        hapticManager.playAttackImpact()
+                        delay(750L)
+                        activeCutInSpeciesId = null
                     }
 
                     hapticManager.playAttackImpact()
@@ -1213,5 +1233,24 @@ fun BattleScreen(
                 Text("BACK", fontSize = 10.sp)
             }
         }
+    }
+
+    // High-Impact Battle Cut-In Overlay
+    activeCutInSpeciesId?.let { cutInId ->
+        CutInOverlay(
+            speciesId = cutInId,
+            title = activeCutInTitle,
+            autoDismissMs = null,
+            onDismiss = { activeCutInSpeciesId = null }
+        )
+    }
+
+    // Authentic Battle Encounter Flash Overlay
+    encounterFlashEnemyId?.let { enemyId ->
+        EncounterFlashOverlay(
+            enemySpeciesId = enemyId,
+            isBoss = false,
+            onFinished = { encounterFlashEnemyId = null }
+        )
     }
 }

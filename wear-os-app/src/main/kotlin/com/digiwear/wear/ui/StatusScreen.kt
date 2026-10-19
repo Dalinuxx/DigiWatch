@@ -1,7 +1,8 @@
-﻿package com.digiwear.wear.ui
+package com.digiwear.wear.ui
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -57,6 +58,7 @@ fun StatusScreen(
     val listState = rememberScalingLazyListState()
     val scope = rememberCoroutineScope()
     var fusionFeedback by remember { mutableStateOf<String?>(null) }
+    var showCutInPortrait by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
         HardwareInputManager.buttonEvents.collect { button ->
@@ -114,7 +116,8 @@ fun StatusScreen(
                     modifier = Modifier
                         .size(44.dp)
                         .background(Color(0xFF15241E), RoundedCornerShape(6.dp))
-                        .border(0.75.dp, Color(0xFF4CAF50), RoundedCornerShape(6.dp)),
+                        .border(0.75.dp, Color(0xFF4CAF50), RoundedCornerShape(6.dp))
+                        .clickable { showCutInPortrait = true },
                     contentAlignment = Alignment.Center
                 ) {
                     SpriteCanvasRenderer(
@@ -145,6 +148,21 @@ fun StatusScreen(
                                 fontSize = 7.sp,
                                 fontWeight = FontWeight.Bold,
                                 color = Color(0xFF80CBC4),
+                                fontFamily = FontFamily.Monospace
+                            )
+                        }
+                        Box(
+                            modifier = Modifier
+                                .background(Color(0xFF263238), RoundedCornerShape(3.dp))
+                                .border(0.5.dp, Color(0xFFFFD54F), RoundedCornerShape(3.dp))
+                                .clickable { showCutInPortrait = true }
+                                .padding(horizontal = 4.dp, vertical = 1.dp)
+                        ) {
+                            Text(
+                                text = "⚡ CUT-IN",
+                                fontSize = 7.sp,
+                                fontWeight = FontWeight.Black,
+                                color = Color(0xFFFFD54F),
                                 fontFamily = FontFamily.Monospace
                             )
                         }
@@ -409,6 +427,15 @@ fun StatusScreen(
                 Text("BACK [B / C]", fontSize = 9.sp, fontWeight = FontWeight.Bold, fontFamily = FontFamily.Monospace)
             }
         }
+    }
+
+    if (showCutInPortrait) {
+        CutInOverlay(
+            speciesId = petState.speciesId,
+            title = "OFFICIAL ALBUM CUT-IN",
+            autoDismissMs = null,
+            onDismiss = { showCutInPortrait = false }
+        )
     }
 }
 

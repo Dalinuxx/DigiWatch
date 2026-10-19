@@ -83,6 +83,11 @@ fun AdventureScreen(
     var isBattling by remember { mutableStateOf(false) }
     var qteActive by remember { mutableStateOf(false) }
     var criticalBoostActive by remember { mutableStateOf(false) }
+    var activeCutInSpeciesId by remember { mutableStateOf<Int?>(null) }
+    var activeCutInTitle by remember { mutableStateOf("CRITICAL HIT") }
+    var encounterFlashEnemyId by remember { mutableStateOf<Int?>(null) }
+    var encounterFlashIsBoss by remember { mutableStateOf(false) }
+    var encounterFlashBossTitle by remember { mutableStateOf<String?>(null) }
 
     androidx.compose.runtime.DisposableEffect(Unit) {
         onDispose {
@@ -152,6 +157,14 @@ fun AdventureScreen(
             battleMode = BattleMode.ADVENTURE
         )
 
+        // Dramatic Encounter Flash Sequence
+        encounterFlashEnemyId = enemySpeciesId
+        encounterFlashIsBoss = (bossToClear != null)
+        encounterFlashBossTitle = bossToClear?.bossName
+        hapticManager.playAttentionAlert()
+        delay(1050L)
+        encounterFlashEnemyId = null
+
         var chosenResult = baseResult
         activeBattleResult = chosenResult
         isBattling = true
@@ -181,6 +194,18 @@ fun AdventureScreen(
                     activeBattleResult = critResult
                 }
             }
+
+            // Authentic Color V-Pet Battle Cut-In on Critical Hit / Mega Hit
+            val isCrit = turn.attackType == "MEGA_HIT" || (turn.attackerIndex == 0 && criticalBoostActive)
+            if (isCrit) {
+                val attackerSpeciesId = if (turn.attackerIndex == 0) petState.speciesId else enemySpecies.id
+                activeCutInTitle = if (turn.attackType == "MEGA_HIT") "MEGA HIT" else "CRITICAL HIT"
+                activeCutInSpeciesId = attackerSpeciesId
+                hapticManager.playAttackImpact()
+                delay(750L)
+                activeCutInSpeciesId = null
+            }
+
             hapticManager.playAttackImpact()
             delay(560L)
             idx++
@@ -846,5 +871,25 @@ fun AdventureScreen(
                 Text("BACK", fontSize = 10.sp)
             }
         }
+    }
+
+    // High-Impact Battle Cut-In Overlay
+    activeCutInSpeciesId?.let { cutInId ->
+        CutInOverlay(
+            speciesId = cutInId,
+            title = activeCutInTitle,
+            autoDismissMs = null,
+            onDismiss = { activeCutInSpeciesId = null }
+        )
+    }
+
+    // Authentic Battle Encounter Flash Overlay
+    encounterFlashEnemyId?.let { enemyId ->
+        EncounterFlashOverlay(
+            enemySpeciesId = enemyId,
+            isBoss = encounterFlashIsBoss,
+            bossTitle = encounterFlashBossTitle,
+            onFinished = { encounterFlashEnemyId = null }
+        )
     }
 }

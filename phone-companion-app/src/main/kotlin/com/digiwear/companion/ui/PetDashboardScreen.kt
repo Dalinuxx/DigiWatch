@@ -94,6 +94,7 @@ fun PetDashboardScreen(
     var hazardAlertsEnabled by remember { mutableStateOf(true) }
     var clockFormat24h by remember { mutableStateOf(false) }
     var aospWatchIp by remember { mutableStateOf(wearableManager.getConfiguredAospWatchIp()) }
+    var showPartnerCutIn by remember { mutableStateOf(false) }
 
     val scope = rememberCoroutineScope()
     val species = remember(petState.speciesId) { PetSpecies.getById(petState.speciesId) }
@@ -179,14 +180,15 @@ fun PetDashboardScreen(
 
     val stanceNames = listOf("IDLE", "WALK", "HAPPY", "ATTACK")
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(DigiWearPalette.CyberBg)
-            .padding(16.dp)
-            .verticalScroll(scrollState),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
+    Box(modifier = Modifier.fillMaxSize()) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(DigiWearPalette.CyberBg)
+                .padding(16.dp)
+                .verticalScroll(scrollState),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
         // Top Digivice Section Header + Sync Watch Action
         DigiSectionHeader(
             tag = "ACTIVE PARTNER MONITOR",
@@ -300,7 +302,8 @@ fun PetDashboardScreen(
             Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(8.dp),
+                    .padding(8.dp)
+                    .clickable { showPartnerCutIn = true },
                 contentAlignment = Alignment.Center
             ) {
                 // Authentic 1997 Bandai V-Pet Dot-Matrix Pixel Sprite
@@ -1466,6 +1469,16 @@ fun PetDashboardScreen(
             )
         }
     }
+
+    if (showPartnerCutIn) {
+        PhoneCutInOverlay(
+            speciesId = petState.speciesId,
+            title = "OFFICIAL ALBUM CUT-IN",
+            autoDismissMs = null,
+            onDismiss = { showPartnerCutIn = false }
+        )
+    }
+}
 }
 
 @Composable

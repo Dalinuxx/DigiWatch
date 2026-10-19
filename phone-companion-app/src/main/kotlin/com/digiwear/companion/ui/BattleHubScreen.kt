@@ -132,6 +132,9 @@ fun BattleHubScreen(
     var currentTurnIndex by remember { mutableIntStateOf(0) }
     var qteActive by remember { mutableStateOf(false) }
     var critBoostTriggered by remember { mutableStateOf(false) }
+    var activeCutInSpeciesId by remember { mutableStateOf<Int?>(null) }
+    var activeCutInTitle by remember { mutableStateOf("CRITICAL HIT") }
+    var encounterFlashEnemyId by remember { mutableStateOf<Int?>(null) }
 
     val scope = rememberCoroutineScope()
     val scrollState = rememberScrollState()
@@ -286,6 +289,11 @@ fun BattleHubScreen(
             critBoostTriggered = false
 
             scope.launch {
+                // Dramatic Encounter Flash Sequence
+                encounterFlashEnemyId = fB.speciesId
+                delay(1050L)
+                encounterFlashEnemyId = null
+
                 var idx = 0
                 while (idx < activeRes.turns.size) {
                     currentTurnIndex = idx
@@ -299,6 +307,17 @@ fun BattleHubScreen(
                             battleResult = critRes
                         }
                     }
+
+                    // Authentic Color V-Pet Cut-In on Critical Hit / Mega Hit
+                    val isCrit = turn.attackType == "MEGA_HIT" || (turn.attackerIndex == 0 && critBoostTriggered)
+                    if (isCrit) {
+                        val attackerId = if (turn.attackerIndex == 0) fA.speciesId else fB.speciesId
+                        activeCutInTitle = if (turn.attackType == "MEGA_HIT") "MEGA HIT" else "CRITICAL HIT"
+                        activeCutInSpeciesId = attackerId
+                        delay(850L)
+                        activeCutInSpeciesId = null
+                    }
+
                     delay(520L)
                     idx++
                 }
@@ -309,14 +328,15 @@ fun BattleHubScreen(
         }
     }
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(DigiWearPalette.CyberBg)
-            .padding(16.dp)
-            .verticalScroll(scrollState),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
+    Box(modifier = Modifier.fillMaxSize()) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(DigiWearPalette.CyberBg)
+                .padding(16.dp)
+                .verticalScroll(scrollState),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
         DigiSectionHeader(
             tag = "D-COM // 4-MODE BATTLE COMMAND CENTER",
             title = selectedBattleMode.displayName,
@@ -1490,6 +1510,26 @@ fun BattleHubScreen(
             }
         }
     }
+
+    // High-Impact Battle Cut-In Overlay
+    activeCutInSpeciesId?.let { cutInId ->
+        PhoneCutInOverlay(
+            speciesId = cutInId,
+            title = activeCutInTitle,
+            autoDismissMs = null,
+            onDismiss = { activeCutInSpeciesId = null }
+        )
+    }
+
+    // Authentic Battle Encounter Flash Overlay
+    encounterFlashEnemyId?.let { enemyId ->
+        PhoneEncounterFlashOverlay(
+            enemySpeciesId = enemyId,
+            isBoss = false,
+            onFinished = { encounterFlashEnemyId = null }
+        )
+    }
+}
 }
 
 @Composable

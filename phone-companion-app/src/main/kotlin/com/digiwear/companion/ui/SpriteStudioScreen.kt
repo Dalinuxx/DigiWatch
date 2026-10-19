@@ -1,4 +1,4 @@
-﻿package com.digiwear.companion.ui
+package com.digiwear.companion.ui
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
@@ -99,6 +99,7 @@ fun SpriteStudioScreen(
     var searchQuery by remember { mutableStateOf("") }
     var selectedStageFilter by remember { mutableStateOf<PetStage?>(null) }
     var syncMessage by remember { mutableStateOf<String?>(null) }
+    var showCutInPortrait by remember { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
     val scrollState = rememberScrollState()
     val context = LocalContext.current
@@ -172,15 +173,16 @@ fun SpriteStudioScreen(
         }
     }
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(DigiWearPalette.CyberBg)
-            .padding(16.dp)
-            .verticalScroll(scrollState),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        DigiSectionHeader(
+    Box(modifier = Modifier.fillMaxSize()) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(DigiWearPalette.CyberBg)
+                .padding(16.dp)
+                .verticalScroll(scrollState),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            DigiSectionHeader(
             tag = "DIGIDEX // COLOR SPRITE STUDIO",
             title = "${PetSpecies.SPECIES_REGISTRY.size}-Species Encyclopedia",
             subtitle = "64x64px Digimon Color / 0nl1ne Matrix (FilterQuality.None)",
@@ -346,6 +348,23 @@ fun SpriteStudioScreen(
                             Text(mode, fontSize = 10.sp, fontWeight = FontWeight.Bold, fontFamily = FontFamily.Monospace)
                         }
                     }
+                }
+
+                Spacer(modifier = Modifier.height(10.dp))
+                Button(
+                    onClick = { showCutInPortrait = true },
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF1E2A38)),
+                    shape = RoundedCornerShape(8.dp),
+                    border = BorderStroke(1.dp, Color(0xFFFFD54F))
+                ) {
+                    Text(
+                        text = "⚡ VIEW OFFICIAL ALBUM CUT-IN PORTRAIT",
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color(0xFFFFD54F),
+                        fontFamily = FontFamily.Monospace
+                    )
                 }
             }
         }
@@ -707,6 +726,16 @@ fun SpriteStudioScreen(
             Text(text = "▸ $it", fontSize = 11.sp, color = Color(0xFF00E676), fontFamily = FontFamily.Monospace)
         }
     }
+
+    if (showCutInPortrait) {
+        PhoneCutInOverlay(
+            speciesId = selectedSpeciesId,
+            title = "OFFICIAL ALBUM CUT-IN",
+            autoDismissMs = null,
+            onDismiss = { showCutInPortrait = false }
+        )
+    }
+}
 }
 
 @Composable
