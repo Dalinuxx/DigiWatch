@@ -1,4 +1,4 @@
-﻿<#
+<#
 .SYNOPSIS
     DigiWear Automated Sideloading Assistant
     Easily connect and install the Wear OS app and Phone Companion app via ADB.
@@ -54,6 +54,14 @@ function Get-ApkPath {
     $scriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 
     # 1. Check release_bin folder (distributed release binaries)
+    if ($moduleName -eq "wear-os-app") {
+        $namedRel = Join-Path $scriptDir "release_bin\DigiWear-WearOS-release.apk"
+        if (Test-Path $namedRel) { return $namedRel }
+    } elseif ($moduleName -eq "phone-companion-app") {
+        $namedRel = Join-Path $scriptDir "release_bin\DigiWear-Companion-release.apk"
+        if (Test-Path $namedRel) { return $namedRel }
+    }
+
     $binRelease = Join-Path $scriptDir "release_bin\$($moduleName)-release.apk"
     if (Test-Path $binRelease) { return $binRelease }
 

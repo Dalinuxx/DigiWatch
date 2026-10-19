@@ -1,4 +1,4 @@
-﻿@echo off
+@echo off
 title DigiWear Sideloading Assistant
 chcp 65001 >nul
 cls
@@ -48,17 +48,35 @@ if "%CHOICE%"=="0" exit /b 0
 if "%CHOICE%"=="1" (
     set /p WATCH_IP="Enter Watch IP:Port (e.g. 192.168.1.50:5555): "
     "%ADB_CMD%" connect %WATCH_IP%
-    "%ADB_CMD%" install -r -d "%~dp0wear-os-app\build\outputs\apk\release\wear-os-app-release-unsigned.apk"
+    if exist "%~dp0release_bin\DigiWear-WearOS-release.apk" (
+        "%ADB_CMD%" install -r -d "%~dp0release_bin\DigiWear-WearOS-release.apk"
+    ) else if exist "%~dp0release_bin\wear-os-app-release.apk" (
+        "%ADB_CMD%" install -r -d "%~dp0release_bin\wear-os-app-release.apk"
+    ) else (
+        "%ADB_CMD%" install -r -d "%~dp0wear-os-app\build\outputs\apk\release\wear-os-app-release.apk"
+    )
     pause
     goto MENU
 )
 if "%CHOICE%"=="2" (
-    "%ADB_CMD%" install -r -d "%~dp0wear-os-app\build\outputs\apk\release\wear-os-app-release-unsigned.apk"
+    if exist "%~dp0release_bin\DigiWear-WearOS-release.apk" (
+        "%ADB_CMD%" install -r -d "%~dp0release_bin\DigiWear-WearOS-release.apk"
+    ) else if exist "%~dp0release_bin\wear-os-app-release.apk" (
+        "%ADB_CMD%" install -r -d "%~dp0release_bin\wear-os-app-release.apk"
+    ) else (
+        "%ADB_CMD%" install -r -d "%~dp0wear-os-app\build\outputs\apk\release\wear-os-app-release.apk"
+    )
     pause
     goto MENU
 )
 if "%CHOICE%"=="3" (
-    "%ADB_CMD%" install -r -d "%~dp0phone-companion-app\build\outputs\apk\release\phone-companion-app-release-unsigned.apk"
+    if exist "%~dp0release_bin\DigiWear-Companion-release.apk" (
+        "%ADB_CMD%" install -r -d "%~dp0release_bin\DigiWear-Companion-release.apk"
+    ) else if exist "%~dp0release_bin\phone-companion-app-release.apk" (
+        "%ADB_CMD%" install -r -d "%~dp0release_bin\phone-companion-app-release.apk"
+    ) else (
+        "%ADB_CMD%" install -r -d "%~dp0phone-companion-app\build\outputs\apk\release\phone-companion-app-release.apk"
+    )
     pause
     goto MENU
 )

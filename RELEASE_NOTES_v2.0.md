@@ -1,4 +1,4 @@
-﻿# DigiWear v2.0 Official Release Notes
+# DigiWear v2.0 Official Release Notes
 
 ### Complete Overview
 DigiWear v2.0 represents a complete, exhaustive overhaul across both the standalone smartwatch application and the Android phone companion application, achieving 100% parity with historical Bandai virtual pets while leveraging modern wearable hardware, NFC, and wireless protocols.
@@ -7,17 +7,17 @@ DigiWear v2.0 represents a complete, exhaustive overhaul across both the standal
 
 ### Highlights & New Features
 
-#### 1. 300-Species Complete Canonical Roster
-- 300 authentic Digimon from Baby I to Super Ultimate.
-- 300 bespoke 16x16 pixel matrices with 12 distinct animation frames per monster (idle, walk, feed, chew, sleep, sick, attack charge, attack strike, refusal).
+#### 1. 350-Species Complete Canonical Roster
+- 350 authentic Digimon from Baby I to Super Ultimate (10 Baby I, 24 Baby II, 60 Child, 87 Adult, 77 Perfect, 92 Ultimate/Super Ultimate).
+- 350 bespoke 16x16 pixel matrices with 12 distinct animation frames per monster (idle, walk, feed, chew, sleep, sick, attack charge, attack strike, refusal).
 - Rendered on a 64x64 matrix at `FilterQuality.None` for pristine pixel sharpness across round and square watch displays.
 - 10 Starter Digi-Eggs covering every historical generation and evolutionary lineage.
 
-#### 2. 100% Evolutionary Reachability & 54 DNA Jogress / DigiXros Recipes
-- Every single one of the 300 species can be naturally reached from the 10 starter eggs.
+#### 2. 100% Evolutionary Reachability & 65 DNA Jogress / DigiXros Recipes
+- Every single one of the 350 species can be naturally reached from the 10 starter eggs.
 - Zero orphaned species and zero dead ends.
-- 54 canonical DNA Jogress, DigiXros, and Mode Change fusions with dedicated 1-tap chambers on both watch and companion app.
-- Full visual sprite sheet evolution poster (`docs/digiwear_evolution_guide_chart.png`) and 300-species master sprite sheet (`docs/digiwear_roster_spritesheet.png`).
+- 65 canonical DNA Jogress, DigiXros, and Mode Change fusions with dedicated 1-tap chambers on both watch and companion app.
+- Full visual sprite sheet evolution poster (`docs/digiwear_evolution_guide_chart.png`) and 350-species master sprite sheet (`docs/digiwear_roster_spritesheet.png`).
 
 #### 3. 4-Mode Battle System with Face-to-Face Animated Arena
 - **Adventure Colosseum**: 30 sectors of physical-step exploration and turn-by-turn boss combat with environmental weather hazards.
@@ -35,7 +35,7 @@ DigiWear v2.0 represents a complete, exhaustive overhaul across both the standal
 
 #### 5. Complete Android Companion App & Home Screen Widget
 - **DigiVault Cryo-Storage**: Zero-decay cold storage for raised Digimon with instant deployment and dual CommCode/DigiROM export.
-- **300-Species Sprite Studio**: 12-frame animation viewer with authentic Bandai LCD screen overlays.
+- **350-Species Sprite Studio**: 12-frame animation viewer with authentic Bandai LCD screen overlays.
 - **Story Campaign Architect**: 30-sector custom campaign editor with direct wireless push to watch.
 - **Android Home Screen AppWidget**: Live 64x64 pixel art sprite, stage, weight, hunger hearts, and strength stars updated in real-time.
 - **Cloud JSON Backup & Restore**: Full archive import/export.
@@ -43,8 +43,9 @@ DigiWear v2.0 represents a complete, exhaustive overhaul across both the standal
 ---
 
 ### Release Binaries (`release_bin/`)
-- `wear-os-app-release.apk`
-- `digiwear-aosp-standard-watch-release.apk`
-- `wear-os-app-debug.apk`
-- `phone-companion-app-release.apk`
-- `phone-companion-app-debug.apk`
+- `DigiWear-WearOS-release.apk` (Wear OS 3.0+ Release)
+- `DigiWear-Companion-release.apk` (Android Phone Companion Release)
+- `digiwear-aosp-standard-watch-release.apk` (Standalone AOSP / Full Android Watch Release)
+- `wear-os-app-release.apk` & `phone-companion-app-release.apk` (Standard Gradle module names)
+- `wear-os-app-debug.apk` & `phone-companion-app-debug.apk` (Development Debug builds)
+

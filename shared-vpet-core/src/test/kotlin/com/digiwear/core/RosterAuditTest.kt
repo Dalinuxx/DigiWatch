@@ -1,4 +1,4 @@
-﻿package com.digiwear.core
+package com.digiwear.core
 
 import com.digiwear.core.codec.CommCodeCodec
 import com.digiwear.core.fusion.FusionType
@@ -276,11 +276,9 @@ class RosterAuditTest {
         val registry = PetSpecies.SPECIES_REGISTRY.values.sortedBy { it.id }
         val docsDir = java.io.File("../docs").apply { mkdirs() }
         val rosterSheetFile = java.io.File(docsDir, "digiwear_roster_spritesheet.png")
-        val rosterSheetLegacyFile = java.io.File(docsDir, "digiwear_205_roster_spritesheet.png")
         val evoChartFile = java.io.File(docsDir, "digiwear_evolution_guide_chart.png")
 
         renderMasterRosterSpriteSheetPng(registry, rosterSheetFile)
-        renderMasterRosterSpriteSheetPng(registry, rosterSheetLegacyFile)
         renderVisualEvolutionGuideChartPng(registry, evoChartFile)
 
         val sb = StringBuilder()

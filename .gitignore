@@ -1,20 +1,66 @@
+# ======================================================================
+# DigiWear Git Ignore Rules
+# ======================================================================
+
+# Built Binaries & Gradle Build Outputs
 *.iml
-.gradle
-.kotlin
-/local.properties
-/.idea/
-.DS_Store
-Thumbs.db
-/build
-*/build
+.gradle/
+.kotlin/
+/build/
+*/build/
 build/
-captures
-.externalNativeBuild
-.cxx
+captures/
+.externalNativeBuild/
+.cxx/
 *.apk
 *.aab
 *.dex
 *.class
+*.dm
+
+# Sensitive Signing Keys & Release Keystores
+signing/
+*.jks
+*.keystore
+*.p12
+*.key
+*.pem
+*.pk8
+*.p8
+*.der
+
+# Local Environment, Credentials & Secrets
+/local.properties
+local.properties
+*.properties.local
+*.env
+*.env.*
+.env
+google-services.json
+secrets.properties
+keystore.properties
+release-secrets*
+*.credentials
+
+# Sensitive Release Documents, Marketing & Reddit Launch Posts
+docs/REDDIT_POST.md
+docs/*REDDIT*
+*REDDIT*
+*reddit*
+marketing/
+social/
+release_notes_draft*
+RELEASE_DRAFT*.md
+
+# Temporary Files, Logs & Scratches
 *.log
 scratch/
-release_bin/
+*.dump
+*.tmp
+*.bak
+*.swp
+
+# IDE & OS Metadata
+/.idea/
+.DS_Store
+Thumbs.db

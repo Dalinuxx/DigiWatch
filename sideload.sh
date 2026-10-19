@@ -1,4 +1,4 @@
-﻿#!/usr/bin/env bash
+#!/usr/bin/env bash
 # ======================================================================
 #            DIGIWEAR SIDELOADING & INSTALLATION SCRIPT 📟⌚
 # ======================================================================
@@ -44,6 +44,12 @@ ADB_CMD=$(find_adb)
 
 get_apk() {
     local module="$1"
+    local bin_named=""
+    if [ "$module" = "wear-os-app" ]; then
+        bin_named="$SCRIPT_DIR/release_bin/DigiWear-WearOS-release.apk"
+    elif [ "$module" = "phone-companion-app" ]; then
+        bin_named="$SCRIPT_DIR/release_bin/DigiWear-Companion-release.apk"
+    fi
     local bin_rel="$SCRIPT_DIR/release_bin/$module-release.apk"
     local bin_uns="$SCRIPT_DIR/release_bin/$module-release-unsigned.apk"
     local bin_deb="$SCRIPT_DIR/release_bin/$module-debug.apk"
@@ -51,7 +57,9 @@ get_apk() {
     local uns="$SCRIPT_DIR/$module/build/outputs/apk/release/$module-release-unsigned.apk"
     local deb="$SCRIPT_DIR/$module/build/outputs/apk/debug/$module-debug.apk"
 
-    if [ -f "$bin_rel" ]; then
+    if [ -n "$bin_named" ] && [ -f "$bin_named" ]; then
+        echo "$bin_named"
+    elif [ -f "$bin_rel" ]; then
         echo "$bin_rel"
     elif [ -f "$bin_uns" ]; then
         echo "$bin_uns"
