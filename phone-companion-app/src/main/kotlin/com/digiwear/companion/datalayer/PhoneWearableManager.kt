@@ -292,7 +292,13 @@ class PhoneWearableManager(private val context: Context) {
         pendulumShakeMode: Boolean = false,
         soundEnabled: Boolean = false,
         nfcBridgeMode: String = "NFC_DUEL",
-        displayShapeOverride: String? = null
+        displayShapeOverride: String? = null,
+        dailyStepGoal: Int = 5000,
+        contrastLevel: String = "MEDIUM",
+        sleepSchedule: String = "21:00_07:00",
+        ambientStyle: String = "MINIMAL_DOT",
+        hazardAlertsEnabled: Boolean = true,
+        clockFormat24h: Boolean = false
     ): Boolean = withContext(Dispatchers.IO) {
         val nodes = getConnectedWatchNodes()
         if (nodes.isEmpty()) return@withContext false
@@ -307,6 +313,12 @@ class PhoneWearableManager(private val context: Context) {
             if (displayShapeOverride != null) {
                 put("display_shape_override", displayShapeOverride)
             }
+            put("daily_step_goal", dailyStepGoal.toString())
+            put("lcd_contrast_level", contrastLevel)
+            put("sleep_schedule", sleepSchedule)
+            put("ambient_display_style", ambientStyle)
+            put("hazard_alerts_enabled", hazardAlertsEnabled.toString())
+            put("clock_format_24h", clockFormat24h.toString())
         }
         val jsonStr = json.encodeToString(map)
         val payload = jsonStr.toByteArray(Charsets.UTF_8)

@@ -1,4 +1,4 @@
-﻿package com.digiwear.companion.ui
+package com.digiwear.companion.ui
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
@@ -87,6 +87,12 @@ fun PetDashboardScreen(
     var pendulumShakeMode by remember { mutableStateOf(false) }
     var nfcBridgeMode by remember { mutableStateOf("NFC_DUEL") }
     var displayShapeOverride by remember { mutableStateOf("AUTO") }
+    var dailyStepGoal by remember { mutableIntStateOf(5000) }
+    var contrastLevel by remember { mutableStateOf("MEDIUM") }
+    var sleepSchedule by remember { mutableStateOf("21:00_07:00") }
+    var ambientStyle by remember { mutableStateOf("MINIMAL_DOT") }
+    var hazardAlertsEnabled by remember { mutableStateOf(true) }
+    var clockFormat24h by remember { mutableStateOf(false) }
     var aospWatchIp by remember { mutableStateOf(wearableManager.getConfiguredAospWatchIp()) }
 
     val scope = rememberCoroutineScope()
@@ -145,6 +151,12 @@ fun PetDashboardScreen(
             watchSettings["sound_enabled"]?.let { soundEnabled = it.toBoolean() }
             watchSettings["nfc_bridge_mode"]?.let { nfcBridgeMode = it }
             watchSettings["display_shape_override"]?.let { displayShapeOverride = it }
+            watchSettings["daily_step_goal"]?.toIntOrNull()?.let { dailyStepGoal = it }
+            watchSettings["lcd_contrast_level"]?.let { contrastLevel = it }
+            watchSettings["sleep_schedule"]?.let { sleepSchedule = it }
+            watchSettings["ambient_display_style"]?.let { ambientStyle = it }
+            watchSettings["hazard_alerts_enabled"]?.let { hazardAlertsEnabled = it.toBoolean() }
+            watchSettings["clock_format_24h"]?.let { clockFormat24h = it.toBoolean() }
         }
         aospWatchIp = wearableManager.getConfiguredAospWatchIp()
     }
@@ -199,6 +211,13 @@ fun PetDashboardScreen(
                                     watchSettings["pendulum_shake_mode"]?.let { pendulumShakeMode = it.toBoolean() }
                                     watchSettings["sound_enabled"]?.let { soundEnabled = it.toBoolean() }
                                     watchSettings["nfc_bridge_mode"]?.let { nfcBridgeMode = it }
+                                    watchSettings["display_shape_override"]?.let { displayShapeOverride = it }
+                                    watchSettings["daily_step_goal"]?.toIntOrNull()?.let { dailyStepGoal = it }
+                                    watchSettings["lcd_contrast_level"]?.let { contrastLevel = it }
+                                    watchSettings["sleep_schedule"]?.let { sleepSchedule = it }
+                                    watchSettings["ambient_display_style"]?.let { ambientStyle = it }
+                                    watchSettings["hazard_alerts_enabled"]?.let { hazardAlertsEnabled = it.toBoolean() }
+                                    watchSettings["clock_format_24h"]?.let { clockFormat24h = it.toBoolean() }
                                 }
                                 val syncedSpecies = PetSpecies.getById(petState.speciesId)
                                 syncStatus = if (liveWatchState != null) {
@@ -529,7 +548,7 @@ fun PetDashboardScreen(
                     border = BorderStroke(1.dp, DigiWearPalette.CrestGold)
                 ) {
                     Text(
-                        text = if (showStarterEggPicker) "HIDE DIGI-EGG INCUBATOR" else "🥚 HATCH NEW STARTER DIGI-EGG (10 LINEAGES)",
+                        text = if (showStarterEggPicker) "HIDE DIGI-EGG INCUBATOR" else "🥚 HATCH NEW STARTER DIGI-EGG (16 CANONICAL LINEAGES)",
                         fontSize = 10.sp,
                         fontWeight = FontWeight.Bold,
                         color = DigiWearPalette.CrestGold,
@@ -868,28 +887,31 @@ fun PetDashboardScreen(
 
                 Spacer(modifier = Modifier.height(12.dp))
 
-                // Vibration Toggle
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(text = "Haptic Vibrations on Watch", fontSize = 12.sp, color = Color.White)
-                    Switch(
-                        checked = vibrationEnabled,
-                        onCheckedChange = { vibrationEnabled = it }
-                    )
-                }
-
-                // Piezo Chiptune Buzzer Toggle
+                // Haptic Feedback Toggle
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Column {
-                        Text(text = "1997 Piezo Chiptune Buzzer", fontSize = 12.sp, color = Color.White)
-                        Text(text = "Synthesizes square-wave LCD beeps & fanfare on watch", fontSize = 10.sp, color = Color.Gray)
+                        Text(text = "HAPTIC FEEDBACK", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = Color.White, fontFamily = FontFamily.Monospace)
+                        Text(text = "Vibrations on watch for steps, attacks & evolutions", fontSize = 9.5.sp, color = Color.Gray)
+                    }
+                    Switch(
+                        checked = vibrationEnabled,
+                        onCheckedChange = { vibrationEnabled = it }
+                    )
+                }
+
+                // Chiptune Buzzer Sound FX Toggle
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Column {
+                        Text(text = "CHIPTUNE BUZZER", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = Color.White, fontFamily = FontFamily.Monospace)
+                        Text(text = "8-Bit piezo square-wave LCD beeps & battle fanfare", fontSize = 9.5.sp, color = Color.Gray)
                     }
                     Switch(
                         checked = soundEnabled,
@@ -897,15 +919,15 @@ fun PetDashboardScreen(
                     )
                 }
 
-                // 3-Button V-Pet Mode Toggle
+                // 3-Button LCD Controls Toggle
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Column {
-                        Text(text = "3-Button Authentic V-Pet Mode", fontSize = 12.sp, color = Color.White)
-                        Text(text = "Shows [A•SEL] [B•OK] [C•ESC] LCD shell + Rotary/Stem keys", fontSize = 10.sp, color = Color.Gray)
+                        Text(text = "3-BUTTON LCD CONTROLS", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = Color.White, fontFamily = FontFamily.Monospace)
+                        Text(text = "[A•SEL] [B•OK] [C•ESC] LCD bar + Rotary/Stem hardware keys", fontSize = 9.5.sp, color = Color.Gray)
                     }
                     Switch(
                         checked = threeButtonMode,
@@ -913,15 +935,15 @@ fun PetDashboardScreen(
                     )
                 }
 
-                // Pendulum Shake Training Mode Toggle
+                // Training Method Toggle
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Column {
-                        Text(text = "Pendulum Shake Training Mode", fontSize = 12.sp, color = Color.White)
-                        Text(text = "Off = OG Timing QTE (Default) • On = Authentic Wrist Shake (5-8 hits)", fontSize = 10.sp, color = Color.Gray)
+                        Text(text = "TRAINING METHOD", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = Color.White, fontFamily = FontFamily.Monospace)
+                        Text(text = if (pendulumShakeMode) "Pendulum Shake (5-8 hits)" else "Timing QTE (Default)", fontSize = 9.5.sp, color = if (pendulumShakeMode) Color(0xFFFFD54F) else Color.Gray)
                     }
                     Switch(
                         checked = pendulumShakeMode,
@@ -931,9 +953,184 @@ fun PetDashboardScreen(
 
                 Spacer(modifier = Modifier.height(8.dp))
 
+                // LCD Contrast Level Selector
+                Text(
+                    text = "LCD CONTRAST LEVEL:",
+                    fontSize = 11.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color(0xFFFFD54F),
+                    fontFamily = FontFamily.Monospace
+                )
+                Spacer(modifier = Modifier.height(4.dp))
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(6.dp)
+                ) {
+                    val contrastChoices = listOf(
+                        "LOW" to "Soft Matrix",
+                        "MEDIUM" to "Standard (Def)",
+                        "HIGH" to "Deep Crisp"
+                    )
+                    contrastChoices.forEach { (levelId, label) ->
+                        val active = contrastLevel == levelId
+                        Box(
+                            modifier = Modifier
+                                .weight(1f)
+                                .background(if (active) Color(0xFFE65100) else DigiWearPalette.CardInner, RoundedCornerShape(8.dp))
+                                .border(1.dp, if (active) Color(0xFFFFB74D) else Color(0xFF263238), RoundedCornerShape(8.dp))
+                                .clickable { contrastLevel = levelId }
+                                .padding(vertical = 8.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(text = label, fontSize = 9.sp, fontWeight = FontWeight.Bold, color = if (active) Color.White else Color.LightGray, fontFamily = FontFamily.Monospace)
+                        }
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                // Daily Step Target Selector
+                Text(
+                    text = "DAILY STEP TARGET:",
+                    fontSize = 11.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color(0xFF80D8FF),
+                    fontFamily = FontFamily.Monospace
+                )
+                Spacer(modifier = Modifier.height(4.dp))
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(6.dp)
+                ) {
+                    val stepChoices = listOf(3000, 5000, 7500, 10000)
+                    stepChoices.forEach { goal ->
+                        val active = dailyStepGoal == goal
+                        Box(
+                            modifier = Modifier
+                                .weight(1f)
+                                .background(if (active) Color(0xFF00838F) else DigiWearPalette.CardInner, RoundedCornerShape(8.dp))
+                                .border(1.dp, if (active) Color(0xFF4DD0E1) else Color(0xFF263238), RoundedCornerShape(8.dp))
+                                .clickable { dailyStepGoal = goal }
+                                .padding(vertical = 8.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(text = "${goal / 1000}K", fontSize = 9.5.sp, fontWeight = FontWeight.Bold, color = if (active) Color.White else Color.LightGray, fontFamily = FontFamily.Monospace)
+                        }
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                // Sleep Schedule Selector
+                Text(
+                    text = "SLEEP SCHEDULE:",
+                    fontSize = 11.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color(0xFFB39DDB),
+                    fontFamily = FontFamily.Monospace
+                )
+                Spacer(modifier = Modifier.height(4.dp))
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(6.dp)
+                ) {
+                    val sleepChoices = listOf(
+                        "20:00_07:00" to "20–07 Early",
+                        "21:00_07:00" to "21–07 Standard",
+                        "22:00_08:00" to "22–08 Owl",
+                        "23:00_08:00" to "23–08 Late"
+                    )
+                    sleepChoices.forEach { (schedId, label) ->
+                        val active = sleepSchedule == schedId
+                        Box(
+                            modifier = Modifier
+                                .weight(1f)
+                                .background(if (active) Color(0xFF4527A0) else DigiWearPalette.CardInner, RoundedCornerShape(8.dp))
+                                .border(1.dp, if (active) Color(0xFF9575CD) else Color(0xFF263238), RoundedCornerShape(8.dp))
+                                .clickable { sleepSchedule = schedId }
+                                .padding(vertical = 8.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(text = label, fontSize = 8.sp, fontWeight = FontWeight.Bold, color = if (active) Color.White else Color.LightGray, fontFamily = FontFamily.Monospace)
+                        }
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                // Always-On Ambient Display Style Selector
+                Text(
+                    text = "ALWAYS-ON AMBIENT STYLE:",
+                    fontSize = 11.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color(0xFF81C784),
+                    fontFamily = FontFamily.Monospace
+                )
+                Spacer(modifier = Modifier.height(4.dp))
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(6.dp)
+                ) {
+                    val ambChoices = listOf(
+                        "MINIMAL_DOT" to "Minimal Dot",
+                        "OUTLINE" to "Outline Wire",
+                        "DIMMED_LCD" to "Dimmed Retro"
+                    )
+                    ambChoices.forEach { (styleId, label) ->
+                        val active = ambientStyle == styleId
+                        Box(
+                            modifier = Modifier
+                                .weight(1f)
+                                .background(if (active) Color(0xFF2E7D32) else DigiWearPalette.CardInner, RoundedCornerShape(8.dp))
+                                .border(1.dp, if (active) Color(0xFF81C784) else Color(0xFF263238), RoundedCornerShape(8.dp))
+                                .clickable { ambientStyle = styleId }
+                                .padding(vertical = 8.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(text = label, fontSize = 8.5.sp, fontWeight = FontWeight.Bold, color = if (active) Color.White else Color.LightGray, fontFamily = FontFamily.Monospace)
+                        }
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                // Clock Format Toggle (12H vs 24H)
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Column {
+                        Text(text = "CLOCK TIME FORMAT", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = Color.White, fontFamily = FontFamily.Monospace)
+                        Text(text = if (clockFormat24h) "24-Hour Military (13:00)" else "12-Hour Standard (1:00 PM)", fontSize = 9.5.sp, color = Color.Gray)
+                    }
+                    Switch(
+                        checked = clockFormat24h,
+                        onCheckedChange = { clockFormat24h = it }
+                    )
+                }
+
+                // Environmental Hazard Notifications Toggle
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Column {
+                        Text(text = "HAZARD NOTIFICATIONS", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = Color.White, fontFamily = FontFamily.Monospace)
+                        Text(text = "Alert when entering X-Program Fog & Miasma zones", fontSize = 9.5.sp, color = Color.Gray)
+                    }
+                    Switch(
+                        checked = hazardAlertsEnabled,
+                        onCheckedChange = { hazardAlertsEnabled = it }
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(8.dp))
+
                 // NFC Tap Bridge Mode Selector (Parity with Watch SettingsScreen)
                 Text(
-                    text = "Watch NFC Tap Bridge Mode:",
+                    text = "NFC TAP BRIDGE MODE:",
                     fontSize = 11.sp,
                     fontWeight = FontWeight.Bold,
                     color = Color(0xFF80D8FF),
@@ -982,7 +1179,7 @@ fun PetDashboardScreen(
 
                 // Watch Display Shape Override (for Round AOSP Watches reporting Square ROMs)
                 Text(
-                    text = "Watch Display Shape Override (Wear OS & AOSP):",
+                    text = "SCREEN DISPLAY SHAPE:",
                     fontSize = 11.sp,
                     fontWeight = FontWeight.Bold,
                     color = DigiWearPalette.CrestGold,
@@ -996,7 +1193,7 @@ fun PetDashboardScreen(
                     val shapeOptions = listOf(
                         "AUTO" to "⚙ Auto-Detect",
                         "ROUND" to "⭕ Round Bezel",
-                        "SQUARE" to "⬜ Square / Rect"
+                        "SQUARE" to "⬜ Square LCD"
                     )
                     shapeOptions.forEach { (shapeId, label) ->
                         val active = displayShapeOverride == shapeId
@@ -1113,7 +1310,13 @@ fun PetDashboardScreen(
                                 pendulumShakeMode = pendulumShakeMode,
                                 soundEnabled = soundEnabled,
                                 nfcBridgeMode = nfcBridgeMode,
-                                displayShapeOverride = displayShapeOverride
+                                displayShapeOverride = displayShapeOverride,
+                                dailyStepGoal = dailyStepGoal,
+                                contrastLevel = contrastLevel,
+                                sleepSchedule = sleepSchedule,
+                                ambientStyle = ambientStyle,
+                                hazardAlertsEnabled = hazardAlertsEnabled,
+                                clockFormat24h = clockFormat24h
                             )
                             syncStatus = if (ok) "All Settings applied to Smartwatch!" else "Saved locally (Smartwatch offline)"
                         }
@@ -1123,7 +1326,6 @@ fun PetDashboardScreen(
                 ) {
                     Icon(Icons.Default.Tune, contentDescription = "Apply", modifier = Modifier.size(16.dp))
                     Spacer(modifier = Modifier.width(6.dp))
-                    Text("APPLY SETTINGS TO DIGIWEAR", fontSize = 11.sp, fontWeight = FontWeight.Bold, fontFamily = FontFamily.Monospace)
                 }
             }
         }

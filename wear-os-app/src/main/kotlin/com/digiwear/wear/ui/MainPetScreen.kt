@@ -1,4 +1,4 @@
-﻿package com.digiwear.wear.ui
+package com.digiwear.wear.ui
 
 import android.content.Context
 import android.hardware.Sensor
@@ -105,6 +105,8 @@ fun MainPetScreen(
     val isThreeButtonMode by repository.threeButtonModeFlow.collectAsState(initial = false)
     val isPendulumShakeMode by repository.pendulumShakeModeFlow.collectAsState(initial = false)
     val isSoundEnabled by repository.soundEnabledFlow.collectAsState(initial = false)
+    val contrastLevel by repository.contrastLevelFlow.collectAsState(initial = "MEDIUM")
+    val ambientStyle by repository.ambientStyleFlow.collectAsState(initial = "MINIMAL_DOT")
     val displayConfig = WatchDisplayConfig.current()
     val scope = rememberCoroutineScope()
 
@@ -286,7 +288,9 @@ fun MainPetScreen(
         BackgroundCanvas(
             theme = currentTheme,
             isAmbient = false,
-            lightsOff = petState.lightsOff
+            lightsOff = petState.lightsOff,
+            contrastLevel = contrastLevel,
+            ambientStyle = ambientStyle
         )
 
         if (isTrainingActive) {

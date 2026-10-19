@@ -1,4 +1,4 @@
-﻿package com.digiwear.wear.ui
+package com.digiwear.wear.ui
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -13,9 +13,9 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -30,12 +30,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.wear.compose.material.Button
-import androidx.wear.compose.material.ButtonDefaults
 import androidx.wear.compose.foundation.lazy.ScalingLazyColumn
 import androidx.wear.compose.foundation.lazy.rememberScalingLazyListState
+import androidx.wear.compose.material.Button
+import androidx.wear.compose.material.ButtonDefaults
 import androidx.wear.compose.material.Text
-import androidx.compose.runtime.LaunchedEffect
 import com.digiwear.core.model.BackgroundTheme
 import com.digiwear.core.model.PetSpecies
 import com.digiwear.wear.data.PetRepository
@@ -70,16 +69,40 @@ fun SettingsScreen(
     val isSoundEnabled by repository.soundEnabledFlow.collectAsState(initial = false)
     val nfcBridgeMode by repository.nfcBridgeModeFlow.collectAsState(initial = "NFC_DUEL")
     val displayShapeOverride by repository.displayShapeOverrideFlow.collectAsState(initial = "AUTO")
+    val dailyStepGoal by repository.dailyStepGoalFlow.collectAsState(initial = 5000)
+    val contrastLevel by repository.contrastLevelFlow.collectAsState(initial = "MEDIUM")
+    val sleepSchedule by repository.sleepScheduleFlow.collectAsState(initial = "21:00_07:00")
+    val ambientStyle by repository.ambientStyleFlow.collectAsState(initial = "MINIMAL_DOT")
+    val hazardAlertsEnabled by repository.hazardAlertsFlow.collectAsState(initial = true)
+    val clockFormat24h by repository.clockFormatFlow.collectAsState(initial = false)
 
     var feedbackMessage by remember { mutableStateOf<String?>(null) }
     var showEggSelector by remember { mutableStateOf(false) }
 
     val themes = BackgroundTheme.entries
+    val contrastOptions = listOf(
+        "LOW" to "Soft Matrix",
+        "MEDIUM" to "Standard (Def)",
+        "HIGH" to "Deep Crisp"
+    )
+    val stepGoalOptions = listOf(3000, 5000, 7500, 10000)
+    val sleepScheduleOptions = listOf(
+        "20:00_07:00" to "20:00–07:00 (Early)",
+        "21:00_07:00" to "21:00–07:00 (Standard)",
+        "22:00_08:00" to "22:00–08:00 (Night Owl)",
+        "23:00_08:00" to "23:00–08:00 (Late Night)"
+    )
+    val ambientStyleOptions = listOf(
+        "MINIMAL_DOT" to "Minimal Dot",
+        "OUTLINE" to "Outline Wire",
+        "DIMMED_LCD" to "Dimmed Retro"
+    )
     val nfcModes = listOf(
         "NFC_DUEL" to "Tap-to-Duel (P2P)",
         "WILD_SCAN" to "Wild Tag Scanner",
         "ACOM_RELAY" to "Phone A-Com Relay"
     )
+    val shapeModes = listOf("AUTO", "ROUND", "SQUARE")
 
     ScalingLazyColumn(
         modifier = Modifier
@@ -91,7 +114,7 @@ fun SettingsScreen(
     ) {
         item {
             Text(
-                text = "SETTINGS",
+                text = "DIGIWEAR SETTINGS",
                 fontSize = displayConfig.headerFontSize,
                 fontWeight = FontWeight.Bold,
                 color = Color(0xFF64B5F6),
@@ -100,15 +123,16 @@ fun SettingsScreen(
         }
 
         // ==========================================
-        // 1. Background Theme Selector
+        // 1. Shell & LCD Theme Selector
         // ==========================================
         item {
             Spacer(modifier = Modifier.height(6.dp))
             Text(
-                text = "BACKGROUND THEME",
-                fontSize = 9.sp,
+                text = "SHELL & LCD THEME",
+                fontSize = 8.5.sp,
                 color = Color.LightGray,
-                fontWeight = FontWeight.SemiBold
+                fontWeight = FontWeight.SemiBold,
+                fontFamily = FontFamily.Monospace
             )
         }
 
@@ -127,7 +151,7 @@ fun SettingsScreen(
                         repository.setTheme(themes[prevIdx])
                         hapticManager.playStepMilestone()
                     },
-                    modifier = Modifier.size(34.dp),
+                    modifier = Modifier.size(32.dp),
                     colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFF263238))
                 ) {
                     Text("◀", fontSize = 10.sp)
@@ -137,7 +161,6 @@ fun SettingsScreen(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     modifier = Modifier.weight(1f).padding(horizontal = 4.dp)
                 ) {
-                    // Swatch preview box
                     Box(
                         modifier = Modifier
                             .size(24.dp, 12.dp)
@@ -145,7 +168,7 @@ fun SettingsScreen(
                     )
                     Text(
                         text = currentTheme.displayName,
-                        fontSize = 10.sp,
+                        fontSize = 9.sp,
                         fontWeight = FontWeight.Bold,
                         color = Color.White,
                         textAlign = TextAlign.Center
@@ -159,7 +182,7 @@ fun SettingsScreen(
                         repository.setTheme(themes[nextIdx])
                         hapticManager.playStepMilestone()
                     },
-                    modifier = Modifier.size(34.dp),
+                    modifier = Modifier.size(32.dp),
                     colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFF263238))
                 ) {
                     Text("▶", fontSize = 10.sp)
@@ -168,10 +191,55 @@ fun SettingsScreen(
         }
 
         // ==========================================
-        // 2. Vibration Feedback Toggle
+        // 2. LCD Contrast Level
         // ==========================================
         item {
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(6.dp))
+            val currentContrast = contrastOptions.find { it.first == contrastLevel } ?: contrastOptions[1]
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = displayConfig.horizontalPadding),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = "LCD CONTRAST LEVEL",
+                        fontSize = 9.5.sp,
+                        color = Color.White,
+                        fontFamily = FontFamily.Monospace
+                    )
+                    Text(
+                        text = currentContrast.second,
+                        fontSize = 8.sp,
+                        color = Color(0xFFFFD54F)
+                    )
+                }
+                Button(
+                    onClick = {
+                        val idx = contrastOptions.indexOfFirst { it.first == contrastLevel }.coerceAtLeast(0)
+                        val next = contrastOptions[(idx + 1) % contrastOptions.size].first
+                        repository.setContrastLevel(next)
+                        if (isVibrationEnabled) hapticManager.playStepMilestone()
+                    },
+                    modifier = Modifier.size(width = 54.dp, height = 30.dp),
+                    colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFF37474F))
+                ) {
+                    Text(
+                        text = contrastLevel,
+                        fontSize = 8.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+            }
+        }
+
+        // ==========================================
+        // 3. Haptic Feedback Toggle
+        // ==========================================
+        item {
+            Spacer(modifier = Modifier.height(6.dp))
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -180,8 +248,8 @@ fun SettingsScreen(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = "VIBRATIONS",
-                    fontSize = 10.sp,
+                    text = "HAPTIC FEEDBACK",
+                    fontSize = 9.5.sp,
                     color = Color.White,
                     fontFamily = FontFamily.Monospace
                 )
@@ -192,14 +260,14 @@ fun SettingsScreen(
                         hapticManager.isEnabled = next
                         if (next) hapticManager.playStepMilestone()
                     },
-                    modifier = Modifier.size(width = 54.dp, height = 32.dp),
+                    modifier = Modifier.size(width = 54.dp, height = 30.dp),
                     colors = ButtonDefaults.buttonColors(
                         backgroundColor = if (isVibrationEnabled) Color(0xFF2E7D32) else Color(0xFFC62828)
                     )
                 ) {
                     Text(
                         text = if (isVibrationEnabled) "ON" else "OFF",
-                        fontSize = 9.sp,
+                        fontSize = 8.5.sp,
                         fontWeight = FontWeight.Bold
                     )
                 }
@@ -207,10 +275,10 @@ fun SettingsScreen(
         }
 
         // ==========================================
-        // 3. 8-Bit Bandai Buzzer Sound FX Toggle
+        // 4. Chiptune Buzzer Sound FX Toggle
         // ==========================================
         item {
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(6.dp))
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -220,14 +288,14 @@ fun SettingsScreen(
             ) {
                 Column {
                     Text(
-                        text = "BUZZER SOUNDS",
-                        fontSize = 10.sp,
+                        text = "CHIPTUNE BUZZER",
+                        fontSize = 9.5.sp,
                         color = Color.White,
                         fontFamily = FontFamily.Monospace
                     )
                     Text(
                         text = "8-Bit Piezo Beeps",
-                        fontSize = 8.sp,
+                        fontSize = 7.5.sp,
                         color = Color.LightGray
                     )
                 }
@@ -237,14 +305,14 @@ fun SettingsScreen(
                         repository.setSoundEnabled(next)
                         if (isVibrationEnabled) hapticManager.playStepMilestone()
                     },
-                    modifier = Modifier.size(width = 54.dp, height = 32.dp),
+                    modifier = Modifier.size(width = 54.dp, height = 30.dp),
                     colors = ButtonDefaults.buttonColors(
                         backgroundColor = if (isSoundEnabled) Color(0xFF2E7D32) else Color(0xFFC62828)
                     )
                 ) {
                     Text(
                         text = if (isSoundEnabled) "ON" else "OFF",
-                        fontSize = 9.sp,
+                        fontSize = 8.5.sp,
                         fontWeight = FontWeight.Bold
                     )
                 }
@@ -252,10 +320,10 @@ fun SettingsScreen(
         }
 
         // ==========================================
-        // 4. 3-Button V-Pet Authentic Mode Toggle
+        // 5. 3-Button LCD Controls Toggle
         // ==========================================
         item {
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(6.dp))
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -265,14 +333,14 @@ fun SettingsScreen(
             ) {
                 Column {
                     Text(
-                        text = "3-BUTTON MODE",
-                        fontSize = 10.sp,
+                        text = "3-BUTTON LCD CONTROLS",
+                        fontSize = 9.sp,
                         color = Color.White,
                         fontFamily = FontFamily.Monospace
                     )
                     Text(
-                        text = "[A][B][C] + Stem Keys",
-                        fontSize = 8.sp,
+                        text = "[A•SEL] [B•OK] [C•ESC]",
+                        fontSize = 7.5.sp,
                         color = Color.LightGray
                     )
                 }
@@ -282,14 +350,14 @@ fun SettingsScreen(
                         repository.setThreeButtonMode(next)
                         if (isVibrationEnabled) hapticManager.playStepMilestone()
                     },
-                    modifier = Modifier.size(width = 54.dp, height = 32.dp),
+                    modifier = Modifier.size(width = 54.dp, height = 30.dp),
                     colors = ButtonDefaults.buttonColors(
                         backgroundColor = if (isThreeButtonMode) Color(0xFF2E7D32) else Color(0xFFC62828)
                     )
                 ) {
                     Text(
                         text = if (isThreeButtonMode) "ON" else "OFF",
-                        fontSize = 9.sp,
+                        fontSize = 8.5.sp,
                         fontWeight = FontWeight.Bold
                     )
                 }
@@ -297,10 +365,10 @@ fun SettingsScreen(
         }
 
         // ==========================================
-        // 4. Training Mode Toggle (QTE vs Pendulum Shake)
+        // 6. Training Method Toggle (QTE vs Pendulum Shake)
         // ==========================================
         item {
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(6.dp))
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -310,14 +378,14 @@ fun SettingsScreen(
             ) {
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
-                        text = "TRAIN METHOD",
-                        fontSize = 10.sp,
+                        text = "TRAINING METHOD",
+                        fontSize = 9.5.sp,
                         color = Color.White,
                         fontFamily = FontFamily.Monospace
                     )
                     Text(
-                        text = if (isPendulumShakeMode) "Pendulum Shake (5-8)" else "OG Timing QTE (Default)",
-                        fontSize = 8.sp,
+                        text = if (isPendulumShakeMode) "Pendulum Shake (5-8)" else "Timing QTE (Default)",
+                        fontSize = 7.5.sp,
                         color = if (isPendulumShakeMode) Color(0xFFFFD54F) else Color.LightGray
                     )
                 }
@@ -327,7 +395,7 @@ fun SettingsScreen(
                         repository.setPendulumShakeMode(next)
                         if (isVibrationEnabled) hapticManager.playStepMilestone()
                     },
-                    modifier = Modifier.size(width = 60.dp, height = 32.dp),
+                    modifier = Modifier.size(width = 58.dp, height = 30.dp),
                     colors = ButtonDefaults.buttonColors(
                         backgroundColor = if (isPendulumShakeMode) Color(0xFF6A1B9A) else Color(0xFF00695C)
                     )
@@ -342,10 +410,236 @@ fun SettingsScreen(
         }
 
         // ==========================================
-        // 5. NFC Tap Bridge Mode Selector
+        // 7. Daily Step Target
         // ==========================================
         item {
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(6.dp))
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = displayConfig.horizontalPadding),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = "DAILY STEP TARGET",
+                        fontSize = 9.5.sp,
+                        color = Color.White,
+                        fontFamily = FontFamily.Monospace
+                    )
+                    Text(
+                        text = "$dailyStepGoal Steps Goal",
+                        fontSize = 8.sp,
+                        color = Color(0xFF80D8FF)
+                    )
+                }
+                Button(
+                    onClick = {
+                        val idx = stepGoalOptions.indexOf(dailyStepGoal).coerceAtLeast(0)
+                        val nextGoal = stepGoalOptions[(idx + 1) % stepGoalOptions.size]
+                        repository.setDailyStepGoal(nextGoal)
+                        if (isVibrationEnabled) hapticManager.playStepMilestone()
+                    },
+                    modifier = Modifier.size(width = 58.dp, height = 30.dp),
+                    colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFF00838F))
+                ) {
+                    Text(
+                        text = "${dailyStepGoal / 1000}K",
+                        fontSize = 8.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+            }
+        }
+
+        // ==========================================
+        // 8. Sleep Schedule
+        // ==========================================
+        item {
+            Spacer(modifier = Modifier.height(6.dp))
+            val currentSleep = sleepScheduleOptions.find { it.first == sleepSchedule } ?: sleepScheduleOptions[1]
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = displayConfig.horizontalPadding),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = "SLEEP SCHEDULE",
+                        fontSize = 9.5.sp,
+                        color = Color.White,
+                        fontFamily = FontFamily.Monospace
+                    )
+                    Text(
+                        text = currentSleep.second,
+                        fontSize = 7.5.sp,
+                        color = Color(0xFFB39DDB)
+                    )
+                }
+                Button(
+                    onClick = {
+                        val idx = sleepScheduleOptions.indexOfFirst { it.first == sleepSchedule }.coerceAtLeast(0)
+                        val next = sleepScheduleOptions[(idx + 1) % sleepScheduleOptions.size].first
+                        repository.setSleepSchedule(next)
+                        if (isVibrationEnabled) hapticManager.playStepMilestone()
+                    },
+                    modifier = Modifier.size(width = 58.dp, height = 30.dp),
+                    colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFF4527A0))
+                ) {
+                    Text(
+                        text = sleepSchedule.substringBefore("_"),
+                        fontSize = 8.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+            }
+        }
+
+        // ==========================================
+        // 9. Always-On Ambient Display Style
+        // ==========================================
+        item {
+            Spacer(modifier = Modifier.height(6.dp))
+            val currentAmb = ambientStyleOptions.find { it.first == ambientStyle } ?: ambientStyleOptions[0]
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = displayConfig.horizontalPadding),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = "ALWAYS-ON AMBIENT",
+                        fontSize = 9.sp,
+                        color = Color.White,
+                        fontFamily = FontFamily.Monospace
+                    )
+                    Text(
+                        text = currentAmb.second,
+                        fontSize = 7.5.sp,
+                        color = Color(0xFF81C784)
+                    )
+                }
+                Button(
+                    onClick = {
+                        val idx = ambientStyleOptions.indexOfFirst { it.first == ambientStyle }.coerceAtLeast(0)
+                        val next = ambientStyleOptions[(idx + 1) % ambientStyleOptions.size].first
+                        repository.setAmbientStyle(next)
+                        if (isVibrationEnabled) hapticManager.playStepMilestone()
+                    },
+                    modifier = Modifier.size(width = 58.dp, height = 30.dp),
+                    colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFF2E7D32))
+                ) {
+                    Text(
+                        text = when (ambientStyle) {
+                            "OUTLINE" -> "OUTL"
+                            "DIMMED_LCD" -> "LCD"
+                            else -> "DOT"
+                        },
+                        fontSize = 8.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+            }
+        }
+
+        // ==========================================
+        // 10. Clock Time Format (12H vs 24H)
+        // ==========================================
+        item {
+            Spacer(modifier = Modifier.height(6.dp))
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = displayConfig.horizontalPadding),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Column {
+                    Text(
+                        text = "CLOCK TIME FORMAT",
+                        fontSize = 9.5.sp,
+                        color = Color.White,
+                        fontFamily = FontFamily.Monospace
+                    )
+                    Text(
+                        text = if (clockFormat24h) "24-Hour (13:00)" else "12-Hour (1:00 PM)",
+                        fontSize = 7.5.sp,
+                        color = Color.LightGray
+                    )
+                }
+                Button(
+                    onClick = {
+                        val next = !clockFormat24h
+                        repository.setClockFormat24h(next)
+                        if (isVibrationEnabled) hapticManager.playStepMilestone()
+                    },
+                    modifier = Modifier.size(width = 54.dp, height = 30.dp),
+                    colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFF37474F))
+                ) {
+                    Text(
+                        text = if (clockFormat24h) "24H" else "12H",
+                        fontSize = 8.5.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+            }
+        }
+
+        // ==========================================
+        // 11. Environmental Hazard Notifications
+        // ==========================================
+        item {
+            Spacer(modifier = Modifier.height(6.dp))
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = displayConfig.horizontalPadding),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Column {
+                    Text(
+                        text = "HAZARD NOTIFICATIONS",
+                        fontSize = 9.sp,
+                        color = Color.White,
+                        fontFamily = FontFamily.Monospace
+                    )
+                    Text(
+                        text = "X-Program Fog & Miasma Alerts",
+                        fontSize = 7.5.sp,
+                        color = Color.LightGray
+                    )
+                }
+                Button(
+                    onClick = {
+                        val next = !hazardAlertsEnabled
+                        repository.setHazardAlertsEnabled(next)
+                        if (isVibrationEnabled) hapticManager.playStepMilestone()
+                    },
+                    modifier = Modifier.size(width = 54.dp, height = 30.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        backgroundColor = if (hazardAlertsEnabled) Color(0xFF00897B) else Color(0xFF78909C)
+                    )
+                ) {
+                    Text(
+                        text = if (hazardAlertsEnabled) "ON" else "OFF",
+                        fontSize = 8.5.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+            }
+        }
+
+        // ==========================================
+        // 12. NFC Tap Bridge Mode Selector
+        // ==========================================
+        item {
+            Spacer(modifier = Modifier.height(6.dp))
             val currentPair = nfcModes.find { it.first == nfcBridgeMode } ?: nfcModes.first()
             Row(
                 modifier = Modifier
@@ -356,14 +650,14 @@ fun SettingsScreen(
             ) {
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
-                        text = "NFC TAP MODE",
-                        fontSize = 10.sp,
+                        text = "NFC TAP BRIDGE MODE",
+                        fontSize = 9.sp,
                         color = Color.White,
                         fontFamily = FontFamily.Monospace
                     )
                     Text(
                         text = currentPair.second,
-                        fontSize = 8.sp,
+                        fontSize = 7.5.sp,
                         color = Color(0xFF80D8FF)
                     )
                 }
@@ -374,7 +668,7 @@ fun SettingsScreen(
                         repository.setNfcBridgeMode(nextMode)
                         if (isVibrationEnabled) hapticManager.playStepMilestone()
                     },
-                    modifier = Modifier.size(width = 60.dp, height = 32.dp),
+                    modifier = Modifier.size(width = 58.dp, height = 30.dp),
                     colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFF0277BD))
                 ) {
                     Text(
@@ -391,7 +685,7 @@ fun SettingsScreen(
         }
 
         // ==========================================
-        // 6. Hatch New Digi-Egg / Reset
+        // 13. Hatch New Starter Digi-Egg (Full 16 Lineages)
         // ==========================================
         item {
             Spacer(modifier = Modifier.height(10.dp))
@@ -404,7 +698,7 @@ fun SettingsScreen(
                         .padding(horizontal = displayConfig.horizontalPadding),
                     colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFF5E35B1))
                 ) {
-                    Text("🥚 HATCH NEW DIGI-EGG", fontSize = 8.sp, fontWeight = FontWeight.Black, fontFamily = FontFamily.Monospace)
+                    Text("🥚 HATCH STARTER DIGI-EGG (16)", fontSize = 8.sp, fontWeight = FontWeight.Black, fontFamily = FontFamily.Monospace)
                 }
             } else {
                 val starterEggs = listOf(
@@ -415,9 +709,15 @@ fun SettingsScreen(
                     Triple(109, "V5•ZURU", Color(0xFF33691E)),
                     Triple(111, "PEN•MOKU", Color(0xFFE65100)),
                     Triple(113, "VIR•KURA", Color(0xFF4A148C)),
-                    Triple(130, "NYO•NYOK", Color(0xFFAD1457)),
-                    Triple(131, "PIC•PICH", Color(0xFF0097A7)),
-                    Triple(132, "PUK•PUKA", Color(0xFF1565C0))
+                    Triple(130, "WND•NYOK", Color(0xFFAD1457)),
+                    Triple(131, "DEP•PICH", Color(0xFF0097A7)),
+                    Triple(132, "MTL•PUKA", Color(0xFF1565C0)),
+                    Triple(135, "Z•COTSU", Color(0xFF4E342E)),
+                    Triple(136, "D3•FUFU", Color(0xFF00838F)),
+                    Triple(137, "DRK•ALGO", Color(0xFF311B92)),
+                    Triple(138, "VTL•DOKI", Color(0xFFC2185B)),
+                    Triple(139, "CYB•CHOR", Color(0xFF2E7D32)),
+                    Triple(140, "COL•BUBB", Color(0xFFE91E63))
                 )
                 Column(
                     modifier = Modifier
@@ -428,7 +728,7 @@ fun SettingsScreen(
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Text(
-                        text = "SELECT STARTER DIGI-EGG:",
+                        text = "SELECT FROM 16 STARTER EGGS:",
                         fontSize = 8.sp,
                         fontWeight = FontWeight.Bold,
                         color = Color(0xFFCE93D8),
@@ -489,14 +789,13 @@ fun SettingsScreen(
         }
 
         // ==========================================
-        // 7. AOSP & Wear OS Hardware Compatibility Diagnostics + Display Shape + LAN Sync
+        // 14. Platform & Hardware Status (AOSP + Wear OS + LAN Sync)
         // ==========================================
         item {
             val context = androidx.compose.ui.platform.LocalContext.current
             val pedometerMode = remember { com.digiwear.wear.sensor.StepTrackerManager.getActivePedometerMode(context) }
             val nfcAvailable = remember { com.digiwear.wear.nfc.NfcDuelManager.isNfcAvailable(context) }
             val lanIp = remember { com.digiwear.wear.datalayer.AospLanSyncServer.getLocalIpAddress() }
-            val shapeModes = listOf("AUTO", "ROUND", "SQUARE")
             Spacer(modifier = Modifier.height(8.dp))
             Column(
                 modifier = Modifier
@@ -507,7 +806,7 @@ fun SettingsScreen(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Text(
-                    text = "⌚ PLATFORM & AOSP STATUS",
+                    text = "⌚ PLATFORM & HARDWARE STATUS",
                     fontSize = 7.5.sp,
                     fontWeight = FontWeight.Black,
                     color = Color(0xFF80D8FF),
@@ -579,7 +878,7 @@ fun SettingsScreen(
         }
 
         // ==========================================
-        // 8. Back Button
+        // 15. Back Button
         // ==========================================
         item {
             Spacer(modifier = Modifier.height(8.dp))

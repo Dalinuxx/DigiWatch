@@ -1,4 +1,4 @@
-﻿package com.digiwear.wear.ui
+package com.digiwear.wear.ui
 
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -25,19 +25,27 @@ fun BackgroundCanvas(
     theme: BackgroundTheme,
     isAmbient: Boolean,
     modifier: Modifier = Modifier,
-    lightsOff: Boolean = false
+    lightsOff: Boolean = false,
+    contrastLevel: String = "MEDIUM",
+    ambientStyle: String = "MINIMAL_DOT"
 ) {
+    val contrastMultiplier = when (contrastLevel.uppercase()) {
+        "LOW" -> 0.65f
+        "HIGH" -> 1.45f
+        else -> 1.0f
+    }
+
     Spacer(
         modifier = modifier
             .fillMaxSize()
             .drawWithCache {
                 val primaryColor = Color(theme.primaryColorHex)
-                val secondaryColor = Color(theme.secondaryColorHex).copy(alpha = 0.35f)
-                val gridColor25 = Color(theme.gridColorHex).copy(alpha = 0.25f)
-                val gridColor20 = Color(theme.gridColorHex).copy(alpha = 0.20f)
-                val gridColor15 = Color(theme.gridColorHex).copy(alpha = 0.15f)
-                val gridColor35 = Color(theme.gridColorHex).copy(alpha = 0.35f)
-                val bezelHighlight = Color(theme.gridColorHex).copy(alpha = 0.45f)
+                val secondaryColor = Color(theme.secondaryColorHex).copy(alpha = (0.35f * contrastMultiplier).coerceIn(0.1f, 0.8f))
+                val gridColor25 = Color(theme.gridColorHex).copy(alpha = (0.25f * contrastMultiplier).coerceIn(0.1f, 0.7f))
+                val gridColor20 = Color(theme.gridColorHex).copy(alpha = (0.20f * contrastMultiplier).coerceIn(0.08f, 0.6f))
+                val gridColor15 = Color(theme.gridColorHex).copy(alpha = (0.15f * contrastMultiplier).coerceIn(0.06f, 0.5f))
+                val gridColor35 = Color(theme.gridColorHex).copy(alpha = (0.35f * contrastMultiplier).coerceIn(0.15f, 0.85f))
+                val bezelHighlight = Color(theme.gridColorHex).copy(alpha = (0.45f * contrastMultiplier).coerceIn(0.2f, 0.95f))
 
                 // Precompute 1997 LCD dot-matrix coordinates once per size/theme change
                 val lcdDots = if (theme == BackgroundTheme.CLASSIC_VPET_LCD) {
@@ -76,8 +84,17 @@ fun BackgroundCanvas(
 
                 onDrawBehind {
                     if (isAmbient || lightsOff) {
-                        // OLED Power Saving: Pure pitch black
+                        // OLED Power Saving: Pure pitch black base
                         drawRect(color = Color.Black)
+                        if (isAmbient && ambientStyle == "DIMMED_LCD") {
+                            drawRoundRect(
+                                color = Color(0xFF222830),
+                                topLeft = Offset(4f, 4f),
+                                size = Size(size.width - 8f, size.height - 8f),
+                                cornerRadius = CornerRadius(12f, 12f),
+                                style = Stroke(width = 1f)
+                            )
+                        }
                         return@onDrawBehind
                     }
 

@@ -1,4 +1,4 @@
-﻿package com.digiwear.wear.datalayer
+package com.digiwear.wear.datalayer
 
 import android.content.Context
 import com.digiwear.core.model.BackgroundTheme
@@ -154,6 +154,12 @@ object AospLanSyncServer {
                         map["sound_enabled"]?.let { repo.setSoundEnabled(it.toBoolean()) }
                         map["nfc_bridge_mode"]?.let { repo.setNfcBridgeMode(it) }
                         map["display_shape_override"]?.let { repo.setDisplayShapeOverride(it) }
+                        map["daily_step_goal"]?.toIntOrNull()?.let { repo.setDailyStepGoal(it) }
+                        map["lcd_contrast_level"]?.let { repo.setContrastLevel(it) }
+                        map["sleep_schedule"]?.let { repo.setSleepSchedule(it) }
+                        map["ambient_display_style"]?.let { repo.setAmbientStyle(it) }
+                        map["hazard_alerts_enabled"]?.let { repo.setHazardAlertsEnabled(it.toBoolean()) }
+                        map["clock_format_24h"]?.let { repo.setClockFormat24h(it.toBoolean()) }
                         "OK"
                     } catch (_: Exception) {
                         "ERR"

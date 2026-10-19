@@ -78,6 +78,36 @@ class PetRepository private constructor(context: Context) {
     )
     val displayShapeOverrideFlow: StateFlow<String> = _displayShapeOverrideFlow.asStateFlow()
 
+    private val _dailyStepGoalFlow = MutableStateFlow(
+        prefs.getInt("daily_step_goal", 5000)
+    )
+    val dailyStepGoalFlow: StateFlow<Int> = _dailyStepGoalFlow.asStateFlow()
+
+    private val _contrastLevelFlow = MutableStateFlow(
+        prefs.getString("lcd_contrast_level", "MEDIUM") ?: "MEDIUM"
+    )
+    val contrastLevelFlow: StateFlow<String> = _contrastLevelFlow.asStateFlow()
+
+    private val _sleepScheduleFlow = MutableStateFlow(
+        prefs.getString("sleep_schedule", "21:00_07:00") ?: "21:00_07:00"
+    )
+    val sleepScheduleFlow: StateFlow<String> = _sleepScheduleFlow.asStateFlow()
+
+    private val _ambientStyleFlow = MutableStateFlow(
+        prefs.getString("ambient_display_style", "MINIMAL_DOT") ?: "MINIMAL_DOT"
+    )
+    val ambientStyleFlow: StateFlow<String> = _ambientStyleFlow.asStateFlow()
+
+    private val _hazardAlertsFlow = MutableStateFlow(
+        prefs.getBoolean("hazard_alerts_enabled", true)
+    )
+    val hazardAlertsFlow: StateFlow<Boolean> = _hazardAlertsFlow.asStateFlow()
+
+    private val _clockFormatFlow = MutableStateFlow(
+        prefs.getBoolean("clock_format_24h", false)
+    )
+    val clockFormatFlow: StateFlow<Boolean> = _clockFormatFlow.asStateFlow()
+
     private val _beamedCommCodeFlow = MutableStateFlow<String?>(null)
     val beamedCommCodeFlow: StateFlow<String?> = _beamedCommCodeFlow.asStateFlow()
 
@@ -124,6 +154,36 @@ class PetRepository private constructor(context: Context) {
         _displayShapeOverrideFlow.value = mode
     }
 
+    fun setDailyStepGoal(goal: Int) {
+        prefs.edit().putInt("daily_step_goal", goal).apply()
+        _dailyStepGoalFlow.value = goal
+    }
+
+    fun setContrastLevel(level: String) {
+        prefs.edit().putString("lcd_contrast_level", level).apply()
+        _contrastLevelFlow.value = level
+    }
+
+    fun setSleepSchedule(schedule: String) {
+        prefs.edit().putString("sleep_schedule", schedule).apply()
+        _sleepScheduleFlow.value = schedule
+    }
+
+    fun setAmbientStyle(style: String) {
+        prefs.edit().putString("ambient_display_style", style).apply()
+        _ambientStyleFlow.value = style
+    }
+
+    fun setHazardAlertsEnabled(enabled: Boolean) {
+        prefs.edit().putBoolean("hazard_alerts_enabled", enabled).apply()
+        _hazardAlertsFlow.value = enabled
+    }
+
+    fun setClockFormat24h(is24h: Boolean) {
+        prefs.edit().putBoolean("clock_format_24h", is24h).apply()
+        _clockFormatFlow.value = is24h
+    }
+
     fun getSettingsMap(): Map<String, String> = mapOf(
         "theme" to _themeFlow.value.id,
         "vibration" to _vibrationFlow.value.toString(),
@@ -131,7 +191,13 @@ class PetRepository private constructor(context: Context) {
         "pendulum_shake_mode" to _pendulumShakeModeFlow.value.toString(),
         "sound_enabled" to _soundEnabledFlow.value.toString(),
         "nfc_bridge_mode" to _nfcBridgeModeFlow.value,
-        "display_shape_override" to _displayShapeOverrideFlow.value
+        "display_shape_override" to _displayShapeOverrideFlow.value,
+        "daily_step_goal" to _dailyStepGoalFlow.value.toString(),
+        "lcd_contrast_level" to _contrastLevelFlow.value,
+        "sleep_schedule" to _sleepScheduleFlow.value,
+        "ambient_display_style" to _ambientStyleFlow.value,
+        "hazard_alerts_enabled" to _hazardAlertsFlow.value.toString(),
+        "clock_format_24h" to _clockFormatFlow.value.toString()
     )
 
     fun setBeamedCommCode(code: String?) {

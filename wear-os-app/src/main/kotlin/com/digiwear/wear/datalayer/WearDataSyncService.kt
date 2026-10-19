@@ -1,4 +1,4 @@
-﻿package com.digiwear.wear.datalayer
+package com.digiwear.wear.datalayer
 
 import com.digiwear.core.model.BackgroundTheme
 import com.digiwear.core.model.PetState
@@ -72,6 +72,24 @@ class WearDataSyncService : WearableListenerService() {
                         }
                         map["display_shape_override"]?.let { shapeMode ->
                             repo.setDisplayShapeOverride(shapeMode)
+                        }
+                        map["daily_step_goal"]?.toIntOrNull()?.let { goal ->
+                            repo.setDailyStepGoal(goal)
+                        }
+                        map["lcd_contrast_level"]?.let { level ->
+                            repo.setContrastLevel(level)
+                        }
+                        map["sleep_schedule"]?.let { schedule ->
+                            repo.setSleepSchedule(schedule)
+                        }
+                        map["ambient_display_style"]?.let { style ->
+                            repo.setAmbientStyle(style)
+                        }
+                        map["hazard_alerts_enabled"]?.let { alertStr ->
+                            repo.setHazardAlertsEnabled(alertStr.toBoolean())
+                        }
+                        map["clock_format_24h"]?.let { clockStr ->
+                            repo.setClockFormat24h(clockStr.toBoolean())
                         }
                     } catch (_: Exception) {}
                 }
