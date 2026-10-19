@@ -1,4 +1,4 @@
-# DigiWatch 📟⌚
+﻿# DigiWear 📟⌚
 ### Dual-Device Standalone Wear OS Virtual Pet System & Android Companion Ecosystem
 
 [![Platform](https://img.shields.io/badge/Platform-Wear%20OS%203.0%2B%20%7C%20Android%2013%2B-blue?logo=android&logoColor=white)](https://developer.android.com/wear)
@@ -12,9 +12,9 @@
 
 ## 🌟 Executive Summary
 
-**DigiWatch** is an authentic, standalone virtual pet ecosystem designed from the ground up for modern Wear OS smartwatches and paired with a feature-complete Android companion application. 
+**DigiWear** is an authentic, standalone virtual pet ecosystem designed from the ground up for modern Wear OS smartwatches and paired with a feature-complete Android companion application. 
 
-Recreating the golden era of handheld virtual pets (Generations V1 through V6, Pendulum, D-3, and Digimon X), DigiWatch combines historical lifecycle simulation accuracy with modern smartwatch wearable hardware:
+Recreating the golden era of handheld virtual pets (Generations V1 through V6, Pendulum, D-3, and Digimon X), DigiWear combines historical lifecycle simulation accuracy with modern smartwatch wearable hardware:
 - **Standalone Wear OS Simulation**: Operates 100% autonomously on your wrist without requiring an active smartphone tether. Physiological stats calculate via real-time UTC Unix timestamp deltas.
 - **Ultra-Low-Power Ambient Mode**: Custom monochrome outline shaders guarantee an On-Pixel Ratio (OPR ≤ 15%) for all-day battery endurance.
 - **Physical Hardware Button Interception**: Sub-millisecond synchronous key dispatch intercepts watch stem buttons (`STEM_PRIMARY`, `STEM_1`, `STEM_2`, `STEM_3`), rotary crown, and volume keys for zero-latency sweet-spot Quick Time Events (QTEs).
@@ -27,25 +27,25 @@ Recreating the golden era of handheld virtual pets (Generations V1 through V6, P
 
 ## 🧬 Official Visual Sprite Sheet Digivolution & DNA Jogress Guide (All 350 Species)
 
-Every single one of the **350 Digimon** in DigiWatch is naturally reachable from the **10 Starter Digi-Eggs** via canonical Bandai 1997 V-Pet, Digimon Pendulum, and Digimon Color evolution rules, or via **65 DNA Jogress / DigiXros / Mode Change** combinations.
+Every single one of the **350 Digimon** in DigiWear is naturally reachable from the **10 Starter Digi-Eggs** via canonical Bandai 1997 V-Pet, Digimon Pendulum, and Digimon Color evolution rules, or via **65 DNA Jogress / DigiXros / Mode Change** combinations.
 
 👉 **[Read the Complete Interactive Table & Guide (`DIGIVOLUTION_GUIDE.md`)](DIGIVOLUTION_GUIDE.md)**
 
 ### Visual Sprite Sheet Evolution & DNA Jogress Chart
-![DigiWatch Full Sprite Sheet Evolution Guide](docs/digiwatch_evolution_guide_chart.png)
+![DigiWear Full Sprite Sheet Evolution Guide](docs/digiwear_evolution_guide_chart.png)
 
 ### Master 350-Species Full-Color Pixel-Art Sprite Sheet
-![DigiWatch 350-Species Master Roster Sprite Sheet](docs/digiwatch_roster_spritesheet.png)
+![DigiWear 350-Species Master Roster Sprite Sheet](docs/digiwear_roster_spritesheet.png)
 
 ---
 
 ## ⌚ Universal Wear OS & Standalone AOSP Standard Watch Compatibility
 
-DigiWatch is engineered from the ground up to run natively on **both** Google **Wear OS 3.0–5.0+** smartwatches **and** standalone **AOSP / Full Android Standard Watches (FAWs)** running Android 9.0–15.0+ (including Kospet, Lokmat, Lemfo, Zeblaze, Rogbid, and generic round/square AOSP Android smartwatches without Google Play Services):
+DigiWear is engineered from the ground up to run natively on **both** Google **Wear OS 3.0–5.0+** smartwatches **and** standalone **AOSP / Full Android Standard Watches (FAWs)** running Android 9.0–15.0+ (including Kospet, Lokmat, Lemfo, Zeblaze, Rogbid, and generic round/square AOSP Android smartwatches without Google Play Services):
 
 | Subsystem | Wear OS 3.0 / 4.0 / 5.0+ Watches | Standalone AOSP / Full Android Standard Watches |
 | :--- | :--- | :--- |
-| **APK Binary (`release_bin/`)** | `wear-os-app-release.apk` | `digiwatch-aosp-standard-watch-release.apk` (or `wear-os-app-release.apk`) |
+| **APK Binary (`release_bin/`)** | `wear-os-app-release.apk` | `digiwear-aosp-standard-watch-release.apk` (or `wear-os-app-release.apk`) |
 | **Manifest Hardware Flag** | `android.hardware.type.watch` (`required="false"`) | Installs cleanly via standard Android PackageInstaller / ADB without Wear OS flags |
 | **Wearable Shared Library** | `<uses-library android:name="com.google.android.wearable" android:required="false" />` | Dynamically guarded via reflection in `AmbientController` — zero crash when absent |
 | **Pedometer & Step Engine** | **Tier 1**: `Sensor.TYPE_STEP_COUNTER` / **Tier 2**: `TYPE_STEP_DETECTOR` | **Tier 3 Fallback**: Automatic **AOSP Wrist Accelerometer Gait Peak Detector** (`1.24g` threshold, `330ms` debounce) + `+100 Steps` bench button |
@@ -57,12 +57,12 @@ DigiWatch is engineered from the ground up to run natively on **both** Google **
 ### AOSP Smartwatch Wi-Fi & Hotspot LAN Bridge
 For Full Android Watches without Google Play Services:
 1. Connect your AOSP smartwatch and your Android phone to the same Wi-Fi network (or turn on your phone's Wi-Fi Hotspot and connect your watch).
-2. Open DigiWatch on your watch, navigate to **Settings**, and locate **AOSP LAN BRIDGE** to see the watch's IP and port (e.g. `192.168.43.112:45820`).
+2. Open DigiWear on your watch, navigate to **Settings**, and locate **AOSP LAN BRIDGE** to see the watch's IP and port (e.g. `192.168.43.112:45820`).
 3. Open the Companion App on your phone, head to **Pet Dashboard → Smartwatch Shell & Hardware Settings → AOSP / Android Watch Wi-Fi & Hotspot Bridge**, and tap **`🔍 LINK AOSP`**.
 4. The companion app automatically broadcasts a UDP discovery probe on port `45821` to link your watch. If your watch has a static IP, you can also enter it manually. Once linked, all live state pulls, 1-tap Jogress beams, remote care actions, custom campaigns, and setting pushes sync in real-time over TCP.
 
 ### Display Shape Override for Round AOSP Watches
-Many round AOSP watches (Kospet, Lokmat, Lemfo, Zeblaze) run customized smartphone ROMs where Android misreports `isScreenRound = false`. DigiWatch provides a 1-tap **Display Shape Override** (`AUTO` / `ROUND` / `SQUARE`) in both the Watch Settings and Phone Companion App. Setting this to `ROUND` enforces circular OLED safety margins to prevent any UI truncation on circular bezels.
+Many round AOSP watches (Kospet, Lokmat, Lemfo, Zeblaze) run customized smartphone ROMs where Android misreports `isScreenRound = false`. DigiWear provides a 1-tap **Display Shape Override** (`AUTO` / `ROUND` / `SQUARE`) in both the Watch Settings and Phone Companion App. Setting this to `ROUND` enforces circular OLED safety margins to prevent any UI truncation on circular bezels.
 
 ## 🏛 System Architecture
 
@@ -155,7 +155,7 @@ State decay strictly follows the original Bandai virtual pet timing schedules ba
 ---
 
 ### 2. Hybrid Input System & Zero-Latency Hardware Buttons
-DigiWatch provides both classic physical handheld controls and modern touch ergonomics:
+DigiWear provides both classic physical handheld controls and modern touch ergonomics:
 
 1. **Authentic 3-Button LCD Mode**:
    - Renders the iconic 8-icon Bandai LCD border:
@@ -207,7 +207,7 @@ Every monster is rendered via a uniform 64 × 64 px matrix canvas at `FilterQual
 
 ### 4. DNA Digivolution (Jogress) & DigiXros Architecture
 
-DigiWatch introduces authentic DNA Digivolution and DigiXros mechanics **without compromising compatibility with Digimon 0nl1ne, D-Com, and A-Com**:
+DigiWear introduces authentic DNA Digivolution and DigiXros mechanics **without compromising compatibility with Digimon 0nl1ne, D-Com, and A-Com**:
 
 #### Why Wire Compatibility is 100% Preserved:
 In online battle simulators and physical 2-pin / 3-pin handheld communicators, communication packets contain only the **active combatant's current parameters**:
@@ -258,14 +258,14 @@ Because external simulators inspect only the resulting species, Omnimon (`#510`)
 
 ### 5. 4-Mode Battle System, Canonical V-Pet Formulas & 128-Bit Comm Code
 
-DigiWatch features **full face-to-face animated battle rendering** (`flipHorizontal = true` on the left fighter so both Digimon face each other, animated projectile clashes `●━━▶` / `⚡MEGA HIT⚡`, live HP bars, and QTE reflex boosts) across **4 distinct, separated Battle Modes** on both Watch and Phone:
+DigiWear features **full face-to-face animated battle rendering** (`flipHorizontal = true` on the left fighter so both Digimon face each other, animated projectile clashes `●━━▶` / `⚡MEGA HIT⚡`, live HP bars, and QTE reflex boosts) across **4 distinct, separated Battle Modes** on both Watch and Phone:
 
 1. **🏟 Mode 1 — Adventure Colosseum (`BattleMode.ADVENTURE`)**:
    - 30-Sector Pedometer Quest & Colosseum Boss Gates with sector weather hazards (`Thunderstorm`, `Magma Heat`, `Tidal Current`, `Miasma Fog`, `Zero Gravity`, `Apocalymon Void`) and live turn-by-turn face-to-face arena combat.
 2. **📡 Mode 2 — Wild NFC & Barcode Scanner (`BattleMode.WILD_SCAN`)**:
    - Scan any physical NFC tag/card/transit pass/amiibo on Watch or Phone, or scan/enter any **UPC/EAN-13 product barcode or QR code** in the Companion App (`WildScanEncounterGenerator`) to deterministically discover Wild Digimon scaled to a Digital World Habitat Zone (`File Island Coast`, `Folder Continent`, `Net Ocean Trench`, `Dark Area Abyss`), with an 18% Rare Boss Anomaly escalation!
 3. **📶 Mode 3 — NFC Tap-to-Duel P2P (`BattleMode.NFC_TAP_DUEL`)**:
-   - Tap Watch-to-Watch, Watch-to-Phone, or Phone-to-Phone via NFC Reader/NDEF (`application/vnd.com.digiwatch.battle`) or 128-bit Crockford Base32 CommCodes for instant peer-to-peer duels and DNA Jogress fusions.
+   - Tap Watch-to-Watch, Watch-to-Phone, or Phone-to-Phone via NFC Reader/NDEF (`application/vnd.com.digiwear.battle`) or 128-bit Crockford Base32 CommCodes for instant peer-to-peer duels and DNA Jogress fusions.
 4. **🌐 Mode 4 — A-Com / D-Com / WiFiCom + Watch NFC Relay (`BattleMode.ACOM_DCOM_WIFICOM`)**:
    - Full `V1-XXXX-XXXX-XXXX` (48-bit) and `V1-XXXX-XXXX` (32-bit) DigiROM transceiver for Digimon 0nl1ne, w0rld, Alpha Terminal, A-Com, D-Com, and WiFiCom.
    - **Watch-to-Phone NFC & DataLayer Relay**: Tap your Smartwatch to your Phone (or tap **`📲 RELAY DIGIROM TO PHONE`** on the Watch) to bridge your Watch Partner's live DigiROM into the Phone Companion App's A-Com / WiFiCom Online Tamer Lobby, and beam opponents right back to your wrist!
@@ -376,7 +376,7 @@ All modules assemble cleanly with 0 errors:
 ### 3. Sideloading to Devices
 
 #### ⚡ Automated One-Click Sideloading Companion Scripts (Recommended):
-DigiWatch includes interactive helper scripts that automatically locate `adb` on your system (checking PATH and default Android SDK folders), assist with Wi-Fi pairing/connecting, and install both signed APKs without manual terminal commands:
+DigiWear includes interactive helper scripts that automatically locate `adb` on your system (checking PATH and default Android SDK folders), assist with Wi-Fi pairing/connecting, and install both signed APKs without manual terminal commands:
 
 - **Windows (Double-Click or Command Line)**:
   ```cmd

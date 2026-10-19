@@ -1,4 +1,4 @@
-pluginManagement {
+﻿pluginManagement {
     repositories {
         google()
         mavenCentral()
@@ -13,7 +13,7 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "DigiWatch"
+rootProject.name = "DigiWear"
 include(":shared-vpet-core")
 include(":wear-os-app")
 include(":phone-companion-app")

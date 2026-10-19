@@ -1,4 +1,4 @@
-plugins {
+﻿plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.compose.compiler)
@@ -7,11 +7,11 @@ plugins {
 }
 
 android {
-    namespace = "com.digiwatch.wear"
+    namespace = "com.digiwear.wear"
     compileSdk = 35
 
     defaultConfig {
-        applicationId = "com.digiwatch.wear"
+        applicationId = "com.digiwear.wear"
         minSdk = 28
         targetSdk = 34
         versionCode = 1
@@ -22,7 +22,7 @@ android {
 
     signingConfigs {
         create("release") {
-            val keystoreFile = rootProject.file(System.getenv("KEYSTORE_FILE") ?: "signing/digiwatch-release.jks")
+            val keystoreFile = rootProject.file(System.getenv("KEYSTORE_FILE") ?: "signing/digiwear-release.jks")
             if (keystoreFile.exists()) {
                 storeFile = keystoreFile
                 storePassword = System.getenv("KEYSTORE_PASSWORD") ?: "digiwatch"

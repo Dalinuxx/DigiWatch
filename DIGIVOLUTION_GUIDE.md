@@ -1,15 +1,15 @@
-# 🧬 DigiWatch Official Visual Sprite Sheet Digivolution & DNA Jogress Guide (350 Species)
+# 🧬 DigiWear Official Visual Sprite Sheet Digivolution & DNA Jogress Guide (350 Species)
 
 > **100% Complete & Mathematically Verified Lineage Chart + Full Pixel-Art Sprite Sheets**
-> Every single one of the **350 Digimon** in DigiWatch is naturally reachable from the **10 Starter Digi-Eggs** via canonical Bandai 1997 V-Pet, Digimon Pendulum, and Digimon Color evolution rules, or via **65 DNA Jogress / DigiXros / Mode Change** combinations.
+> Every single one of the **350 Digimon** in DigiWear is naturally reachable from the **10 Starter Digi-Eggs** via canonical Bandai 1997 V-Pet, Digimon Pendulum, and Digimon Color evolution rules, or via **65 DNA Jogress / DigiXros / Mode Change** combinations.
 
 ## 🖼️ Visual Sprite Sheet Evolution Chart & Master 350-Species Roster
 
 ### 1. Full Visual Sprite Sheet Evolution & DNA Jogress Guide Poster
-![DigiWatch Full Sprite Sheet Evolution Guide](docs/digiwatch_evolution_guide_chart.png)
+![DigiWear Full Sprite Sheet Evolution Guide](docs/digiwear_evolution_guide_chart.png)
 
 ### 2. Complete 350-Species Master Pixel-Art Sprite Sheet
-![DigiWatch 350-Species Master Roster Sprite Sheet](docs/digiwatch_roster_spritesheet.png)
+![DigiWear 350-Species Master Roster Sprite Sheet](docs/digiwear_roster_spritesheet.png)
 
 ## 📊 Roster & Evolution Summary
 

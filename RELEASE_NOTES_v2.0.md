@@ -1,7 +1,7 @@
-# DigiWatch v2.0 Official Release Notes
+﻿# DigiWear v2.0 Official Release Notes
 
 ### Complete Overview
-DigiWatch v2.0 represents a complete, exhaustive overhaul across both the standalone smartwatch application and the Android phone companion application, achieving 100% parity with historical Bandai virtual pets while leveraging modern wearable hardware, NFC, and wireless protocols.
+DigiWear v2.0 represents a complete, exhaustive overhaul across both the standalone smartwatch application and the Android phone companion application, achieving 100% parity with historical Bandai virtual pets while leveraging modern wearable hardware, NFC, and wireless protocols.
 
 ---
 
@@ -17,7 +17,7 @@ DigiWatch v2.0 represents a complete, exhaustive overhaul across both the standa
 - Every single one of the 300 species can be naturally reached from the 10 starter eggs.
 - Zero orphaned species and zero dead ends.
 - 54 canonical DNA Jogress, DigiXros, and Mode Change fusions with dedicated 1-tap chambers on both watch and companion app.
-- Full visual sprite sheet evolution poster (`docs/digiwatch_evolution_guide_chart.png`) and 300-species master sprite sheet (`docs/digiwatch_roster_spritesheet.png`).
+- Full visual sprite sheet evolution poster (`docs/digiwear_evolution_guide_chart.png`) and 300-species master sprite sheet (`docs/digiwear_roster_spritesheet.png`).
 
 #### 3. 4-Mode Battle System with Face-to-Face Animated Arena
 - **Adventure Colosseum**: 30 sectors of physical-step exploration and turn-by-turn boss combat with environmental weather hazards.
@@ -44,7 +44,7 @@ DigiWatch v2.0 represents a complete, exhaustive overhaul across both the standa
 
 ### Release Binaries (`release_bin/`)
 - `wear-os-app-release.apk`
-- `digiwatch-aosp-standard-watch-release.apk`
+- `digiwear-aosp-standard-watch-release.apk`
 - `wear-os-app-debug.apk`
 - `phone-companion-app-release.apk`
 - `phone-companion-app-debug.apk`

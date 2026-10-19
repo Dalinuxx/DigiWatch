@@ -1,5 +1,5 @@
-@echo off
-title DigiWatch Sideloading Assistant
+﻿@echo off
+title DigiWear Sideloading Assistant
 chcp 65001 >nul
 cls
 
@@ -12,7 +12,7 @@ if %ERRORLEVEL% EQU 0 (
 
 :: Fallback if PowerShell is somehow not installed
 echo ======================================================================
-echo             DIGIWATCH SIDELOADING ASSISTANT (Batch Mode)
+echo             DIGIWEAR SIDELOADING ASSISTANT (Batch Mode)
 echo ======================================================================
 echo.
 
@@ -33,7 +33,7 @@ if %ERRORLEVEL% NEQ 0 (
 :MENU
 cls
 echo ======================================================================
-echo             DIGIWATCH SIDELOADING ASSISTANT (Batch Mode)
+echo             DIGIWEAR SIDELOADING ASSISTANT (Batch Mode)
 echo ======================================================================
 echo.
 echo   [1] Install Wear OS Watch App (Wi-Fi)

@@ -1,6 +1,6 @@
-<#
+﻿<#
 .SYNOPSIS
-    DigiWatch Automated Sideloading Assistant
+    DigiWear Automated Sideloading Assistant
     Easily connect and install the Wear OS app and Phone Companion app via ADB.
 #>
 
@@ -9,7 +9,7 @@
 function Write-Header {
     Clear-Host
     Write-Host '======================================================================' -ForegroundColor Cyan
-    Write-Host '            DIGIWATCH SIDELOADING & INSTALLATION WIZARD 📟⌚           ' -ForegroundColor Yellow -BackgroundColor Black
+    Write-Host '            DIGIWEAR SIDELOADING & INSTALLATION WIZARD 📟⌚           ' -ForegroundColor Yellow -BackgroundColor Black
     Write-Host '======================================================================' -ForegroundColor Cyan
     Write-Host '  Dual-Device Virtual Pet System for Wear OS and Android Companion    ' -ForegroundColor Gray
     Write-Host '======================================================================' -ForegroundColor Cyan

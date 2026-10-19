@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
     <uses-permission android:name="android.permission.INTERNET" />
@@ -25,7 +25,7 @@
             <intent-filter>
                 <action android:name="android.nfc.action.NDEF_DISCOVERED" />
                 <category android:name="android.intent.category.DEFAULT" />
-                <data android:mimeType="application/vnd.com.digiwatch.battle" />
+                <data android:mimeType="application/vnd.com.digiwear.battle" />
             </intent-filter>
             <intent-filter>
                 <action android:name="android.nfc.action.TAG_DISCOVERED" />
@@ -34,14 +34,14 @@
         </activity>
 
         <receiver
-            android:name=".widget.DigiWatchAppWidgetProvider"
+            android:name=".widget.DigiWearAppWidgetProvider"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
             </intent-filter>
             <meta-data
                 android:name="android.appwidget.provider"
-                android:resource="@xml/digiwatch_app_widget_info" />
+                android:resource="@xml/digiwear_app_widget_info" />
         </receiver>
 
     </application>

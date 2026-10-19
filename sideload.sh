@@ -1,6 +1,6 @@
-#!/usr/bin/env bash
+﻿#!/usr/bin/env bash
 # ======================================================================
-#            DIGIWATCH SIDELOADING & INSTALLATION SCRIPT 📟⌚
+#            DIGIWEAR SIDELOADING & INSTALLATION SCRIPT 📟⌚
 # ======================================================================
 # Supports Linux and macOS with auto-detection of Android SDK & ADB.
 
@@ -96,7 +96,7 @@ show_guide() {
 while true; do
     clear
     echo -e "${CYAN}======================================================================${NC}"
-    echo -e "${YELLOW}            DIGIWATCH SIDELOADING & INSTALLATION WIZARD 📟⌚          ${NC}"
+    echo -e "${YELLOW}            DIGIWEAR SIDELOADING & INSTALLATION WIZARD 📟⌚          ${NC}"
     echo -e "${CYAN}======================================================================${NC}"
     echo -e "  Dual-Device Virtual Pet System for Wear OS & Android Companion      "
     echo -e "${CYAN}======================================================================${NC}"

@@ -1,4 +1,4 @@
-# DigiWatch Release Announcement for Reddit
+﻿# DigiWear Release Announcement for Reddit
 
 Subreddits to post to:
 - r/digimon
@@ -20,7 +20,7 @@ Hey everyone,
 
 I've been a huge fan of classic Digimon virtual pets since the original 1997 bricks and the Pendulum series. Over the last few years I kept waiting for an authentic, full-featured V-Pet experience on smartwatches that wasn't just a basic watch face or a companion app that requires your phone to stay tethered in your pocket 24/7.
 
-I wanted something that ran completely standalone on my wrist, felt like a real Bandai V-Pet with accurate timing, physical button controls, and real battles, but took full advantage of modern wearable hardware. Since nobody had built quite what I was looking for, I decided to build it myself. It's called DigiWatch, and today I'm releasing the entire project as open source along with ready-to-install signed release APKs.
+I wanted something that ran completely standalone on my wrist, felt like a real Bandai V-Pet with accurate timing, physical button controls, and real battles, but took full advantage of modern wearable hardware. Since nobody had built quite what I was looking for, I decided to build it myself. It's called DigiWear, and today I'm releasing the entire project as open source along with ready-to-install signed release APKs.
 
 Here is a breakdown of what is packed into this:
 
@@ -51,8 +51,8 @@ The phone app includes a Cryo-Vault where you can preserve raised Digimon in zer
 The project is completely free, licensed under MIT, and contains zero ads, zero trackers, and zero microtransactions.
 
 GitHub Repository (source code, visual sprite sheet guide, and signed release APKs):
-https://github.com/Dalinuxx/DigiWatch
+https://github.com/Dalinuxx/DigiWear
 
-The signed release APKs are in the release_bin folder in the repository (wear-os-app-release.apk, digiwatch-aosp-standard-watch-release.apk, and phone-companion-app-release.apk), along with automated one-click sideload scripts for Windows, Mac, and Linux.
+The signed release APKs are in the release_bin folder in the repository (wear-os-app-release.apk, digiwear-aosp-standard-watch-release.apk, and phone-companion-app-release.apk), along with automated one-click sideload scripts for Windows, Mac, and Linux.
 
 If you test it out on your watch, let me know how it runs and what you think. I'm happy to answer any questions about the battle formulas, evolution branches, or sideloading setup in the comments.
