@@ -1,4 +1,4 @@
-package com.digiwear.wear.ui
+﻿package com.digiwear.wear.ui
 
 import android.content.Context
 import android.hardware.Sensor
@@ -71,6 +71,7 @@ import com.digiwear.wear.haptic.HapticManager
 import com.digiwear.wear.input.HardwareInputManager
 import com.digiwear.wear.input.VPetButton
 import com.digiwear.wear.render.SpriteCanvasRenderer
+import com.digiwear.core.engine.TrainingEngine
 import com.digiwear.wear.render.SpriteFrame
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -328,6 +329,7 @@ fun MainPetScreen(
                     petState = petState,
                     displayConfig = displayConfig,
                     hapticManager = hapticManager,
+                    buzzerManager = buzzerManager,
                     onFinished = { won, message ->
                         scope.launch {
                             repository.train(won = won)
@@ -351,6 +353,7 @@ fun MainPetScreen(
                     petState = petState,
                     displayConfig = displayConfig,
                     hapticManager = hapticManager,
+                    buzzerManager = buzzerManager,
                     onFinished = { won, message ->
                         scope.launch {
                             repository.train(won = won)
@@ -1390,6 +1393,7 @@ private fun TrainingQteView(
     petState: PetState,
     displayConfig: WatchDisplayConfig,
     hapticManager: HapticManager,
+    buzzerManager: BuzzerManager,
     onFinished: (won: Boolean, message: String) -> Unit,
     onCancel: () -> Unit
 ) {
@@ -1417,10 +1421,12 @@ private fun TrainingQteView(
     // Countdown logic
     LaunchedEffect(Unit) {
         while (countdownValue > 1) {
+            buzzerManager.playButtonBeep()
             hapticManager.playStepMilestone()
             delay(500L)
             countdownValue--
         }
+        buzzerManager.playAttackImpactTone()
         hapticManager.playAttackImpact()
         delay(400L)
         phase = "PUNCH"
@@ -1433,16 +1439,18 @@ private fun TrainingQteView(
             phase = "RESOLVED"
             HardwareInputManager.activeQteListener = null
 
-            if (gaugeVal >= 0.75f) {
+            val res = TrainingEngine.evaluateQtePunch(gaugeVal)
+            if (res.isMegaHit) {
+                buzzerManager.playVictoryFanfare()
                 hapticManager.playVictoryFanfare()
-                onFinished(true, "MEGA HIT! 5/5 SMASHED! (+1 Effort)")
-            } else if (gaugeVal >= 0.40f) {
+            } else if (res.won) {
+                buzzerManager.playAttackImpactTone()
                 hapticManager.playAttackImpact()
-                onFinished(true, "GOOD HIT! 3/5 SMASHED! (+1 Effort)")
             } else {
+                buzzerManager.playAttentionBeep()
                 hapticManager.playAttentionAlert()
-                onFinished(false, "MISS! 1/5 Hit (Try Again)")
             }
+            onFinished(res.won, res.feedbackMessage)
         }
     }
 
@@ -1600,10 +1608,13 @@ private fun TrainingShakeView(
     petState: PetState,
     displayConfig: WatchDisplayConfig,
     hapticManager: HapticManager,
+    buzzerManager: BuzzerManager,
     onFinished: (won: Boolean, message: String) -> Unit,
     onCancel: () -> Unit
 ) {
     val context = LocalContext.current
+    val species = remember(petState.speciesId) { PetSpecies.getById(petState.speciesId) }
+    val optimalRange = remember(species.attribute) { TrainingEngine.getOptimalShakeRange(species.attribute) }
     var phase by remember { mutableStateOf("COUNTDOWN") } // COUNTDOWN -> SHAKE -> RESOLVED
     var countdownValue by remember { mutableIntStateOf(3) }
     var shakeCount by remember { mutableIntStateOf(0) }
@@ -1613,10 +1624,12 @@ private fun TrainingShakeView(
     // Countdown logic
     LaunchedEffect(Unit) {
         while (countdownValue > 1) {
+            buzzerManager.playButtonBeep()
             hapticManager.playStepMilestone()
             delay(500L)
             countdownValue--
         }
+        buzzerManager.playAttackImpactTone()
         hapticManager.playAttackImpact()
         delay(400L)
         phase = "SHAKE"
@@ -1634,20 +1647,19 @@ private fun TrainingShakeView(
                 resolved = true
                 phase = "RESOLVED"
                 delay(500L)
-                when {
-                    shakeCount in 5..8 -> {
-                        hapticManager.playVictoryFanfare()
-                        onFinished(true, "MEGA HIT! $shakeCount SHAKES! (+1 Effort)")
-                    }
-                    shakeCount in 3..4 || shakeCount in 9..10 -> {
-                        hapticManager.playAttackImpact()
-                        onFinished(true, "GOOD HIT! $shakeCount SHAKES! (+1 Effort)")
-                    }
-                    else -> {
-                        hapticManager.playAttentionAlert()
-                        onFinished(false, "MISS! $shakeCount Shakes (5-8 is Sweet Spot)")
-                    }
+                val sp = PetSpecies.getById(petState.speciesId)
+                val res = TrainingEngine.evaluateShakeTraining(sp.attribute, shakeCount)
+                if (res.isMegaHit) {
+                    buzzerManager.playVictoryFanfare()
+                    hapticManager.playVictoryFanfare()
+                } else if (res.won) {
+                    buzzerManager.playAttackImpactTone()
+                    hapticManager.playAttackImpact()
+                } else {
+                    buzzerManager.playAttentionBeep()
+                    hapticManager.playAttentionAlert()
                 }
+                onFinished(res.won, res.feedbackMessage)
             }
         }
     }
@@ -1673,6 +1685,7 @@ private fun TrainingShakeView(
                     if (gForce > 1.85f && (now - lastShakeTimestamp) > 200L) {
                         lastShakeTimestamp = now
                         shakeCount++
+                        buzzerManager.playQteClickTone()
                         hapticManager.playStepMilestone()
                     }
                 }
@@ -1688,6 +1701,7 @@ private fun TrainingShakeView(
             HardwareInputManager.activeQteListener = { button ->
                 if (button == VPetButton.B || button == VPetButton.A) {
                     shakeCount++
+                    buzzerManager.playQteClickTone()
                     hapticManager.playStepMilestone()
                     true
                 } else false
@@ -1710,6 +1724,7 @@ private fun TrainingShakeView(
             .clickable {
                 if (phase == "SHAKE" && !resolved) {
                     shakeCount++
+                    buzzerManager.playQteClickTone()
                     hapticManager.playStepMilestone()
                 }
             },
@@ -1744,10 +1759,10 @@ private fun TrainingShakeView(
                         text = "SHAKE! [ $shakeCount ]",
                         fontSize = 18.sp,
                         fontWeight = FontWeight.Black,
-                        color = if (shakeCount in 5..8) Color(0xFF00E676) else Color(0xFFFF1744)
+                        color = if (shakeCount in optimalRange) Color(0xFF00E676) else Color(0xFFFF1744)
                     )
                     Text(
-                        text = "SWEET SPOT: 5-8 SHAKES",
+                        text = "SWEET SPOT: ${optimalRange.first}-${optimalRange.last} (${species.attribute.displayName.uppercase()})",
                         fontSize = 8.sp,
                         color = Color(0xFF80D8FF),
                         fontFamily = FontFamily.Monospace
