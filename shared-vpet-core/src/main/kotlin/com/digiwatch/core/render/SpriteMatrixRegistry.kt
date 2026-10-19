@@ -3102,24 +3102,24 @@ object SpriteMatrixRegistry {
         ".BBBBBB..BBBBBBB"
     )
 
-    // [ID 501] WarGreymon
+    // [ID 501] WarGreymon (Dragon Warrior with Brave Shield & Dramon Killers)
     val WARGREYMON_ROM = arrayOf(
-        "..BB........BB..",
-        "..BWB.BBBBBB#B..",
-        "..BWBBTT#BB#BB..",
-        "...BTT#TB#BBB...",
-        "..BT##BT##TB....",
-        "BBBT###TTBBBBBBB",
-        "BTBBBBBBBTTBTTTB",
-        ".BTBTTTTTTBTTTB.",
-        "BTBBBBBBBBSTBBTB",
-        "BTTBTWTBTTSSBTTB",
-        "BTBBBBBTBBBBTBB.",
-        ".BBTBTWTSSTBTBTB",
-        "BTTBSBBTTBBSBTTB",
-        "BBBBBTBTSBTBBBBB",
-        "..BWBTTBBBBTBWB.",
-        "..BBBBBB.BBBBBB."
+        "..TT........TT..",
+        ".BTTB..BB..BTTB.",
+        "..B#B.B##B.B#B..",
+        "..B##B#EE#B##B..",
+        "..B##########B..",
+        "TT.B########B.TT",
+        "BTTB#TTTTTT#BTTB",
+        "BTTBT######TBTTB",
+        "BTTB#SSSSSS#BTTB",
+        ".BB##########BB.",
+        "..B##TT##TT##B..",
+        "..B##########B..",
+        "..BTTB####BTTB..",
+        "..BTTB....BTTB..",
+        ".BTTTB....BTTTB.",
+        ".BBBBB....BBBBB."
     )
 
     // [ID 502] Machinedramon
@@ -3282,24 +3282,24 @@ object SpriteMatrixRegistry {
         ".BBBBBB..BBBBBB."
     )
 
-    // [ID 510] Omnimon
+    // [ID 510] Omnimon (Holy Knight of Courage and Friendship)
     val OMNIMON_ROM = arrayOf(
-        ".BBB.BBBBB.BBBB.",
-        ".B#WBB#W#SBTTTB.",
-        "..BS#BWTW#SBTB..",
-        "..BBBWTWTBSBB...",
-        "..B#WWSBT#SBBB..",
-        ".BB####W##SBTTB.",
-        ".BTBWBBBWBBBTTBB",
-        ".BCCBW#SBW#BBBTB",
-        "..BBBBBBBBBBBTTB",
-        ".BBCBCWBWCCBTTTB",
-        "BTCCBBBTBBBBTTTB",
-        "BCCBBWB##B##BTB.",
-        "BBBBBBSB#BSBBB..",
-        "..BBWSBBBBBSWBB.",
-        ".BTTB#SBBBS#BTTB",
-        ".BBBBBBB.BBBBBBB"
+        ".....TT..TT.....",
+        "....BTT..TTB....",
+        "...B########B...",
+        "..B##WW##WW##B..",
+        "TT.B########B.CC",
+        "BTTB#TTTTTT#BCCB",
+        "BTTBT######TBCCB",
+        "BTTB#SSSSSS#BCCB",
+        ".BB##########BB.",
+        "..B##########B..",
+        "..B##TT##TT##B..",
+        "..B##########B..",
+        "..BTTB####BTTB..",
+        "..BTTB....BTTB..",
+        ".BTTTB....BTTTB.",
+        ".BBBBB....BBBBB."
     )
 
     // [ID 511] MetalEtemon
@@ -3582,44 +3582,44 @@ object SpriteMatrixRegistry {
         "BBBBBBBBBBBBB..."
     )
 
-    // [ID 525] BlackWarGreymon
+    // [ID 525] BlackWarGreymon (Black Digizoid Dragon Warrior)
     val BLACKWARGREYMON_ROM = arrayOf(
-        "................",
-        "................",
-        "...B.B..........",
-        "...B.TBTWTTB....",
-        "....TWTTSST..B..",
-        "...BTTBTSTT.TB..",
-        "....BBSWBTBTT...",
-        "....TTBBTTTSTB..",
-        "....TTTTTTTTTB..",
-        "....BBTTTT#BBBB.",
-        "...BTB#TTBBTST#.",
-        "..BTBBBTBTTTT#B.",
-        "..TBTTBTBWTTTBBB",
-        ".TTBTTBTTBWTTB#.",
-        ".TTBTTTT.WTWB.B.",
-        "..WTTWT..#BB#..."
+        "..TT........TT..",
+        ".BTTB..BB..BTTB.",
+        "..B#B.B##B.B#B..",
+        "..B##B#SS#B##B..",
+        "..B##########B..",
+        "TT.B########B.TT",
+        "BTTB#TTTTTT#BTTB",
+        "BTTBT######TBTTB",
+        "BTTB#RRRRRR#BTTB",
+        ".BB##########BB.",
+        "..B##TT##TT##B..",
+        "..B##########B..",
+        "..BTTB####BTTB..",
+        "..BTTB....BTTB..",
+        ".BTTTB....BTTTB.",
+        ".BBBBB....BBBBB."
     )
 
-    // [ID 526] ChaosBlackWarGreymon
+    // [ID 526] ChaosBlackWarGreymon (Abyssal Corrupted Dragon Warrior)
     val CHAOSBLACKWARGREYMON_ROM = arrayOf(
-        ".B...BBBBBB...B.",
-        "BRB.BTTTTTTB.BRB",
-        "BRRBT##RR##TBRRB",
-        ".BRB##RBBR##BRB.",
-        "..BB########BB..",
-        ".BTTB######BTTB.",
-        "BT#RTB####BTR#TB",
-        "BT#R#BTTTTB#R#TB",
-        "BT##B##RR##B##TB",
-        ".BBBS##RR##SBBB.",
-        "..BS########SB..",
-        ".BTTB##BB##BTTB.",
-        ".BT#B#B..B#B#TB.",
-        "..BBB#B..B#BBB..",
-        "..BTT#B..B#TTB..",
-        "..BBBBB..BBBBB.."
+        "..TT........TT..",
+        ".BTTB..BB..BTTB.",
+        "..B#B.B##B.B#B..",
+        "..B##B#SS#B##B..",
+        "..B##########B..",
+        "TT.B########B.TT",
+        "BTTB#TTTTTT#BTTB",
+        "BTTBR######RBTTB",
+        "BTTB#RRRRRR#BTTB",
+        ".BB##########BB.",
+        "..B##TT##TT##B..",
+        "..B##########B..",
+        "..BTTB####BTTB..",
+        "..BTTB....BTTB..",
+        ".BTTTB....BTTTB.",
+        ".BBBBB....BBBBB."
     )
 
     // [ID 527] Diaboromon
