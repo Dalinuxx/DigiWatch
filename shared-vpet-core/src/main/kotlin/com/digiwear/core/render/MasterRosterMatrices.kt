@@ -1385,22 +1385,22 @@ object MasterRosterMatrices {
 
     // [ID 463] MetalGreymon (Virus) (cybernetic blue dragon with chrome trident claw)
     val METALGREYMON_VIRUS_ROM = arrayOf(
-        "..TT........TT..",
-        "..BTTB....BTTB..",
-        "...B########B...",
-        "..B##########B..",
-        ".B#WW######WW#B.",
-        ".B#EE######EE#B.",
-        ".B############B.",
-        "B#WW########TT#B",
-        "B#TT#SSSSSS#TT#B",
-        "B##############B",
-        ".B#SSSSSSSSSS#B.",
-        "..B##########B..",
-        ".B####BB####B#B.",
-        "B####B..B####BB.",
-        "B####B..B####B..",
-        "BBBBBB..BBBBBB.."
+        ".....BBBBB..BBB.",
+        "BB..BWWWWWBBWWB.",
+        "BWBBBWBBBWRWRB..",
+        "BBBWWBGBWTTBBSB.",
+        "BWWWWWWWWBB.BSB.",
+        "BBBBBBWWB#B.BSB.",
+        ".B####BB##RBSSSB",
+        "..BBBBB##WTBSSSB",
+        "....BWTWWBWBSBSB",
+        "..BBWTWBBWWWBBSB",
+        ".B#BTTBWWBWTBBSB",
+        ".B#B##BWTBTBB.BB",
+        "..BB###BBBB##B.B",
+        ".BB#B#####B###B.",
+        "B#B##BBBBB#B#B#B",
+        "BBBBBBB...BBBBBB"
     )
 
     // [ID 464] Cyberdramon (Savers) (streamlined sleek dragoon hunter)
@@ -1449,22 +1449,22 @@ object MasterRosterMatrices {
 
     // [ID 559] BlitzGreymon (plasma cannon artillery dragon)
     val BLITZGREYMON_ROM = arrayOf(
-        "...TT......TT...",
-        "..BTTB....BTTB..",
-        "...B########B...",
-        "..B##WW##WW##B..",
-        "..B##EE##EE##B..",
-        ".B############B.",
-        "B#WW########WW#B",
-        "B#TT#SSSSSS#TT#B",
-        "B#TT#SSSSSS#TT#B",
-        "B#WW########WW#B",
-        ".B#SSSSSSSSSS#B.",
-        "..B##########B..",
-        ".B###BB##BB###B.",
-        "B###B..BB..B###B",
-        "B###B......B###B",
-        "BBBBB......BBBBB"
+        ".......BB..BB...",
+        ".BB..BBSSBB#B...",
+        ".B#BB###SBB#BBB.",
+        ".BCB###BB#SSB##B",
+        "..BC#SBGBBBB###B",
+        "..BBBBBBSB#BBS#B",
+        "...BTTTTBB###B#B",
+        "....BBBB#BBBBBSB",
+        "..BBS##SSBB#TBSB",
+        ".B#B#SSSB##TSBSB",
+        ".BSBS##SB#STSBSB",
+        "..BBB##BTBBBBBSB",
+        "..B#BBBBBS##B.BB",
+        ".BB#SB..BSSSB...",
+        "B#S#SB..BS#S#B..",
+        "BBBBBB..BBBBBB.."
     )
 
     // [ID 560] CresGarurumon (golden blade knight wolf)
@@ -1789,22 +1789,22 @@ object MasterRosterMatrices {
 
     // [ID 576] ShineGreymon (solar blazing knight dragon)
     val SHINEGREYMON_ROM = arrayOf(
-        "TTTT..TTTT..TTTT",
-        "BTTB.B####B.BTTB",
-        ".B############B.",
-        "B##############B",
-        "B##WW######WW##B",
-        "B##EE######EE##B",
-        "B#TT########WW#B",
-        "B#TT#SSSSSS#WWB.",
-        "B###SSSSSSSS###B",
-        "B##############B",
-        ".B#SSSSSSSSSS#B.",
-        "..B##########B..",
-        ".B###B####B###B.",
-        "B#####B..B#####B",
-        "B#BB##B..B##BB#B",
-        "BBB.BBB..BBB.BBB"
+        "TT.....TT..TT...",
+        "B.TTRTT.B.S.S...",
+        ".B#..#..BB..SSS.",
+        ".B..####.B.S..SS",
+        ".B.#.C...BB..S.S",
+        ".B###B.RR..SS..S",
+        "B.R...RR..SS..S.",
+        "BBBBBBB.SSS..S..",
+        "..B.....S..SS...",
+        ".BB.BB.SS..S....",
+        "W..B..B..S.S..SS",
+        "W..BBBB..BB.SS.S",
+        "BBBBBBBBB.SS..S.",
+        "..BB.BBB...SSS..",
+        ".B.B..B.B.B.B...",
+        ".BBBBBBBBBBBB..."
     )
 
     // [ID 577] MirageGaogamon (howling moonlight beast knight)
@@ -1869,22 +1869,22 @@ object MasterRosterMatrices {
 
     // [ID 580] WarGreymon X (sharpened X-Antibody dragon warrior)
     val WARGREYMON_X_ROM = arrayOf(
-        "TT..TTTTTTTT..TT",
-        "BTTB.BTTTTB.BTTB",
-        ".B############B.",
-        "B##############B",
-        "B##WW######WW##B",
-        "B##EE######EE##B",
-        "B#WW########WW#B",
-        "B#TTSSSSSSSSTT#B",
-        "B###SSSSSSSS###B",
-        "B##############B",
-        ".B#SSSSSSSSSS#B.",
-        "..B##########B..",
-        ".B############B.",
-        "B##BB#BBBB#BB##B",
-        "B##B..B##B..B##B",
-        "BBBB..BBBB..BBBB"
+        ".TT.........T...",
+        "B.T..TTTTTTT.T..",
+        "T..BB....T...T..",
+        "T.T..###.TTTTT..",
+        ".B..#SS.....T...",
+        ".B.#......TTTTT.",
+        ".B###B.TTTT...T.",
+        "..B..B.TTT...T..",
+        "...B###B..TTTTT.",
+        "..BB......TT..T.",
+        ".B.B.BB..TT...T.",
+        ".B.BB..TTT.T.T..",
+        "..BBBBBBBBB.T...",
+        "..BB.B.B..TTTT..",
+        ".B.B.BBBB.T.T.T.",
+        ".BBBBB..BBBBBBB."
     )
 
     // [ID 581] MetalGarurumon X (quadrupedal heavy gatling beast)
@@ -2173,22 +2173,22 @@ object MasterRosterMatrices {
 
     // [ID 373] GeoGreymon (striped horn skull helmet and toothy jaw)
     val GEOGREYMON_ROM = arrayOf(
-        "TT........TT....",
-        ".BTTB..TT.BTTB..",
-        "..B##BTTTTB##B..",
-        ".B##RR####RR##B.",
-        ".B#WW######WW#B.",
-        "B##############B",
-        "B#WWWWWWWWWWWW#B",
-        ".B############B.",
-        ".B##RR####RR##B.",
-        "B#TT#RR##RR#TT#B",
-        "B#TTB######BTT#B",
-        ".BB##########BB.",
-        "..B###B##B###B.T",
-        ".B####B..B####BT",
-        "B#TT#B....B#TT#B",
-        ".BBB........BBB."
+        "W....TTTRT..TTT.",
+        "TW..TTRTTTRTTTR.",
+        "TTRTEWT...TRTT..",
+        "TRWWWB.W.TTTT...",
+        "B#R#####R#.B....",
+        ".B#B.B##...B.BB.",
+        ".B..........B.B.",
+        "..B#R#B....B.B..",
+        "....B.....B.BB..",
+        "..B#....B#...B..",
+        ".B.B...B...B.BBB",
+        ".B.B...B...B.B.B",
+        "..BB....B#B..B.B",
+        ".BB.B.....B...B.",
+        "B.B..B###B.B.B.B",
+        "BBBBBBB...BBBBBB"
     )
 
     // [ID 374] Bulkmon (heavy lightning gorilla brawler)
@@ -2473,22 +2473,22 @@ object MasterRosterMatrices {
 
     // [ID 465] RizeGreymon (cyborg dragon with chrome revolver arm)
     val RIZEGREYMON_ROM = arrayOf(
-        "TT........TT....",
-        ".BTTB..TT.BTTB..",
-        "RR.B##BTTB##B.RR",
-        "BRRB########BRRB",
-        "BRR#WW####WW#RRB",
-        ".B############B.",
-        "B#SS########SS#B",
-        "B#SSSS#SSSS#SS#B",
-        "B#SSSSB####BSS#B",
-        ".BB##########BB.",
-        "..B##TT##TT##B.T",
-        ".B####B..B####BT",
-        ".B###B....B###BT",
-        "B####B....B####B",
-        ".BBB........BBB.",
-        "................"
+        "................",
+        "..W..TTTRT..TTT.",
+        ".TW.TTRTTTRTTT..",
+        ".TRTEWW..TTTT...",
+        ".TRWWB..TTTTT...",
+        "B#R#####R#.B.BB.",
+        "T###.T##...BB.B.",
+        ".T........BB.B..",
+        "..B###B..B...SSS",
+        "....B....B.B...S",
+        "..BB....BB...BB.",
+        ".B.B...B..TTWWWW",
+        ".B.B...B..TTWW.T",
+        "..B.B...BB...TTT",
+        ".B.B.BBBB.B.B.B.",
+        ".BBBBBBB.BBBBBB."
     )
 
     // [ID 466] MachGaogamon (rocket turbine engine boxer wolf)
@@ -2853,22 +2853,22 @@ object MasterRosterMatrices {
 
     // [ID 589] ShineGreymon Burst Mode (blazing solar corona wings)
     val SHINEGREYMON_BURST_MODE_ROM = arrayOf(
-        "................",
-        "................",
-        "RRRR..TTTT..RRRR",
-        "BRRB.BTTTTB.BRRB",
-        "BRR.B######B.RRB",
-        ".B#B#WW##WW#B#B.",
-        "RR.B########B.RR",
-        "BRR#B######B#RRB",
-        "BRRB#TTTTTT#BRRB",
-        ".BRB#TTTTTT#BRB.",
-        "..B##########B..",
-        "..B##TT##TT##B.T",
-        ".B####B..B####BT",
-        ".B###B....B###BT",
-        "B####B....B####B",
-        ".BBB........BBB."
+        "..BB...BBB......",
+        ".BGB.BBBRBB..SSS",
+        ".BGWBRRBWBRBBSS.",
+        ".BGRRBBRBRBRRBSS",
+        ".BRRBCRRRBBBBSS.",
+        "..BRRRRBBBRRRBSS",
+        "..BRBBB.BRRWBRB.",
+        ".BRBW..BRRWBWBSS",
+        ".BWWBBBBWWB.BBB.",
+        ".BBBBRCRBBWBRRB.",
+        "BWRRBRRRRBBWRRB.",
+        "B.WB.B.RBRB.WB..",
+        ".BBBR.RBR.RBBB..",
+        ".B.B.BBBRR.B.B..",
+        "BRBRBWB.BWBRBRB.",
+        "BBBBBBB.BBBBBBB."
     )
 
     // [ID 590] MirageGaogamon Burst Mode (full moon auroral wolf knight)
