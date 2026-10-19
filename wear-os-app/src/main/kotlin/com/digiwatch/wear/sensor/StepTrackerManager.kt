@@ -49,6 +49,26 @@ class StepTrackerManager(
         sensorManager.unregisterListener(this)
     }
 
+    /**
+     * Pauses high-frequency CPU accelerometer polling when entering Ambient Mode
+     * on hardware lacking a dedicated hardware step counter sensor, allowing the AP to Doze.
+     */
+    fun onEnterAmbient() {
+        flushPendingSteps()
+        if (stepCounterSensor == null && accelerometerSensor != null) {
+            sensorManager.unregisterListener(this, accelerometerSensor)
+        }
+    }
+
+    /**
+     * Resumes accelerometer polling upon exiting Ambient Mode.
+     */
+    fun onExitAmbient() {
+        if (stepCounterSensor == null && accelerometerSensor != null) {
+            sensorManager.registerListener(this, accelerometerSensor, SensorManager.SENSOR_DELAY_GAME)
+        }
+    }
+
     fun flushPendingSteps() {
         val stepsToFlush = synchronized(this) {
             val s = pendingSteps

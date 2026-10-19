@@ -71,7 +71,10 @@ class MainActivity : ComponentActivity() {
             AmbientController(
                 activity = this,
                 onEnterAmbient = {
-                    stepTracker.flushPendingSteps()
+                    stepTracker.onEnterAmbient()
+                },
+                onExitAmbient = {
+                    stepTracker.onExitAmbient()
                 },
                 onAmbientTick = {
                     activityScope.launch(Dispatchers.IO) {

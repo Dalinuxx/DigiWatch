@@ -82,11 +82,11 @@ private val FEATURED_FIGHTERS = listOf(201, 301, 304, 401, 501, 503, 515, 227, 4
 
 private val ONLINE_LOBBY_TAMERS = listOf(
     Triple("Tamer_Taichi [A-Com]", 401, 0x4101),    // MetalGreymon
-    Triple("Tamer_Yamato [D-Com]", 405, 0x4502),    // WereGarurumon
-    Triple("Tamer_Ruki [WiFiCom]", 439, 0x7711),    // Taomon
-    Triple("Tamer_Takato [0nl1ne]", 526, 0x8822),   // Dukemon
-    Triple("RoyalKnight_X [WiFiCom]", 516, 0x99AA), // Alphamon
-    Triple("DarkMaster_Z [A-Com]", 507, 0xDEAD)     // Piedmon
+    Triple("Tamer_Yamato [D-Com]", 404, 0x4502),    // WereGarurumon
+    Triple("Tamer_Ruki [WiFiCom]", 425, 0x7711),    // Taomon
+    Triple("Tamer_Takato [0nl1ne]", 515, 0x8822),   // Dukemon
+    Triple("RoyalKnight_X [WiFiCom]", 523, 0x99AA), // Alphamon
+    Triple("DarkMaster_Z [A-Com]", 509, 0xDEAD)     // Piedmon
 )
 
 private val COLOSSEUM_ENVIRONMENTS = listOf(

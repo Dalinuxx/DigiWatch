@@ -19,6 +19,8 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material.icons.filled.Archive
@@ -218,14 +220,12 @@ fun SpriteStudioScreen(
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        // Filtered Species Selector Row with Miniature Sprites
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .horizontalScroll(rememberScrollState()),
+        // Filtered Species Selector Row with Miniature Sprites (Virtualized LazyRow for 350 species)
+        LazyRow(
+            modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            filteredRoster.forEach { sp ->
+            items(filteredRoster, key = { it.id }) { sp ->
                 val selected = selectedSpeciesId == sp.id
                 Row(
                     modifier = Modifier
