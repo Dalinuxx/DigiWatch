@@ -1,4 +1,4 @@
-﻿package com.digiwear.wear.data
+package com.digiwear.wear.data
 
 import androidx.room.Dao
 import androidx.room.Database
@@ -30,7 +30,7 @@ interface PetDao {
     suspend fun insertOrUpdateAdventure(adventure: AdventureEntity)
 }
 
-@Database(entities = [PetEntity::class, AdventureEntity::class], version = 1, exportSchema = false)
+@Database(entities = [PetEntity::class, AdventureEntity::class], version = 2, exportSchema = false)
 abstract class DigiWearDatabase : RoomDatabase() {
     abstract fun petDao(): PetDao
 }

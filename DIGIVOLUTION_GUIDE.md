@@ -659,3 +659,20 @@ Combine any two compatible Digimon via **Watch D-Com Battle Link**, **Phone Batt
 | 83 | `#541` **LordKnightmon** | `#1419` **Aero V-dramon** | `#1540` **Dynasmon X** | `Mode Change` | Dynasmon unleashes dragon aura into Dynasmon X. |
 | 84 | `#542` **Craniummon** | `#1433` **Blizzarmon** | `#1542` **Sleipmon X** | `Mode Change` | Sleipmon arms six legs with glacial fortress armor into Sleipmon X. |
 | 85 | `#543` **Sleipmon** | `#1317` **Kaiser Leomon** | `#1543` **Duftmon X** | `Mode Change` | Duftmon adopts dark leonine strategist form into Duftmon X. |
+
+---
+
+## 🗺️ Adventure Mode Synergy & Rare Starter Egg Unlocks
+
+Advancing through the **5 Grand Canonical Sagas (114 Sectors)** directly powers your Digimon's evolutionary growth:
+- **Battle Requirements Synergy**: Every victory against Wild Digimon and Sector Bosses in Adventure Mode immediately increments your partner's `totalBattles` and `victories`. This fulfills the mandatory 10–15 battle threshold for Perfect evolutions and 25–35 battle threshold for Ultimate evolutions without requiring separate manual sparring.
+- **Apex Boss Egg Rewards**: Defeating the climactic bosses of each Grand Saga permanently unlocks exclusive Starter Eggs in the watch's Hatch menu and companion app:
+  - **Node 110 (Mt. Infinity Spire)**: Defeating Myotismon unlocks `#1101` **Cotsucomon Egg**.
+  - **Node 130 (Dimensional Zero)**: Defeating ZeedMillenniummon unlocks `#1106` **Bubbmon Color Egg**.
+  - **Node 206 (Versandi Core Gateway)**: Defeating GranKuwagamon unlocks `#1103` **Algomon Baby I Egg**.
+  - **Node 212 (Uluda Peak)**: Defeating RagnaLoordmon unlocks `#1102` **Fufumon Egg**.
+  - **Node 225 (Death-X-mon Singularity)**: Defeating Death-X-mon unlocks `#1104` **Dokimon Egg**.
+  - **Node 319 (The Black Orb)**: Defeating Lucemon Larva unlocks `#1105` **Choromon Egg**.
+  - **Node 420 (Sin Apex)**: Defeating Ogudomon unlocks `#1106` **Bubbmon Color Egg**.
+  - **Node 518 (Quantum Nexus)**: Defeating Siriusmon unlocks `#1103` **Algomon Baby I Egg**.
+

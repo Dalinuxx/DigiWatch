@@ -1,4 +1,4 @@
-﻿package com.digiwear.core.battle
+package com.digiwear.core.battle
 
 import com.digiwear.core.model.BattleFighter
 import com.digiwear.core.model.BattleMode
@@ -234,14 +234,15 @@ object DeterministicBattleSolver {
      */
     fun computeEnvironmentMultiplier(fighter: BattleFighter, fighterIdx: Int, env: String): Float {
         return when (env) {
-            "glitch_fog" -> if (fighter.attribute == ElementalAttribute.VIRUS) 1.15f else 1.0f
-            "subzero_frost" -> if (fighter.attribute == ElementalAttribute.DATA) 1.15f else 0.90f
-            "pyroclastic_flow", "heat_wave" -> if (fighter.attribute == ElementalAttribute.VACCINE) 1.15f else 1.10f
-            "cosmic_nihilism", "quantum_erasure", "dark_gravity" -> {
+            "glitch_fog", "x_program_fog", "x_virus_rot", "dark_miasma" -> if (fighter.attribute == ElementalAttribute.VIRUS) 1.15f else 1.0f
+            "subzero_frost", "cocytus_blizzard", "absolute_aurora", "fenrir_frost" -> if (fighter.attribute == ElementalAttribute.DATA) 1.15f else 0.90f
+            "pyroclastic_flow", "heat_wave", "ancient_inferno", "hellfire_storm", "solar_flare", "gehenna_flames" -> if (fighter.attribute == ElementalAttribute.VACCINE) 1.15f else 1.10f
+            "cosmic_nihilism", "quantum_erasure", "dark_gravity", "dark_annihilation", "grb_cataclysm", "seven_sins_maw", "temporal_singularity" -> {
                 if (fighterIdx == 0 && fighter.effort >= 4) 1.15f
                 else if (fighterIdx == 1) 1.10f
                 else 1.0f
             }
+            "seraphic_grace", "holy_shield_aura", "divine_seals", "merciful_aurora", "aurora_blessing" -> if (fighter.attribute == ElementalAttribute.VACCINE) 1.20f else 0.95f
             else -> 1.0f
         }
     }

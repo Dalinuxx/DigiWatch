@@ -1,4 +1,4 @@
-﻿package com.digiwear.wear.ui
+package com.digiwear.wear.ui
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -75,6 +75,7 @@ fun AdventureScreen(
     val currentNode = story.nodes[currentNodeIndex]
     var eventMessage by remember { mutableStateOf<String?>(null) }
     var wildEncounterMonsterId by remember { mutableStateOf<Int?>(null) }
+    var showSagaPicker by remember { mutableStateOf(false) }
 
     // Live Adventure Combat Arena State
     var activeBattleResult by remember { mutableStateOf<BattleResult?>(null) }
@@ -89,11 +90,15 @@ fun AdventureScreen(
         }
     }
 
-    val actLabel = when {
-        currentNodeIndex < 10 -> "ACT I • FILE ISLAND"
-        currentNodeIndex < 20 -> "ACT II • SERVER CONT."
-        currentNodeIndex < 25 -> "ACT III • SPIRAL MTN"
-        else -> "ACT IV • GENESIS"
+    val actLabel = if (currentNode.actTitle.isNotBlank()) {
+        currentNode.actTitle
+    } else {
+        when {
+            currentNodeIndex < 10 -> "ACT I • FILE ISLAND"
+            currentNodeIndex < 20 -> "ACT II • SERVER CONT."
+            currentNodeIndex < 25 -> "ACT III • SPIRAL MTN"
+            else -> "ACT IV • GENESIS"
+        }
     }
     val stepRatio = (progress.accumulatedStepsCurrentNode.toFloat() / currentNode.requiredSteps.coerceAtLeast(1).toFloat()).coerceIn(0f, 1f)
 
@@ -121,14 +126,14 @@ fun AdventureScreen(
         val fighterB = BattleFighter(
             id = "adventure_enemy",
             speciesId = enemySpecies.id,
-            name = enemySpecies.name,
+            name = bossToClear?.bossName?.ifBlank { enemySpecies.name } ?: enemySpecies.name,
             stage = enemySpecies.stage,
             attribute = enemySpecies.attribute,
             maxHp = enemyHp,
             currentHp = enemyHp,
             basePower = enemyPower,
             victories = currentNodeIndex,
-            effort = (currentNodeIndex / 8).coerceIn(0, 4),
+            effort = (currentNodeIndex / 6).coerceIn(0, 4),
             battleSeed = seedB
         )
 
@@ -190,10 +195,19 @@ fun AdventureScreen(
             if (won) {
                 hapticManager.playVictoryFanfare()
                 repository.recordBossVictory(bossToClear)
-                eventMessage = "🏆 Boss ${enemySpecies.name} Defeated (${chosenResult.turns.size} turns)! Gate Unlocked!"
+                val eggRewardMsg = bossToClear.rewardEggId?.let { eggId ->
+                    val eggSp = PetSpecies.getById(eggId)
+                    " 🥚 Unlocked ${eggSp.name} Starter Egg!"
+                } ?: ""
+                val itemRewardMsg = if (bossToClear.rewardItem.isNotBlank()) {
+                    " 🏆 Obtained ${bossToClear.rewardItem}!"
+                } else ""
+                val defeatLine = if (bossToClear.defeatDialogue.isNotBlank()) "\n\"${bossToClear.defeatDialogue}\"" else ""
+                eventMessage = "🏆 Boss ${enemySpecies.name} Defeated!$defeatLine$eggRewardMsg$itemRewardMsg"
             } else {
                 hapticManager.playAttentionAlert()
-                eventMessage = "💀 Boss ${enemySpecies.name} held the gate (HP: ${chosenResult.fighterBFinalHp}). Train & retry!"
+                val introLine = if (bossToClear.introDialogue.isNotBlank()) "\n\"${bossToClear.introDialogue}\"" else ""
+                eventMessage = "💀 Boss ${enemySpecies.name} held the gate (HP: ${chosenResult.fighterBFinalHp}).$introLine"
             }
         } else {
             wildEncounterMonsterId = null
@@ -207,12 +221,19 @@ fun AdventureScreen(
         }
     }
 
-    LaunchedEffect(currentNode, progress, wildEncounterMonsterId, petState, isBattling) {
+    LaunchedEffect(currentNode, progress, wildEncounterMonsterId, petState, isBattling, showSagaPicker) {
         HardwareInputManager.buttonEvents.collect { button ->
             if (isBattling) return@collect
             when (button) {
-                VPetButton.C -> onBack()
+                VPetButton.C -> {
+                    if (showSagaPicker) {
+                        showSagaPicker = false
+                    } else {
+                        onBack()
+                    }
+                }
                 VPetButton.B -> {
+                    if (showSagaPicker) return@collect
                     val activeWild = wildEncounterMonsterId
                     val boss = currentNode.bossEncounter
                     if (activeWild != null) {
@@ -261,37 +282,41 @@ fun AdventureScreen(
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(Color(0xFF0A1410)),
+                .background(Color(0xFF070B10)),
             contentAlignment = Alignment.Center
         ) {
             Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(displayConfig.contentPadding),
                 horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center,
-                modifier = Modifier.padding(horizontal = displayConfig.horizontalPadding)
+                verticalArrangement = Arrangement.Center
             ) {
                 Text(
-                    text = "COLOSSEUM • SEC ${currentNodeIndex + 1}",
-                    fontSize = 7.5.sp,
+                    text = "⚔ ADVENTURE ARENA ⚔",
+                    fontSize = 8.sp,
                     fontWeight = FontWeight.Black,
                     color = Color(0xFF64FFDA),
                     fontFamily = FontFamily.Monospace
                 )
                 Text(
-                    text = "R${currentTurn?.round ?: 1}/10 • ENV: ${currentNode.environmentEffect.uppercase()}",
-                    fontSize = 7.sp,
-                    color = Color(0xFFFFD54F),
+                    text = "TURN ${currentTurnIndex + 1}/${activeBattleResult!!.turns.size} • ${currentNode.environmentEffect.uppercase()}",
+                    fontSize = 6.5.sp,
+                    color = Color.Gray,
                     fontFamily = FontFamily.Monospace
                 )
                 Spacer(modifier = Modifier.height(3.dp))
+
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceEvenly,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
+                    // Left Fighter (Player)
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Text(playerSpecies.name.take(8), fontSize = 7.5.sp, color = Color(0xFF80D8FF), fontWeight = FontWeight.Bold, fontFamily = FontFamily.Monospace)
+                        Text(activeBattleResult!!.fighterA.name.take(8), fontSize = 7.5.sp, color = Color(0xFF80D8FF), fontWeight = FontWeight.Bold, fontFamily = FontFamily.Monospace)
                         SpriteCanvasRenderer(
-                            speciesId = petState.speciesId,
+                            speciesId = activeBattleResult!!.fighterA.speciesId,
                             isAmbient = false,
                             overrideFrame = if (currentTurn?.attackerIndex == 0) SpriteFrame.ATTACK_RELEASE else SpriteFrame.IDLE_A,
                             size = displayConfig.battleSpriteSize,
@@ -303,19 +328,21 @@ fun AdventureScreen(
                         Text("$playerRemHp HP", fontSize = 6.5.sp, color = Color(0xFFB9F6CA), fontFamily = FontFamily.Monospace)
                     }
 
-                    Text(
-                        text = when {
-                            currentTurn?.attackType == "MEGA_HIT" -> "⚡MEGA⚡"
-                            currentTurn?.attackerIndex == 0 -> "●━▶"
-                            currentTurn?.attackerIndex == 1 -> "◀━●"
-                            else -> "VS"
-                        },
-                        fontSize = 8.sp,
-                        fontWeight = FontWeight.Black,
-                        color = Color(0xFFFFD54F),
-                        fontFamily = FontFamily.Monospace
-                    )
+                    // Clash Animation Symbol
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Text(
+                            text = if (currentTurn?.attackerIndex == 0) "●━━▶" else "◀━━●",
+                            fontSize = 11.sp,
+                            fontWeight = FontWeight.Black,
+                            color = if (criticalBoostActive) Color(0xFFFFD54F) else Color.White,
+                            fontFamily = FontFamily.Monospace
+                        )
+                        if (criticalBoostActive) {
+                            Text("⚡CRIT⚡", fontSize = 7.sp, fontWeight = FontWeight.Black, color = Color(0xFFFF5252), fontFamily = FontFamily.Monospace)
+                        }
+                    }
 
+                    // Right Fighter (Enemy / Boss)
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         Text(activeBattleResult!!.fighterB.name.take(8), fontSize = 7.5.sp, color = Color(0xFFFF8A80), fontWeight = FontWeight.Bold, fontFamily = FontFamily.Monospace)
                         SpriteCanvasRenderer(
@@ -363,6 +390,88 @@ fun AdventureScreen(
         return
     }
 
+    // Saga Switcher Overlay Dialog
+    if (showSagaPicker) {
+        val builtInSagas = remember { AdventureEngine.getBuiltInCampaigns() }
+        ScalingLazyColumn(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Color(0xFF080D12)),
+            contentPadding = displayConfig.contentPadding,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            item {
+                Text(
+                    text = "SELECT SAGA",
+                    fontSize = displayConfig.headerFontSize,
+                    fontWeight = FontWeight.Black,
+                    color = Color(0xFF26A69A),
+                    fontFamily = FontFamily.Monospace
+                )
+            }
+            item {
+                Text(
+                    text = "Choose a Canonical Adventure Campaign:",
+                    fontSize = 7.sp,
+                    color = Color.Gray,
+                    textAlign = TextAlign.Center
+                )
+            }
+            items(builtInSagas.size) { idx ->
+                val saga = builtInSagas[idx]
+                val isActive = saga.campaignId.equals(story.campaignId, ignoreCase = true)
+                Spacer(modifier = Modifier.height(3.dp))
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 4.dp)
+                        .background(
+                            if (isActive) Color(0xFF004D40) else Color(0xFF141F28),
+                            RoundedCornerShape(8.dp)
+                        )
+                        .border(
+                            1.dp,
+                            if (isActive) Color(0xFF64FFDA) else Color(0xFF2C3E50),
+                            RoundedCornerShape(8.dp)
+                        )
+                        .clickable {
+                            scope.launch {
+                                repository.switchCampaign(saga.campaignId)
+                                showSagaPicker = false
+                                hapticManager.playStepMilestone()
+                                eventMessage = "Switched to ${saga.title}!"
+                            }
+                        }
+                        .padding(6.dp)
+                ) {
+                    Text(
+                        text = saga.title,
+                        fontSize = 8.5.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = if (isActive) Color(0xFF64FFDA) else Color.White
+                    )
+                    Text(
+                        text = "${saga.nodes.size} Sectors • Rec: ${saga.recommendedStage}",
+                        fontSize = 7.sp,
+                        color = Color.LightGray,
+                        fontFamily = FontFamily.Monospace
+                    )
+                }
+            }
+            item {
+                Spacer(modifier = Modifier.height(6.dp))
+                Button(
+                    onClick = { showSagaPicker = false },
+                    modifier = Modifier.fillMaxWidth().height(26.dp).padding(horizontal = 4.dp),
+                    colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFF37474F))
+                ) {
+                    Text("CLOSE", fontSize = 8.sp)
+                }
+            }
+        }
+        return
+    }
+
     ScalingLazyColumn(
         modifier = Modifier
             .fillMaxSize()
@@ -372,13 +481,27 @@ fun AdventureScreen(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         item {
-            Text(
-                text = "DIGIVICE QUEST",
-                fontSize = displayConfig.headerFontSize,
-                fontWeight = FontWeight.Black,
-                color = Color(0xFF26A69A),
-                fontFamily = FontFamily.Monospace
-            )
+            Row(
+                modifier = Modifier.fillMaxWidth().padding(horizontal = displayConfig.horizontalPadding),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "DIGIVICE QUEST",
+                    fontSize = displayConfig.headerFontSize,
+                    fontWeight = FontWeight.Black,
+                    color = Color(0xFF26A69A),
+                    fontFamily = FontFamily.Monospace
+                )
+                Box(
+                    modifier = Modifier
+                        .background(Color(0xFF00695C), RoundedCornerShape(4.dp))
+                        .clickable { showSagaPicker = true }
+                        .padding(horizontal = 6.dp, vertical = 2.dp)
+                ) {
+                    Text("SAGA ▾", fontSize = 7.sp, fontWeight = FontWeight.Bold, color = Color.White, fontFamily = FontFamily.Monospace)
+                }
+            }
         }
 
         item {
@@ -527,6 +650,7 @@ fun AdventureScreen(
         if (currentNode.bossEncounter != null && !progress.clearedFlags.contains(currentNode.bossEncounter!!.completionFlag)) {
             val boss = currentNode.bossEncounter!!
             val bossSpecies = PetSpecies.getById(boss.bossMonsterId)
+            val bossDisplayName = boss.bossName.ifBlank { bossSpecies.name }
             item {
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally,
@@ -538,12 +662,21 @@ fun AdventureScreen(
                         .padding(6.dp)
                 ) {
                     Text(
-                        text = "☠ BOSS GATE: ${bossSpecies.name.uppercase()}",
+                        text = "☠ BOSS: ${bossDisplayName.uppercase()}",
                         fontSize = 9.sp,
                         fontWeight = FontWeight.Black,
                         color = Color(0xFFFF5252),
                         fontFamily = FontFamily.Monospace
                     )
+                    if (boss.introDialogue.isNotBlank()) {
+                        Text(
+                            text = "\"${boss.introDialogue}\"",
+                            fontSize = 7.5.sp,
+                            color = Color(0xFFFFCCBC),
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier.padding(horizontal = 4.dp, vertical = 1.dp)
+                        )
+                    }
                     Text(
                         text = "HP ${boss.bossHp} • PWR ${boss.bossPower} • ${bossSpecies.attribute.displayName}",
                         fontSize = 7.sp,
@@ -555,6 +688,19 @@ fun AdventureScreen(
                         isAmbient = false,
                         size = displayConfig.battleSpriteSize
                     )
+                    if (boss.rewardItem.isNotBlank() || boss.rewardEggId != null) {
+                        Spacer(modifier = Modifier.height(2.dp))
+                        val rewardLabel = buildString {
+                            if (boss.rewardEggId != null) append("🥚 Egg ")
+                            if (boss.rewardItem.isNotBlank()) append("🏆 ${boss.rewardItem}")
+                        }
+                        Text(
+                            text = "🎁 REWARD: $rewardLabel",
+                            fontSize = 6.5.sp,
+                            color = Color(0xFFFFD54F),
+                            fontFamily = FontFamily.Monospace
+                        )
+                    }
                     Spacer(modifier = Modifier.height(2.dp))
                     Button(
                         onClick = {
@@ -574,41 +720,104 @@ fun AdventureScreen(
         // Campaign Completed Banner
         if (progress.isCompleted) {
             item {
-                Text(
-                    text = "🎉 DIGITAL WORLD RESTORED! 🎉",
-                    fontSize = 9.sp,
-                    fontWeight = FontWeight.Black,
-                    color = Color(0xFFFFD54F),
-                    fontFamily = FontFamily.Monospace
-                )
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = displayConfig.horizontalPadding, vertical = 4.dp)
+                        .background(Color(0xFF263238), RoundedCornerShape(8.dp))
+                        .border(1.dp, Color(0xFFFFD54F), RoundedCornerShape(8.dp))
+                        .padding(6.dp)
+                ) {
+                    Text(
+                        text = "🎉 SAGA CONQUERED! 🎉",
+                        fontSize = 9.sp,
+                        fontWeight = FontWeight.Black,
+                        color = Color(0xFFFFD54F),
+                        fontFamily = FontFamily.Monospace
+                    )
+                    Text(
+                        text = "All sectors of '${story.title}' restored!",
+                        fontSize = 7.sp,
+                        color = Color.LightGray,
+                        textAlign = TextAlign.Center
+                    )
+                }
             }
         }
 
-        // Step Simulator / Walk Button
+        // Expedition Spoils / Unlocked Rewards Summary
+        if (progress.unlockedEggs.isNotEmpty() || progress.collectedItems.isNotEmpty()) {
+            item {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = displayConfig.horizontalPadding, vertical = 2.dp)
+                        .background(Color(0xFF142028), RoundedCornerShape(6.dp))
+                        .padding(4.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text(
+                        text = "SPOILS: ${progress.unlockedEggs.size} Eggs • ${progress.collectedItems.size} Crests",
+                        fontSize = 6.5.sp,
+                        color = Color(0xFF80CBC4),
+                        fontFamily = FontFamily.Monospace
+                    )
+                }
+            }
+        }
+
+        // Step Simulator / Walk Button (+100 and +500)
         item {
             Spacer(modifier = Modifier.height(2.dp))
-            Button(
-                onClick = {
-                    scope.launch {
-                        val result = repository.addAdventureSteps(100)
-                        val monsterId = result.randomEncounterMonsterId
-                        if (result.nodeCleared) {
-                            hapticManager.playStepMilestone()
-                            eventMessage = "Sector Gate Cleared!"
-                        } else if (monsterId != null) {
-                            wildEncounterMonsterId = monsterId
-                            val encSpecies = PetSpecies.getById(monsterId)
-                            hapticManager.playAttackImpact()
-                            eventMessage = "Wild ${encSpecies.name} Encountered!"
-                        }
-                    }
-                },
+            Row(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = displayConfig.horizontalPadding),
-                colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFF00897B))
+                horizontalArrangement = Arrangement.spacedBy(4.dp)
             ) {
-                Text("+100 Steps (Walk)", fontSize = 9.sp)
+                Button(
+                    onClick = {
+                        scope.launch {
+                            val result = repository.addAdventureSteps(100)
+                            val monsterId = result.randomEncounterMonsterId
+                            if (result.nodeCleared) {
+                                hapticManager.playStepMilestone()
+                                eventMessage = "Sector Gate Cleared!"
+                            } else if (monsterId != null) {
+                                wildEncounterMonsterId = monsterId
+                                val encSpecies = PetSpecies.getById(monsterId)
+                                hapticManager.playAttackImpact()
+                                eventMessage = "Wild ${encSpecies.name} Encountered!"
+                            }
+                        }
+                    },
+                    modifier = Modifier.weight(1f).height(28.dp),
+                    colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFF00897B))
+                ) {
+                    Text("+100", fontSize = 8.sp, fontFamily = FontFamily.Monospace)
+                }
+                Button(
+                    onClick = {
+                        scope.launch {
+                            val result = repository.addAdventureSteps(500)
+                            val monsterId = result.randomEncounterMonsterId
+                            if (result.nodeCleared) {
+                                hapticManager.playStepMilestone()
+                                eventMessage = "Sector Gate Cleared!"
+                            } else if (monsterId != null) {
+                                wildEncounterMonsterId = monsterId
+                                val encSpecies = PetSpecies.getById(monsterId)
+                                hapticManager.playAttackImpact()
+                                eventMessage = "Wild ${encSpecies.name} Encountered!"
+                            }
+                        }
+                    },
+                    modifier = Modifier.weight(1f).height(28.dp),
+                    colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFF00695C))
+                ) {
+                    Text("+500", fontSize = 8.sp, fontFamily = FontFamily.Monospace)
+                }
             }
         }
 
@@ -617,9 +826,10 @@ fun AdventureScreen(
                 Spacer(modifier = Modifier.height(2.dp))
                 Text(
                     text = msg,
-                    fontSize = 9.sp,
+                    fontSize = 8.5.sp,
                     color = Color(0xFF64FFDA),
-                    textAlign = TextAlign.Center
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.padding(horizontal = displayConfig.horizontalPadding)
                 )
             }
         }

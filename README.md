@@ -296,21 +296,26 @@ Bit 112-127: HMAC-16 Cryptographic Checksum (16-bit)
 
 ---
 
-### 6. 30-Sector Step Adventure Campaign
+### 6. Grand Canonical Sagas & Adventure Engine (114 Sectors across 5 Sagas)
 
-Connects real physical movement from the smartwatch step counter (`TYPE_STEP_COUNTER`) to a grand 30-Sector campaign spanning the iconic eras of the Digital World:
+Connects real physical movement from the smartwatch step counter (`TYPE_STEP_COUNTER`) directly to 5 authentic Grand Canonical Sagas spanning 114 sectors of Digital Monster lore, incorporating the entire 500-species roster:
 
 ```mermaid
-graph LR
-    A["Act I: File Island<br/>Nodes 101-110<br/>Boss: Myotismon"] --> B["Act II: Server Continent<br/>Nodes 111-120<br/>Boss: MagnaAngemon"]
-    B --> C["Act III: Spiral Mountain<br/>Nodes 121-125<br/>Boss: Piedmon"]
-    C --> D["Act IV: Genesis Core<br/>Nodes 126-130<br/>Final Boss: ZeedMillenniummon"]
+graph TD
+    S1["1. The Original Odyssey<br/>30 Sectors • File Island to Spiral Mountain<br/>Climax: ZeedMillenniummon"]
+    S2["2. Project Ark: The X-Antibody Crisis<br/>25 Sectors • Versandi, Uluda & Skuld Terminals<br/>Climax: Death-X-mon"]
+    S3["3. Frontier of the Ancients<br/>20 Sectors • Spirits of the Ten Warriors<br/>Climax: Omnimon Merciful Mode"]
+    S4["4. Catastrophe of the Seven Sins<br/>21 Sectors • Dark Area Gates & Bancho Brigade<br/>Climax: Ogudomon & DarknessBagramon"]
+    S5["5. Ghost Crypt: Hologram GRB Wave<br/>18 Sectors • Hologram Ghosts & Quantum Void<br/>Climax: Apex Siriusmon"]
 ```
 
+- **On-Wrist Saga Switcher (`SAGA ▾`)**: Switch between all 5 Grand Sagas on-the-fly directly from the watch UI, preserving progress, unlocked starter eggs, and collected spoils across all campaigns.
 - **Persistent Hardware Step Baseline**: `StepTrackerManager` persists the hardware step counter baseline in `SharedPreferences` across app restarts and screen-off periods (automatically detecting device reboots), ensuring every background step is credited toward sector progression.
+- **Narrative Dialogue & Boss Encounters**: Every sector features authentic narrative scene text, authentic boss entrance battle quotes, and defeat reactions.
+- **Egg Unlocks & Relic Spoils**: Defeating sector apex bosses rewards exclusive items (`X_ANTIBODY_CORE`, `CREST_OF_ANCIENT_FLAME`, `WRATH_CORE`, `SIRIUS_SOLAR_CORE`) and permanently unlocks rare Starter Eggs (`Mokumon`, `Pukamon`, `Cotsucomon`, `Algomon Baby I`) in the Starter Egg menu!
 - **Deterministic Boss & Wild Encounter Combat**: Both Sector Boss gates and random Wild Digimon encounters resolve real turn-by-turn combat via `DeterministicBattleSolver` (`[B]` button or touch), crediting victories directly toward partner evolution requirements.
-- **Environmental Weather Hazards**: Dynamic hazards (`glitch_fog`, `subzero_frost`, `pyroclastic_flow`, `cosmic_nihilism`) alter elemental combat damage variables in real time.
-- **Boss Clear Flags**: Defeating sector bosses awards permanent campaign progress flags (`FLAG_INFINITY_CLEARED`, `FLAG_GENESIS_CLEARED`).
+- **16+ Environmental Sector Modifiers (`1.15x` Damage)**: Dynamic hazards (`glitch_fog`, `x_program_fog`, `cocytus_blizzard`, `hellfire_storm`, `gehenna_flames`, `grb_cataclysm`, `seven_sins_maw`, `temporal_singularity`, `seraphic_grace`) alter elemental combat damage variables in real time.
+- **Boss Clear Flags**: Defeating sector bosses awards permanent campaign progress flags (`FLAG_INFINITY_CLEARED`, `FLAG_GENESIS_CLEARED`, `FLAG_ARK_25`, `FLAG_FRO_20`, `FLAG_SDL_21`, `FLAG_GG_FINAL`).
 
 ---
 
@@ -320,7 +325,7 @@ The mobile application (`:phone-companion-app`) serves as a full-featured manage
 - **DigiVault Cryo-Preservation**: Archive raised Digimon in zero-decay cryostasis. Browse stored partners with live animated pixel art, search/filter by stage, deploy back to the watch & phone dashboard with one click, or generate dual 128-bit Base32 Comm Codes and `V1-XXXX-XXXX-XXXX` DigiROM packets.
 - **Android Home Screen AppWidget**: Built with standard `RemoteViews` rendering the live 64 × 64 color pixel-art sprite, stage, weight, hunger hearts (`♥♥♥♥`), and strength stars (`★★★★`). Refreshes automatically on watch sync, DigiDex morph, DNA Jogress fusion, backup restore, and DigiVault deployment.
 - **500-Species DigiDex, Evolution Encyclopedia & 6-Mode Sprite Studio**: Search and filter all 500 species by stage or ID, inspect all 12 animation frames across 6 live preview modes (`IDLE`, `WALK`, `FEED`, `SLEEP`, `ATTACK`, `STATUS`) with authentic V-Pet pixel overlays, browse interactive pre-evolutions, branching evolutions, and DNA Jogress recipes, and morph your active partner or synthesize into DigiVault.
-- **30-Sector Story Architect**: Create and customize custom campaign sagas and push them directly to the watch's active adventure engine via `/sync/campaign_data`.
+- **Story Architect with 5 Grand Saga Presets**: Inspect and customize campaign sectors with visual boss sprites, wild encounter pools, and 1-tap "LOAD SAGA" presets for all 5 canonical sagas, pushing directly to the watch over DataLayer or AOSP Wi-Fi LAN Bridge.
 - **JSON Cloud Portability**: Export and import either single `PetState` JSON snapshots or a Full Companion Archive (`FullCompanionArchive`: Active Pet + DigiVault Cryo-Storage + Custom Campaigns) with one-click JSON backup and restore.
 - **Remote Watch Settings & Live Pull Sync**: Wirelessly pull live `PetState` from the watch or push 5 authentic LCD & shell themes (`classic_vpet_lcd`, `amber_pendulum_lcd`, `digivice_ic_blue`, `file_island_day`, `dark_oled_minimal`), haptic vibration motor, 1997 piezo chiptune buzzer, 3-button mode, and pendulum shake mode.
 

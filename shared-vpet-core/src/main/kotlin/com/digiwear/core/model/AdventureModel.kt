@@ -1,4 +1,4 @@
-﻿package com.digiwear.core.model
+package com.digiwear.core.model
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -12,7 +12,17 @@ data class BossEncounter(
     @SerialName("boss_power")
     val bossPower: Int,
     @SerialName("completion_flag")
-    val completionFlag: String = ""
+    val completionFlag: String = "",
+    @SerialName("boss_name")
+    val bossName: String = "",
+    @SerialName("intro_dialogue")
+    val introDialogue: String = "",
+    @SerialName("defeat_dialogue")
+    val defeatDialogue: String = "",
+    @SerialName("reward_item")
+    val rewardItem: String = "",
+    @SerialName("reward_egg_id")
+    val rewardEggId: Int? = null
 )
 
 @Serializable
@@ -31,7 +41,11 @@ data class CampaignNode(
     @SerialName("boss_encounter")
     val bossEncounter: BossEncounter? = null,
     @SerialName("narrative_text")
-    val narrativeText: String
+    val narrativeText: String,
+    @SerialName("act_title")
+    val actTitle: String = "",
+    @SerialName("sub_area")
+    val subArea: String = ""
 )
 
 @Serializable
@@ -39,7 +53,13 @@ data class CampaignStory(
     @SerialName("campaign_id")
     val campaignId: String,
     val title: String,
-    val nodes: List<CampaignNode>
+    val nodes: List<CampaignNode>,
+    @SerialName("description")
+    val description: String = "",
+    @SerialName("recommended_stage")
+    val recommendedStage: String = "",
+    @SerialName("banner_theme")
+    val bannerTheme: String = ""
 )
 
 @Serializable
@@ -49,5 +69,8 @@ data class AdventureProgress(
     val accumulatedStepsCurrentNode: Int = 0,
     val totalAdventureSteps: Int = 0,
     val clearedFlags: Set<String> = emptySet(),
-    val isCompleted: Boolean = false
+    val isCompleted: Boolean = false,
+    val unlockedEggs: Set<Int> = emptySet(),
+    val collectedItems: Set<String> = emptySet(),
+    val unlockedCampaigns: Set<String> = emptySet()
 )

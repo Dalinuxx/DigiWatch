@@ -1,4 +1,4 @@
-﻿package com.digiwear.companion.ui
+package com.digiwear.companion.ui
 
 import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
@@ -96,7 +96,12 @@ private val COLOSSEUM_ENVIRONMENTS = listOf(
     "Tidal Current",
     "Miasma Fog",
     "Zero Gravity",
-    "Apocalymon Void"
+    "Apocalymon Void",
+    "X-Program Fog",
+    "Cocytus Blizzard",
+    "Dark Area Sin Gates",
+    "GRB Wave Cataclysm",
+    "Quantum Singularity"
 )
 
 @Composable

@@ -1,4 +1,4 @@
-﻿package com.digiwear.wear.data
+package com.digiwear.wear.data
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
@@ -94,5 +94,8 @@ data class AdventureEntity(
     val accumulatedStepsCurrentNode: Int = 0,
     val totalAdventureSteps: Int = 0,
     val clearedFlagsCsv: String = "",
-    val isCompleted: Boolean = false
+    val isCompleted: Boolean = false,
+    val unlockedEggsCsv: String = "",
+    val collectedItemsCsv: String = "",
+    val unlockedCampaignsCsv: String = ""
 )

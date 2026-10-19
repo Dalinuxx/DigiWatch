@@ -1,7 +1,10 @@
-﻿package com.digiwear.core
+package com.digiwear.core
 
 import com.digiwear.core.adventure.AdventureEngine
+import com.digiwear.core.adventure.CampaignStoryRegistry
 import com.digiwear.core.model.AdventureProgress
+import com.digiwear.core.model.BossEncounter
+import com.digiwear.core.model.PetSpecies
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
@@ -36,6 +39,69 @@ class AdventureEngineTest {
     }
 
     @Test
+    fun testAllFiveBuiltInCampaignsAreValidAndReferenceRegistered500Species() {
+        val campaigns = AdventureEngine.getBuiltInCampaigns()
+        assertEquals(5, campaigns.size)
+
+        val expectedIds = setOf(
+            "file_island_corrupted_sector",
+            "project_ark_dmx",
+            "frontier_ten_warriors",
+            "seven_demon_lords",
+            "ghost_game_crypt"
+        )
+        val actualIds = campaigns.map { it.campaignId }.toSet()
+        assertEquals(expectedIds, actualIds)
+
+        val missingList = mutableListOf<String>()
+        var totalSectors = 0
+        for (campaign in campaigns) {
+            assertTrue("Title must not be empty", campaign.title.isNotBlank())
+            assertTrue("Description must not be empty", campaign.description.isNotBlank())
+            assertTrue("Recommended stage must not be empty", campaign.recommendedStage.isNotBlank())
+            assertTrue("Nodes must not be empty", campaign.nodes.isNotEmpty())
+            totalSectors += campaign.nodes.size
+
+            for (node in campaign.nodes) {
+                assertTrue("Node ${node.name} steps must be > 0", node.requiredSteps > 0)
+                assertTrue("Node ${node.name} must have narrative text", node.narrativeText.isNotBlank())
+
+                // Check encounter pool species exist in 500-species registry
+                for (id in node.encounterPool) {
+                    val sp = PetSpecies.SPECIES_REGISTRY[id]
+                    if (sp == null) {
+                        missingList.add("MISSING ENCOUNTER: campaign=${campaign.campaignId}, node=${node.nodeId} (${node.name}), id=$id")
+                    }
+                }
+
+                // Check boss encounter
+                node.bossEncounter?.let { boss ->
+                    val bossSp = PetSpecies.SPECIES_REGISTRY[boss.bossMonsterId]
+                    if (bossSp == null) {
+                        missingList.add("MISSING BOSS: campaign=${campaign.campaignId}, node=${node.nodeId} (${node.name}), bossMonsterId=${boss.bossMonsterId}, bossName=${boss.bossName}")
+                    }
+                    assertTrue("Boss HP must be > 0", boss.bossHp > 0)
+                    assertTrue("Boss Power must be > 0", boss.bossPower > 0)
+                    assertTrue("Boss completion flag must not be blank", boss.completionFlag.isNotBlank())
+
+                    boss.rewardEggId?.let { eggId ->
+                        val eggSp = PetSpecies.SPECIES_REGISTRY[eggId]
+                        if (eggSp == null) {
+                            missingList.add("MISSING EGG: campaign=${campaign.campaignId}, node=${node.nodeId} (${node.name}), rewardEggId=$eggId")
+                        }
+                    }
+                }
+            }
+        }
+        if (missingList.isNotEmpty()) {
+            org.junit.Assert.fail("Missing species found in campaigns:\n" + missingList.joinToString("\n"))
+        }
+
+        // 30 (Odyssey) + 25 (Project Ark) + 20 (Frontier) + 21 (Demon Lords) + 18 (Ghost Game) = 114 total sectors!
+        assertEquals(114, totalSectors)
+    }
+
+    @Test
     fun testStepProgressionAndNodeClear() {
         val story = AdventureEngine.parseCampaign(AdventureEngine.DEFAULT_CAMPAIGN_JSON)
         var progress = AdventureProgress()
@@ -55,7 +121,7 @@ class AdventureEngineTest {
     }
 
     @Test
-    fun testBossEncounterGate() {
+    fun testBossEncounterGateAndRewardsCollection() {
         val story = AdventureEngine.parseCampaign(AdventureEngine.DEFAULT_CAMPAIGN_JSON)
         // Position at Node 3 (index 2: Overclocked Jungle requires 1200 steps and has boss Ogremon)
         val atNode3 = AdventureProgress(
@@ -75,5 +141,18 @@ class AdventureEngineTest {
         val afterBoss = AdventureEngine.recordBossVictory(story, res.updatedProgress, res.bossEncounter!!)
         assertEquals(3, afterBoss.currentNodeIndex)
         assertTrue(afterBoss.clearedFlags.contains("FLAG_JUNGLE_CLEARED"))
+        assertTrue("Must collect boss reward item", afterBoss.collectedItems.contains("CREST_OF_COURAGE_FRAGMENT"))
+    }
+
+    @Test
+    fun testProjectArkSagaEggUnlocks() {
+        val saga = CampaignStoryRegistry.PROJECT_ARK_DMX
+        val node6 = saga.nodes[5] // Versandi Core Gateway has GranKuwagamon boss rewarding Dokimon Egg 1108
+        val boss = node6.bossEncounter!!
+        assertEquals(1108, boss.rewardEggId)
+
+        val progress = AdventureProgress(campaignId = saga.campaignId, currentNodeIndex = 5)
+        val afterBoss = AdventureEngine.recordBossVictory(saga, progress, boss)
+        assertTrue("Must unlock Dokimon Egg 1108", afterBoss.unlockedEggs.contains(1108))
     }
 }
