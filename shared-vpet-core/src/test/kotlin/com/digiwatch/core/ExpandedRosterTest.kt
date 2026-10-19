@@ -15,9 +15,9 @@ class ExpandedRosterTest {
 
     @Test
     fun expandedIdsAreUniqueAndNeverCollideWithBaseRoster() {
-        assertEquals(135, ExpandedRoster.SPECIES.size)
-        assertEquals(135, expandedIds.size)
-        assertEquals(300, PetSpecies.SPECIES_REGISTRY.size)
+        assertEquals(185, ExpandedRoster.SPECIES.size)
+        assertEquals(185, expandedIds.size)
+        assertEquals(350, PetSpecies.SPECIES_REGISTRY.size)
     }
 
     @Test

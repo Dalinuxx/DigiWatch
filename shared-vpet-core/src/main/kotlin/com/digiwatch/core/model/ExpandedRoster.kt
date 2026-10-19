@@ -93,8 +93,14 @@ object ExpandedRoster {
     val SPECIES: List<PetSpecies> by lazy {
         listOf(
             // ---------------- Baby I (starter eggs) ----------------
-            sp(130, "Nyokimon", PetStage.BABY_I, F, 50, 10, 5, egg(120)),
-            sp(131, "Pichimon", PetStage.BABY_I, F, 50, 10, 5, egg(121)),
+            sp(130, "Nyokimon", PetStage.BABY_I, F, 50, 10, 5, arrayOf(
+                EvolutionRule(targetSpeciesId = 133, minAgeSeconds = 3600L, minCareMistakes = 0, maxCareMistakes = 1, minEffort = 2),
+                EvolutionRule(targetSpeciesId = 120, minAgeSeconds = 3600L)
+            )),
+            sp(131, "Pichimon", PetStage.BABY_I, F, 50, 10, 5, arrayOf(
+                EvolutionRule(targetSpeciesId = 134, minAgeSeconds = 3600L, minCareMistakes = 0, maxCareMistakes = 1, minEffort = 2),
+                EvolutionRule(targetSpeciesId = 121, minAgeSeconds = 3600L)
+            )),
             sp(132, "Pukamon", PetStage.BABY_I, F, 50, 10, 5, egg(122)),
 
             // ---------------- Baby II (Original Expansion) ----------------
@@ -107,18 +113,25 @@ object ExpandedRoster {
             sp(124, "Hopmon", PetStage.BABY_II, F, 80, 20, 10, hatch(229, 244, 245)),
             sp(125, "Kapurimon", PetStage.BABY_II, F, 80, 20, 10, hatch(237, 249, 233)),
             sp(126, "Minomon", PetStage.BABY_II, F, 80, 20, 10, hatch(238, 213, 228)),
-            sp(127, "Sunmon", PetStage.BABY_II, F, 80, 20, 10, hatch(247, 235, 201)),
-            sp(128, "Moonmon", PetStage.BABY_II, F, 80, 20, 10, hatch(248, 236, 217)),
+            sp(127, "Sunmon", PetStage.BABY_II, F, 80, 20, 10, hatch4(247, 235, 201, 258)),
+            sp(128, "Moonmon", PetStage.BABY_II, F, 80, 20, 10, hatch4(248, 236, 217, 259)),
             sp(129, "Ketomon", PetStage.BABY_II, F, 80, 20, 10, hatch(244, 240, 227)),
+            sp(133, "Poromon", PetStage.BABY_II, F, 80, 20, 10, hatch4(251, 252, 253, 254)),
+            sp(134, "Upamon", PetStage.BABY_II, F, 80, 20, 10, hatch4(255, 256, 257, 260)),
 
             // ---------------- Child (Original Expansion) ----------------
-            sp(223, "Salamon", PetStage.CHILD, VA, 130, 35, 18, grow3(372, 338, 349)),
+            sp(223, "Salamon", PetStage.CHILD, VA, 130, 35, 18, arrayOf(
+                EvolutionRule(targetSpeciesId = 383, minAgeSeconds = DAY, minCareMistakes = 0, maxCareMistakes = 1, minEffort = 3),
+                EvolutionRule(targetSpeciesId = 372, minAgeSeconds = DAY, minCareMistakes = 0, maxCareMistakes = 2, minEffort = 1),
+                EvolutionRule(targetSpeciesId = 338, minAgeSeconds = DAY, minCareMistakes = 0, maxCareMistakes = 3, minEffort = 0),
+                EvolutionRule(targetSpeciesId = 349, minAgeSeconds = DAY, minCareMistakes = 4, maxCareMistakes = 999)
+            )),
             sp(224, "Gaomon", PetStage.CHILD, DA, 135, 36, 20, grow(346, 347)),
             sp(225, "Hawkmon", PetStage.CHILD, VA, 125, 34, 16, grow3(361, 344, 348)),
             sp(226, "Armadillomon", PetStage.CHILD, DA, 140, 33, 24, grow3(360, 345, 311)),
             sp(227, "Dorumon", PetStage.CHILD, DA, 135, 36, 20, grow(342, 316)),
             sp(228, "Kotemon", PetStage.CHILD, DA, 130, 37, 20, grow(343, 313)),
-            sp(229, "Monodramon", PetStage.CHILD, VI, 130, 38, 20, grow(317, 318)),
+            sp(229, "Monodramon", PetStage.CHILD, VI, 130, 38, 20, grow3(384, 317, 318)),
             sp(230, "Floramon", PetStage.CHILD, DA, 120, 32, 15, grow(308, 330)),
             sp(231, "Goblimon", PetStage.CHILD, VI, 135, 37, 22, grow(312, 325)),
 
@@ -127,7 +140,7 @@ object ExpandedRoster {
             sp(233, "Gotsumon", PetStage.CHILD, DA, 140, 36, 25, grow(351, 311)),
             sp(234, "Otamamon", PetStage.CHILD, VI, 130, 34, 18, grow(352, 356)),
             sp(235, "Candlemon", PetStage.CHILD, DA, 125, 37, 16, grow(337, 304)),
-            sp(236, "Bakumon", PetStage.CHILD, VA, 130, 33, 18, grow(343, 328)),
+            sp(236, "Bakumon", PetStage.CHILD, VA, 130, 33, 18, grow3(382, 343, 328)),
             sp(237, "Hagurumon", PetStage.CHILD, VI, 135, 36, 22, grow(354, 353)),
             sp(238, "Mushroomon", PetStage.CHILD, VI, 125, 34, 15, grow(355, 330)),
             sp(239, "Crabmon", PetStage.CHILD, DA, 140, 35, 24, grow(358, 324)),
@@ -143,12 +156,29 @@ object ExpandedRoster {
             sp(249, "ToyAgumon", PetStage.CHILD, VA, 130, 34, 19, grow(353, 348)),
             sp(250, "Keramon", PetStage.CHILD, VI, 135, 39, 20, grow(368, 326)),
 
+            // ---------------- Child (Ghost Game, Seekers & Vital Expansion) ----------------
+            sp(251, "Pulsemon", PetStage.CHILD, VA, 130, 37, 18, grow(374, 348)),
+            sp(252, "Gammamon", PetStage.CHILD, VA, 135, 38, 19, arrayOf(
+                EvolutionRule(targetSpeciesId = 375, minAgeSeconds = DAY, minCareMistakes = 0, maxCareMistakes = 1, minEffort = 3),
+                EvolutionRule(targetSpeciesId = 376, minAgeSeconds = DAY, minCareMistakes = 0, maxCareMistakes = 2, minEffort = 0),
+                EvolutionRule(targetSpeciesId = 377, minAgeSeconds = DAY, minCareMistakes = 3, maxCareMistakes = 4),
+                EvolutionRule(targetSpeciesId = 378, minAgeSeconds = DAY, minCareMistakes = 5, maxCareMistakes = 999)
+            )),
+            sp(253, "Angoramon", PetStage.CHILD, VA, 140, 34, 22, grow(379, 347)),
+            sp(254, "Jellymon", PetStage.CHILD, DA, 125, 35, 16, grow(380, 356)),
+            sp(255, "Loogamon", PetStage.CHILD, VI, 135, 38, 20, grow(381, 385)),
+            sp(256, "Shoutmon", PetStage.CHILD, F, 130, 36, 18, grow(373, 302)),
+            sp(257, "Gumdramon", PetStage.CHILD, F, 130, 35, 17, grow(384, 318)),
+            sp(258, "Agunimon", PetStage.CHILD, VA, 140, 40, 24, grow(304, 301)),
+            sp(259, "Lobomon", PetStage.CHILD, VA, 135, 39, 22, grow(306, 343)),
+            sp(260, "Gazimon", PetStage.CHILD, VI, 130, 36, 20, grow(386, 387)),
+
             // ---------------- Adult (Original Expansion) ----------------
             sp(342, "Dorugamon", PetStage.ADULT, DA, 370, 100, 32, mature(435, 440)),
             sp(343, "Sorcerymon", PetStage.ADULT, DA, 350, 98, 30, mature(436, 443)),
-            sp(344, "Aquilamon", PetStage.ADULT, VA, 355, 100, 28, mature(437, 407)), // Silphymon / Garudamon
-            sp(345, "Ankylomon", PetStage.ADULT, VA, 390, 95, 45, mature(441, 438)), // Shakkoumon / Zudomon
-            sp(346, "Gaogamon", PetStage.ADULT, DA, 375, 102, 34, mature(404, 439)),
+            sp(344, "Aquilamon", PetStage.ADULT, VA, 355, 100, 28, mature(437, 407)),
+            sp(345, "Ankylomon", PetStage.ADULT, VA, 390, 95, 45, mature(441, 438)),
+            sp(346, "Gaogamon", PetStage.ADULT, DA, 375, 102, 34, mature(466, 439)),
             sp(347, "Mojyamon", PetStage.ADULT, DA, 365, 92, 36, mature(462, 460)),
             sp(348, "Starmon", PetStage.ADULT, DA, 330, 94, 22, mature(402, 442)),
             sp(349, "Dokugumon", PetStage.ADULT, VI, 340, 96, 26, mature(458, 457)),
@@ -159,7 +189,7 @@ object ExpandedRoster {
             sp(352, "Gekomon", PetStage.ADULT, DA, 350, 94, 30, mature(444, 446)),
             sp(353, "Clockmon", PetStage.ADULT, DA, 360, 96, 32, mature(464, 436)),
             sp(354, "Guardromon", PetStage.ADULT, VI, 385, 97, 42, mature(418, 463)),
-            sp(355, "Woodmon", PetStage.ADULT, VI, 370, 92, 35, mature(443, 456)),
+            sp(355, "Woodmon", PetStage.ADULT, VI, 370, 92, 35, mature(474, 456)),
             sp(356, "Octomon", PetStage.ADULT, VI, 355, 95, 28, mature(446, 447)),
             sp(357, "Gesomon", PetStage.ADULT, VI, 360, 96, 26, mature(446, 447)),
             sp(358, "Ebidramon", PetStage.ADULT, DA, 370, 99, 34, mature(409, 447)),
@@ -173,26 +203,43 @@ object ExpandedRoster {
             sp(366, "Ginryumon", PetStage.ADULT, VA, 375, 102, 32, mature(450, 459)),
             sp(367, "Coredramon", PetStage.ADULT, VA, 375, 103, 33, mature(451, 416)),
             sp(368, "Chrysalimon", PetStage.ADULT, VI, 370, 99, 35, mature(448, 410)),
-            sp(369, "Firamon", PetStage.ADULT, VA, 375, 102, 32, mature(454, 401)),
+            sp(369, "Firamon", PetStage.ADULT, VA, 375, 102, 32, mature(476, 401)),
             sp(370, "Lekismon", PetStage.ADULT, DA, 365, 100, 29, mature(455, 404)),
-            sp(371, "ExVeemon", PetStage.ADULT, F, 370, 102, 30, mature(423, 422)),
+            sp(371, "ExVeemon", PetStage.ADULT, F, 370, 102, 30, mature(475, 422)),
             sp(372, "Lynxmon", PetStage.ADULT, F, 365, 100, 28, mature(461, 427)),
 
+            // ---------------- Adult (Ghost Game, Seekers, Armor & Commando) ----------------
+            sp(373, "GeoGreymon", PetStage.ADULT, VA, 380, 104, 35, mature(465, 463)),
+            sp(374, "Bulkmon", PetStage.ADULT, VA, 385, 105, 38, mature(467, 445)),
+            sp(375, "BetelGammamon", PetStage.ADULT, VA, 375, 102, 32, mature(468, 454)),
+            sp(376, "KausGammamon", PetStage.ADULT, DA, 365, 101, 28, mature(468, 451)),
+            sp(377, "WezenGammamon", PetStage.ADULT, DA, 390, 98, 45, mature(468, 418)),
+            sp(378, "GulusGammamon", PetStage.ADULT, VI, 380, 106, 30, mature(469, 448)),
+            sp(379, "SymbareAngoramon", PetStage.ADULT, VA, 365, 100, 26, mature(470, 439)),
+            sp(380, "TeslaJellymon", PetStage.ADULT, DA, 360, 99, 25, mature(471, 453)),
+            sp(381, "Loogarmon", PetStage.ADULT, VI, 375, 103, 32, mature(472, 460)),
+            sp(382, "Pegasusmon", PetStage.ADULT, VA, 370, 100, 30, mature(461, 449)),
+            sp(383, "Nefertimon", PetStage.ADULT, VA, 365, 98, 28, mature(427, 437)),
+            sp(384, "Strikedramon", PetStage.ADULT, VA, 375, 102, 32, mature(464, 416)),
+            sp(385, "Dobermon", PetStage.ADULT, VA, 365, 99, 28, mature(477, 456)),
+            sp(386, "Sangloupmon", PetStage.ADULT, VI, 370, 101, 30, mature(473, 457)),
+            sp(387, "DarkKnightmon", PetStage.ADULT, VI, 390, 105, 48, mature(459, 440)),
+
             // ---------------- Perfect (Original Expansion) ----------------
-            sp(435, "Dorugreymon", PetStage.PERFECT, DA, 440, 130, 42, ascend(523, 550)), // Alphamon / Dorugoramon
+            sp(435, "Dorugreymon", PetStage.PERFECT, DA, 440, 130, 42, ascend(523, 550)),
             sp(436, "Knightmon", PetStage.PERFECT, DA, 420, 124, 40, arrayOf(
-                EvolutionRule(targetSpeciesId = 578, minAgeSeconds = 3 * DAY, minBattles = 35, minWinRatio = 0.85f, minCareMistakes = 0, maxCareMistakes = 0, minEffort = 4), // Jesmon GX
-                EvolutionRule(targetSpeciesId = 541, minAgeSeconds = 3 * DAY, minBattles = 30, minWinRatio = 0.80f, minCareMistakes = 0, maxCareMistakes = 1, minEffort = 4), // LordKnightmon
-                EvolutionRule(targetSpeciesId = 544, minAgeSeconds = 3 * DAY, minBattles = 30, minWinRatio = 0.80f, minCareMistakes = 2, maxCareMistakes = 3, minEffort = 3), // Duftmon
-                EvolutionRule(targetSpeciesId = 551, minAgeSeconds = 3 * DAY, minBattles = 25, minWinRatio = 0.75f, minCareMistakes = 4, maxCareMistakes = 999) // Gaiomon
+                EvolutionRule(targetSpeciesId = 578, minAgeSeconds = 3 * DAY, minBattles = 35, minWinRatio = 0.85f, minCareMistakes = 0, maxCareMistakes = 0, minEffort = 4),
+                EvolutionRule(targetSpeciesId = 541, minAgeSeconds = 3 * DAY, minBattles = 30, minWinRatio = 0.80f, minCareMistakes = 0, maxCareMistakes = 1, minEffort = 4),
+                EvolutionRule(targetSpeciesId = 544, minAgeSeconds = 3 * DAY, minBattles = 30, minWinRatio = 0.80f, minCareMistakes = 2, maxCareMistakes = 3, minEffort = 3),
+                EvolutionRule(targetSpeciesId = 551, minAgeSeconds = 3 * DAY, minBattles = 25, minWinRatio = 0.75f, minCareMistakes = 4, maxCareMistakes = 999)
             )),
-            sp(437, "Silphymon", PetStage.PERFECT, VA, 430, 128, 34, ascend(552, 555)), // Ophanimon / Kentaurosmon
-            sp(438, "Zudomon", PetStage.PERFECT, DA, 460, 126, 55, ascend(553, 581)), // Vikemon / MetalGarurumon X
-            sp(439, "Panjyamon", PetStage.PERFECT, DA, 440, 128, 48, ascend(568, 560)), // BanchoLeomon / CresGarurumon
-            sp(440, "Phantomon", PetStage.PERFECT, VI, 410, 125, 36, ascend(554, 532)), // Chaosdramon / Daemon
-            sp(441, "Shakkoumon", PetStage.PERFECT, VA, 460, 128, 48, ascend(553, 555)), // Vikemon / Kentaurosmon
-            sp(442, "Digitamamon", PetStage.PERFECT, VI, 470, 122, 60, ascend(530, 532)), // Belphemon / Daemon
-            sp(443, "Cherrymon", PetStage.PERFECT, DA, 445, 120, 50, ascend(557, 505)), // Cherubimon / Rosemon
+            sp(437, "Silphymon", PetStage.PERFECT, VA, 430, 128, 34, ascend(552, 555)),
+            sp(438, "Zudomon", PetStage.PERFECT, DA, 460, 126, 55, ascend(553, 581)),
+            sp(439, "Panjyamon", PetStage.PERFECT, DA, 440, 128, 48, ascend(568, 560)),
+            sp(440, "Phantomon", PetStage.PERFECT, VI, 410, 125, 36, ascend(554, 532)),
+            sp(441, "Shakkoumon", PetStage.PERFECT, VA, 460, 128, 48, ascend(553, 555)),
+            sp(442, "Digitamamon", PetStage.PERFECT, VI, 470, 122, 60, ascend(530, 532)),
+            sp(443, "Cherrymon", PetStage.PERFECT, DA, 445, 120, 50, ascend(557, 505)),
 
             // ---------------- Perfect (Master Expansion) ----------------
             sp(444, "ShogunGekomon", PetStage.PERFECT, DA, 460, 126, 50, ascend(570, 508)),
@@ -210,12 +257,27 @@ object ExpandedRoster {
             sp(456, "SkullSatamon", PetStage.PERFECT, VI, 440, 133, 36, ascend(573, 532)),
             sp(457, "Mummymon", PetStage.PERFECT, VI, 435, 125, 38, ascend(566, 534)),
             sp(458, "Arukenimon", PetStage.PERFECT, VI, 435, 127, 36, ascend(571, 531)),
-            sp(459, "Grademon", PetStage.PERFECT, VA, 450, 132, 42, ascend(567, 579)),
+            sp(459, "Grademon", PetStage.PERFECT, VA, 450, 132, 42, ascend(592, 579)),
             sp(460, "Astamon", PetStage.PERFECT, VI, 445, 130, 38, ascend(582, 530)),
-            sp(461, "Gargoylemon", PetStage.PERFECT, VA, 440, 128, 36, ascend(574, 552)),
+            sp(461, "Gargoylemon", PetStage.PERFECT, VA, 440, 128, 36, ascend(552, 574)),
             sp(462, "Mammothmon", PetStage.PERFECT, VA, 465, 128, 55, ascend(581, 553)),
             sp(463, "MetalGreymon (Virus)", PetStage.PERFECT, VI, 450, 132, 45, ascend(559, 525)),
-            sp(464, "Cyberdramon (Savers)", PetStage.PERFECT, VA, 445, 130, 38, ascend(569, 515)),
+            sp(464, "Cyberdramon (Savers)", PetStage.PERFECT, VA, 445, 130, 38, ascend(567, 569)),
+
+            // ---------------- Perfect (Ghost Game, Seekers & Modern Champions) ----------------
+            sp(465, "RizeGreymon", PetStage.PERFECT, VA, 455, 133, 45, ascend(589, 576)),
+            sp(466, "MachGaogamon", PetStage.PERFECT, DA, 450, 132, 42, ascend(590, 577)),
+            sp(467, "Boutmon", PetStage.PERFECT, VA, 460, 134, 46, ascend(587, 578)),
+            sp(468, "Canoweissmon", PetStage.PERFECT, VA, 460, 135, 42, ascend(583, 562)),
+            sp(469, "Regulusmon", PetStage.PERFECT, VI, 465, 136, 44, ascend(588, 566)),
+            sp(470, "Lamortemon", PetStage.PERFECT, VA, 450, 131, 48, ascend(584, 568)),
+            sp(471, "Thetismon", PetStage.PERFECT, DA, 440, 130, 36, ascend(585, 570)),
+            sp(472, "Soloogarmon", PetStage.PERFECT, VI, 455, 134, 42, ascend(586, 560)),
+            sp(473, "Baalmon", PetStage.PERFECT, F, 445, 132, 38, ascend(591, 520)),
+            sp(474, "JewelBeemon", PetStage.PERFECT, VA, 440, 130, 35, ascend(571, 507)),
+            sp(475, "Dinobeemon", PetStage.PERFECT, F, 450, 133, 40, ascend(506, 512)),
+            sp(476, "SkullMeramon", PetStage.PERFECT, DA, 460, 133, 45, ascend(554, 502)),
+            sp(477, "Cerberusmon", PetStage.PERFECT, VA, 455, 132, 42, ascend(582, 534)),
 
             // ---------------- Ultimate (Original Expansion) ----------------
             sp(550, "Dorugoramon", PetStage.ULTIMATE, DA, 640, 200, 55, emptyArray()),
@@ -252,7 +314,19 @@ object ExpandedRoster {
             sp(579, "Gallantmon X", PetStage.ULTIMATE, VA, 700, 215, 65, emptyArray()),
             sp(580, "WarGreymon X", PetStage.ULTIMATE, VA, 695, 214, 66, emptyArray()),
             sp(581, "MetalGarurumon X", PetStage.ULTIMATE, DA, 690, 212, 64, emptyArray()),
-            sp(582, "Beelzemon X", PetStage.ULTIMATE, VI, 705, 217, 65, emptyArray())
+            sp(582, "Beelzemon X", PetStage.ULTIMATE, VI, 705, 217, 65, emptyArray()),
+
+            // ---------------- Ultimate (Ghost Game, Seekers & Apex Burst Fusions) ----------------
+            sp(583, "Siriusmon", PetStage.ULTIMATE, VA, 690, 214, 64, emptyArray()),
+            sp(584, "Diarbbitmon", PetStage.ULTIMATE, VA, 670, 208, 58, emptyArray()),
+            sp(585, "Amphimon", PetStage.ULTIMATE, DA, 660, 205, 52, emptyArray()),
+            sp(586, "Fenriloogamon", PetStage.ULTIMATE, VI, 705, 217, 65, emptyArray()),
+            sp(587, "Kazuchimon", PetStage.ULTIMATE, VA, 680, 212, 60, emptyArray()),
+            sp(588, "Arcturusmon", PetStage.ULTIMATE, VI, 710, 218, 66, emptyArray()),
+            sp(589, "ShineGreymon Burst Mode", PetStage.ULTIMATE, VA, 720, 220, 70, emptyArray()),
+            sp(590, "MirageGaogamon Burst Mode", PetStage.ULTIMATE, DA, 710, 218, 66, emptyArray()),
+            sp(591, "Beelzemon Blast Mode", PetStage.ULTIMATE, VI, 725, 222, 70, emptyArray()),
+            sp(592, "Omnimon Merciful Mode", PetStage.ULTIMATE, VA, 740, 225, 72, emptyArray())
         )
     }
 
@@ -287,6 +361,19 @@ object ExpandedRoster {
         JogressRecipe(414, 445, 558, FusionType.DIGIXROS, "MetalTyrannomon and Volcamon fuse heavy magma cybernetics into RustTyrannomon."),
         JogressRecipe(434, 532, 566, FusionType.MODE_CHANGE, "Lucemon Chaos Mode absorbs Daemon's dark wrath to awaken Lucemon Satan Mode."),
         JogressRecipe(451, 562, 545, FusionType.DNA_JOGRESS, "Wingdramon and Slayerdramon unite into the Dragon Emperor Examon."),
-        JogressRecipe(515, 227, 579, FusionType.MODE_CHANGE, "Gallantmon assimilates the X-Antibody core to awaken Gallantmon X.")
+        JogressRecipe(515, 227, 579, FusionType.MODE_CHANGE, "Gallantmon assimilates the X-Antibody core to awaken Gallantmon X."),
+
+        // Expansion Wave: Ghost Game, Seekers, Vital Bracelet, and Apex Form Fusions
+        JogressRecipe(469, 476, 588, FusionType.DNA_JOGRESS, "Regulusmon assimilates the abyssal hellfire of SkullMeramon to awaken Arcturusmon."),
+        JogressRecipe(322, 371, 475, FusionType.DNA_JOGRESS, "Kuwagamon and ExVeemon mutate into the mutant dragon-wasp chimera Dinobeemon."),
+        JogressRecipe(576, 563, 589, FusionType.MODE_CHANGE, "ShineGreymon ignites blazing solar corona energy to awaken ShineGreymon Burst Mode."),
+        JogressRecipe(577, 564, 590, FusionType.MODE_CHANGE, "MirageGaogamon reflects maximum full moon lunar energy into MirageGaogamon Burst Mode."),
+        JogressRecipe(520, 473, 591, FusionType.MODE_CHANGE, "Beelzemon absorbs Baalmon's dark mantle to awaken Beelzemon Blast Mode."),
+        JogressRecipe(510, 504, 592, FusionType.MODE_CHANGE, "Omnimon dons the seraphic wings of sorrow and hope into Omnimon Merciful Mode."),
+        JogressRecipe(468, 501, 583, FusionType.DNA_JOGRESS, "Canoweissmon and WarGreymon combine white dragon blades into Siriusmon."),
+        JogressRecipe(470, 404, 584, FusionType.DNA_JOGRESS, "Lamortemon and WereGarurumon channel fencing precision into Diarbbitmon."),
+        JogressRecipe(471, 570, 585, FusionType.DNA_JOGRESS, "Thetismon and MarineAngemon synchronize deep sea virtue into Amphimon."),
+        JogressRecipe(472, 460, 586, FusionType.DNA_JOGRESS, "Soloogarmon and Astamon ignite the demonic core into Fenriloogamon."),
+        JogressRecipe(467, 374, 587, FusionType.DNA_JOGRESS, "Boutmon and Bulkmon channel thunderous electricity into Kazuchimon.")
     )
 }

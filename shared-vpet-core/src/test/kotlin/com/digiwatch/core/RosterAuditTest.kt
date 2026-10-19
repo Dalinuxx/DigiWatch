@@ -118,7 +118,7 @@ class RosterAuditTest {
     @Test
     fun auditDigimon0nl1neCompatibilityForAllSpecies() {
         val registry = PetSpecies.SPECIES_REGISTRY
-        assertEquals(300, registry.size)
+        assertEquals(350, registry.size)
 
         for (sp in registry.values) {
             // Guarantee 12-bit monster ID for Digimon 0nl1ne / D-Com wire packets (0x001..0xFFF)
@@ -169,7 +169,7 @@ class RosterAuditTest {
     }
 
     @Test
-    fun auditPerfectToUltimateRequirementsAndAll44JogressRecipes() {
+    fun auditPerfectToUltimateRequirementsAndAll65JogressRecipes() {
         val registry = PetSpecies.SPECIES_REGISTRY
         val perfectSpecies = registry.values.filter { it.stage == PetStage.PERFECT && it.evolutionRules.isNotEmpty() }
         assertTrue("Must have Perfect species with evolution rules", perfectSpecies.isNotEmpty())
@@ -189,8 +189,8 @@ class RosterAuditTest {
             }
         }
 
-        // Verify all 54 Jogress / DigiXros / Mode Change recipes reference valid species
-        assertEquals(54, JogressEngine.RECIPES.size)
+        // Verify all 65 Jogress / DigiXros / Mode Change recipes reference valid species
+        assertEquals(65, JogressEngine.RECIPES.size)
         for (recipe in JogressEngine.RECIPES) {
             assertTrue("Missing primary species ${recipe.primarySpeciesId}", registry.containsKey(recipe.primarySpeciesId))
             assertTrue("Missing secondary species ${recipe.secondarySpeciesId}", registry.containsKey(recipe.secondarySpeciesId))
@@ -213,7 +213,7 @@ class RosterAuditTest {
             }
         }
         assertTrue(
-            "All 300 species must be reachable from the 10 starter eggs! Unreachable: $unreachableSpecies",
+            "All 350 species must be reachable from the 10 starter eggs! Unreachable: $unreachableSpecies",
             unreachableSpecies.isEmpty()
         )
 
@@ -285,18 +285,18 @@ class RosterAuditTest {
 
         val sb = StringBuilder()
 
-        sb.appendLine("# 🧬 DigiWatch Official Visual Sprite Sheet Digivolution & DNA Jogress Guide (300 Species)")
+        sb.appendLine("# 🧬 DigiWatch Official Visual Sprite Sheet Digivolution & DNA Jogress Guide (350 Species)")
         sb.appendLine()
         sb.appendLine("> **100% Complete & Mathematically Verified Lineage Chart + Full Pixel-Art Sprite Sheets**")
-        sb.appendLine("> Every single one of the **300 Digimon** in DigiWatch is naturally reachable from the **10 Starter Digi-Eggs** via canonical Bandai 1997 V-Pet, Digimon Pendulum, and Digimon Color evolution rules, or via **54 DNA Jogress / DigiXros / Mode Change** combinations.")
+        sb.appendLine("> Every single one of the **350 Digimon** in DigiWatch is naturally reachable from the **10 Starter Digi-Eggs** via canonical Bandai 1997 V-Pet, Digimon Pendulum, and Digimon Color evolution rules, or via **65 DNA Jogress / DigiXros / Mode Change** combinations.")
         sb.appendLine()
-        sb.appendLine("## 🖼️ Visual Sprite Sheet Evolution Chart & Master 300-Species Roster")
+        sb.appendLine("## 🖼️ Visual Sprite Sheet Evolution Chart & Master 350-Species Roster")
         sb.appendLine()
         sb.appendLine("### 1. Full Visual Sprite Sheet Evolution & DNA Jogress Guide Poster")
         sb.appendLine("![DigiWatch Full Sprite Sheet Evolution Guide](docs/digiwatch_evolution_guide_chart.png)")
         sb.appendLine()
-        sb.appendLine("### 2. Complete 300-Species Master Pixel-Art Sprite Sheet")
-        sb.appendLine("![DigiWatch 300-Species Master Roster Sprite Sheet](docs/digiwatch_roster_spritesheet.png)")
+        sb.appendLine("### 2. Complete 350-Species Master Pixel-Art Sprite Sheet")
+        sb.appendLine("![DigiWatch 350-Species Master Roster Sprite Sheet](docs/digiwatch_roster_spritesheet.png)")
         sb.appendLine()
         sb.appendLine("## 📊 Roster & Evolution Summary")
         sb.appendLine()
@@ -471,7 +471,7 @@ class RosterAuditTest {
         g.fillRoundRect(10, 8, width - 20, 54, 12, 12)
         g.color = java.awt.Color(0x00, 0xE5, 0xFF)
         g.font = java.awt.Font(java.awt.Font.MONOSPACED, java.awt.Font.BOLD, 20)
-        g.drawString("DIGIWATCH v2.0 — COMPLETE 300-SPECIES FULL-COLOR PIXEL ART ROSTER", 24, 34)
+        g.drawString("DIGIWATCH v2.0 — COMPLETE 350-SPECIES FULL-COLOR PIXEL ART ROSTER", 24, 34)
         g.color = java.awt.Color(0xB0, 0xBE, 0xC5)
         g.font = java.awt.Font(java.awt.Font.MONOSPACED, java.awt.Font.PLAIN, 12)
         g.drawString("16x16 Multi-Tone Bandai Color Palettes • Cyan = Vaccine • Gold = Data • Crimson = Virus • Emerald = Free", 24, 53)
@@ -551,7 +551,7 @@ class RosterAuditTest {
         g.color = java.awt.Color(0x00, 0xE5, 0xFF)
         g.drawRoundRect(16, 12, width - 32, 68, 14, 14)
         g.font = java.awt.Font(java.awt.Font.MONOSPACED, java.awt.Font.BOLD, 24)
-        g.drawString("DIGIWATCH v2.0 — VISUAL SPRITE SHEET DIGIVOLUTION & DNA JOGRESS GUIDE (ALL 300 SPECIES)", 32, 42)
+        g.drawString("DIGIWATCH v2.0 — VISUAL SPRITE SHEET DIGIVOLUTION & DNA JOGRESS GUIDE (ALL 350 SPECIES)", 32, 42)
         g.color = java.awt.Color(0xCF, 0xD8, 0xDC)
         g.font = java.awt.Font(java.awt.Font.MONOSPACED, java.awt.Font.PLAIN, 13)
         g.drawString("100% Reachable from 10 Starter Eggs • Key: Age = Min Time in Stage | CM = Care Mistakes | ♥ = Effort Hearts (0-4) | W = Min Battles & Win% | G = Weight", 32, 66)
@@ -731,13 +731,13 @@ class RosterAuditTest {
         }
 
         // =========================================================================
-        // SECTION 3: ALL 44 DNA DIGIVOLUTION (JOGRESS) & MODE CHANGE VISUAL RECIPES
+        // SECTION 3: ALL 65 DNA DIGIVOLUTION (JOGRESS), DIGIXROS & MODE CHANGE VISUAL RECIPES
         // =========================================================================
         g.color = java.awt.Color(0x1E, 0x29, 0x3B)
         g.fillRoundRect(16, section3Y, width - 32, 36, 10, 10)
         g.color = java.awt.Color(0xEA, 0x80, 0xFC)
         g.font = java.awt.Font(java.awt.Font.MONOSPACED, java.awt.Font.BOLD, 16)
-        g.drawString("⚡ PART 3: ALL 54 DNA DIGIVOLUTION (JOGRESS), DIGIXROS & MODE CHANGE VISUAL RECIPES", 30, section3Y + 24)
+        g.drawString("⚡ PART 3: ALL 65 DNA DIGIVOLUTION (JOGRESS), DIGIXROS & MODE CHANGE VISUAL RECIPES", 30, section3Y + 24)
 
         JogressEngine.RECIPES.forEachIndexed { idx, recipe ->
             val col = idx % jogressCols

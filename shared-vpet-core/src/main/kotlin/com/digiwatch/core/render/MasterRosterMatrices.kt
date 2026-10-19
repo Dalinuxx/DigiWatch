@@ -1927,6 +1927,1010 @@ object MasterRosterMatrices {
         ".BBBB......BBBB."
     )
 
+    // =========================================================================
+    // Wave 3: Ghost Game, Seekers, Vital Bracelet & Apex Burst Forms (133..592)
+    // =========================================================================
+
+    // [ID 133] Poromon (avian plume chick with flutter wings)
+    val POROMON_ROM = arrayOf(
+        "......TTTT......",
+        ".....BTTTTB.....",
+        "....B######B....",
+        "...B########B...",
+        "..B##WW##WW##B..",
+        "..B##EE##EE##B..",
+        ".B############B.",
+        "TT############TT",
+        "BTT##########TTB",
+        ".B#TT######TT#B.",
+        "..B#SSSSSSSS#B..",
+        "...B########B...",
+        "....B######B....",
+        ".....B####B.....",
+        "......BBBB......",
+        "................"
+    )
+
+    // [ID 134] Upamon (amphibian axolotl with horizontal ear frills)
+    val UPAMON_ROM = arrayOf(
+        "TT............TT",
+        "BTTB........BTTB",
+        ".BTTB......BTTB.",
+        "..B##########B..",
+        ".B############B.",
+        ".B##WW####WW##B.",
+        ".B##EE####EE##B.",
+        "B##############B",
+        "B##############B",
+        ".B############B.",
+        "..B#SSSSSSSS#B..",
+        "...B########B...",
+        "....B######B....",
+        ".....B####B.....",
+        "......BBBB......",
+        "................"
+    )
+
+    // [ID 251] Pulsemon (electric shockwave fur and lightning crest)
+    val PULSEMON_ROM = arrayOf(
+        "...TT....TT.....",
+        "...BTT..BTTB....",
+        "....B#TT##B.....",
+        "....B######B....",
+        "...B##WW####B...",
+        "...B##EE####B...",
+        "..B##########B..",
+        ".B############B.",
+        "B#TT#SSSSSS#TT#B",
+        "B#TTSSSSSSSSTT#B",
+        ".B###SSSSSS###B.",
+        "..B##########B..",
+        "...B###BB###B...",
+        "..B###B..B###B..",
+        ".B###B....B###B.",
+        ".BBBB......BBBB."
+    )
+
+    // [ID 252] Gammamon (white dragon with triceratops horns and red bandanna)
+    val GAMMAMON_ROM = arrayOf(
+        "TT....TT....TT..",
+        "BTTB..B#B..BTTB.",
+        ".B############B.",
+        "..B##WW##WW##B..",
+        "..B##EE##EE##B..",
+        ".B############B.",
+        "B##############B",
+        "B##RRRRRRRRRR##B",
+        "B#RRSSSSSSSSRR#B",
+        ".B###SSSSSS###B.",
+        "..B#SSSSSSSS#B..",
+        "...B########B...",
+        "..B###B##B###B..",
+        ".B####B..B####B.",
+        ".B#BB#B..B#BB#B.",
+        ".BBB.BB..BB.BBB."
+    )
+
+    // [ID 253] Angoramon (long-eared gentledog with stocky fur coat)
+    val ANGORAMON_ROM = arrayOf(
+        "TTTT........TTTT",
+        "BTTB........BTTB",
+        "BTTB..BBBB..BTTB",
+        ".B###B####B###B.",
+        "..B##WW##WW##B..",
+        "..B##EE##EE##B..",
+        ".B############B.",
+        "B##############B",
+        "B###SSSSSSSS###B",
+        "B#SSSSSSSSSSSS#B",
+        ".B#SSSSSSSSSS#B.",
+        "..B##########B..",
+        ".B###B####B###B.",
+        "B####B....B####B",
+        "B####B....B####B",
+        "BBBBBB....BBBBBB"
+    )
+
+    // [ID 254] Jellymon (translucent aquatic jelly spirit with curled tentacles)
+    val JELLYMON_ROM = arrayOf(
+        "....TTTTTTTT....",
+        "...BTTTTTTTTB...",
+        "..B##########B..",
+        ".B##WW####WW##B.",
+        ".B##EE####EE##B.",
+        "B##############B",
+        "B#TT########TT#B",
+        ".B#TT#SSSS#TT#B.",
+        "..B###SSSS###B..",
+        "...B########B...",
+        "..B##B####B##B..",
+        ".B##B......B##B.",
+        "B##B........B##B",
+        "B#B..........B#B",
+        ".BB..........BB.",
+        "................"
+    )
+
+    // [ID 255] Loogamon (demonic wolf pup with forehead magic digicore interface)
+    val LOOGAMON_ROM = arrayOf(
+        "TT............TT",
+        "BTTB...RR...BTTB",
+        ".B####BRRB####B.",
+        "..B##WW##WW##B..",
+        "..B##EE##EE##B..",
+        ".B############B.",
+        "B##############B",
+        "B#TT#SSSSSS#TT#B",
+        "B###SSSSSSSS###B",
+        ".B#SSSSSSSSSS#B.",
+        "..B##########B..",
+        ".B############B.",
+        "B####B####B####B",
+        ".B##B.B##B.B##B.",
+        ".B##B.B##B.B##B.",
+        ".BBBB..BB..BBBB."
+    )
+
+    // [ID 256] Shoutmon (red dragon rocker with V-crest and mic)
+    val SHOUTMON_ROM = arrayOf(
+        "TTTT........TTTT",
+        ".BTTB......BTTB.",
+        "..BTTB....BTTB..",
+        "...B########B...",
+        "..B##WW##WW##B..",
+        "..B##EE##EE##B..",
+        ".B############B.",
+        "B#TT########TT#B",
+        "B#TT#SSSSSS#TT#B",
+        ".B###SSSSSS###B.",
+        "..B##########B..",
+        "...B########B...",
+        "..B###B##B###B..",
+        ".B####B..B####B.",
+        ".B#BB#B..B#BB#B.",
+        ".BBB.BB..BB.BBB."
+    )
+
+    // [ID 257] Gumdramon (rubber dragon with hammer tail)
+    val GUMDRAMON_ROM = arrayOf(
+        ".....TT..TT.....",
+        "....BTT..TTB....",
+        "...B########B...",
+        "..B##WW##WW##B..",
+        "..B##EE##EE##B..",
+        ".B############B.",
+        "B#WW########WW#B",
+        "B###SSSSSSSS###B",
+        "B###SSSSSSSS###B",
+        ".B#SSSSSSSSSS#B.",
+        "..B##########B..",
+        "..B##########BTT",
+        ".B####BB####BTTB",
+        "B####B..B####BTT",
+        "B####B..B####BBB",
+        "BBBBBB..BBBBBB.."
+    )
+
+    // [ID 258] Agunimon (flame warrior with flowing flame mane and martial stance)
+    val AGUNIMON_ROM = arrayOf(
+        "......TTTT......",
+        "....BTTTTTTB....",
+        "...BTT####TTB...",
+        "...B#WW##WW#B...",
+        "...B#EE##EE#B...",
+        "..B##########B..",
+        ".B#RR######RR#B.",
+        "B##RRSSSSSSRR##B",
+        "B##############B",
+        ".B#SSSSSSSSSS#B.",
+        "..B##########B..",
+        "...B########B...",
+        "..B###B##B###B..",
+        ".B####B..B####B.",
+        ".B####B..B####B.",
+        ".BBBBBB..BBBBBB."
+    )
+
+    // [ID 259] Lobomon (wolf knight with wolf helm and dual Licht blades)
+    val LOBOMON_ROM = arrayOf(
+        "TT....TTTT....TT",
+        "BTTB.BTTTTB.BTTB",
+        ".B############B.",
+        "..B#WW####WW#B..",
+        "..B#EE####EE#B..",
+        ".B############B.",
+        "B#WW########WW#B",
+        "B#TT#SSSSSS#TT#B",
+        "B###SSSSSSSS###B",
+        ".B#SSSSSSSSSS#B.",
+        "..B##########B..",
+        "...B########B...",
+        "..B###B##B###B..",
+        ".B####B..B####B.",
+        ".B####B..B####B.",
+        ".BBBBBB..BBBBBB."
+    )
+
+    // [ID 260] Gazimon (dark beast with long notched ears and claws)
+    val GAZIMON_ROM = arrayOf(
+        "TT..TT....TT..TT",
+        "BTTBTTB..BTTBTTB",
+        ".B############B.",
+        "..B##WW##WW##B..",
+        "..B##EE##EE##B..",
+        ".B############B.",
+        "B#WW########WW#B",
+        "B#TT#SSSSSS#TT#B",
+        "B##############B",
+        ".B#SSSSSSSSSS#B.",
+        "..B##########B..",
+        "...B########B...",
+        "..B###B##B###B..",
+        ".B####B..B####B.",
+        ".B####B..B####B.",
+        ".BBBBBB..BBBBBB."
+    )
+
+    // [ID 373] GeoGreymon (striped horn skull helmet and toothy jaw)
+    val GEOGREYMON_ROM = arrayOf(
+        "TTTTTT....TTTTTT",
+        "BTTTTB....BTTTTB",
+        ".B############B.",
+        "..B##WW##WW##B..",
+        "..B##EE##EE##B..",
+        ".B############B.",
+        "B#RR########RR#B",
+        "B#RR#SSSSSS#RR#B",
+        "B###SSSSSSSS###B",
+        "B##############B",
+        ".B#SSSSSSSSSS#B.",
+        "..B##########B..",
+        ".B####BB####B#B.",
+        "B####B..B####BB.",
+        "B####B..B####B..",
+        "BBBBBB..BBBBBB.."
+    )
+
+    // [ID 374] Bulkmon (heavy lightning gorilla brawler)
+    val BULKMON_ROM = arrayOf(
+        "....TTTTTTTT....",
+        "...BTTTTTTTTB...",
+        "..B##########B..",
+        ".B##WW####WW##B.",
+        ".B##EE####EE##B.",
+        "B##############B",
+        "B#TT########TT#B",
+        "B#TT#SSSSSS#TT#B",
+        "B###SSSSSSSS###B",
+        "B##############B",
+        ".B#SSSSSSSSSS#B.",
+        "..B##########B..",
+        ".B###B####B###B.",
+        "B####B....B####B",
+        "B####B....B####B",
+        "BBBBBB....BBBBBB"
+    )
+
+    // [ID 375] BetelGammamon (bipedal fire dragon with flaming horns)
+    val BETELGAMMAMON_ROM = arrayOf(
+        "TTTT........TTTT",
+        "BTTB...RR...BTTB",
+        ".B####BRRB####B.",
+        "B##############B",
+        "B##WW######WW##B",
+        "B##EE######EE##B",
+        "B#RR########RR#B",
+        "B#RR#SSSSSS#RR#B",
+        "B###SSSSSSSS###B",
+        "B##############B",
+        ".B#SSSSSSSSSS#B.",
+        "..B##########B..",
+        "...B########B...",
+        "..B###B##B###B..",
+        ".B####B..B####B.",
+        ".BBBBB....BBBBB."
+    )
+
+    // [ID 376] KausGammamon (aerodynamic blue glider wings)
+    val KAUSGAMMAMON_ROM = arrayOf(
+        "TT............TT",
+        "BTTB........BTTB",
+        ".BTTB..TT..BTTB.",
+        "..B##BTTTTB##B..",
+        "...B########B...",
+        "..B##WW##WW##B..",
+        "..B##EE##EE##B..",
+        ".B############B.",
+        "B#CC########CC#B",
+        "B#CC#SSSSSS#CC#B",
+        "B###SSSSSSSS###B",
+        ".B#SSSSSSSSSS#B.",
+        "..B##########B..",
+        "..B###B##B###B..",
+        ".B####B..B####B.",
+        ".BBBBB....BBBBB."
+    )
+
+    // [ID 377] WezenGammamon (heavy green artillery dragon with triple rail cannons)
+    val WEZENGAMMAMON_ROM = arrayOf(
+        "TTTT..TTTT..TTTT",
+        "BTTB..BTTB..BTTB",
+        ".B############B.",
+        "B##############B",
+        "B##WW######WW##B",
+        "B##EE######EE##B",
+        "B#TT########TT#B",
+        "B#TT#SSSSSS#TT#B",
+        "B###SSSSSSSS###B",
+        "B##############B",
+        ".B#SSSSSSSSSS#B.",
+        "..B##########B..",
+        ".BB##########BB.",
+        "B###B.BBBB.B###B",
+        "B###B.B##B.B###B",
+        "BBBBB.BBBB.BBBBB"
+    )
+
+    // [ID 378] GulusGammamon (dark dragon with black flames and dark crest)
+    val GULUSGAMMAMON_ROM = arrayOf(
+        "TTTT........TTTT",
+        ".BTTB..TT..BTTB.",
+        "..B##BTTTTB##B..",
+        "...B########B...",
+        "..B##WW##WW##B..",
+        "..B##EE##EE##B..",
+        ".B############B.",
+        "B#WW########WW#B",
+        "B#TT#SSSSSS#TT#B",
+        "B###SSSSSSSS###B",
+        "B##############B",
+        ".B#SSSSSSSSSS#B.",
+        "..B##########B..",
+        ".B####BB####B#B.",
+        "B####B..B####BB.",
+        "BBBBBB..BBBBBB.."
+    )
+
+    // [ID 379] SymbareAngoramon (martial hare with slender ear scarf)
+    val SYMBAREANGORAMON_ROM = arrayOf(
+        "TTTT........TTTT",
+        "BTTB........BTTB",
+        ".BTTB......BTTB.",
+        "..B##########B..",
+        "...B#WW##WW#B...",
+        "...B#EE##EE#B...",
+        "..B##########B..",
+        ".B############B.",
+        "B#WW########WW#B",
+        "B#TT#SSSSSS#TT#B",
+        ".B###SSSSSS###B.",
+        "..B#SSSSSSSS#B..",
+        "...B########B...",
+        "..B###B##B###B..",
+        ".B####B..B####B.",
+        ".BBBBB....BBBBB."
+    )
+
+    // [ID 380] TeslaJellymon (floating electric shock tentacles)
+    val TESLAJELLYMON_ROM = arrayOf(
+        "...TT......TT...",
+        "..BTTB....BTTB..",
+        "...B########B...",
+        "..B##########B..",
+        ".B#WW######WW#B.",
+        ".B#EE######EE#B.",
+        ".B############B.",
+        "B#CC########CC#B",
+        "B#CC#SSSSSS#CC#B",
+        ".B###SSSSSS###B.",
+        "..B#SSSSSSSS#B..",
+        "...B########B...",
+        "..B##B####B##B..",
+        ".B##B......B##B.",
+        "B##B........B##B",
+        "BBB..........BBB"
+    )
+
+    // [ID 381] Loogarmon (demonic wolf with blazing blue flames)
+    val LOOGARMON_ROM = arrayOf(
+        "TT............TT",
+        "BTTB...CC...BTTB",
+        ".B####BCCB####B.",
+        "..B##WW##WW##B..",
+        "..B##EE##EE##B..",
+        ".B############B.",
+        "B##############B",
+        "B#CC#SSSSSS#CC#B",
+        "B###SSSSSSSS###B",
+        "B##############B",
+        ".B#SSSSSSSSSS#B.",
+        "..B##########B..",
+        ".BB##########BB.",
+        "B##B#B####B#B##B",
+        "B##B.B####B.B##B",
+        "BBBB..BBBB..BBBB"
+    )
+
+    // [ID 382] Pegasusmon (winged celestial steed with golden helm)
+    val PEGASUSMON_ROM = arrayOf(
+        "......TTTT......",
+        ".....BTTTTB.....",
+        "....B######B....",
+        "WW.B########B.WW",
+        "BWW#WW####WW#WWB",
+        ".B##EE####EE##B.",
+        "..B##########B..",
+        ".B#GG######GG#B.",
+        "B##GGSSSSSSGG##B",
+        "B##############B",
+        ".B#SSSSSSSSSS#B.",
+        "..B##########B..",
+        ".B####BB####B#B.",
+        "B####B..B####BB.",
+        "B####B..B####B..",
+        "BBBBBB..BBBBBB.."
+    )
+
+    // [ID 383] Nefertimon (sacred golden sphinx with royal headdress)
+    val NEFERTIMON_ROM = arrayOf(
+        "...TTTTTTTTTT...",
+        "..BTTTTTTTTTTB..",
+        "..B##########B..",
+        ".B##WW####WW##B.",
+        ".B##EE####EE##B.",
+        "B##############B",
+        "B#GG########GG#B",
+        "B#GG#SSSSSS#GG#B",
+        "B###SSSSSSSS###B",
+        "B##############B",
+        ".B#SSSSSSSSSS#B.",
+        "..B##########B..",
+        ".BB##########BB.",
+        "B###B.BBBB.B###B",
+        "B###B.B##B.B###B",
+        "BBBBB.BBBB.BBBBB"
+    )
+
+    // [ID 384] Strikedramon (commando dragon with red hair crest)
+    val STRIKEDRAMON_ROM = arrayOf(
+        "......RRRR......",
+        ".....BRRRRB.....",
+        "....B######B....",
+        "...B########B...",
+        "..B##WW##WW##B..",
+        "..B##EE##EE##B..",
+        ".B############B.",
+        "B#TT########TT#B",
+        "B#TT#SSSSSS#TT#B",
+        "B##############B",
+        ".B#SSSSSSSSSS#B.",
+        "..B##########B..",
+        "...B########B...",
+        "..B###B##B###B..",
+        ".B####B..B####B.",
+        ".BBBBBB..BBBBBB."
+    )
+
+    // [ID 385] Dobermon (hunter demon dog with spiked collar)
+    val DOBERMON_ROM = arrayOf(
+        "TT............TT",
+        "BTTB........BTTB",
+        ".B############B.",
+        "..B#WW####WW#B..",
+        "..B#EE####EE#B..",
+        ".B############B.",
+        "B#TT########TT#B",
+        "B#TT#SSSSSS#TT#B",
+        "B##############B",
+        ".B#SSSSSSSSSS#B.",
+        "..B##########B..",
+        ".BB##########BB.",
+        "B###B.BBBB.B###B",
+        "B###B.B##B.B###B",
+        "B###B.BBBB.B###B",
+        "BBBBB.BBBB.BBBBB"
+    )
+
+    // [ID 386] Sangloupmon (vampire wolf with bloody blade fangs)
+    val SANGLOUPMON_ROM = arrayOf(
+        "TTTT........TTTT",
+        "BTTB...RR...BTTB",
+        ".B####BRRB####B.",
+        "..B##WW##WW##B..",
+        "..B##EE##EE##B..",
+        ".B############B.",
+        "B#RR########RR#B",
+        "B#RR#SSSSSS#RR#B",
+        "B##############B",
+        ".B#SSSSSSSSSS#B.",
+        "..B##########B..",
+        ".BB##########BB.",
+        "B##B#B####B#B##B",
+        "B##B.B####B.B##B",
+        "B##B.B####B.B##B",
+        "BBBB..BBBB..BBBB"
+    )
+
+    // [ID 387] DarkKnightmon (ebony chrome armor with twin cross spear horns)
+    val DARKKNIGHTMON_ROM = arrayOf(
+        "TTTT..TTTT..TTTT",
+        "BTTB..BTTB..BTTB",
+        ".B############B.",
+        "B##############B",
+        "B##WW######WW##B",
+        "B##EE######EE##B",
+        "B#TT########TT#B",
+        "B#TT#SSSSSS#TT#B",
+        "B##############B",
+        "B##############B",
+        ".B#SSSSSSSSSS#B.",
+        "..B##########B..",
+        ".B####BB####B#B.",
+        "B####B..B####BB.",
+        "B####B..B####B..",
+        "BBBBBB..BBBBBB.."
+    )
+
+    // [ID 465] RizeGreymon (cyborg dragon with chrome revolver arm)
+    val RIZEGREYMON_ROM = arrayOf(
+        "TTTTTT....TTTTTT",
+        "BTTTTB....BTTTTB",
+        ".B############B.",
+        "B##############B",
+        "B##WW######WW##B",
+        "B##EE######EE##B",
+        "B#TT########WW#B",
+        "B#TT#SSSSSS#WWWB",
+        "B###SSSSSSSSWWWB",
+        "B##############B",
+        ".B#SSSSSSSSSS#B.",
+        "..B##########B..",
+        ".B###B####B###B.",
+        "B#####B..B#####B",
+        "B#BB##B..B##BB#B",
+        "BBB.BBB..BBB.BBB"
+    )
+
+    // [ID 466] MachGaogamon (rocket turbine engine boxer wolf)
+    val MACHGAOGAMON_ROM = arrayOf(
+        "TTTT..TTTT..TTTT",
+        "BTTB..B##B..BTTB",
+        ".B############B.",
+        "B##############B",
+        "B##WW######WW##B",
+        "B##EE######EE##B",
+        "B#WW########WW#B",
+        "B#TT#SSSSSS#TT#B",
+        "B###SSSSSSSS###B",
+        "B##############B",
+        ".B#SSSSSSSSSS#B.",
+        "..B##########B..",
+        ".BB##########BB.",
+        "B##B#B####B#B##B",
+        "B##B.B####B.B##B",
+        "BBBB..BBBB..BBBB"
+    )
+
+    // [ID 467] Boutmon (electrified karate master with lightning belt)
+    val BOUTMON_ROM = arrayOf(
+        "....TTTTTTTT....",
+        "...BTTTTTTTTB...",
+        "..B##########B..",
+        ".B##WW####WW##B.",
+        ".B##EE####EE##B.",
+        "B##############B",
+        "B#TT########TT#B",
+        "B#TTSSSSSSSSTT#B",
+        "B###SSSSSSSS###B",
+        "B##############B",
+        ".B#SSSSSSSSSS#B.",
+        "..B##########B..",
+        ".B###B####B###B.",
+        "B####B....B####B",
+        "B####B....B####B",
+        "BBBBBB....BBBBBB"
+    )
+
+    // [ID 468] Canoweissmon (four-winged white celestial dragon)
+    val CANOWEISSMON_ROM = arrayOf(
+        "WW..TTTTTTTT..WW",
+        "BWW.BTTTTTTB.WWB",
+        ".B############B.",
+        "B##############B",
+        "B##WW######WW##B",
+        "B##EE######EE##B",
+        "B#WW########WW#B",
+        "B#TT#SSSSSS#TT#B",
+        "B###SSSSSSSS###B",
+        "B##############B",
+        ".B#SSSSSSSSSS#B.",
+        "..B##########B..",
+        "...B########B...",
+        "..B###B##B###B..",
+        ".B####B..B####B.",
+        ".BBBBB....BBBBB."
+    )
+
+    // [ID 469] Regulusmon (dark dragon lord with shield lance)
+    val REGULUSMON_ROM = arrayOf(
+        "TTTT..TTTT..TTTT",
+        "BTTB.B####B.BTTB",
+        ".B############B.",
+        "B##############B",
+        "B##WW######WW##B",
+        "B##EE######EE##B",
+        "B#RR########RR#B",
+        "B#RR#SSSSSS#RR#B",
+        "B###SSSSSSSS###B",
+        "B##############B",
+        ".B#SSSSSSSSSS#B.",
+        "..B##########B..",
+        ".B####BB####B#B.",
+        "B####B..B####BB.",
+        "B####B..B####B..",
+        "BBBBBB..BBBBBB.."
+    )
+
+    // [ID 470] Lamortemon (beast berserker with dual bone greatswords)
+    val LAMORTEMON_ROM = arrayOf(
+        "TTTTTT....TTTTTT",
+        "BTTTTB....BTTTTB",
+        ".B############B.",
+        "B##############B",
+        "B##WW######WW##B",
+        "B##EE######EE##B",
+        "B#WW########WW#B",
+        "B#TT#SSSSSS#TT#B",
+        "B###SSSSSSSS###B",
+        "B##############B",
+        ".B#SSSSSSSSSS#B.",
+        "..B##########B..",
+        ".B###B####B###B.",
+        "B####B....B####B",
+        "B####B....B####B",
+        "BBBBBB....BBBBBB"
+    )
+
+    // [ID 471] Thetismon (sea goddess with toxic needle sleeves)
+    val THETISMON_ROM = arrayOf(
+        "....TTTTTTTT....",
+        "...BTTTTTTTTB...",
+        "..B##########B..",
+        ".B##WW####WW##B.",
+        ".B##EE####EE##B.",
+        ".B############B.",
+        "B#CC########CC#B",
+        "B#CC#SSSSSS#CC#B",
+        "B##############B",
+        ".B#SSSSSSSSSS#B.",
+        "..B##########B..",
+        "...B########B...",
+        "..B##B####B##B..",
+        ".B##B......B##B.",
+        "B##B........B##B",
+        "BBB..........BBB"
+    )
+
+    // [ID 472] Soloogarmon (dual-blade demon knight)
+    val SOLOOGARMON_ROM = arrayOf(
+        "TT....TTTT....TT",
+        "BTTB.BTTTTB.BTTB",
+        ".B############B.",
+        "B##############B",
+        "B##WW######WW##B",
+        "B##EE######EE##B",
+        "B#CC########CC#B",
+        "B#CC#SSSSSS#CC#B",
+        "B##############B",
+        "B##############B",
+        ".B#SSSSSSSSSS#B.",
+        "..B##########B..",
+        "...B########B...",
+        "..B###B##B###B..",
+        ".B####B..B####B.",
+        ".BBBBBB..BBBBBB."
+    )
+
+    // [ID 473] Baalmon (robed assassin with inscribed talismans)
+    val BAALMON_ROM = arrayOf(
+        "......TTTT......",
+        "....BTTTTTTB....",
+        "...B########B...",
+        "..B##WW##WW##B..",
+        "..B##EE##EE##B..",
+        ".B############B.",
+        "B#RR########RR#B",
+        "B#RR#SSSSSS#RR#B",
+        "B##############B",
+        ".B#SSSSSSSSSS#B.",
+        "..B##########B..",
+        ".B############B.",
+        "B##B########B##B",
+        "B###B######B###B",
+        ".B##B.B##B.B##B.",
+        "..BB...BB...BB.."
+    )
+
+    // [ID 474] JewelBeemon (jewel beetle knight with rapier)
+    val JEWELBEEMON_ROM = arrayOf(
+        "TT..TT....TT..TT",
+        "BTTBTTB..BTTBTTB",
+        ".B############B.",
+        "..B#WW####WW#B..",
+        "..B#EE####EE#B..",
+        ".B############B.",
+        "B#GG########GG#B",
+        "B#GG#SSSSSS#GG#B",
+        "B###SSSSSSSS###B",
+        ".B#SSSSSSSSSS#B.",
+        "..B##########B..",
+        "...B########B...",
+        "..B#B######B#B..",
+        ".B##B......B##B.",
+        ".B#B........B#B.",
+        ".BBB........BBB."
+    )
+
+    // [ID 475] Dinobeemon (dragon-wasp chimera)
+    val DINOBEEMON_ROM = arrayOf(
+        "TT..TTTTTTTT..TT",
+        "BTTB.B####B.BTTB",
+        ".B############B.",
+        "B##############B",
+        "B##WW######WW##B",
+        "B##EE######EE##B",
+        "B#TT########TT#B",
+        "B#TT#SSSSSS#TT#B",
+        "B###SSSSSSSS###B",
+        "B##############B",
+        ".B#SSSSSSSSSS#B.",
+        "..B##########B..",
+        "...B########B...",
+        "....B######B....",
+        ".....B####B.....",
+        "......BBBB......"
+    )
+
+    // [ID 476] SkullMeramon (chained hellfire skull phantom)
+    val SKULLMERAMON_ROM = arrayOf(
+        "......CCCC......",
+        ".....BCCCCB.....",
+        "....B######B....",
+        "...B########B...",
+        "...B#WW##WW#B...",
+        "...B#EE##EE#B...",
+        "..B##########B..",
+        ".B#TT######TT#B.",
+        "B##TTSSSSSSSTT##",
+        "B##############B",
+        ".B#SSSSSSSSSS#B.",
+        "..B##########B..",
+        ".B###B####B###B.",
+        "B####B....B####B",
+        "B####B....B####B",
+        "BBBBBB....BBBBBB"
+    )
+
+    // [ID 477] Cerberusmon (three-headed hellhound beast)
+    val CERBERUSMON_ROM = arrayOf(
+        "TT..TTTTTTTT..TT",
+        "BTTB.B####B.BTTB",
+        ".B############B.",
+        "B##############B",
+        "B##WW######WW##B",
+        "B##EE######EE##B",
+        "B#TT########TT#B",
+        "B#TT#SSSSSS#TT#B",
+        "B##############B",
+        "B##############B",
+        ".B#SSSSSSSSSS#B.",
+        "..B##########B..",
+        ".BB##########BB.",
+        "B###B.BBBB.B###B",
+        "B###B.B##B.B###B",
+        "BBBBB.BBBB.BBBBB"
+    )
+
+    // [ID 583] Siriusmon (radiant white dragon knight with arm blades)
+    val SIRIUSMON_ROM = arrayOf(
+        "WW..TTTTTTTT..WW",
+        "BWW.BTTTTTTB.WWB",
+        ".B############B.",
+        "B##############B",
+        "B##WW######WW##B",
+        "B##EE######EE##B",
+        "B#WW########WW#B",
+        "B#TT#SSSSSS#TT#B",
+        "B#TT#SSSSSS#TT#B",
+        "B##############B",
+        ".B#SSSSSSSSSS#B.",
+        "..B##########B..",
+        ".B###B####B###B.",
+        "B####B....B####B",
+        "B####B....B####B",
+        "BBBBBB....BBBBBB"
+    )
+
+    // [ID 584] Diarbbitmon (noble white rabbit fencing knight)
+    val DIARBBITMON_ROM = arrayOf(
+        "TTTT........TTTT",
+        "BTTB........BTTB",
+        ".BTTB..TT..BTTB.",
+        "..B##BTTTTB##B..",
+        "...B########B...",
+        "..B##WW##WW##B..",
+        "..B##EE##EE##B..",
+        ".B############B.",
+        "B#WW########WW#B",
+        "B#TT#SSSSSS#TT#B",
+        "B###SSSSSSSS###B",
+        ".B#SSSSSSSSSS#B.",
+        "..B##########B..",
+        "...B########B...",
+        "..B###B##B###B..",
+        ".BBBBBB..BBBBBB."
+    )
+
+    // [ID 585] Amphimon (futuristic titanium diving goddess)
+    val AMPHIMON_ROM = arrayOf(
+        "....TTTTTTTT....",
+        "...BTTTTTTTTB...",
+        "..B##########B..",
+        ".B##WW####WW##B.",
+        ".B##EE####EE##B.",
+        "B##############B",
+        "B#CC########CC#B",
+        "B#CC#SSSSSS#CC#B",
+        "B###SSSSSSSS###B",
+        "B##############B",
+        ".B#SSSSSSSSSS#B.",
+        "..B##########B..",
+        "...B########B...",
+        "....B######B....",
+        ".....B####B.....",
+        "......BBBB......"
+    )
+
+    // [ID 586] Fenriloogamon (demonic wolf knight with hellfire wings)
+    val FENRILOOGAMON_ROM = arrayOf(
+        "TT............TT",
+        "BTTB...CC...BTTB",
+        ".B####BCCB####B.",
+        "B##############B",
+        "B##WW######WW##B",
+        "B##EE######EE##B",
+        "B#CC########CC#B",
+        "B#CC#SSSSSS#CC#B",
+        "B###SSSSSSSS###B",
+        "B##############B",
+        ".B#SSSSSSSSSS#B.",
+        "..B##########B..",
+        ".BB##########BB.",
+        "B##BB#BBBB#BB##B",
+        "B##B..B##B..B##B",
+        "BBBB..BBBB..BBBB"
+    )
+
+    // [ID 587] Kazuchimon (golden thunder god samurai warrior)
+    val KAZUCHIMON_ROM = arrayOf(
+        "TT....TTTT....TT",
+        "BTTB.BTTTTB.BTTB",
+        ".B############B.",
+        "B##############B",
+        "B##WW######WW##B",
+        "B##EE######EE##B",
+        "B#GG########GG#B",
+        "B#GG#SSSSSS#GG#B",
+        "B###SSSSSSSS###B",
+        "B##############B",
+        ".B#SSSSSSSSSS#B.",
+        "..B##########B..",
+        ".B###B####B###B.",
+        "B####B....B####B",
+        "B####B....B####B",
+        "BBBBBB....BBBBBB"
+    )
+
+    // [ID 588] Arcturusmon (abyssal GRB dark dragon with plasma drill cannons)
+    val ARCTURUSMON_ROM = arrayOf(
+        ".RR..........RR.",
+        "BRRB...TT...BRRB",
+        ".B##B.TTTT.B##B.",
+        "B##############B",
+        "B##WW######WW##B",
+        "B##EE######EE##B",
+        "B##############B",
+        "B#RR#SSSSSS#RR#B",
+        "B###SSSSSSSS###B",
+        "B#RR#SSSSSS#RR#B",
+        ".B############B.",
+        "..B##########B..",
+        ".B###B####B###B.",
+        "B####B####B####B",
+        "B##B..B##B..B##B",
+        ".BB....BB....BB."
+    )
+
+    // [ID 589] ShineGreymon Burst Mode (blazing solar corona wings)
+    val SHINEGREYMON_BURST_MODE_ROM = arrayOf(
+        "RRRR..TTTT..RRRR",
+        "BRRB.B####B.BRRB",
+        ".B############B.",
+        "B##############B",
+        "B##WW######WW##B",
+        "B##EE######EE##B",
+        "B#RR########RR#B",
+        "B#RR#SSSSSS#RRB.",
+        "B###SSSSSSSS###B",
+        "B##############B",
+        ".B#SSSSSSSSSS#B.",
+        "..B##########B..",
+        ".B###B####B###B.",
+        "B#####B..B#####B",
+        "B#BB##B..B##BB#B",
+        "BBB.BBB..BBB.BBB"
+    )
+
+    // [ID 590] MirageGaogamon Burst Mode (full moon auroral wolf knight)
+    val MIRAGEGAOGAMON_BURST_MODE_ROM = arrayOf(
+        "..CC.TTTT.CC....",
+        ".BCCBTTTTBCCB...",
+        "...B########B...",
+        "..B##########B..",
+        ".B#WW######WW#B.",
+        ".B#EE######EE#B.",
+        ".B############B.",
+        "B#CC########CC#B",
+        "B#CC#SSSSSS#CC#B",
+        "B##############B",
+        ".B#SSSSSSSSSS#B.",
+        "..B##########B..",
+        ".BB##########BB.",
+        "B##B#B####B#B##B",
+        "B##B.B####B.B##B",
+        "BBBB..BBBB..BBBB"
+    )
+
+    // [ID 591] Beelzemon Blast Mode (black seraph wings and Death Slinger blaster)
+    val BEELZEMON_BLAST_MODE_ROM = arrayOf(
+        "TT............TT",
+        "BTTB..TTTT..BTTB",
+        ".B###BTTTTB###B.",
+        "B##############B",
+        "B##WW######WW##B",
+        "B##EE######EE##B",
+        "B#WW########WW#B",
+        "B#TT#SSSSSS#WWWB",
+        "B###SSSSSSSSWWWB",
+        "B##############B",
+        ".B#SSSSSSSSSS#B.",
+        "..B##########B..",
+        "...B########B...",
+        "..B#B######B#B..",
+        ".B##B......B##B.",
+        ".BBB........BBB."
+    )
+
+    // [ID 592] Omnimon Merciful Mode (seraphic holy knight with celestial Habakiri)
+    val OMNIMON_MERCIFUL_MODE_ROM = arrayOf(
+        "WW....TTTT....WW",
+        "BWW..BTTTTB..WWB",
+        ".B############B.",
+        "B##############B",
+        "B##WW######WW##B",
+        "B##EE######EE##B",
+        "B#WW########WW#B",
+        "B#TT#SSSSSS#TT#B",
+        "B#TT#SSSSSS#TT#B",
+        "B##############B",
+        ".B#SSSSSSSSSS#B.",
+        "..B##########B..",
+        ".B####BB####B#B.",
+        "B####B..B####BB.",
+        "B####B..B####B..",
+        "BBBBBB..BBBBBB.."
+    )
+
     /**
      * Looks up the dot-matrix ROM array for species in the master roster.
      */
@@ -1939,6 +2943,8 @@ object MasterRosterMatrices {
             127 -> SUNMON_ROM
             128 -> MOONMON_ROM
             129 -> KETOMON_ROM
+            133 -> POROMON_ROM
+            134 -> UPAMON_ROM
 
             232 -> GOMAMON_ROM
             233 -> GOTSUMON_ROM
@@ -1959,6 +2965,16 @@ object MasterRosterMatrices {
             248 -> LUNAMON_ROM
             249 -> TOYAGUMON_ROM
             250 -> KERAMON_ROM
+            251 -> PULSEMON_ROM
+            252 -> GAMMAMON_ROM
+            253 -> ANGORAMON_ROM
+            254 -> JELLYMON_ROM
+            255 -> LOOGAMON_ROM
+            256 -> SHOUTMON_ROM
+            257 -> GUMDRAMON_ROM
+            258 -> AGUNIMON_ROM
+            259 -> LOBOMON_ROM
+            260 -> GAZIMON_ROM
 
             350 -> IKKAKUMON_ROM
             351 -> GOLEMON_ROM
@@ -1983,6 +2999,21 @@ object MasterRosterMatrices {
             370 -> LEKISMON_ROM
             371 -> EXVEEMON_ROM
             372 -> LYNXMON_ROM
+            373 -> GEOGREYMON_ROM
+            374 -> BULKMON_ROM
+            375 -> BETELGAMMAMON_ROM
+            376 -> KAUSGAMMAMON_ROM
+            377 -> WEZENGAMMAMON_ROM
+            378 -> GULUSGAMMAMON_ROM
+            379 -> SYMBAREANGORAMON_ROM
+            380 -> TESLAJELLYMON_ROM
+            381 -> LOOGARMON_ROM
+            382 -> PEGASUSMON_ROM
+            383 -> NEFERTIMON_ROM
+            384 -> STRIKEDRAMON_ROM
+            385 -> DOBERMON_ROM
+            386 -> SANGLOUPMON_ROM
+            387 -> DARKKNIGHTMON_ROM
 
             444 -> SHOGUNGEKOMON_ROM
             445 -> VOLCAMON_ROM
@@ -2005,6 +3036,19 @@ object MasterRosterMatrices {
             462 -> MAMMOTHMON_ROM
             463 -> METALGREYMON_VIRUS_ROM
             464 -> CYBERDRAMON_SAVERS_ROM
+            465 -> RIZEGREYMON_ROM
+            466 -> MACHGAOGAMON_ROM
+            467 -> BOUTMON_ROM
+            468 -> CANOWEISSMON_ROM
+            469 -> REGULUSMON_ROM
+            470 -> LAMORTEMON_ROM
+            471 -> THETISMON_ROM
+            472 -> SOLOOGARMON_ROM
+            473 -> BAALMON_ROM
+            474 -> JEWELBEEMON_ROM
+            475 -> DINOBEEMON_ROM
+            476 -> SKULLMERAMON_ROM
+            477 -> CERBERUSMON_ROM
 
             558 -> RUSTTYRANNOMON_ROM
             559 -> BLITZGREYMON_ROM
@@ -2031,6 +3075,16 @@ object MasterRosterMatrices {
             580 -> WARGREYMON_X_ROM
             581 -> METALGARURUMON_X_ROM
             582 -> BEELZEMON_X_ROM
+            583 -> SIRIUSMON_ROM
+            584 -> DIARBBITMON_ROM
+            585 -> AMPHIMON_ROM
+            586 -> FENRILOOGAMON_ROM
+            587 -> KAZUCHIMON_ROM
+            588 -> ARCTURUSMON_ROM
+            589 -> SHINEGREYMON_BURST_MODE_ROM
+            590 -> MIRAGEGAOGAMON_BURST_MODE_ROM
+            591 -> BEELZEMON_BLAST_MODE_ROM
+            592 -> OMNIMON_MERCIFUL_MODE_ROM
             else -> null
         }
     }
@@ -2047,6 +3101,8 @@ object MasterRosterMatrices {
             127 -> SpritePalette(SpritePalette.rgb(255, 140, 30), SpritePalette.rgb(255, 215, 60), SpritePalette.rgb(230, 50, 40), SpritePalette.rgb(255, 255, 255)) // Sunmon
             128 -> SpritePalette(SpritePalette.rgb(220, 215, 245), SpritePalette.rgb(135, 145, 220), SpritePalette.rgb(255, 240, 120), SpritePalette.rgb(20, 20, 25)) // Moonmon
             129 -> SpritePalette(SpritePalette.rgb(100, 110, 130), SpritePalette.rgb(245, 200, 50), SpritePalette.rgb(240, 242, 248), SpritePalette.rgb(220, 35, 35)) // Ketomon
+            133 -> SpritePalette(SpritePalette.rgb(248, 185, 205), SpritePalette.rgb(225, 45, 55), SpritePalette.rgb(255, 215, 65), SpritePalette.rgb(40, 180, 220)) // Poromon
+            134 -> SpritePalette(SpritePalette.rgb(252, 245, 175), SpritePalette.rgb(230, 200, 110), SpritePalette.rgb(245, 130, 150), SpritePalette.rgb(25, 25, 30)) // Upamon
 
             232 -> SpritePalette(SpritePalette.rgb(245, 245, 250), SpritePalette.rgb(185, 30, 40), SpritePalette.rgb(155, 95, 175), SpritePalette.rgb(40, 150, 225)) // Gomamon
             233 -> SpritePalette(SpritePalette.rgb(150, 155, 165), SpritePalette.rgb(95, 100, 110), SpritePalette.rgb(245, 200, 45), SpritePalette.rgb(220, 40, 40)) // Gotsumon
@@ -2067,6 +3123,16 @@ object MasterRosterMatrices {
             248 -> SpritePalette(SpritePalette.rgb(195, 190, 240), SpritePalette.rgb(245, 245, 252), SpritePalette.rgb(245, 215, 65), SpritePalette.rgb(220, 45, 75)) // Lunamon
             249 -> SpritePalette(SpritePalette.rgb(235, 50, 50), SpritePalette.rgb(245, 210, 40), SpritePalette.rgb(50, 115, 225), SpritePalette.rgb(255, 255, 255)) // ToyAgumon
             250 -> SpritePalette(SpritePalette.rgb(70, 150, 160), SpritePalette.rgb(215, 50, 50), SpritePalette.rgb(245, 220, 60), SpritePalette.rgb(255, 255, 255)) // Keramon
+            251 -> SpritePalette(SpritePalette.rgb(235, 245, 60), SpritePalette.rgb(45, 215, 235), SpritePalette.rgb(35, 40, 48), SpritePalette.rgb(255, 255, 255)) // Pulsemon
+            252 -> SpritePalette(SpritePalette.rgb(248, 250, 255), SpritePalette.rgb(235, 230, 215), SpritePalette.rgb(225, 35, 45), SpritePalette.rgb(30, 45, 95)) // Gammamon
+            253 -> SpritePalette(SpritePalette.rgb(215, 195, 160), SpritePalette.rgb(248, 242, 230), SpritePalette.rgb(150, 95, 60), SpritePalette.rgb(55, 165, 85)) // Angoramon
+            254 -> SpritePalette(SpritePalette.rgb(110, 220, 240), SpritePalette.rgb(175, 240, 255), SpritePalette.rgb(250, 220, 75), SpritePalette.rgb(140, 65, 180)) // Jellymon
+            255 -> SpritePalette(SpritePalette.rgb(65, 55, 80), SpritePalette.rgb(220, 30, 45), SpritePalette.rgb(210, 215, 230), SpritePalette.rgb(250, 205, 45)) // Loogamon
+            256 -> SpritePalette(SpritePalette.rgb(235, 45, 40), SpritePalette.rgb(255, 225, 45), SpritePalette.rgb(190, 195, 205), SpritePalette.rgb(255, 255, 255)) // Shoutmon
+            257 -> SpritePalette(SpritePalette.rgb(135, 75, 185), SpritePalette.rgb(245, 185, 40), SpritePalette.rgb(220, 40, 50), SpritePalette.rgb(250, 215, 70)) // Gumdramon
+            258 -> SpritePalette(SpritePalette.rgb(215, 55, 35), SpritePalette.rgb(250, 205, 55), SpritePalette.rgb(160, 30, 25), SpritePalette.rgb(45, 185, 245)) // Agunimon
+            259 -> SpritePalette(SpritePalette.rgb(45, 95, 190), SpritePalette.rgb(230, 235, 245), SpritePalette.rgb(60, 195, 240), SpritePalette.rgb(245, 190, 45)) // Lobomon
+            260 -> SpritePalette(SpritePalette.rgb(75, 78, 88), SpritePalette.rgb(165, 145, 180), SpritePalette.rgb(240, 240, 245), SpritePalette.rgb(220, 30, 35)) // Gazimon
 
             350 -> SpritePalette(SpritePalette.rgb(240, 245, 250), SpritePalette.rgb(180, 35, 45), SpritePalette.rgb(240, 200, 55), SpritePalette.rgb(20, 20, 25)) // Ikkakumon
             351 -> SpritePalette(SpritePalette.rgb(130, 120, 110), SpritePalette.rgb(215, 80, 35), SpritePalette.rgb(75, 70, 65), SpritePalette.rgb(250, 205, 50)) // Golemon
@@ -2091,6 +3157,21 @@ object MasterRosterMatrices {
             370 -> SpritePalette(SpritePalette.rgb(175, 170, 225), SpritePalette.rgb(245, 245, 252), SpritePalette.rgb(245, 200, 50), SpritePalette.rgb(215, 45, 75)) // Lekismon
             371 -> SpritePalette(SpritePalette.rgb(50, 120, 220), SpritePalette.rgb(245, 245, 252), SpritePalette.rgb(245, 195, 45), SpritePalette.rgb(220, 35, 40)) // ExVeemon
             372 -> SpritePalette(SpritePalette.rgb(240, 115, 30), SpritePalette.rgb(245, 240, 220), SpritePalette.rgb(215, 40, 40), SpritePalette.rgb(40, 160, 230)) // Lynxmon
+            373 -> SpritePalette(SpritePalette.rgb(240, 125, 35), SpritePalette.rgb(195, 35, 40), SpritePalette.rgb(45, 55, 80), SpritePalette.rgb(45, 190, 110)) // GeoGreymon
+            374 -> SpritePalette(SpritePalette.rgb(245, 225, 45), SpritePalette.rgb(45, 200, 235), SpritePalette.rgb(65, 70, 80), SpritePalette.rgb(220, 35, 45)) // Bulkmon
+            375 -> SpritePalette(SpritePalette.rgb(225, 45, 45), SpritePalette.rgb(255, 210, 50), SpritePalette.rgb(35, 40, 50), SpritePalette.rgb(40, 195, 235)) // BetelGammamon
+            376 -> SpritePalette(SpritePalette.rgb(45, 105, 210), SpritePalette.rgb(70, 210, 240), SpritePalette.rgb(215, 220, 235), SpritePalette.rgb(245, 205, 45)) // KausGammamon
+            377 -> SpritePalette(SpritePalette.rgb(75, 135, 75), SpritePalette.rgb(45, 85, 45), SpritePalette.rgb(165, 115, 60), SpritePalette.rgb(225, 40, 45)) // WezenGammamon
+            378 -> SpritePalette(SpritePalette.rgb(35, 35, 42), SpritePalette.rgb(115, 65, 145), SpritePalette.rgb(180, 185, 195), SpritePalette.rgb(245, 215, 55)) // GulusGammamon
+            379 -> SpritePalette(SpritePalette.rgb(180, 125, 75), SpritePalette.rgb(135, 35, 55), SpritePalette.rgb(240, 195, 85), SpritePalette.rgb(50, 175, 100)) // SymbareAngoramon
+            380 -> SpritePalette(SpritePalette.rgb(85, 205, 215), SpritePalette.rgb(250, 230, 65), SpritePalette.rgb(35, 50, 85), SpritePalette.rgb(155, 70, 195)) // TeslaJellymon
+            381 -> SpritePalette(SpritePalette.rgb(55, 58, 68), SpritePalette.rgb(50, 185, 235), SpritePalette.rgb(225, 230, 242), SpritePalette.rgb(245, 200, 45)) // Loogarmon
+            382 -> SpritePalette(SpritePalette.rgb(250, 250, 255), SpritePalette.rgb(245, 210, 55), SpritePalette.rgb(100, 180, 240), SpritePalette.rgb(35, 110, 215)) // Pegasusmon
+            383 -> SpritePalette(SpritePalette.rgb(245, 215, 60), SpritePalette.rgb(40, 75, 160), SpritePalette.rgb(215, 225, 240), SpritePalette.rgb(215, 35, 45)) // Nefertimon
+            384 -> SpritePalette(SpritePalette.rgb(130, 140, 155), SpritePalette.rgb(215, 45, 40), SpritePalette.rgb(75, 80, 90), SpritePalette.rgb(245, 205, 50)) // Strikedramon
+            385 -> SpritePalette(SpritePalette.rgb(40, 42, 48), SpritePalette.rgb(195, 200, 210), SpritePalette.rgb(195, 35, 45), SpritePalette.rgb(240, 190, 40)) // Dobermon
+            386 -> SpritePalette(SpritePalette.rgb(48, 45, 58), SpritePalette.rgb(195, 25, 40), SpritePalette.rgb(160, 165, 180), SpritePalette.rgb(245, 235, 120)) // Sangloupmon
+            387 -> SpritePalette(SpritePalette.rgb(35, 36, 42), SpritePalette.rgb(215, 30, 45), SpritePalette.rgb(235, 195, 55), SpritePalette.rgb(145, 50, 185)) // DarkKnightmon
 
             444 -> SpritePalette(SpritePalette.rgb(180, 45, 55), SpritePalette.rgb(245, 200, 45), SpritePalette.rgb(85, 160, 75), SpritePalette.rgb(20, 20, 25)) // ShogunGekomon
             445 -> SpritePalette(SpritePalette.rgb(195, 60, 35), SpritePalette.rgb(75, 75, 85), SpritePalette.rgb(245, 205, 50), SpritePalette.rgb(255, 255, 255)) // Volcamon
@@ -2113,6 +3194,19 @@ object MasterRosterMatrices {
             462 -> SpritePalette(SpritePalette.rgb(145, 105, 70), SpritePalette.rgb(240, 235, 215), SpritePalette.rgb(75, 70, 65), SpritePalette.rgb(220, 35, 35)) // Mammothmon
             463 -> SpritePalette(SpritePalette.rgb(70, 75, 95), SpritePalette.rgb(185, 195, 210), SpritePalette.rgb(140, 45, 160), SpritePalette.rgb(245, 195, 45)) // MetalGreymon (Virus)
             464 -> SpritePalette(SpritePalette.rgb(55, 60, 75), SpritePalette.rgb(215, 35, 45), SpritePalette.rgb(185, 195, 210), SpritePalette.rgb(0, 210, 255)) // Cyberdramon (Savers)
+            465 -> SpritePalette(SpritePalette.rgb(235, 120, 30), SpritePalette.rgb(205, 215, 230), SpritePalette.rgb(200, 35, 40), SpritePalette.rgb(45, 205, 240)) // RizeGreymon
+            466 -> SpritePalette(SpritePalette.rgb(45, 80, 165), SpritePalette.rgb(195, 205, 220), SpritePalette.rgb(240, 240, 248), SpritePalette.rgb(245, 195, 45)) // MachGaogamon
+            467 -> SpritePalette(SpritePalette.rgb(245, 220, 50), SpritePalette.rgb(35, 38, 45), SpritePalette.rgb(45, 160, 235), SpritePalette.rgb(220, 35, 45)) // Boutmon
+            468 -> SpritePalette(SpritePalette.rgb(245, 248, 255), SpritePalette.rgb(245, 215, 60), SpritePalette.rgb(215, 40, 45), SpritePalette.rgb(50, 140, 235)) // Canoweissmon
+            469 -> SpritePalette(SpritePalette.rgb(36, 36, 44), SpritePalette.rgb(205, 30, 40), SpritePalette.rgb(120, 45, 140), SpritePalette.rgb(245, 205, 45)) // Regulusmon
+            470 -> SpritePalette(SpritePalette.rgb(155, 105, 60), SpritePalette.rgb(235, 235, 240), SpritePalette.rgb(75, 75, 85), SpritePalette.rgb(235, 110, 35)) // Lamortemon
+            471 -> SpritePalette(SpritePalette.rgb(45, 145, 165), SpritePalette.rgb(175, 225, 75), SpritePalette.rgb(220, 230, 245), SpritePalette.rgb(145, 65, 175)) // Thetismon
+            472 -> SpritePalette(SpritePalette.rgb(70, 55, 95), SpritePalette.rgb(55, 175, 235), SpritePalette.rgb(225, 230, 242), SpritePalette.rgb(245, 200, 50)) // Soloogarmon
+            473 -> SpritePalette(SpritePalette.rgb(65, 45, 85), SpritePalette.rgb(215, 35, 45), SpritePalette.rgb(200, 205, 220), SpritePalette.rgb(245, 195, 45)) // Baalmon
+            474 -> SpritePalette(SpritePalette.rgb(45, 185, 95), SpritePalette.rgb(215, 40, 50), SpritePalette.rgb(245, 215, 55), SpritePalette.rgb(0, 215, 245)) // JewelBeemon
+            475 -> SpritePalette(SpritePalette.rgb(42, 45, 52), SpritePalette.rgb(235, 40, 45), SpritePalette.rgb(240, 200, 50), SpritePalette.rgb(45, 185, 95)) // Dinobeemon
+            476 -> SpritePalette(SpritePalette.rgb(50, 115, 225), SpritePalette.rgb(175, 185, 200), SpritePalette.rgb(60, 65, 75), SpritePalette.rgb(225, 40, 45)) // SkullMeramon
+            477 -> SpritePalette(SpritePalette.rgb(48, 50, 60), SpritePalette.rgb(180, 190, 205), SpritePalette.rgb(215, 35, 40), SpritePalette.rgb(245, 200, 45)) // Cerberusmon
 
             558 -> SpritePalette(SpritePalette.rgb(175, 70, 40), SpritePalette.rgb(90, 85, 80), SpritePalette.rgb(215, 35, 35), SpritePalette.rgb(245, 195, 45)) // RustTyrannomon
             559 -> SpritePalette(SpritePalette.rgb(215, 35, 45), SpritePalette.rgb(50, 55, 70), SpritePalette.rgb(245, 195, 50), SpritePalette.rgb(0, 225, 255)) // BlitzGreymon
@@ -2139,6 +3233,16 @@ object MasterRosterMatrices {
             580 -> SpritePalette(SpritePalette.rgb(245, 190, 40), SpritePalette.rgb(235, 110, 30), SpritePalette.rgb(190, 200, 215), SpritePalette.rgb(215, 35, 40)) // WarGreymon X
             581 -> SpritePalette(SpritePalette.rgb(60, 120, 225), SpritePalette.rgb(245, 195, 45), SpritePalette.rgb(180, 190, 210), SpritePalette.rgb(215, 35, 45)) // MetalGarurumon X
             582 -> SpritePalette(SpritePalette.rgb(42, 42, 54), SpritePalette.rgb(215, 35, 45), SpritePalette.rgb(245, 200, 50), SpritePalette.rgb(215, 225, 240)) // Beelzemon X
+            583 -> SpritePalette(SpritePalette.rgb(248, 250, 255), SpritePalette.rgb(220, 35, 45), SpritePalette.rgb(245, 210, 55), SpritePalette.rgb(40, 205, 245)) // Siriusmon
+            584 -> SpritePalette(SpritePalette.rgb(245, 245, 252), SpritePalette.rgb(45, 85, 185), SpritePalette.rgb(215, 225, 240), SpritePalette.rgb(220, 35, 45)) // Diarbbitmon
+            585 -> SpritePalette(SpritePalette.rgb(215, 225, 240), SpritePalette.rgb(45, 195, 225), SpritePalette.rgb(40, 55, 85), SpritePalette.rgb(245, 210, 50)) // Amphimon
+            586 -> SpritePalette(SpritePalette.rgb(225, 230, 242), SpritePalette.rgb(45, 170, 235), SpritePalette.rgb(240, 195, 45), SpritePalette.rgb(225, 35, 45)) // Fenriloogamon
+            587 -> SpritePalette(SpritePalette.rgb(245, 215, 50), SpritePalette.rgb(45, 175, 95), SpritePalette.rgb(50, 55, 65), SpritePalette.rgb(0, 225, 255)) // Kazuchimon
+            588 -> SpritePalette(SpritePalette.rgb(35, 25, 38), SpritePalette.rgb(195, 25, 45), SpritePalette.rgb(165, 45, 215), SpritePalette.rgb(255, 175, 45)) // Arcturusmon: GRB Obsidian + Abyssal Crimson + Toxic Plasma + Amber
+            589 -> SpritePalette(SpritePalette.rgb(235, 55, 35), SpritePalette.rgb(255, 165, 40), SpritePalette.rgb(245, 240, 220), SpritePalette.rgb(0, 235, 255)) // ShineGreymon Burst Mode
+            590 -> SpritePalette(SpritePalette.rgb(55, 135, 235), SpritePalette.rgb(145, 220, 255), SpritePalette.rgb(245, 245, 255), SpritePalette.rgb(245, 205, 45)) // MirageGaogamon Burst Mode
+            591 -> SpritePalette(SpritePalette.rgb(38, 38, 48), SpritePalette.rgb(215, 35, 45), SpritePalette.rgb(215, 220, 235), SpritePalette.rgb(45, 195, 105)) // Beelzemon Blast Mode
+            592 -> SpritePalette(SpritePalette.rgb(250, 252, 255), SpritePalette.rgb(165, 215, 250), SpritePalette.rgb(245, 215, 60), SpritePalette.rgb(0, 220, 255)) // Omnimon Merciful Mode
             else -> null
         }
     }
