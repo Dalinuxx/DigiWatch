@@ -83,11 +83,12 @@ fun StatusScreen(
         else -> Color(0xFF69F0AE)
     }
 
-    ScalingLazyColumn(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Color(0xFF0D131A)),
-        state = listState,
+    Box(modifier = Modifier.fillMaxSize()) {
+        ScalingLazyColumn(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Color(0xFF0D131A)),
+            state = listState,
         contentPadding = displayConfig.contentPadding,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -436,6 +437,7 @@ fun StatusScreen(
             autoDismissMs = null,
             onDismiss = { showCutInPortrait = false }
         )
+    }
     }
 }
 

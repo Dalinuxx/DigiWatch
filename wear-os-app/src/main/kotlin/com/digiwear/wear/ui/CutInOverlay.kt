@@ -37,6 +37,11 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.DrawScope
+import android.graphics.BitmapFactory
+import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -54,7 +59,7 @@ import kotlin.math.sin
 /**
  * Authentic Color V-Pet (Digital Monster Color / Pendulum Color) battle cut-in view.
  * Renders dynamic manga speedlines, glowing attribute energy aura,
- * a magnified headshot portrait with eye glints, and critical hit battle banners.
+ * official Reference Book character artwork portrait with eye glints, and critical hit battle banners.
  */
 @Composable
 fun CutInOverlay(
@@ -67,6 +72,17 @@ fun CutInOverlay(
     val cutIn = remember(speciesId) { CutInPortraitEngine.getCutInPortrait(speciesId) }
     val attrColor = Color(cutIn.attributeColorArgb)
     val secColor = Color(cutIn.secondaryAuraArgb)
+    val context = LocalContext.current
+
+    val highResBitmap = remember(speciesId) {
+        try {
+            context.assets.open("portraits/$speciesId.png").use { stream ->
+                BitmapFactory.decodeStream(stream)?.asImageBitmap()
+            }
+        } catch (_: Exception) {
+            null
+        }
+    }
 
     val infiniteTransition = rememberInfiniteTransition(label = "CutInAnim")
     val speedlinePhase by infiniteTransition.animateFloat(
@@ -103,13 +119,25 @@ fun CutInOverlay(
             .clickable { onDismiss?.invoke() },
         contentAlignment = Alignment.Center
     ) {
-        // 1. Dynamic Canvas Layer: Speedlines, Aura, Magnified Headshot & Lens Flares
+        // 1. Dynamic Canvas Layer: Speedlines, Aura, High-Res Portrait & Lens Flares
         Canvas(modifier = Modifier.fillMaxSize()) {
             val center = Offset(size.width / 2f, size.height / 2f - 10.dp.toPx())
+            val boxPx = 140.dp.toPx()
             drawActionSpeedlines(center, speedlinePhase, attrColor, secColor)
             drawAttributeAura(center, attrColor, secColor)
-            drawMagnifiedHeadshot(cutIn, center, 140.dp.toPx())
-            drawEyeGlints(cutIn, center, 140.dp.toPx(), eyeGlintPulse, attrColor)
+            if (highResBitmap != null) {
+                drawImage(
+                    image = highResBitmap,
+                    dstOffset = IntOffset(
+                        (center.x - boxPx / 2f).toInt(),
+                        (center.y - boxPx / 2f).toInt()
+                    ),
+                    dstSize = IntSize(boxPx.toInt(), boxPx.toInt())
+                )
+            } else {
+                drawMagnifiedHeadshot(cutIn, center, boxPx)
+            }
+            drawEyeGlints(cutIn, center, boxPx, eyeGlintPulse, attrColor)
             drawCyberReticle(center, 150.dp.toPx(), attrColor)
         }
 
