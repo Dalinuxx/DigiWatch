@@ -1,26 +1,26 @@
-# 🧬 DigiWear Official Visual Sprite Sheet Digivolution & DNA Jogress Guide (350 Species)
+# 🧬 DigiWear Official Visual Sprite Sheet Digivolution & DNA Jogress Guide (500 Species)
 
 > **100% Complete & Mathematically Verified Lineage Chart + Full Pixel-Art Sprite Sheets**
-> Every single one of the **350 Digimon** in DigiWear is naturally reachable from the **10 Starter Digi-Eggs** via canonical Bandai 1997 V-Pet, Digimon Pendulum, and Digimon Color evolution rules, or via **65 DNA Jogress / DigiXros / Mode Change** combinations.
+> Every single one of the **500 Digimon** in DigiWear is naturally reachable from the **16 Starter Digi-Eggs** via canonical Bandai 1997 V-Pet, Digimon Pendulum, and Digimon Color evolution rules, or via **86 DNA Jogress / DigiXros / Mode Change** combinations.
 
-## 🖼️ Visual Sprite Sheet Evolution Chart & Master 350-Species Roster
+## 🖼️ Visual Sprite Sheet Evolution Chart & Master 500-Species Roster
 
 ### 1. Full Visual Sprite Sheet Evolution & DNA Jogress Guide Poster
 ![DigiWear Full Sprite Sheet Evolution Guide](docs/digiwear_evolution_guide_chart.png)
 
-### 2. Complete 350-Species Master Pixel-Art Sprite Sheet
-![DigiWear 350-Species Master Roster Sprite Sheet](docs/digiwear_roster_spritesheet.png)
+### 2. Complete 500-Species Master Pixel-Art Sprite Sheet
+![DigiWear 500-Species Master Roster Sprite Sheet](docs/digiwear_roster_spritesheet.png)
 
 ## 📊 Roster & Evolution Summary
 
 | Stage | Species Count | Canonical Evolution Window | Key Branching Factors |
 | :--- | :---: | :--- | :--- |
-| **Baby I** | **10** | Hatch → 10 Mins (`600s`) | Starter Digi-Egg Selection (10 Lineages) |
-| **Baby II** | **24** | 6 Hours (`21,600s`) | Care Mistakes (`CM`), Training Effort (`♥`), Weight (`G`) |
-| **Child** | **60** | 24 Hours (`86,400s`) | Care Mistakes (`CM`), Training Effort (`♥`), Overfeed Count, Weight (`G`) |
-| **Adult** | **87** | 36 Hours (`129,600s`) | Battles (`≥ 10–15`), Win Ratio (`≥ 60%–80%`), Care Mistakes (`CM`), Effort (`♥`) |
-| **Perfect** | **77** | 72 Hours (`259,200s`) | Battles (`≥ 20–35`), Win Ratio (`≥ 60%–85%`), Care Mistakes (`CM`), Effort (`♥`) |
-| **Ultimate** | **92** | Apex / Mode Change / Jogress | DNA Jogress, Mode Change, or Super-Ultimate Fusion |
+| **Baby I** | **16** | Hatch → 10 Mins (`600s`) | Starter Digi-Egg Selection (10 Lineages) |
+| **Baby II** | **34** | 6 Hours (`21,600s`) | Care Mistakes (`CM`), Training Effort (`♥`), Weight (`G`) |
+| **Child** | **85** | 24 Hours (`86,400s`) | Care Mistakes (`CM`), Training Effort (`♥`), Overfeed Count, Weight (`G`) |
+| **Adult** | **117** | 36 Hours (`129,600s`) | Battles (`≥ 10–15`), Win Ratio (`≥ 60%–80%`), Care Mistakes (`CM`), Effort (`♥`) |
+| **Perfect** | **111** | 72 Hours (`259,200s`) | Battles (`≥ 20–35`), Win Ratio (`≥ 60%–85%`), Care Mistakes (`CM`), Effort (`♥`) |
+| **Ultimate** | **137** | Apex / Mode Change / Jogress | DNA Jogress, Mode Change, or Super-Ultimate Fusion |
 
 ---
 
@@ -30,20 +30,26 @@ You can hatch any of these **10 Starter Digi-Eggs** at any time from **Watch Set
 
 | Egg ID | Baby I (Fresh) | Evolves Into (Baby II Targets & Conditions) | Version / Family Origin |
 | :---: | :--- | :--- | :--- |
-| `#101` | **Botamon** | → **`#129` Ketomon**: `Age ≥ 1h • CM 0–1 • Effort ≥ 2♥`<br>→ **`#102` Koromon**: `Age ≥ 1h` | Digital Monster Ver. 1 |
-| `#103` | **Punimon** | → **`#118` Chocomon**: `Age ≥ 1h • CM 0–1 • Effort ≥ 2♥`<br>→ **`#104` Tsunomon**: `Age ≥ 1h` | Digital Monster Ver. 2 |
-| `#105` | **Poyomon** | → **`#128` Moonmon**: `Age ≥ 1h • CM = 0 • Effort ≥ 3♥`<br>→ **`#117` Gummymon**: `Age ≥ 1h • CM 0–1 • Effort ≥ 2♥`<br>→ **`#106` Tokomon**: `Age ≥ 1h` | Digital Monster Ver. 3 |
-| `#107` | **Yuramon** | → **`#126` Minomon**: `Age ≥ 1h • CM = 0 • Effort ≥ 3♥`<br>→ **`#116` Viximon**: `Age ≥ 1h • CM 0–1 • Effort ≥ 2♥`<br>→ **`#108` Tanemon**: `Age ≥ 1h` | Digital Monster Ver. 4 |
-| `#109` | **Zurumon** | → **`#125` Kapurimon**: `Age ≥ 1h • CM = 0 • Effort ≥ 3♥`<br>→ **`#119` Yaamon**: `Age ≥ 1h • CM 0–1 • Effort ≥ 2♥`<br>→ **`#110` Pagumon**: `Age ≥ 1h` | Digital Monster Ver. 5 |
-| `#111` | **Mokumon** | → **`#127` Sunmon**: `Age ≥ 1h • CM = 0 • Effort ≥ 3♥`<br>→ **`#124` Hopmon**: `Age ≥ 1h • CM 0–1 • Effort ≥ 2♥`<br>→ **`#115` Gigimon**: `Age ≥ 1h • CM 0–2 • Effort ≥ 1♥`<br>→ **`#112` DemiMeramon**: `Age ≥ 1h` | Digimon Pendulum 1.0 Nature Spirits |
-| `#113` | **Kuramon** | → **`#123` Tsumemon**: `Age ≥ 1h • CM 0–1 • Effort ≥ 2♥`<br>→ **`#114` DemiVeemon**: `Age ≥ 1h` | Armageddon Army / Virus Busters |
-| `#130` | **Nyokimon** | → **`#133` Poromon**: `Age ≥ 1h • CM 0–1 • Effort ≥ 2♥`<br>→ **`#120` Nyaromon**: `Age ≥ 1h` | Wind Guardians / Floramon Line |
-| `#131` | **Pichimon** | → **`#134` Upamon**: `Age ≥ 1h • CM 0–1 • Effort ≥ 2♥`<br>→ **`#121` Pyocomon**: `Age ≥ 1h` | Deep Savers / Marine Line |
-| `#132` | **Pukamon** | → **`#122` Dorimon**: `Age ≥ 1h` | Deep Savers II / Gomamon Line |
+| `#101` | **Botamon** | → **`#129` Ketomon**: `Age ≥ 1h • CM 0–1 • Effort ≥ 2♥`<br>→ **`#1103` Sakuttomon**: `Age ≥ 1h • CM 0–2`<br>→ **`#102` Koromon**: `Age ≥ 1h` | Digital Monster Ver. 1 |
+| `#103` | **Punimon** | → **`#118` Chocomon**: `Age ≥ 1h • CM 0–1 • Effort ≥ 2♥`<br>→ **`#1110` Wanyamon**: `Age ≥ 1h • CM 0–2`<br>→ **`#104` Tsunomon**: `Age ≥ 1h` | Digital Monster Ver. 2 |
+| `#105` | **Poyomon** | → **`#128` Moonmon**: `Age ≥ 1h • CM = 0 • Effort ≥ 3♥`<br>→ **`#117` Gummymon**: `Age ≥ 1h • CM 0–1 • Effort ≥ 2♥`<br>→ **`#1105` Chibimon**: `Age ≥ 1h • CM 0–2`<br>→ **`#106` Tokomon**: `Age ≥ 1h` | Digital Monster Ver. 3 |
+| `#107` | **Yuramon** | → **`#126` Minomon**: `Age ≥ 1h • CM = 0 • Effort ≥ 3♥`<br>→ **`#116` Viximon**: `Age ≥ 1h • CM 0–1 • Effort ≥ 2♥`<br>→ **`#1115` Minomon Color**: `Age ≥ 1h • CM 0–2`<br>→ **`#108` Tanemon**: `Age ≥ 1h` | Digital Monster Ver. 4 |
+| `#109` | **Zurumon** | → **`#125` Kapurimon**: `Age ≥ 1h • CM = 0 • Effort ≥ 3♥`<br>→ **`#119` Yaamon**: `Age ≥ 1h • CM 0–1 • Effort ≥ 2♥`<br>→ **`#1107` Algomon Baby II**: `Age ≥ 1h • CM 0–2`<br>→ **`#110` Pagumon**: `Age ≥ 1h` | Digital Monster Ver. 5 |
+| `#111` | **Mokumon** | → **`#127` Sunmon**: `Age ≥ 1h • CM = 0 • Effort ≥ 3♥`<br>→ **`#124` Hopmon**: `Age ≥ 1h • CM 0–1 • Effort ≥ 2♥`<br>→ **`#115` Gigimon**: `Age ≥ 1h • CM 0–2 • Effort ≥ 1♥`<br>→ **`#1116` Babydmon**: `Age ≥ 1h • CM 0–2`<br>→ **`#112` DemiMeramon**: `Age ≥ 1h` | Digimon Pendulum 1.0 Nature Spirits |
+| `#113` | **Kuramon** | → **`#123` Tsumemon**: `Age ≥ 1h • CM 0–1 • Effort ≥ 2♥`<br>→ **`#1102` Kakkinmon**: `Age ≥ 1h • CM 0–2`<br>→ **`#114` DemiVeemon**: `Age ≥ 1h` | Armageddon Army / Virus Busters |
+| `#130` | **Nyokimon** | → **`#133` Poromon**: `Age ≥ 1h • CM 0–1 • Effort ≥ 2♥`<br>→ **`#1114` Mochimon Color**: `Age ≥ 1h • CM 0–2`<br>→ **`#120` Nyaromon**: `Age ≥ 1h` | Wind Guardians / Floramon Line |
+| `#131` | **Pichimon** | → **`#134` Upamon**: `Age ≥ 1h • CM 0–1 • Effort ≥ 2♥`<br>→ **`#1109` Bibimon**: `Age ≥ 1h • CM 0–2`<br>→ **`#121` Pyocomon**: `Age ≥ 1h` | Deep Savers / Marine Line |
+| `#132` | **Pukamon** | → **`#1112` Caprimon Color**: `Age ≥ 1h • CM 0–1 • Effort ≥ 2♥`<br>→ **`#122` Dorimon**: `Age ≥ 1h` | Deep Savers II / Gomamon Line |
+| `#1101` | **Cotsucomon** | → **`#1102` Kakkinmon**: `Age ≥ 1h • CM 0–1 • Effort ≥ 2♥`<br>→ **`#1103` Sakuttomon**: `Age ≥ 1h` | Classic V-Pet |
+| `#1104` | **Fufumon** | → **`#1105` Chibimon**: `Age ≥ 1h • CM 0–1 • Effort ≥ 2♥`<br>→ **`#1116` Babydmon**: `Age ≥ 1h` | Classic V-Pet |
+| `#1106` | **Algomon Baby I** | → **`#1107` Algomon Baby II**: `Age ≥ 1h` | Classic V-Pet |
+| `#1108` | **Dokimon** | → **`#1109` Bibimon**: `Age ≥ 1h • CM 0–1 • Effort ≥ 2♥`<br>→ **`#1110` Wanyamon**: `Age ≥ 1h` | Classic V-Pet |
+| `#1111` | **Choromon** | → **`#1112` Caprimon Color**: `Age ≥ 1h • CM 0–1 • Effort ≥ 2♥`<br>→ **`#1114` Mochimon Color**: `Age ≥ 1h` | Classic V-Pet |
+| `#1113` | **Bubbmon Color** | → **`#1115` Minomon Color**: `Age ≥ 1h • CM 0–1 • Effort ≥ 2♥`<br>→ **`#1114` Mochimon Color**: `Age ≥ 1h` | Classic V-Pet |
 
 ---
 
-## 🐾 Baby II Stage Digimon (24 Species)
+## 🐾 Baby II Stage Digimon (34 Species)
 
 | ID | Digimon | Attr | HP / PWR | Starter Egg Lineage Path | Evolves Into (Target & Exact Requirements) |
 | :---: | :--- | :---: | :---: | :--- | :--- |
@@ -71,10 +77,20 @@ You can hatch any of these **10 Starter Digi-Eggs** at any time from **Watch Set
 | `#129` | **Ketomon** | Free | `80HP / 20P` | Botamon → Ketomon | → **`#244` Ryudamon** (Child): `Age ≥ 12h • CM 0–2`<br>→ **`#240` Syakomon** (Child): `Age ≥ 12h • CM 3–5`<br>→ **`#227` Dorumon** (Child): `Age ≥ 12h • CM ≥ 6` |
 | `#133` | **Poromon** | Free | `80HP / 20P` | Nyokimon → Poromon | → **`#251` Pulsemon** (Child): `Age ≥ 12h • CM 0–1 • Effort ≥ 3♥`<br>→ **`#252` Gammamon** (Child): `Age ≥ 12h • CM 0–2`<br>→ **`#253` Angoramon** (Child): `Age ≥ 12h • CM 3–4`<br>→ **`#254` Jellymon** (Child): `Age ≥ 12h • CM ≥ 5` |
 | `#134` | **Upamon** | Free | `80HP / 20P` | Pichimon → Upamon | → **`#255` Loogamon** (Child): `Age ≥ 12h • CM 0–1 • Effort ≥ 3♥`<br>→ **`#256` Shoutmon** (Child): `Age ≥ 12h • CM 0–2`<br>→ **`#257` Gumdramon** (Child): `Age ≥ 12h • CM 3–4`<br>→ **`#260` Gazimon** (Child): `Age ≥ 12h • CM ≥ 5` |
+| `#1102` | **Kakkinmon** | Free | `70HP / 15P` | Kuramon → Kakkinmon | → **`#1220` Ludomon** (Child): `Age ≥ 24h • CM 0–1 • Effort ≥ 3♥`<br>→ **`#1218` Zubamon** (Child): `Age ≥ 24h • CM 0–3`<br>→ **`#1205` Bearmon** (Child): `Age ≥ 24h • CM ≥ 4` |
+| `#1103` | **Sakuttomon** | Free | `70HP / 15P` | Botamon → Sakuttomon | → **`#1218` Zubamon** (Child): `Age ≥ 24h • CM 0–1 • Effort ≥ 3♥`<br>→ **`#1216` Liollmon** (Child): `Age ≥ 24h • CM 0–3`<br>→ **`#1225` Bokomon** (Child): `Age ≥ 24h • CM ≥ 4` |
+| `#1105` | **Chibimon** | Free | `70HP / 15P` | Poyomon → Chibimon | → **`#1204` Dracomon X** (Child): `Age ≥ 24h • CM 0–1 • Effort ≥ 3♥`<br>→ **`#1201` Agumon X** (Child): `Age ≥ 24h • CM 0–3`<br>→ **`#1217` Paledramon** (Child): `Age ≥ 24h • CM ≥ 4` |
+| `#1107` | **Algomon Baby II** | Free | `70HP / 15P` | Zurumon → Algomon Baby II | → **`#1212` Algomon Child** (Child): `Age ≥ 24h • CM 0–3 • Effort ≥ 2♥`<br>→ **`#1211` Ghostmon** (Child): `Age ≥ 24h • CM ≥ 4` |
+| `#1109` | **Bibimon** | Free | `70HP / 15P` | Pichimon → Bibimon | → **`#1221` Herissmon** (Child): `Age ≥ 24h • CM 0–1 • Effort ≥ 3♥`<br>→ **`#1207` Junkmon** (Child): `Age ≥ 24h • CM 0–3`<br>→ **`#1210` Sunarizamon** (Child): `Age ≥ 24h • CM ≥ 4` |
+| `#1110` | **Wanyamon** | Free | `70HP / 15P` | Punimon → Wanyamon | → **`#1203` Gabumon X** (Child): `Age ≥ 24h • CM 0–1 • Effort ≥ 3♥`<br>→ **`#1202` Agumon (Black) X** (Child): `Age ≥ 24h • CM 0–3`<br>→ **`#1223` Strabimon** (Child): `Age ≥ 24h • CM ≥ 4` |
+| `#1112` | **Caprimon Color** | Free | `70HP / 15P` | Pukamon → Caprimon Color | → **`#1219` Koemon** (Child): `Age ≥ 24h • CM 0–1 • Effort ≥ 3♥`<br>→ **`#1213` Terriermon X** (Child): `Age ≥ 24h • CM 0–3`<br>→ **`#1214` Lopmon X** (Child): `Age ≥ 24h • CM ≥ 4` |
+| `#1114` | **Mochimon Color** | Free | `70HP / 15P` | Nyokimon → Mochimon Color | → **`#1215` KoKabuterimon** (Child): `Age ≥ 24h • CM 0–3 • Effort ≥ 2♥`<br>→ **`#1206` Ganimon** (Child): `Age ≥ 24h • CM ≥ 4` |
+| `#1115` | **Minomon Color** | Free | `70HP / 15P` | Yuramon → Minomon Color | → **`#1208` Pomumon** (Child): `Age ≥ 24h • CM 0–3 • Effort ≥ 2♥`<br>→ **`#1222` Morphomon** (Child): `Age ≥ 24h • CM ≥ 4` |
+| `#1116` | **Babydmon** | Free | `70HP / 15P` | Mokumon → Babydmon | → **`#1209` Sangomon** (Child): `Age ≥ 24h • CM 0–1 • Effort ≥ 3♥`<br>→ **`#1224` Plotmon Color** (Child): `Age ≥ 24h • CM 0–3`<br>→ **`#1204` Dracomon X** (Child): `Age ≥ 24h • CM ≥ 4` |
 
 ---
 
-## 🐾 Child Stage Digimon (60 Species)
+## 🐾 Child Stage Digimon (85 Species)
 
 | ID | Digimon | Attr | HP / PWR | Starter Egg Lineage Path | Evolves Into (Target & Exact Requirements) |
 | :---: | :--- | :---: | :---: | :--- | :--- |
@@ -138,10 +154,35 @@ You can hatch any of these **10 Starter Digi-Eggs** at any time from **Watch Set
 | `#258` | **Agunimon** | Vaccine | `140HP / 40P` | Mokumon → Sunmon → Agunimon | → **`#304` Meramon** (Adult): `Age ≥ 24h • CM 0–3 • Effort ≥ 2♥`<br>→ **`#301` Greymon** (Adult): `Age ≥ 24h • CM ≥ 4` |
 | `#259` | **Lobomon** | Vaccine | `135HP / 39P` | Poyomon → Moonmon → Lobomon | → **`#306` Garurumon** (Adult): `Age ≥ 24h • CM 0–3 • Effort ≥ 2♥`<br>→ **`#343` Sorcerymon** (Adult): `Age ≥ 24h • CM ≥ 4` |
 | `#260` | **Gazimon** | Virus | `130HP / 36P` | Pichimon → Upamon → Gazimon | → **`#386` Sangloupmon** (Adult): `Age ≥ 24h • CM 0–3 • Effort ≥ 2♥`<br>→ **`#387` DarkKnightmon** (Adult): `Age ≥ 24h • CM ≥ 4` |
+| `#1201` | **Agumon X** | Vaccine | `190HP / 35P` | Poyomon → Chibimon → Agumon X | → **`#1310` Agnimon** (Adult): `Age ≥ 24h • CM 0–1 • Effort ≥ 3♥`<br>→ **`#1330` Fladramon** (Adult): `Age ≥ 24h • CM 0–3`<br>→ **`#1301` Darklizamon** (Adult): `Age ≥ 24h • CM ≥ 4` |
+| `#1202` | **Agumon (Black) X** | Virus | `190HP / 36P` | Punimon → Wanyamon → Agumon (Black) X | → **`#1301` Darklizamon** (Adult): `Age ≥ 24h • CM 0–1 • Effort ≥ 3♥`<br>→ **`#1302` Deltamon** (Adult): `Age ≥ 24h • CM 0–3`<br>→ **`#1315` Duskmon** (Adult): `Age ≥ 24h • CM ≥ 4` |
+| `#1203` | **Gabumon X** | Data | `185HP / 34P` | Punimon → Wanyamon → Gabumon X | → **`#1311` Wolfmon** (Adult): `Age ≥ 24h • CM 0–1 • Effort ≥ 3♥`<br>→ **`#1329` Moosemon** (Adult): `Age ≥ 24h • CM 0–3`<br>→ **`#1309` Rukamon** (Adult): `Age ≥ 24h • CM ≥ 4` |
+| `#1204` | **Dracomon X** | Data | `190HP / 35P` | Poyomon → Chibimon → Dracomon X | → **`#1330` Fladramon** (Adult): `Age ≥ 24h • CM 0–1 • Effort ≥ 3♥`<br>→ **`#1325` Pteranomon** (Adult): `Age ≥ 24h • CM 0–3`<br>→ **`#1302` Deltamon** (Adult): `Age ≥ 24h • CM ≥ 4` |
+| `#1205` | **Bearmon** | Vaccine | `195HP / 36P` | Kuramon → Kakkinmon → Bearmon | → **`#1317` Kaiser Leomon** (Adult): `Age ≥ 24h • CM 0–1 • Effort ≥ 3♥`<br>→ **`#1314` Chackmon** (Adult): `Age ≥ 24h • CM 0–3`<br>→ **`#1324` Baromon** (Adult): `Age ≥ 24h • CM ≥ 4` |
+| `#1206` | **Ganimon** | Data | `180HP / 32P` | Nyokimon → Mochimon Color → Ganimon | → **`#1303` Tortamon** (Adult): `Age ≥ 24h • CM 0–1 • Effort ≥ 3♥`<br>→ **`#1322` Manbomon** (Adult): `Age ≥ 24h • CM 0–3`<br>→ **`#1326` Marin Bullmon** (Adult): `Age ≥ 24h • CM ≥ 4` |
+| `#1207` | **Junkmon** | Virus | `175HP / 30P` | Pichimon → Bibimon → Junkmon | → **`#1305` Gokimon** (Adult): `Age ≥ 24h • CM 0–1 • Effort ≥ 3♥`<br>→ **`#1313` Blitzmon** (Adult): `Age ≥ 24h • CM 0–3`<br>→ **`#1323` Pipismon** (Adult): `Age ≥ 24h • CM ≥ 4` |
+| `#1208` | **Pomumon** | Data | `180HP / 32P` | Yuramon → Minomon Color → Pomumon | → **`#1307` Kiwimon** (Adult): `Age ≥ 24h • CM 0–1 • Effort ≥ 3♥`<br>→ **`#1306` Cockatrimon** (Adult): `Age ≥ 24h • CM 0–3`<br>→ **`#1328` Peacockmon** (Adult): `Age ≥ 24h • CM ≥ 4` |
+| `#1209` | **Sangomon** | Data | `175HP / 31P` | Mokumon → Babydmon → Sangomon | → **`#1309` Rukamon** (Adult): `Age ≥ 24h • CM 0–1 • Effort ≥ 3♥`<br>→ **`#1322` Manbomon** (Adult): `Age ≥ 24h • CM 0–3`<br>→ **`#1326` Marin Bullmon** (Adult): `Age ≥ 24h • CM ≥ 4` |
+| `#1210` | **Sunarizamon** | Virus | `185HP / 34P` | Pichimon → Bibimon → Sunarizamon | → **`#1316` Baboongamon** (Adult): `Age ≥ 24h • CM 0–1 • Effort ≥ 3♥`<br>→ **`#1303` Tortamon** (Adult): `Age ≥ 24h • CM 0–3`<br>→ **`#1324` Baromon** (Adult): `Age ≥ 24h • CM ≥ 4` |
+| `#1211` | **Ghostmon** | Virus | `170HP / 33P` | Zurumon → Algomon Baby II → Ghostmon | → **`#1315` Duskmon** (Adult): `Age ≥ 24h • CM 0–1 • Effort ≥ 3♥`<br>→ **`#1308` Musyamon** (Adult): `Age ≥ 24h • CM 0–3`<br>→ **`#1323` Pipismon** (Adult): `Age ≥ 24h • CM ≥ 4` |
+| `#1212` | **Algomon Child** | Virus | `190HP / 35P` | Zurumon → Algomon Baby II → Algomon Child | → **`#1304` Snimon** (Adult): `Age ≥ 24h • CM 0–1 • Effort ≥ 3♥`<br>→ **`#1305` Gokimon** (Adult): `Age ≥ 24h • CM 0–3`<br>→ **`#1319` Shadramon** (Adult): `Age ≥ 24h • CM ≥ 4` |
+| `#1213` | **Terriermon X** | Vaccine | `180HP / 32P` | Pukamon → Caprimon Color → Terriermon X | → **`#1327` Kongoumon** (Adult): `Age ≥ 24h • CM 0–1 • Effort ≥ 3♥`<br>→ **`#1321` Harpymon** (Adult): `Age ≥ 24h • CM 0–3`<br>→ **`#1314` Chackmon** (Adult): `Age ≥ 24h • CM ≥ 4` |
+| `#1214` | **Lopmon X** | Data | `180HP / 32P` | Pukamon → Caprimon Color → Lopmon X | → **`#1329` Moosemon** (Adult): `Age ≥ 24h • CM 0–1 • Effort ≥ 3♥`<br>→ **`#1320` Flybeemon** (Adult): `Age ≥ 24h • CM 0–3`<br>→ **`#1312` Fairimon** (Adult): `Age ≥ 24h • CM ≥ 4` |
+| `#1215` | **KoKabuterimon** | Virus | `185HP / 33P` | Nyokimon → Mochimon Color → KoKabuterimon | → **`#1313` Blitzmon** (Adult): `Age ≥ 24h • CM 0–1 • Effort ≥ 3♥`<br>→ **`#1304` Snimon** (Adult): `Age ≥ 24h • CM 0–3`<br>→ **`#1320` Flybeemon** (Adult): `Age ≥ 24h • CM ≥ 4` |
+| `#1216` | **Liollmon** | Vaccine | `190HP / 35P` | Botamon → Sakuttomon → Liollmon | → **`#1318` Aegiomon** (Adult): `Age ≥ 24h • CM 0–1 • Effort ≥ 3♥`<br>→ **`#1317` Kaiser Leomon** (Adult): `Age ≥ 24h • CM 0–3`<br>→ **`#1327` Kongoumon** (Adult): `Age ≥ 24h • CM ≥ 4` |
+| `#1217` | **Paledramon** | Data | `185HP / 34P` | Poyomon → Chibimon → Paledramon | → **`#1314` Chackmon** (Adult): `Age ≥ 24h • CM 0–1 • Effort ≥ 3♥`<br>→ **`#1325` Pteranomon** (Adult): `Age ≥ 24h • CM 0–3`<br>→ **`#1309` Rukamon** (Adult): `Age ≥ 24h • CM ≥ 4` |
+| `#1218` | **Zubamon** | Vaccine | `230HP / 68P` | Botamon → Sakuttomon → Zubamon | → **`#1318` Aegiomon** (Adult): `Age ≥ 24h • CM 0–1 • Effort ≥ 3♥`<br>→ **`#1310` Agnimon** (Adult): `Age ≥ 24h • CM 0–3`<br>→ **`#1327` Kongoumon** (Adult): `Age ≥ 24h • CM ≥ 4` |
+| `#1219` | **Koemon** | Virus | `180HP / 32P` | Pukamon → Caprimon Color → Koemon | → **`#1316` Baboongamon** (Adult): `Age ≥ 24h • CM 0–1 • Effort ≥ 3♥`<br>→ **`#1308` Musyamon** (Adult): `Age ≥ 24h • CM 0–3`<br>→ **`#1324` Baromon** (Adult): `Age ≥ 24h • CM ≥ 4` |
+| `#1220` | **Ludomon** | Vaccine | `250HP / 55P` | Kuramon → Kakkinmon → Ludomon | → **`#1327` Kongoumon** (Adult): `Age ≥ 24h • CM 0–1 • Effort ≥ 3♥`<br>→ **`#1303` Tortamon** (Adult): `Age ≥ 24h • CM 0–3`<br>→ **`#1326` Marin Bullmon** (Adult): `Age ≥ 24h • CM ≥ 4` |
+| `#1221` | **Herissmon** | Data | `220HP / 62P` | Pichimon → Bibimon → Herissmon | → **`#1313` Blitzmon** (Adult): `Age ≥ 24h • CM 0–1 • Effort ≥ 3♥`<br>→ **`#1318` Aegiomon** (Adult): `Age ≥ 24h • CM 0–3`<br>→ **`#1310` Agnimon** (Adult): `Age ≥ 24h • CM ≥ 4` |
+| `#1222` | **Morphomon** | Free | `180HP / 32P` | Yuramon → Minomon Color → Morphomon | → **`#1312` Fairimon** (Adult): `Age ≥ 24h • CM 0–1 • Effort ≥ 3♥`<br>→ **`#1319` Shadramon** (Adult): `Age ≥ 24h • CM 0–3`<br>→ **`#1321` Harpymon** (Adult): `Age ≥ 24h • CM ≥ 4` |
+| `#1223` | **Strabimon** | Free | `190HP / 35P` | Punimon → Wanyamon → Strabimon | → **`#1311` Wolfmon** (Adult): `Age ≥ 24h • CM 0–1 • Effort ≥ 3♥`<br>→ **`#1315` Duskmon** (Adult): `Age ≥ 24h • CM 0–3`<br>→ **`#1317` Kaiser Leomon** (Adult): `Age ≥ 24h • CM ≥ 4` |
+| `#1224` | **Plotmon Color** | Vaccine | `185HP / 33P` | Mokumon → Babydmon → Plotmon Color | → **`#1321` Harpymon** (Adult): `Age ≥ 24h • CM 0–1 • Effort ≥ 3♥`<br>→ **`#1306` Cockatrimon** (Adult): `Age ≥ 24h • CM 0–3`<br>→ **`#1307` Kiwimon** (Adult): `Age ≥ 24h • CM ≥ 4` |
+| `#1225` | **Bokomon** | Free | `160HP / 25P` | Botamon → Sakuttomon → Bokomon | → **`#1324` Baromon** (Adult): `Age ≥ 24h • CM 0–1 • Effort ≥ 3♥`<br>→ **`#1328` Peacockmon** (Adult): `Age ≥ 24h • CM 0–3`<br>→ **`#1312` Fairimon** (Adult): `Age ≥ 24h • CM ≥ 4` |
 
 ---
 
-## 🐾 Adult Stage Digimon (87 Species)
+## 🐾 Adult Stage Digimon (117 Species)
 
 | ID | Digimon | Attr | HP / PWR | Starter Egg Lineage Path | Evolves Into (Target & Exact Requirements) |
 | :---: | :--- | :---: | :---: | :--- | :--- |
@@ -232,10 +273,40 @@ You can hatch any of these **10 Starter Digi-Eggs** at any time from **Watch Set
 | `#385` | **Dobermon** | Vaccine | `365HP / 99P` | Pichimon → Upamon → Loogamon → Dobermon | → **`#477` Cerberusmon** (Perfect): `Age ≥ 48h • CM 0–3 • Battles ≥ 15 • Win ≥ 70%`<br>→ **`#456` SkullSatamon** (Perfect): `Age ≥ 48h • CM ≥ 4 • Battles ≥ 15 • Win ≥ 70%` |
 | `#386` | **Sangloupmon** | Virus | `370HP / 101P` | Pichimon → Upamon → Gazimon → Sangloupmon | → **`#473` Baalmon** (Perfect): `Age ≥ 48h • CM 0–3 • Battles ≥ 15 • Win ≥ 70%`<br>→ **`#457` Mummymon** (Perfect): `Age ≥ 48h • CM ≥ 4 • Battles ≥ 15 • Win ≥ 70%` |
 | `#387` | **DarkKnightmon** | Virus | `390HP / 105P` | Pichimon → Upamon → Gazimon → DarkKnightmon | → **`#459` Grademon** (Perfect): `Age ≥ 48h • CM 0–3 • Battles ≥ 15 • Win ≥ 70%`<br>→ **`#440` Phantomon** (Perfect): `Age ≥ 48h • CM ≥ 4 • Battles ≥ 15 • Win ≥ 70%` |
+| `#1301` | **Darklizamon** | Virus | `340HP / 78P` | Punimon → Wanyamon → Agumon (Black) X → Darklizamon | → **`#1418` Waru Seadramon** (Perfect): `Age ≥ 48h • CM 0–3 • Battles ≥ 15 • Win ≥ 70%`<br>→ **`#1424` Mephismon** (Perfect): `Age ≥ 48h • CM ≥ 4 • Battles ≥ 15 • Win ≥ 70%` |
+| `#1302` | **Deltamon** | Virus | `350HP / 80P` | Punimon → Wanyamon → Agumon (Black) X → Deltamon | → **`#1408` Asuramon** (Perfect): `Age ≥ 48h • CM 0–3 • Battles ≥ 15 • Win ≥ 70%`<br>→ **`#1420` Arachnemon** (Perfect): `Age ≥ 48h • CM ≥ 4 • Battles ≥ 15 • Win ≥ 70%` |
+| `#1303` | **Tortamon** | Vaccine | `360HP / 76P` | Kuramon → Kakkinmon → Ludomon → Tortamon | → **`#1404` Hangyomon** (Perfect): `Age ≥ 48h • CM 0–3 • Battles ≥ 15 • Win ≥ 70%`<br>→ **`#1406` Scorpiomon** (Perfect): `Age ≥ 48h • CM ≥ 4 • Battles ≥ 15 • Win ≥ 70%` |
+| `#1304` | **Snimon** | Virus | `345HP / 82P` | Zurumon → Algomon Baby II → Algomon Child → Snimon | → **`#1405` Anomalocarimon** (Perfect): `Age ≥ 48h • CM 0–3 • Battles ≥ 15 • Win ≥ 70%`<br>→ **`#1420` Arachnemon** (Perfect): `Age ≥ 48h • CM ≥ 4 • Battles ≥ 15 • Win ≥ 70%` |
+| `#1305` | **Gokimon** | Virus | `330HP / 74P` | Zurumon → Algomon Baby II → Algomon Child → Gokimon | → **`#1434` Algomon Perfect** (Perfect): `Age ≥ 48h • CM 0–3 • Battles ≥ 15 • Win ≥ 70%`<br>→ **`#1401` Tonosama Gekomon** (Perfect): `Age ≥ 48h • CM ≥ 4 • Battles ≥ 15 • Win ≥ 70%` |
+| `#1306` | **Cockatrimon** | Data | `340HP / 76P` | Yuramon → Minomon Color → Pomumon → Cockatrimon | → **`#1427` Andiramon Deva** (Perfect): `Age ≥ 48h • CM 0–3 • Battles ≥ 15 • Win ≥ 70%`<br>→ **`#1407` Blossomon** (Perfect): `Age ≥ 48h • CM ≥ 4 • Battles ≥ 15 • Win ≥ 70%` |
+| `#1307` | **Kiwimon** | Data | `335HP / 75P` | Yuramon → Minomon Color → Pomumon → Kiwimon | → **`#1407` Blossomon** (Perfect): `Age ≥ 48h • CM 0–3 • Battles ≥ 15 • Win ≥ 70%`<br>→ **`#1425` Mihiramon** (Perfect): `Age ≥ 48h • CM ≥ 4 • Battles ≥ 15 • Win ≥ 70%` |
+| `#1308` | **Musyamon** | Virus | `360HP / 84P` | Zurumon → Algomon Baby II → Ghostmon → Musyamon | → **`#1408` Asuramon** (Perfect): `Age ≥ 48h • CM 0–3 • Battles ≥ 15 • Win ≥ 70%`<br>→ **`#1426` Vajramon** (Perfect): `Age ≥ 48h • CM ≥ 4 • Battles ≥ 15 • Win ≥ 70%` |
+| `#1309` | **Rukamon** | Vaccine | `350HP / 78P` | Punimon → Wanyamon → Gabumon X → Rukamon | → **`#1417` Mega Seadramon** (Perfect): `Age ≥ 48h • CM 0–3 • Battles ≥ 15 • Win ≥ 70%`<br>→ **`#1404` Hangyomon** (Perfect): `Age ≥ 48h • CM ≥ 4 • Battles ≥ 15 • Win ≥ 70%` |
+| `#1310` | **Agnimon** | Free | `370HP / 85P` | Botamon → Sakuttomon → Zubamon → Agnimon | → **`#1410` Vritramon** (Perfect): `Age ≥ 48h • CM 0–3 • Battles ≥ 15 • Win ≥ 70%`<br>→ **`#1411` Aldamon** (Perfect): `Age ≥ 48h • CM ≥ 4 • Battles ≥ 15 • Win ≥ 70%` |
+| `#1311` | **Wolfmon** | Free | `365HP / 84P` | Punimon → Wanyamon → Gabumon X → Wolfmon | → **`#1412` Beowolfmon** (Perfect): `Age ≥ 48h • CM 0–3 • Battles ≥ 15 • Win ≥ 70%`<br>→ **`#1433` Blizzarmon** (Perfect): `Age ≥ 48h • CM ≥ 4 • Battles ≥ 15 • Win ≥ 70%` |
+| `#1312` | **Fairimon** | Free | `340HP / 78P` | Botamon → Sakuttomon → Bokomon → Fairimon | → **`#1407` Blossomon** (Perfect): `Age ≥ 48h • CM 0–3 • Battles ≥ 15 • Win ≥ 70%`<br>→ **`#1427` Andiramon Deva** (Perfect): `Age ≥ 48h • CM ≥ 4 • Battles ≥ 15 • Win ≥ 70%` |
+| `#1313` | **Blitzmon** | Free | `375HP / 86P` | Nyokimon → Mochimon Color → KoKabuterimon → Blitzmon | → **`#1414` Raihimon** (Perfect): `Age ≥ 48h • CM 0–3 • Battles ≥ 15 • Win ≥ 70%`<br>→ **`#1430` Thunderballmon** (Perfect): `Age ≥ 48h • CM ≥ 4 • Battles ≥ 15 • Win ≥ 70%` |
+| `#1314` | **Chackmon** | Free | `350HP / 80P` | Poyomon → Chibimon → Paledramon → Chackmon | → **`#1433` Blizzarmon** (Perfect): `Age ≥ 48h • CM 0–3 • Battles ≥ 15 • Win ≥ 70%`<br>→ **`#1431` Crys Paledramon** (Perfect): `Age ≥ 48h • CM ≥ 4 • Battles ≥ 15 • Win ≥ 70%` |
+| `#1315` | **Duskmon** | Virus | `370HP / 88P` | Punimon → Wanyamon → Agumon (Black) X → Duskmon | → **`#1413` Velgrmon** (Perfect): `Age ≥ 48h • CM 0–3 • Battles ≥ 15 • Win ≥ 70%`<br>→ **`#1415` Fantomon** (Perfect): `Age ≥ 48h • CM ≥ 4 • Battles ≥ 15 • Win ≥ 70%` |
+| `#1316` | **Baboongamon** | Data | `365HP / 84P` | Pichimon → Bibimon → Sunarizamon → Baboongamon | → **`#1426` Vajramon** (Perfect): `Age ≥ 48h • CM 0–3 • Battles ≥ 15 • Win ≥ 70%`<br>→ **`#1425` Mihiramon** (Perfect): `Age ≥ 48h • CM ≥ 4 • Battles ≥ 15 • Win ≥ 70%` |
+| `#1317` | **Kaiser Leomon** | Free | `375HP / 87P` | Botamon → Sakuttomon → Liollmon → Kaiser Leomon | → **`#1414` Raihimon** (Perfect): `Age ≥ 48h • CM 0–3 • Battles ≥ 15 • Win ≥ 70%`<br>→ **`#1428` Cerberumon Werewolf Mode** (Perfect): `Age ≥ 48h • CM ≥ 4 • Battles ≥ 15 • Win ≥ 70%` |
+| `#1318` | **Aegiomon** | Vaccine | `360HP / 82P` | Botamon → Sakuttomon → Zubamon → Aegiomon | → **`#1409` Aegiochusmon** (Perfect): `Age ≥ 48h • CM 0–3 • Battles ≥ 15 • Win ≥ 70%`<br>→ **`#1422` Cerberumon** (Perfect): `Age ≥ 48h • CM ≥ 4 • Battles ≥ 15 • Win ≥ 70%` |
+| `#1319` | **Shadramon** | Free | `355HP / 84P` | Yuramon → Minomon Color → Morphomon → Shadramon | → **`#1410` Vritramon** (Perfect): `Age ≥ 48h • CM 0–3 • Battles ≥ 15 • Win ≥ 70%`<br>→ **`#1434` Algomon Perfect** (Perfect): `Age ≥ 48h • CM ≥ 4 • Battles ≥ 15 • Win ≥ 70%` |
+| `#1320` | **Flybeemon** | Free | `340HP / 80P` | Nyokimon → Mochimon Color → KoKabuterimon → Flybeemon | → **`#1405` Anomalocarimon** (Perfect): `Age ≥ 48h • CM 0–3 • Battles ≥ 15 • Win ≥ 70%`<br>→ **`#1420` Arachnemon** (Perfect): `Age ≥ 48h • CM ≥ 4 • Battles ≥ 15 • Win ≥ 70%` |
+| `#1321` | **Harpymon** | Free | `345HP / 81P` | Yuramon → Minomon Color → Morphomon → Harpymon | → **`#1427` Andiramon Deva** (Perfect): `Age ≥ 48h • CM 0–3 • Battles ≥ 15 • Win ≥ 70%`<br>→ **`#1408` Asuramon** (Perfect): `Age ≥ 48h • CM ≥ 4 • Battles ≥ 15 • Win ≥ 70%` |
+| `#1322` | **Manbomon** | Free | `350HP / 78P` | Mokumon → Babydmon → Sangomon → Manbomon | → **`#1403` Pukumon** (Perfect): `Age ≥ 48h • CM 0–3 • Battles ≥ 15 • Win ≥ 70%`<br>→ **`#1401` Tonosama Gekomon** (Perfect): `Age ≥ 48h • CM ≥ 4 • Battles ≥ 15 • Win ≥ 70%` |
+| `#1323` | **Pipismon** | Free | `335HP / 76P` | Zurumon → Algomon Baby II → Ghostmon → Pipismon | → **`#1415` Fantomon** (Perfect): `Age ≥ 48h • CM 0–3 • Battles ≥ 15 • Win ≥ 70%`<br>→ **`#1432` Metal Fantomon** (Perfect): `Age ≥ 48h • CM ≥ 4 • Battles ≥ 15 • Win ≥ 70%` |
+| `#1324` | **Baromon** | Free | `355HP / 83P` | Botamon → Sakuttomon → Bokomon → Baromon | → **`#1421` Lucemon Falldown Mode** (Perfect): `Age ≥ 48h • CM 0–3 • Battles ≥ 15 • Win ≥ 70%`<br>→ **`#1408` Asuramon** (Perfect): `Age ≥ 48h • CM ≥ 4 • Battles ≥ 15 • Win ≥ 70%` |
+| `#1325` | **Pteranomon** | Free | `350HP / 82P` | Poyomon → Chibimon → Dracomon X → Pteranomon | → **`#1419` Aero V-dramon** (Perfect): `Age ≥ 48h • CM 0–3 • Battles ≥ 15 • Win ≥ 70%`<br>→ **`#1417` Mega Seadramon** (Perfect): `Age ≥ 48h • CM ≥ 4 • Battles ≥ 15 • Win ≥ 70%` |
+| `#1326` | **Marin Bullmon** | Free | `360HP / 85P` | Mokumon → Babydmon → Sangomon → Marin Bullmon | → **`#1402` Dagomon** (Perfect): `Age ≥ 48h • CM 0–3 • Battles ≥ 15 • Win ≥ 70%`<br>→ **`#1416` Marin Devimon** (Perfect): `Age ≥ 48h • CM ≥ 4 • Battles ≥ 15 • Win ≥ 70%` |
+| `#1327` | **Kongoumon** | Free | `365HP / 84P` | Botamon → Sakuttomon → Zubamon → Kongoumon | → **`#1423` Duramon** (Perfect): `Age ≥ 48h • CM 0–3 • Battles ≥ 15 • Win ≥ 70%`<br>→ **`#1429` Justimon Blitz Arm** (Perfect): `Age ≥ 48h • CM ≥ 4 • Battles ≥ 15 • Win ≥ 70%` |
+| `#1328` | **Peacockmon** | Free | `345HP / 80P` | Botamon → Sakuttomon → Bokomon → Peacockmon | → **`#1425` Mihiramon** (Perfect): `Age ≥ 48h • CM 0–3 • Battles ≥ 15 • Win ≥ 70%`<br>→ **`#1427` Andiramon Deva** (Perfect): `Age ≥ 48h • CM ≥ 4 • Battles ≥ 15 • Win ≥ 70%` |
+| `#1329` | **Moosemon** | Free | `360HP / 82P` | Punimon → Wanyamon → Gabumon X → Moosemon | → **`#1433` Blizzarmon** (Perfect): `Age ≥ 48h • CM 0–3 • Battles ≥ 15 • Win ≥ 70%`<br>→ **`#1428` Cerberumon Werewolf Mode** (Perfect): `Age ≥ 48h • CM ≥ 4 • Battles ≥ 15 • Win ≥ 70%` |
+| `#1330` | **Fladramon** | Free | `370HP / 86P` | Poyomon → Chibimon → Dracomon X → Fladramon | → **`#1419` Aero V-dramon** (Perfect): `Age ≥ 48h • CM 0–3 • Battles ≥ 15 • Win ≥ 70%`<br>→ **`#1411` Aldamon** (Perfect): `Age ≥ 48h • CM ≥ 4 • Battles ≥ 15 • Win ≥ 70%` |
 
 ---
 
-## 🐾 Perfect Stage Digimon (77 Species)
+## 🐾 Perfect Stage Digimon (111 Species)
 
 | ID | Digimon | Attr | HP / PWR | Starter Egg Lineage Path | Evolves Into (Target & Exact Requirements) |
 | :---: | :--- | :---: | :---: | :--- | :--- |
@@ -316,10 +387,44 @@ You can hatch any of these **10 Starter Digi-Eggs** at any time from **Watch Set
 | `#475` | **Dinobeemon** | Free | `450HP / 133P` | Kuramon → DemiVeemon → Veemon → ExVeemon → Dinobeemon | → **`#506` Phoenixmon** (Ultimate): `Age ≥ 72h • CM 0–3 • Effort ≥ 3♥ • Battles ≥ 30 • Win ≥ 80%`<br>→ **`#512` Imperialdramon Dragon Mode** (Ultimate): `Age ≥ 72h • CM ≥ 4 • Battles ≥ 30 • Win ≥ 75%` |
 | `#476` | **SkullMeramon** | Data | `460HP / 133P` | Mokumon → Sunmon → Coronamon → Firamon → SkullMeramon | → **`#554` Chaosdramon** (Ultimate): `Age ≥ 72h • CM 0–3 • Effort ≥ 3♥ • Battles ≥ 30 • Win ≥ 80%`<br>→ **`#502` Machinedramon** (Ultimate): `Age ≥ 72h • CM ≥ 4 • Battles ≥ 30 • Win ≥ 75%` |
 | `#477` | **Cerberusmon** | Vaccine | `455HP / 132P` | Pichimon → Upamon → Loogamon → Dobermon → Cerberusmon | → **`#582` Beelzemon X** (Ultimate): `Age ≥ 72h • CM 0–3 • Effort ≥ 3♥ • Battles ≥ 30 • Win ≥ 80%`<br>→ **`#534` Barbamon** (Ultimate): `Age ≥ 72h • CM ≥ 4 • Battles ≥ 30 • Win ≥ 75%` |
+| `#1401` | **Tonosama Gekomon** | Virus | `480HP / 142P` | Zurumon → Algomon Baby II → Algomon Child → Gokimon → Tonosama Gekomon | → **`#1506` Bacchusmon** (Ultimate): `Age ≥ 72h • CM 0–3 • Effort ≥ 3♥ • Battles ≥ 30 • Win ≥ 80%`<br>→ **`#1530` Metal Etemon** (Ultimate): `Age ≥ 72h • CM ≥ 4 • Battles ≥ 30 • Win ≥ 75%` |
+| `#1402` | **Dagomon** | Virus | `510HP / 154P` | Mokumon → Babydmon → Sangomon → Marin Bullmon → Dagomon | → **`#1503` Neptunemon** (Ultimate): `Age ≥ 72h • CM 0–3 • Effort ≥ 3♥ • Battles ≥ 30 • Win ≥ 80%`<br>→ **`#1537` Ogudomon** (Ultimate): `Age ≥ 72h • CM ≥ 4 • Battles ≥ 30 • Win ≥ 75%` |
+| `#1403` | **Pukumon** | Virus | `490HP / 146P` | Mokumon → Babydmon → Sangomon → Manbomon → Pukumon | → **`#1521` Ancient Mermaimon** (Ultimate): `Age ≥ 72h • CM 0–3 • Effort ≥ 3♥ • Battles ≥ 30 • Win ≥ 80%`<br>→ **`#1503` Neptunemon** (Ultimate): `Age ≥ 72h • CM ≥ 4 • Battles ≥ 30 • Win ≥ 75%` |
+| `#1404` | **Hangyomon** | Data | `475HP / 140P` | Punimon → Wanyamon → Gabumon X → Rukamon → Hangyomon | → **`#1521` Ancient Mermaimon** (Ultimate): `Age ≥ 72h • CM 0–3 • Effort ≥ 3♥ • Battles ≥ 30 • Win ≥ 80%`<br>→ **`#1503` Neptunemon** (Ultimate): `Age ≥ 72h • CM ≥ 4 • Battles ≥ 30 • Win ≥ 75%` |
+| `#1405` | **Anomalocarimon** | Data | `495HP / 148P` | Zurumon → Algomon Baby II → Algomon Child → Snimon → Anomalocarimon | → **`#1503` Neptunemon** (Ultimate): `Age ≥ 72h • CM 0–3 • Effort ≥ 3♥ • Battles ≥ 30 • Win ≥ 80%`<br>→ **`#1527` Xuanwumon** (Ultimate): `Age ≥ 72h • CM ≥ 4 • Battles ≥ 30 • Win ≥ 75%` |
+| `#1406` | **Scorpiomon** | Data | `500HP / 150P` | Kuramon → Kakkinmon → Ludomon → Tortamon → Scorpiomon | → **`#1520` Ancient Troiamon** (Ultimate): `Age ≥ 72h • CM 0–3 • Effort ≥ 3♥ • Battles ≥ 30 • Win ≥ 80%`<br>→ **`#1545` Chaosdramon X** (Ultimate): `Age ≥ 72h • CM ≥ 4 • Battles ≥ 30 • Win ≥ 75%` |
+| `#1407` | **Blossomon** | Data | `485HP / 144P` | Botamon → Sakuttomon → Bokomon → Fairimon → Blossomon | → **`#1505` Ceresmon** (Ultimate): `Age ≥ 72h • CM 0–3 • Effort ≥ 3♥ • Battles ≥ 30 • Win ≥ 80%`<br>→ **`#1502` Minervamon** (Ultimate): `Age ≥ 72h • CM ≥ 4 • Battles ≥ 30 • Win ≥ 75%` |
+| `#1408` | **Asuramon** | Vaccine | `515HP / 156P` | Botamon → Sakuttomon → Bokomon → Baromon → Asuramon | → **`#1504` Vulcanusmon** (Ultimate): `Age ≥ 72h • CM 0–3 • Effort ≥ 3♥ • Battles ≥ 30 • Win ≥ 80%`<br>→ **`#1511` Titamon** (Ultimate): `Age ≥ 72h • CM ≥ 4 • Battles ≥ 30 • Win ≥ 75%` |
+| `#1409` | **Aegiochusmon** | Vaccine | `505HP / 152P` | Botamon → Sakuttomon → Zubamon → Aegiomon → Aegiochusmon | → **`#1507` Jupitermon** (Ultimate): `Age ≥ 72h • CM 0–3 • Effort ≥ 3♥ • Battles ≥ 30 • Win ≥ 80%`<br>→ **`#1501` Marsmon** (Ultimate): `Age ≥ 72h • CM ≥ 4 • Battles ≥ 30 • Win ≥ 75%` |
+| `#1410` | **Vritramon** | Free | `520HP / 158P` | Botamon → Sakuttomon → Zubamon → Agnimon → Vritramon | → **`#1513` Ancient Greymon** (Ultimate): `Age ≥ 72h • CM 0–3 • Effort ≥ 3♥ • Battles ≥ 30 • Win ≥ 80%`<br>→ **`#1519` Ancient Volcamon** (Ultimate): `Age ≥ 72h • CM ≥ 4 • Battles ≥ 30 • Win ≥ 75%` |
+| `#1411` | **Aldamon** | Free | `535HP / 164P` | Botamon → Sakuttomon → Zubamon → Agnimon → Aldamon | → **`#1523` Kaiser Greymon** (Ultimate): `Age ≥ 72h • CM 0–3 • Effort ≥ 3♥ • Battles ≥ 30 • Win ≥ 80%`<br>→ **`#1513` Ancient Greymon** (Ultimate): `Age ≥ 72h • CM ≥ 4 • Battles ≥ 30 • Win ≥ 75%` |
+| `#1412` | **Beowolfmon** | Free | `530HP / 162P` | Punimon → Wanyamon → Gabumon X → Wolfmon → Beowolfmon | → **`#1524` Magna Garurumon** (Ultimate): `Age ≥ 72h • CM 0–3 • Effort ≥ 3♥ • Battles ≥ 30 • Win ≥ 80%`<br>→ **`#1514` Ancient Garurumon** (Ultimate): `Age ≥ 72h • CM ≥ 4 • Battles ≥ 30 • Win ≥ 75%` |
+| `#1413` | **Velgrmon** | Virus | `525HP / 160P` | Punimon → Wanyamon → Agumon (Black) X → Duskmon → Velgrmon | → **`#1518` Ancient Sphinxmon** (Ultimate): `Age ≥ 72h • CM 0–3 • Effort ≥ 3♥ • Battles ≥ 30 • Win ≥ 80%`<br>→ **`#1509` Plutomon** (Ultimate): `Age ≥ 72h • CM ≥ 4 • Battles ≥ 30 • Win ≥ 75%` |
+| `#1414` | **Raihimon** | Free | `530HP / 163P` | Botamon → Sakuttomon → Liollmon → Kaiser Leomon → Raihimon | → **`#1515` Ancient Beatmon** (Ultimate): `Age ≥ 72h • CM 0–3 • Effort ≥ 3♥ • Battles ≥ 30 • Win ≥ 80%`<br>→ **`#1507` Jupitermon** (Ultimate): `Age ≥ 72h • CM ≥ 4 • Battles ≥ 30 • Win ≥ 75%` |
+| `#1415` | **Fantomon** | Virus | `480HP / 145P` | Punimon → Wanyamon → Agumon (Black) X → Duskmon → Fantomon | → **`#1533` Belial Vamdemon** (Ultimate): `Age ≥ 72h • CM 0–3 • Effort ≥ 3♥ • Battles ≥ 30 • Win ≥ 80%`<br>→ **`#1534` Venom Vamdemon** (Ultimate): `Age ≥ 72h • CM ≥ 4 • Battles ≥ 30 • Win ≥ 75%` |
+| `#1416` | **Marin Devimon** | Virus | `505HP / 152P` | Mokumon → Babydmon → Sangomon → Marin Bullmon → Marin Devimon | → **`#1503` Neptunemon** (Ultimate): `Age ≥ 72h • CM 0–3 • Effort ≥ 3♥ • Battles ≥ 30 • Win ≥ 80%`<br>→ **`#1509` Plutomon** (Ultimate): `Age ≥ 72h • CM ≥ 4 • Battles ≥ 30 • Win ≥ 75%` |
+| `#1417` | **Mega Seadramon** | Data | `510HP / 155P` | Punimon → Wanyamon → Gabumon X → Rukamon → Mega Seadramon | → **`#1535` Aegisdramon** (Ultimate): `Age ≥ 72h • CM 0–3 • Effort ≥ 3♥ • Battles ≥ 30 • Win ≥ 80%`<br>→ **`#1526` Qinglongmon** (Ultimate): `Age ≥ 72h • CM ≥ 4 • Battles ≥ 30 • Win ≥ 75%` |
+| `#1418` | **Waru Seadramon** | Virus | `515HP / 156P` | Punimon → Wanyamon → Agumon (Black) X → Darklizamon → Waru Seadramon | → **`#1535` Aegisdramon** (Ultimate): `Age ≥ 72h • CM 0–3 • Effort ≥ 3♥ • Battles ≥ 30 • Win ≥ 80%`<br>→ **`#1545` Chaosdramon X** (Ultimate): `Age ≥ 72h • CM ≥ 4 • Battles ≥ 30 • Win ≥ 75%` |
+| `#1419` | **Aero V-dramon** | Vaccine | `480HP / 145P` | Poyomon → Chibimon → Dracomon X → Fladramon → Aero V-dramon | → **`#1540` Dynasmon X** (Ultimate): `Age ≥ 72h • CM 0–3 • Effort ≥ 3♥ • Battles ≥ 30 • Win ≥ 80%`<br>→ **`#1544` Magnamon X** (Ultimate): `Age ≥ 72h • CM ≥ 4 • Battles ≥ 30 • Win ≥ 75%` |
+| `#1420` | **Arachnemon** | Virus | `460HP / 140P` | Punimon → Wanyamon → Agumon (Black) X → Deltamon → Arachnemon | → **`#1508` Junomon** (Ultimate): `Age ≥ 72h • CM 0–3 • Effort ≥ 3♥ • Battles ≥ 30 • Win ≥ 80%`<br>→ **`#1537` Ogudomon** (Ultimate): `Age ≥ 72h • CM ≥ 4 • Battles ≥ 30 • Win ≥ 75%` |
+| `#1421` | **Lucemon Falldown Mode** | Virus | `545HP / 168P` | Botamon → Sakuttomon → Bokomon → Baromon → Lucemon Falldown Mode | → **`#1537` Ogudomon** (Ultimate): `Age ≥ 72h • CM 0–3 • Effort ≥ 3♥ • Battles ≥ 30 • Win ≥ 80%`<br>→ **`#1536` Belphemon Rage Mode** (Ultimate): `Age ≥ 72h • CM ≥ 4 • Battles ≥ 30 • Win ≥ 75%` |
+| `#1422` | **Cerberumon** | Vaccine | `490HP / 148P` | Botamon → Sakuttomon → Zubamon → Aegiomon → Cerberumon | → **`#1509` Plutomon** (Ultimate): `Age ≥ 72h • CM 0–3 • Effort ≥ 3♥ • Battles ≥ 30 • Win ≥ 80%`<br>→ **`#1518` Ancient Sphinxmon** (Ultimate): `Age ≥ 72h • CM ≥ 4 • Battles ≥ 30 • Win ≥ 75%` |
+| `#1423` | **Duramon** | Vaccine | `485HP / 144P` | Botamon → Sakuttomon → Zubamon → Kongoumon → Duramon | → **`#1538` Jesmon X** (Ultimate): `Age ≥ 72h • CM 0–3 • Effort ≥ 3♥ • Battles ≥ 30 • Win ≥ 80%`<br>→ **`#1539` Gankoomon X** (Ultimate): `Age ≥ 72h • CM ≥ 4 • Battles ≥ 30 • Win ≥ 75%` |
+| `#1424` | **Mephismon** | Virus | `510HP / 154P` | Punimon → Wanyamon → Agumon (Black) X → Darklizamon → Mephismon | → **`#1533` Belial Vamdemon** (Ultimate): `Age ≥ 72h • CM 0–3 • Effort ≥ 3♥ • Battles ≥ 30 • Win ≥ 80%`<br>→ **`#1512` Apollomon Whispered** (Ultimate): `Age ≥ 72h • CM ≥ 4 • Battles ≥ 30 • Win ≥ 75%` |
+| `#1425` | **Mihiramon** | Data | `505HP / 152P` | Botamon → Sakuttomon → Bokomon → Peacockmon → Mihiramon | → **`#1525` Baihumon** (Ultimate): `Age ≥ 72h • CM 0–3 • Effort ≥ 3♥ • Battles ≥ 30 • Win ≥ 80%`<br>→ **`#1528` Zhuqiaomon** (Ultimate): `Age ≥ 72h • CM ≥ 4 • Battles ≥ 30 • Win ≥ 75%` |
+| `#1426` | **Vajramon** | Vaccine | `515HP / 156P` | Zurumon → Algomon Baby II → Ghostmon → Musyamon → Vajramon | → **`#1527` Xuanwumon** (Ultimate): `Age ≥ 72h • CM 0–3 • Effort ≥ 3♥ • Battles ≥ 30 • Win ≥ 80%`<br>→ **`#1529` Huanglongmon** (Ultimate): `Age ≥ 72h • CM ≥ 4 • Battles ≥ 30 • Win ≥ 75%` |
+| `#1427` | **Andiramon Deva** | Data | `510HP / 153P` | Botamon → Sakuttomon → Bokomon → Peacockmon → Andiramon Deva | → **`#1510` Venusmon** (Ultimate): `Age ≥ 72h • CM 0–3 • Effort ≥ 3♥ • Battles ≥ 30 • Win ≥ 80%`<br>→ **`#1516` Ancient Irismon** (Ultimate): `Age ≥ 72h • CM ≥ 4 • Battles ≥ 30 • Win ≥ 75%` |
+| `#1428` | **Cerberumon Werewolf Mode** | Vaccine | `520HP / 157P` | Botamon → Sakuttomon → Liollmon → Kaiser Leomon → Cerberumon Werewolf Mode | → **`#1509` Plutomon** (Ultimate): `Age ≥ 72h • CM 0–3 • Effort ≥ 3♥ • Battles ≥ 30 • Win ≥ 80%`<br>→ **`#1518` Ancient Sphinxmon** (Ultimate): `Age ≥ 72h • CM ≥ 4 • Battles ≥ 30 • Win ≥ 75%` |
+| `#1429` | **Justimon Blitz Arm** | Vaccine | `525HP / 160P` | Botamon → Sakuttomon → Zubamon → Kongoumon → Justimon Blitz Arm | → **`#1541` Craniummon X** (Ultimate): `Age ≥ 72h • CM 0–3 • Effort ≥ 3♥ • Battles ≥ 30 • Win ≥ 80%`<br>→ **`#1543` Duftmon X** (Ultimate): `Age ≥ 72h • CM ≥ 4 • Battles ≥ 30 • Win ≥ 75%` |
+| `#1430` | **Thunderballmon** | Data | `480HP / 142P` | Nyokimon → Mochimon Color → KoKabuterimon → Blitzmon → Thunderballmon | → **`#1515` Ancient Beatmon** (Ultimate): `Age ≥ 72h • CM 0–3 • Effort ≥ 3♥ • Battles ≥ 30 • Win ≥ 80%`<br>→ **`#1532` Ebemon** (Ultimate): `Age ≥ 72h • CM ≥ 4 • Battles ≥ 30 • Win ≥ 75%` |
+| `#1431` | **Crys Paledramon** | Data | `520HP / 158P` | Poyomon → Chibimon → Paledramon → Chackmon → Crys Paledramon | → **`#1517` Ancient Megatheriumon** (Ultimate): `Age ≥ 72h • CM 0–3 • Effort ≥ 3♥ • Battles ≥ 30 • Win ≥ 80%`<br>→ **`#1542` Sleipmon X** (Ultimate): `Age ≥ 72h • CM ≥ 4 • Battles ≥ 30 • Win ≥ 75%` |
+| `#1432` | **Metal Fantomon** | Virus | `515HP / 156P` | Zurumon → Algomon Baby II → Ghostmon → Pipismon → Metal Fantomon | → **`#1534` Venom Vamdemon** (Ultimate): `Age ≥ 72h • CM 0–3 • Effort ≥ 3♥ • Battles ≥ 30 • Win ≥ 80%`<br>→ **`#1531` King Etemon** (Ultimate): `Age ≥ 72h • CM ≥ 4 • Battles ≥ 30 • Win ≥ 75%` |
+| `#1433` | **Blizzarmon** | Free | `520HP / 156P` | Punimon → Wanyamon → Gabumon X → Wolfmon → Blizzarmon | → **`#1517` Ancient Megatheriumon** (Ultimate): `Age ≥ 72h • CM 0–3 • Effort ≥ 3♥ • Battles ≥ 30 • Win ≥ 80%`<br>→ **`#1514` Ancient Garurumon** (Ultimate): `Age ≥ 72h • CM ≥ 4 • Battles ≥ 30 • Win ≥ 75%` |
+| `#1434` | **Algomon Perfect** | Virus | `530HP / 162P` | Yuramon → Minomon Color → Morphomon → Shadramon → Algomon Perfect | → **`#1522` Ancient Wisemon** (Ultimate): `Age ≥ 72h • CM 0–3 • Effort ≥ 3♥ • Battles ≥ 30 • Win ≥ 80%`<br>→ **`#1537` Ogudomon** (Ultimate): `Age ≥ 72h • CM ≥ 4 • Battles ≥ 30 • Win ≥ 75%` |
 
 ---
 
-## 🐾 Ultimate Stage Digimon (92 Species)
+## 🐾 Ultimate Stage Digimon (137 Species)
 
 | ID | Digimon | Attr | HP / PWR | Starter Egg Lineage Path | Evolves Into (Target & Exact Requirements) |
 | :---: | :--- | :---: | :---: | :--- | :--- |
@@ -360,12 +465,12 @@ You can hatch any of these **10 Starter Digi-Eggs** at any time from **Watch Set
 | `#535` | **Omnimon Alter-S** | Virus | `680HP / 206P` | Punimon → Tsunomon → Gabumon → Garurumon → WereGarurumon → MetalGarurumon → Omnimon Alter-S | _Apex Form_ |
 | `#536` | **Omnimon Zwart** | Virus | `675HP / 204P` | Punimon → Chocomon → BlackGabumon → BlackGarurumon → BlackWereGarurumon → Omnimon Zwart | _Apex Form_ |
 | `#537` | **Mastemon** | Vaccine | `650HP / 196P` | Botamon → Koromon → Agumon → Devimon → LadyDevimon → Mastemon | _Apex Form_ |
-| `#538` | **Jesmon** | Data | `655HP / 198P` | Poyomon → Gummymon → Hackmon → BaoHackmon → SaviorHackmon → Jesmon | ⚡ **+#539 Gankoomon → #578 Jesmon GX** (DigiXros) |
-| `#539` | **Gankoomon** | Data | `650HP / 196P` | Poyomon → Gummymon → Hackmon → BaoHackmon → SaviorHackmon → Gankoomon | ⚡ **+#538 Jesmon → #578 Jesmon GX** (DigiXros) |
-| `#540` | **Dynasmon** | Data | `645HP / 194P` | Mokumon → Hopmon → Dracomon → Veedramon → AeroVeedramon → Dynasmon | _Apex Form_ |
-| `#541` | **LordKnightmon** | Virus | `645HP / 194P` | Poyomon → Moonmon → Bakumon → Sorcerymon → Knightmon → LordKnightmon | _Apex Form_ |
-| `#542` | **Craniummon** | Vaccine | `655HP / 198P` | Punimon → Tsunomon → Elecmon → Leomon → Giromon → Craniummon | _Apex Form_ |
-| `#543` | **Sleipmon** | Vaccine | `645HP / 194P` | Poyomon → Moonmon → Bakumon → Pegasusmon → Chirinmon → Sleipmon | _Apex Form_ |
+| `#538` | **Jesmon** | Data | `655HP / 198P` | Poyomon → Gummymon → Hackmon → BaoHackmon → SaviorHackmon → Jesmon | ⚡ **+#539 Gankoomon → #578 Jesmon GX** (DigiXros)<br>⚡ **+#1423 Duramon → #1538 Jesmon X** (Mode Change) |
+| `#539` | **Gankoomon** | Data | `650HP / 196P` | Poyomon → Gummymon → Hackmon → BaoHackmon → SaviorHackmon → Gankoomon | ⚡ **+#538 Jesmon → #578 Jesmon GX** (DigiXros)<br>⚡ **+#1408 Asuramon → #1539 Gankoomon X** (Mode Change) |
+| `#540` | **Dynasmon** | Data | `645HP / 194P` | Mokumon → Hopmon → Dracomon → Veedramon → AeroVeedramon → Dynasmon | ⚡ **+#1327 Kongoumon → #1541 Craniummon X** (Mode Change) |
+| `#541` | **LordKnightmon** | Virus | `645HP / 194P` | Poyomon → Moonmon → Bakumon → Sorcerymon → Knightmon → LordKnightmon | ⚡ **+#1419 Aero V-dramon → #1540 Dynasmon X** (Mode Change) |
+| `#542` | **Craniummon** | Vaccine | `655HP / 198P` | Punimon → Tsunomon → Elecmon → Leomon → Giromon → Craniummon | ⚡ **+#1433 Blizzarmon → #1542 Sleipmon X** (Mode Change) |
+| `#543` | **Sleipmon** | Vaccine | `645HP / 194P` | Poyomon → Moonmon → Bakumon → Pegasusmon → Chirinmon → Sleipmon | ⚡ **+#1317 Kaiser Leomon → #1543 Duftmon X** (Mode Change) |
 | `#544` | **Duftmon** | Data | `640HP / 192P` | Poyomon → Moonmon → Bakumon → Sorcerymon → Knightmon → Duftmon | _Apex Form_ |
 | `#545` | **Examon** | Data | `675HP / 205P` | Zurumon → Pagumon → Gazimon → Devidramon → Megadramon → Examon | _Apex Form_ |
 | `#546` | **Millenniummon** | Virus | `665HP / 200P` | Zurumon → Pagumon → Gazimon → Devidramon → Cyberdramon → Millenniummon | → **`#547` MoonMillenniummon** (Ultimate): `Battles ≥ 30 • Win ≥ 85%` |
@@ -415,12 +520,57 @@ You can hatch any of these **10 Starter Digi-Eggs** at any time from **Watch Set
 | `#590` | **MirageGaogamon Burst Mode** | Data | `710HP / 218P` | Nyokimon → Nyaromon → Gaomon → Gaogamon → MachGaogamon → MirageGaogamon Burst Mode | _Apex Form_ |
 | `#591` | **Beelzemon Blast Mode** | Virus | `725HP / 222P` | Pichimon → Upamon → Gazimon → Sangloupmon → Baalmon → Beelzemon Blast Mode | _Apex Form_ |
 | `#592` | **Omnimon Merciful Mode** | Vaccine | `740HP / 225P` | Botamon → Ketomon → Ryudamon → Ginryumon → Grademon → Omnimon Merciful Mode | _Apex Form_ |
+| `#1501` | **Marsmon** | Vaccine | `680HP / 210P` | Botamon → Sakuttomon → Zubamon → Aegiomon → Aegiochusmon → Marsmon | ⚡ **+#1504 Vulcanusmon → #1511 Titamon** (DNA Jogress) |
+| `#1502` | **Minervamon** | Virus | `675HP / 208P` | Botamon → Sakuttomon → Bokomon → Fairimon → Blossomon → Minervamon | _Apex Form_ |
+| `#1503` | **Neptunemon** | Vaccine | `685HP / 212P` | Punimon → Wanyamon → Gabumon X → Rukamon → Hangyomon → Neptunemon | ⚡ **+#1403 Pukumon → #1535 Aegisdramon** (DNA Jogress) |
+| `#1504` | **Vulcanusmon** | Data | `690HP / 214P` | Botamon → Sakuttomon → Bokomon → Baromon → Asuramon → Vulcanusmon | ⚡ **+#1501 Marsmon → #1511 Titamon** (DNA Jogress) |
+| `#1505` | **Ceresmon** | Data | `680HP / 209P` | Botamon → Sakuttomon → Bokomon → Fairimon → Blossomon → Ceresmon | ⚡ **+#1510 Venusmon → #565 GraceNovamon** (DNA Jogress) |
+| `#1506` | **Bacchusmon** | Virus | `670HP / 206P` | Zurumon → Algomon Baby II → Algomon Child → Gokimon → Tonosama Gekomon → Bacchusmon | _Apex Form_ |
+| `#1507` | **Jupitermon** | Vaccine | `710HP / 220P` | Botamon → Sakuttomon → Zubamon → Aegiomon → Aegiochusmon → Jupitermon | ⚡ **+#1508 Junomon → #1529 Huanglongmon** (DNA Jogress) |
+| `#1508` | **Junomon** | Virus | `700HP / 216P` | Punimon → Wanyamon → Agumon (Black) X → Deltamon → Arachnemon → Junomon | ⚡ **+#1507 Jupitermon → #1529 Huanglongmon** (DNA Jogress) |
+| `#1509` | **Plutomon** | Virus | `705HP / 218P` | Botamon → Sakuttomon → Zubamon → Aegiomon → Cerberumon → Plutomon | _Apex Form_ |
+| `#1510` | **Venusmon** | Vaccine | `660HP / 202P` | Botamon → Sakuttomon → Bokomon → Peacockmon → Andiramon Deva → Venusmon | ⚡ **+#1505 Ceresmon → #565 GraceNovamon** (DNA Jogress) |
+| `#1511` | **Titamon** | Virus | `715HP / 222P` | Botamon → Sakuttomon → Bokomon → Baromon → Asuramon → Titamon | _Apex Form_ |
+| `#1512` | **Apollomon Whispered** | Virus | `695HP / 215P` | Punimon → Wanyamon → Agumon (Black) X → Darklizamon → Mephismon → Apollomon Whispered | _Apex Form_ |
+| `#1513` | **Ancient Greymon** | Data | `710HP / 220P` | Botamon → Sakuttomon → Zubamon → Agnimon → Vritramon → Ancient Greymon | ⚡ **+#1514 Ancient Garurumon → #549 Susanoomon** (DNA Jogress)<br>⚡ **+#1411 Aldamon → #1523 Kaiser Greymon** (Mode Change) |
+| `#1514` | **Ancient Garurumon** | Data | `705HP / 218P` | Punimon → Wanyamon → Gabumon X → Wolfmon → Beowolfmon → Ancient Garurumon | ⚡ **+#1513 Ancient Greymon → #549 Susanoomon** (DNA Jogress) |
+| `#1515` | **Ancient Beatmon** | Vaccine | `700HP / 216P` | Botamon → Sakuttomon → Liollmon → Kaiser Leomon → Raihimon → Ancient Beatmon | _Apex Form_ |
+| `#1516` | **Ancient Irismon** | Vaccine | `680HP / 210P` | Botamon → Sakuttomon → Bokomon → Peacockmon → Andiramon Deva → Ancient Irismon | _Apex Form_ |
+| `#1517` | **Ancient Megatheriumon** | Data | `715HP / 222P` | Punimon → Wanyamon → Gabumon X → Wolfmon → Blizzarmon → Ancient Megatheriumon | _Apex Form_ |
+| `#1518` | **Ancient Sphinxmon** | Virus | `705HP / 218P` | Botamon → Sakuttomon → Zubamon → Aegiomon → Cerberumon → Ancient Sphinxmon | _Apex Form_ |
+| `#1519` | **Ancient Volcamon** | Data | `710HP / 220P` | Botamon → Sakuttomon → Zubamon → Agnimon → Vritramon → Ancient Volcamon | _Apex Form_ |
+| `#1520` | **Ancient Troiamon** | Data | `720HP / 224P` | Kuramon → Kakkinmon → Ludomon → Tortamon → Scorpiomon → Ancient Troiamon | _Apex Form_ |
+| `#1521` | **Ancient Mermaimon** | Data | `685HP / 212P` | Punimon → Wanyamon → Gabumon X → Rukamon → Hangyomon → Ancient Mermaimon | _Apex Form_ |
+| `#1522` | **Ancient Wisemon** | Virus | `690HP / 214P` | Yuramon → Minomon Color → Morphomon → Shadramon → Algomon Perfect → Ancient Wisemon | _Apex Form_ |
+| `#1523` | **Kaiser Greymon** | Free | `725HP / 225P` | Botamon → Sakuttomon → Zubamon → Agnimon → Aldamon → Kaiser Greymon | _Apex Form_ |
+| `#1524` | **Magna Garurumon** | Free | `720HP / 224P` | Punimon → Wanyamon → Gabumon X → Wolfmon → Beowolfmon → Magna Garurumon | _Apex Form_ |
+| `#1525` | **Baihumon** | Data | `715HP / 222P` | Botamon → Sakuttomon → Bokomon → Peacockmon → Mihiramon → Baihumon | ⚡ **+#1526 Qinglongmon → #1529 Huanglongmon** (DNA Jogress) |
+| `#1526` | **Qinglongmon** | Data | `720HP / 224P` | Punimon → Wanyamon → Gabumon X → Rukamon → Mega Seadramon → Qinglongmon | ⚡ **+#1525 Baihumon → #1529 Huanglongmon** (DNA Jogress) |
+| `#1527` | **Xuanwumon** | Virus | `730HP / 226P` | Zurumon → Algomon Baby II → Algomon Child → Snimon → Anomalocarimon → Xuanwumon | ⚡ **+#1528 Zhuqiaomon → #1529 Huanglongmon** (DNA Jogress) |
+| `#1528` | **Zhuqiaomon** | Virus | `715HP / 222P` | Botamon → Sakuttomon → Bokomon → Peacockmon → Mihiramon → Zhuqiaomon | ⚡ **+#1527 Xuanwumon → #1529 Huanglongmon** (DNA Jogress) |
+| `#1529` | **Huanglongmon** | Free | `750HP / 235P` | Zurumon → Algomon Baby II → Ghostmon → Musyamon → Vajramon → Huanglongmon | _Apex Form_ |
+| `#1530` | **Metal Etemon** | Virus | `665HP / 205P` | Zurumon → Algomon Baby II → Algomon Child → Gokimon → Tonosama Gekomon → Metal Etemon | _Apex Form_ |
+| `#1531` | **King Etemon** | Virus | `675HP / 208P` | Zurumon → Algomon Baby II → Ghostmon → Pipismon → Metal Fantomon → King Etemon | _Apex Form_ |
+| `#1532` | **Ebemon** | Virus | `660HP / 204P` | Nyokimon → Mochimon Color → KoKabuterimon → Blitzmon → Thunderballmon → Ebemon | _Apex Form_ |
+| `#1533` | **Belial Vamdemon** | Virus | `710HP / 220P` | Punimon → Wanyamon → Agumon (Black) X → Darklizamon → Mephismon → Belial Vamdemon | ⚡ **+#1534 Venom Vamdemon → #1537 Ogudomon** (DNA Jogress) |
+| `#1534` | **Venom Vamdemon** | Virus | `720HP / 223P` | Punimon → Wanyamon → Agumon (Black) X → Duskmon → Fantomon → Venom Vamdemon | ⚡ **+#1533 Belial Vamdemon → #1537 Ogudomon** (DNA Jogress) |
+| `#1535` | **Aegisdramon** | Vaccine | `680HP / 205P` | Punimon → Wanyamon → Gabumon X → Rukamon → Mega Seadramon → Aegisdramon | _Apex Form_ |
+| `#1536` | **Belphemon Rage Mode** | Virus | `730HP / 228P` | Botamon → Sakuttomon → Bokomon → Baromon → Lucemon Falldown Mode → Belphemon Rage Mode | ⚡ **+#1421 Lucemon Falldown Mode → #1537 Ogudomon** (DNA Jogress) |
+| `#1537` | **Ogudomon** | Virus | `745HP / 232P` | Botamon → Sakuttomon → Bokomon → Baromon → Lucemon Falldown Mode → Ogudomon | _Apex Form_ |
+| `#1538` | **Jesmon X** | Data | `725HP / 226P` | Botamon → Sakuttomon → Zubamon → Kongoumon → Duramon → Jesmon X | _Apex Form_ |
+| `#1539` | **Gankoomon X** | Data | `720HP / 224P` | Botamon → Sakuttomon → Zubamon → Kongoumon → Duramon → Gankoomon X | _Apex Form_ |
+| `#1540` | **Dynasmon X** | Data | `715HP / 222P` | Poyomon → Chibimon → Dracomon X → Fladramon → Aero V-dramon → Dynasmon X | _Apex Form_ |
+| `#1541` | **Craniummon X** | Vaccine | `720HP / 225P` | Botamon → Sakuttomon → Zubamon → Kongoumon → Justimon Blitz Arm → Craniummon X | _Apex Form_ |
+| `#1542` | **Sleipmon X** | Vaccine | `715HP / 222P` | Poyomon → Chibimon → Paledramon → Chackmon → Crys Paledramon → Sleipmon X | _Apex Form_ |
+| `#1543` | **Duftmon X** | Data | `710HP / 220P` | Botamon → Sakuttomon → Zubamon → Kongoumon → Justimon Blitz Arm → Duftmon X | _Apex Form_ |
+| `#1544` | **Magnamon X** | Free | `730HP / 228P` | Poyomon → Chibimon → Dracomon X → Fladramon → Aero V-dramon → Magnamon X | _Apex Form_ |
+| `#1545` | **Chaosdramon X** | Virus | `735HP / 230P` | Punimon → Wanyamon → Agumon (Black) X → Darklizamon → Waru Seadramon → Chaosdramon X | _Apex Form_ |
 
 ---
 
-## ⚡ DNA Digivolution, Mode Change & DigiXros Recipes (All 65 Combinations)
+## ⚡ DNA Digivolution, Mode Change & DigiXros Recipes (All 85 Combinations)
 
-Combine any two compatible Digimon via **Watch D-Com Battle Link**, **Phone Battle Command Center**, or **Phone DigiVault** to awaken these 65 special forms:
+Combine any two compatible Digimon via **Watch D-Com Battle Link**, **Phone Battle Command Center**, or **Phone DigiVault** to awaken these 85 special forms:
 
 | # | Primary Partner | Secondary Partner | Awakened Form | Fusion Type | Lore / Description |
 | :---: | :--- | :--- | :--- | :---: | :--- |
@@ -489,3 +639,23 @@ Combine any two compatible Digimon via **Watch D-Com Battle Link**, **Phone Batt
 | 63 | `#471` **Thetismon** | `#570` **MarineAngemon** | `#585` **Amphimon** | `DNA Jogress` | Thetismon and MarineAngemon synchronize deep sea virtue into Amphimon. |
 | 64 | `#472` **Soloogarmon** | `#460` **Astamon** | `#586` **Fenriloogamon** | `DNA Jogress` | Soloogarmon and Astamon ignite the demonic core into Fenriloogamon. |
 | 65 | `#467` **Boutmon** | `#374` **Bulkmon** | `#587` **Kazuchimon** | `DNA Jogress` | Boutmon and Bulkmon channel thunderous electricity into Kazuchimon. |
+| 66 | `#1507` **Jupitermon** | `#1508` **Junomon** | `#1529` **Huanglongmon** | `DNA Jogress` | King and Queen of Olympos harmonize sovereign divinity into Huanglongmon. |
+| 67 | `#1513` **Ancient Greymon** | `#1514` **Ancient Garurumon** | `#549` **Susanoomon** | `DNA Jogress` | Ten Ancient Warriors flame and light spirits unite into God of Destruction Susanoomon. |
+| 68 | `#1310` **Agnimon** | `#1410` **Vritramon** | `#1411` **Aldamon** | `Mode Change` | Human and Beast Spirits of Fire merge into Aldamon. |
+| 69 | `#1311` **Wolfmon** | `#1412` **Beowolfmon** | `#1524` **Magna Garurumon** | `Mode Change` | Human and Beast Spirits of Light merge into MagnaGarurumon. |
+| 70 | `#1411` **Aldamon** | `#1513` **Ancient Greymon** | `#1523` **Kaiser Greymon** | `Mode Change` | Emperor dragon spirits unify into KaiserGreymon. |
+| 71 | `#1315` **Duskmon** | `#1413` **Velgrmon** | `#1414` **Raihimon** | `Mode Change` | Corrupted darkness purified into the true Thunder-Light spirit Raihimon. |
+| 72 | `#1526` **Qinglongmon** | `#1525` **Baihumon** | `#1529` **Huanglongmon** | `DNA Jogress` | Eastern Azure Dragon and Western White Tiger harmonize into Central Golden Dragon Huanglongmon. |
+| 73 | `#1527` **Xuanwumon** | `#1528` **Zhuqiaomon** | `#1529` **Huanglongmon** | `DNA Jogress` | Northern Black Tortoise and Southern Vermilion Bird harmonize into Central Golden Dragon Huanglongmon. |
+| 74 | `#1533` **Belial Vamdemon** | `#1534` **Venom Vamdemon** | `#1537` **Ogudomon** | `DNA Jogress` | Abyssal vampire lords awaken the Super Demon Lord of Seven Sins Ogudomon. |
+| 75 | `#1421` **Lucemon Falldown Mode** | `#1536` **Belphemon Rage Mode** | `#1537` **Ogudomon** | `DNA Jogress` | Pride and Sloth converge into the Grand Super Demon Lord Ogudomon. |
+| 76 | `#1501` **Marsmon** | `#1504` **Vulcanusmon** | `#1511` **Titamon** | `DNA Jogress` | War and forge titan wrath fuse into One-Man Army Titamon. |
+| 77 | `#1510` **Venusmon** | `#1505` **Ceresmon** | `#565` **GraceNovamon** | `DNA Jogress` | Love and harvest grace radiate cosmic energy into GraceNovamon. |
+| 78 | `#1503` **Neptunemon** | `#1403` **Pukumon** | `#1535` **Aegisdramon** | `DNA Jogress` | Deep sea ocean king and golden puffer armor synthesize into Aegisdramon. |
+| 79 | `#1417` **Mega Seadramon** | `#1418` **Waru Seadramon** | `#1535` **Aegisdramon** | `DNA Jogress` | Light and dark sea dragon cybernetics unite into Aegisdramon. |
+| 80 | `#538` **Jesmon** | `#1423` **Duramon** | `#1538` **Jesmon X** | `Mode Change` | Jesmon assimilates the Legend-Arms blade core into Jesmon X. |
+| 81 | `#539` **Gankoomon** | `#1408` **Asuramon** | `#1539` **Gankoomon X** | `Mode Change` | Gankoomon manifests Hinukamuy's apex wrath into Gankoomon X. |
+| 82 | `#540` **Dynasmon** | `#1327` **Kongoumon** | `#1541` **Craniummon X** | `Mode Change` | Craniummon reinforces Black Digizoid with golden armor into Craniummon X. |
+| 83 | `#541` **LordKnightmon** | `#1419` **Aero V-dramon** | `#1540` **Dynasmon X** | `Mode Change` | Dynasmon unleashes dragon aura into Dynasmon X. |
+| 84 | `#542` **Craniummon** | `#1433` **Blizzarmon** | `#1542` **Sleipmon X** | `Mode Change` | Sleipmon arms six legs with glacial fortress armor into Sleipmon X. |
+| 85 | `#543` **Sleipmon** | `#1317` **Kaiser Leomon** | `#1543` **Duftmon X** | `Mode Change` | Duftmon adopts dark leonine strategist form into Duftmon X. |

@@ -1,4 +1,4 @@
-﻿package com.digiwear.core.engine
+package com.digiwear.core.engine
 
 import com.digiwear.core.model.EvolutionRule
 import com.digiwear.core.model.PetSpecies
@@ -15,7 +15,10 @@ object EvolutionEngine {
     /**
      * All 10 hatchable Baby I starter Digi-Eggs across the 205-species roster.
      */
-    val STARTER_EGG_IDS: List<Int> = listOf(101, 103, 105, 107, 109, 111, 113, 130, 131, 132)
+    val STARTER_EGG_IDS: List<Int> = listOf(
+        101, 103, 105, 107, 109, 111, 113, 130, 131, 132,
+        1101, 1104, 1106, 1108, 1111, 1113
+    )
 
     /**
      * Evaluates whether the current [state] qualifies for an evolutionary mutation.

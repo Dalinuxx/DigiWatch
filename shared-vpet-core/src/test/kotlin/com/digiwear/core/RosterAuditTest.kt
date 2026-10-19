@@ -33,13 +33,13 @@ class RosterAuditTest {
             assertTrue("Species ${sp.name} basePower must be > 0", sp.basePower > 0)
             assertTrue("Species ${sp.name} baselineWeight must be > 0", sp.baselineWeight > 0)
 
-            // Verify strict ID-to-stage range mapping across all 350 species
+            // Verify strict ID-to-stage range mapping across all 500 species
             when (sp.id) {
-                in 100..199 -> assertTrue("${sp.name} (${sp.id}) must be Baby", sp.stage == PetStage.BABY_I || sp.stage == PetStage.BABY_II)
-                in 200..299 -> assertEquals("${sp.name} (${sp.id}) must be Child", PetStage.CHILD, sp.stage)
-                in 300..399 -> assertEquals("${sp.name} (${sp.id}) must be Adult", PetStage.ADULT, sp.stage)
-                in 400..499 -> assertEquals("${sp.name} (${sp.id}) must be Perfect", PetStage.PERFECT, sp.stage)
-                in 500..599 -> assertEquals("${sp.name} (${sp.id}) must be Ultimate", PetStage.ULTIMATE, sp.stage)
+                in 100..199, in 1100..1199 -> assertTrue("${sp.name} (${sp.id}) must be Baby", sp.stage == PetStage.BABY_I || sp.stage == PetStage.BABY_II)
+                in 200..299, in 1200..1299 -> assertEquals("${sp.name} (${sp.id}) must be Child", PetStage.CHILD, sp.stage)
+                in 300..399, in 1300..1399 -> assertEquals("${sp.name} (${sp.id}) must be Adult", PetStage.ADULT, sp.stage)
+                in 400..499, in 1400..1499 -> assertEquals("${sp.name} (${sp.id}) must be Perfect", PetStage.PERFECT, sp.stage)
+                in 500..599, in 1500..1599 -> assertEquals("${sp.name} (${sp.id}) must be Ultimate", PetStage.ULTIMATE, sp.stage)
                 else -> throw AssertionError("Unknown ID range for species: ${sp.id} ${sp.name}")
             }
 
@@ -118,7 +118,7 @@ class RosterAuditTest {
     @Test
     fun auditDigimon0nl1neCompatibilityForAllSpecies() {
         val registry = PetSpecies.SPECIES_REGISTRY
-        assertEquals(350, registry.size)
+        assertEquals(500, registry.size)
 
         for (sp in registry.values) {
             // Guarantee 12-bit monster ID for Digimon 0nl1ne / D-Com wire packets (0x001..0xFFF)
@@ -169,7 +169,7 @@ class RosterAuditTest {
     }
 
     @Test
-    fun auditPerfectToUltimateRequirementsAndAll65JogressRecipes() {
+    fun auditPerfectToUltimateRequirementsAndAll85JogressRecipes() {
         val registry = PetSpecies.SPECIES_REGISTRY
         val perfectSpecies = registry.values.filter { it.stage == PetStage.PERFECT && it.evolutionRules.isNotEmpty() }
         assertTrue("Must have Perfect species with evolution rules", perfectSpecies.isNotEmpty())
@@ -189,8 +189,8 @@ class RosterAuditTest {
             }
         }
 
-        // Verify all 65 Jogress / DigiXros / Mode Change recipes reference valid species
-        assertEquals(65, JogressEngine.RECIPES.size)
+        // Verify all 86 Jogress / DigiXros / Mode Change recipes reference valid species
+        assertEquals(85, JogressEngine.RECIPES.size)
         for (recipe in JogressEngine.RECIPES) {
             assertTrue("Missing primary species ${recipe.primarySpeciesId}", registry.containsKey(recipe.primarySpeciesId))
             assertTrue("Missing secondary species ${recipe.secondarySpeciesId}", registry.containsKey(recipe.secondarySpeciesId))
@@ -213,7 +213,7 @@ class RosterAuditTest {
             }
         }
         assertTrue(
-            "All 350 species must be reachable from the 10 starter eggs! Unreachable: $unreachableSpecies",
+            "All 500 species must be reachable from the 16 starter eggs! Unreachable: $unreachableSpecies",
             unreachableSpecies.isEmpty()
         )
 
@@ -283,18 +283,18 @@ class RosterAuditTest {
 
         val sb = StringBuilder()
 
-        sb.appendLine("# 🧬 DigiWear Official Visual Sprite Sheet Digivolution & DNA Jogress Guide (350 Species)")
+        sb.appendLine("# 🧬 DigiWear Official Visual Sprite Sheet Digivolution & DNA Jogress Guide (500 Species)")
         sb.appendLine()
         sb.appendLine("> **100% Complete & Mathematically Verified Lineage Chart + Full Pixel-Art Sprite Sheets**")
-        sb.appendLine("> Every single one of the **350 Digimon** in DigiWear is naturally reachable from the **10 Starter Digi-Eggs** via canonical Bandai 1997 V-Pet, Digimon Pendulum, and Digimon Color evolution rules, or via **65 DNA Jogress / DigiXros / Mode Change** combinations.")
+        sb.appendLine("> Every single one of the **500 Digimon** in DigiWear is naturally reachable from the **16 Starter Digi-Eggs** via canonical Bandai 1997 V-Pet, Digimon Pendulum, and Digimon Color evolution rules, or via **86 DNA Jogress / DigiXros / Mode Change** combinations.")
         sb.appendLine()
-        sb.appendLine("## 🖼️ Visual Sprite Sheet Evolution Chart & Master 350-Species Roster")
+        sb.appendLine("## 🖼️ Visual Sprite Sheet Evolution Chart & Master 500-Species Roster")
         sb.appendLine()
         sb.appendLine("### 1. Full Visual Sprite Sheet Evolution & DNA Jogress Guide Poster")
         sb.appendLine("![DigiWear Full Sprite Sheet Evolution Guide](docs/digiwear_evolution_guide_chart.png)")
         sb.appendLine()
-        sb.appendLine("### 2. Complete 350-Species Master Pixel-Art Sprite Sheet")
-        sb.appendLine("![DigiWear 350-Species Master Roster Sprite Sheet](docs/digiwear_roster_spritesheet.png)")
+        sb.appendLine("### 2. Complete 500-Species Master Pixel-Art Sprite Sheet")
+        sb.appendLine("![DigiWear 500-Species Master Roster Sprite Sheet](docs/digiwear_roster_spritesheet.png)")
         sb.appendLine()
         sb.appendLine("## 📊 Roster & Evolution Summary")
         sb.appendLine()
@@ -472,7 +472,7 @@ class RosterAuditTest {
         g.fillRoundRect(10, 8, width - 20, 54, 12, 12)
         g.color = java.awt.Color(0x00, 0xE5, 0xFF)
         g.font = java.awt.Font(java.awt.Font.MONOSPACED, java.awt.Font.BOLD, 20)
-        g.drawString("DIGIWEAR v2.0 — COMPLETE 350-SPECIES FULL-COLOR PIXEL ART ROSTER", 24, 34)
+        g.drawString("DIGIWEAR v2.0 — COMPLETE 500-SPECIES FULL-COLOR PIXEL ART ROSTER", 24, 34)
         g.color = java.awt.Color(0xB0, 0xBE, 0xC5)
         g.font = java.awt.Font(java.awt.Font.MONOSPACED, java.awt.Font.PLAIN, 12)
         g.drawString("16x16 Multi-Tone Bandai Color Palettes • Cyan = Vaccine • Gold = Data • Crimson = Virus • Emerald = Free", 24, 53)
@@ -552,19 +552,19 @@ class RosterAuditTest {
         g.color = java.awt.Color(0x00, 0xE5, 0xFF)
         g.drawRoundRect(16, 12, width - 32, 68, 14, 14)
         g.font = java.awt.Font(java.awt.Font.MONOSPACED, java.awt.Font.BOLD, 24)
-        g.drawString("DIGIWEAR v2.0 — VISUAL SPRITE SHEET DIGIVOLUTION & DNA JOGRESS GUIDE (ALL 350 SPECIES)", 32, 42)
+        g.drawString("DIGIWEAR v2.0 — VISUAL SPRITE SHEET DIGIVOLUTION & DNA JOGRESS GUIDE (ALL 500 SPECIES)", 32, 42)
         g.color = java.awt.Color(0xCF, 0xD8, 0xDC)
         g.font = java.awt.Font(java.awt.Font.MONOSPACED, java.awt.Font.PLAIN, 13)
-        g.drawString("100% Reachable from 10 Starter Eggs • Key: Age = Min Time in Stage | CM = Care Mistakes | ♥ = Effort Hearts (0-4) | W = Min Battles & Win% | G = Weight", 32, 66)
+        g.drawString("100% Reachable from 16 Starter Eggs • Key: Age = Min Time in Stage | CM = Care Mistakes | ♥ = Effort Hearts (0-4) | W = Min Battles & Win% | G = Weight", 32, 66)
 
         // =========================================================================
-        // SECTION 1: THE 10 STARTER DIGI-EGGS (BABY I ──▶ BABY II ──▶ CHILD ROOKIES)
+        // SECTION 1: THE 16 STARTER DIGI-EGGS (BABY I ──▶ BABY II ──▶ CHILD ROOKIES)
         // =========================================================================
         g.color = java.awt.Color(0x1E, 0x29, 0x3B)
         g.fillRoundRect(16, section1Y, width - 32, 36, 10, 10)
         g.color = java.awt.Color(0xFF, 0xD5, 0x4F)
         g.font = java.awt.Font(java.awt.Font.MONOSPACED, java.awt.Font.BOLD, 16)
-        g.drawString("🥚 PART 1: THE 10 STARTER DIGI-EGG FAMILIES (BABY I ──10m──▶ BABY II ──6h──▶ CHILD ROOKIE BRANCHES)", 30, section1Y + 24)
+        g.drawString("🥚 PART 1: THE 16 STARTER DIGI-EGG FAMILIES (BABY I ──10m──▶ BABY II ──6h──▶ CHILD ROOKIE BRANCHES)", 30, section1Y + 24)
 
         starterEggs.forEachIndexed { idx, eggId ->
             val rowY = section1Y + 44 + idx * 72

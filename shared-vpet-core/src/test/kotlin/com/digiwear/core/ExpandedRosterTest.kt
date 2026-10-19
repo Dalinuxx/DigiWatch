@@ -1,4 +1,4 @@
-﻿package com.digiwear.core
+package com.digiwear.core
 
 import com.digiwear.core.codec.CommCodeCodec
 import com.digiwear.core.fusion.JogressEngine
@@ -15,9 +15,9 @@ class ExpandedRosterTest {
 
     @Test
     fun expandedIdsAreUniqueAndNeverCollideWithBaseRoster() {
-        assertEquals(185, ExpandedRoster.SPECIES.size)
-        assertEquals(185, expandedIds.size)
-        assertEquals(350, PetSpecies.SPECIES_REGISTRY.size)
+        assertEquals(335, ExpandedRoster.SPECIES.size)
+        assertEquals(335, expandedIds.size)
+        assertEquals(500, PetSpecies.SPECIES_REGISTRY.size)
     }
 
     @Test
@@ -39,7 +39,7 @@ class ExpandedRosterTest {
     @Test
     fun everyExpandedSpeciesIsReachableFromAStarterEgg() {
         val reachable = mutableSetOf<Int>()
-        val queue = ArrayDeque(listOf(101, 103, 105, 107, 109, 111, 113, 130, 131, 132))
+        val queue = ArrayDeque(com.digiwear.core.engine.EvolutionEngine.STARTER_EGG_IDS)
         while (queue.isNotEmpty()) {
             val id = queue.removeFirst()
             if (reachable.add(id)) {

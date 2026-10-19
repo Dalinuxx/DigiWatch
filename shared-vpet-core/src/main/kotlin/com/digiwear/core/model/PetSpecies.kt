@@ -1,4 +1,4 @@
-﻿package com.digiwear.core.model
+package com.digiwear.core.model
 
 import kotlinx.serialization.Serializable
 
@@ -35,6 +35,7 @@ data class PetSpecies(
                     spriteKey = "botamon",
                     evolutionRules = listOf(
                         EvolutionRule(targetSpeciesId = 129, minAgeSeconds = 3600L, minCareMistakes = 0, maxCareMistakes = 1, minEffort = 2), // Ketomon
+                        EvolutionRule(targetSpeciesId = 1103, minAgeSeconds = 3600L, minCareMistakes = 0, maxCareMistakes = 2, minEffort = 0), // Sakuttomon
                         EvolutionRule(targetSpeciesId = 102, minAgeSeconds = 3600L) // 1 hr -> Koromon
                     )
                 ),
@@ -49,6 +50,7 @@ data class PetSpecies(
                     spriteKey = "punimon",
                     evolutionRules = listOf(
                         EvolutionRule(targetSpeciesId = 118, minAgeSeconds = 3600L, minCareMistakes = 0, maxCareMistakes = 1, minEffort = 2), // Chocomon
+                        EvolutionRule(targetSpeciesId = 1110, minAgeSeconds = 3600L, minCareMistakes = 0, maxCareMistakes = 2, minEffort = 0), // Wanyamon
                         EvolutionRule(targetSpeciesId = 104, minAgeSeconds = 3600L) // 1 hr -> Tsunomon
                     )
                 ),
@@ -64,6 +66,7 @@ data class PetSpecies(
                     evolutionRules = listOf(
                         EvolutionRule(targetSpeciesId = 128, minAgeSeconds = 3600L, minCareMistakes = 0, maxCareMistakes = 0, minEffort = 3), // Moonmon
                         EvolutionRule(targetSpeciesId = 117, minAgeSeconds = 3600L, minCareMistakes = 0, maxCareMistakes = 1, minEffort = 2), // Gummymon
+                        EvolutionRule(targetSpeciesId = 1105, minAgeSeconds = 3600L, minCareMistakes = 0, maxCareMistakes = 2, minEffort = 0), // Chibimon
                         EvolutionRule(targetSpeciesId = 106, minAgeSeconds = 3600L) // 1 hr -> Tokomon
                     )
                 ),
@@ -79,6 +82,7 @@ data class PetSpecies(
                     evolutionRules = listOf(
                         EvolutionRule(targetSpeciesId = 126, minAgeSeconds = 3600L, minCareMistakes = 0, maxCareMistakes = 0, minEffort = 3), // Minomon
                         EvolutionRule(targetSpeciesId = 116, minAgeSeconds = 3600L, minCareMistakes = 0, maxCareMistakes = 1, minEffort = 2), // Viximon
+                        EvolutionRule(targetSpeciesId = 1115, minAgeSeconds = 3600L, minCareMistakes = 0, maxCareMistakes = 2, minEffort = 0), // Minomon Color
                         EvolutionRule(targetSpeciesId = 108, minAgeSeconds = 3600L) // 1 hr -> Tanemon
                     )
                 ),
@@ -790,6 +794,7 @@ data class PetSpecies(
                     evolutionRules = listOf(
                         EvolutionRule(targetSpeciesId = 125, minAgeSeconds = 3600L, minCareMistakes = 0, maxCareMistakes = 0, minEffort = 3), // Kapurimon
                         EvolutionRule(targetSpeciesId = 119, minAgeSeconds = 3600L, minCareMistakes = 0, maxCareMistakes = 1, minEffort = 2), // Yaamon
+                        EvolutionRule(targetSpeciesId = 1107, minAgeSeconds = 3600L, minCareMistakes = 0, maxCareMistakes = 2, minEffort = 0), // Algomon Baby II
                         EvolutionRule(targetSpeciesId = 110, minAgeSeconds = 3600L) // Pagumon
                     )
                 ),
@@ -806,6 +811,7 @@ data class PetSpecies(
                         EvolutionRule(targetSpeciesId = 127, minAgeSeconds = 3600L, minCareMistakes = 0, maxCareMistakes = 0, minEffort = 3), // Sunmon
                         EvolutionRule(targetSpeciesId = 124, minAgeSeconds = 3600L, minCareMistakes = 0, maxCareMistakes = 1, minEffort = 2), // Hopmon
                         EvolutionRule(targetSpeciesId = 115, minAgeSeconds = 3600L, minCareMistakes = 0, maxCareMistakes = 2, minEffort = 1), // Gigimon
+                        EvolutionRule(targetSpeciesId = 1116, minAgeSeconds = 3600L, minCareMistakes = 0, maxCareMistakes = 2, minEffort = 0), // Babydmon
                         EvolutionRule(targetSpeciesId = 112, minAgeSeconds = 3600L) // DemiMeramon
                     )
                 ),
@@ -820,6 +826,7 @@ data class PetSpecies(
                     spriteKey = "kuramon",
                     evolutionRules = listOf(
                         EvolutionRule(targetSpeciesId = 123, minAgeSeconds = 3600L, minCareMistakes = 0, maxCareMistakes = 1, minEffort = 2), // Tsumemon
+                        EvolutionRule(targetSpeciesId = 1102, minAgeSeconds = 3600L, minCareMistakes = 0, maxCareMistakes = 2, minEffort = 0), // Kakkinmon
                         EvolutionRule(targetSpeciesId = 114, minAgeSeconds = 3600L) // DemiVeemon
                     )
                 ),

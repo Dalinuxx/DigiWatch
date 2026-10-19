@@ -1,4 +1,4 @@
-﻿package com.digiwear.core.render
+package com.digiwear.core.render
 
 import com.digiwear.core.model.PetSpecies
 import com.digiwear.core.model.SpriteFrame
@@ -13,8 +13,8 @@ class SpriteMatrixRegistryTest {
     private val validChars = setOf('.', '#', 'B', 'K', 'E', 'W', 'T', 'S', 'R', 'G', 'C')
 
     @Test
-    fun testAll350SpeciesHaveValidNonHollow16x16Matrices() {
-        assertEquals(350, PetSpecies.SPECIES_REGISTRY.size)
+    fun testAll500SpeciesHaveValidNonHollow16x16Matrices() {
+        assertEquals(500, PetSpecies.SPECIES_REGISTRY.size)
         for ((speciesId, species) in PetSpecies.SPECIES_REGISTRY) {
             val matrix = SpriteMatrixRegistry.getMatrix(speciesId, SpriteFrame.IDLE_A)
             assertEquals("Matrix row count for species $speciesId (${species.name}) must be 16", 16, matrix.size)
@@ -43,7 +43,7 @@ class SpriteMatrixRegistryTest {
     }
 
     @Test
-    fun testZeroDuplicateMatricesAcrossAll350Species() {
+    fun testZeroDuplicateMatricesAcrossAll500Species() {
         val seen = mutableMapOf<String, Int>()
         val duplicates = mutableListOf<String>()
         for ((speciesId, species) in PetSpecies.SPECIES_REGISTRY) {
@@ -58,11 +58,11 @@ class SpriteMatrixRegistryTest {
             println("DUPLICATES FOUND (${duplicates.size}):\n" + duplicates.joinToString("\n"))
         }
         assertTrue("Found ${duplicates.size} duplicate matrices:\n" + duplicates.joinToString("\n"), duplicates.isEmpty())
-        assertEquals(350, seen.size)
+        assertEquals(500, seen.size)
     }
 
     @Test
-    fun testZeroDuplicatePalettesAcrossAll350Species() {
+    fun testZeroDuplicatePalettesAcrossAll500Species() {
         val seen = mutableMapOf<SpritePalette, Int>()
         for ((speciesId, species) in PetSpecies.SPECIES_REGISTRY) {
             val palette = SpriteMatrixRegistry.getPalette(speciesId)
@@ -77,7 +77,7 @@ class SpriteMatrixRegistryTest {
             )
             seen[palette] = speciesId
         }
-        assertEquals(350, seen.size)
+        assertEquals(500, seen.size)
     }
 
     @Test
@@ -96,7 +96,7 @@ class SpriteMatrixRegistryTest {
     }
 
     @Test
-    fun testAmbientModeOprUnder15PercentForAll350Species() {
+    fun testAmbientModeOprUnder15PercentForAll500Species() {
         for ((speciesId, species) in PetSpecies.SPECIES_REGISTRY) {
             for (frame in SpriteFrame.entries) {
                 val opr = SpriteMatrixRegistry.calculateAmbientOpr(speciesId, frame)

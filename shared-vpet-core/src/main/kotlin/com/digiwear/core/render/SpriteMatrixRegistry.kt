@@ -1,4 +1,4 @@
-﻿package com.digiwear.core.render
+package com.digiwear.core.render
 
 import com.digiwear.core.model.SpriteFrame
 
@@ -4304,8 +4304,12 @@ object SpriteMatrixRegistry {
                 // Left-step stride: shift body 1px left if possible, lift left foot
                 val canShiftLeft = base.all { it.first() == '.' }
                 Array(16) { r ->
-                    val shifted = if (canShiftLeft) shiftRowLeft(base[r], 1) else base[r]
-                    if (r == 14) {
+                    val shifted = if (canShiftLeft) shiftRowLeft(base[r], 1) else {
+                        if (r in 1..12) shiftRowLeft(base[r], 1) else base[r]
+                    }
+                    if (r == 15) {
+                        ".." + shifted.substring(2)
+                    } else if (r == 14) {
                         shifted.substring(0, 8) + base[15].substring(8)
                     } else {
                         shifted
@@ -4316,8 +4320,12 @@ object SpriteMatrixRegistry {
                 // Right-step stride: shift body 1px right if possible, lift right foot
                 val canShiftRight = base.all { it.last() == '.' }
                 Array(16) { r ->
-                    val shifted = if (canShiftRight) shiftRowRight(base[r], 1) else base[r]
-                    if (r == 13 && r + 1 < 16) {
+                    val shifted = if (canShiftRight) shiftRowRight(base[r], 1) else {
+                        if (r in 1..12) shiftRowRight(base[r], 1) else base[r]
+                    }
+                    if (r == 15) {
+                        shifted.substring(0, 14) + ".."
+                    } else if (r == 13 && r + 1 < 16) {
                         base[r].substring(0, 8) + shifted.substring(8)
                     } else {
                         shifted
@@ -4853,7 +4861,7 @@ object SpriteMatrixRegistry {
             539 -> SpritePalette(SpritePalette.rgb(235, 238, 245), SpritePalette.rgb(185, 35, 45), SpritePalette.rgb(245, 195, 50), SpritePalette.rgb(0, 210, 255)) // Gankoomon: White coat + Crimson armor/aura + Gold Hinukamuy
             540 -> SpritePalette(SpritePalette.rgb(235, 238, 248), SpritePalette.rgb(115, 65, 175), SpritePalette.rgb(65, 195, 175), SpritePalette.rgb(245, 195, 55)) // Dynasmon: Pearl Wyvern armor + Royal Purple wings + Teal gems
             541 -> SpritePalette(SpritePalette.rgb(235, 105, 155), SpritePalette.rgb(245, 200, 65), SpritePalette.rgb(242, 245, 252), SpritePalette.rgb(185, 35, 75)) // LordKnightmon: Rose Pink armor + Gold ribbons/shield + Silver
-            542 -> SpritePalette(SpritePalette.rgb(95, 75, 145), SpritePalette.rgb(185, 195, 215), SpritePalette.rgb(65, 205, 235), SpritePalette.rgb(225, 40, 55)) // Craniummon: Black Digizoid Violet-Indigo + Silver + Cyan ClaÃ­omh Solais
+            542 -> SpritePalette(SpritePalette.rgb(95, 75, 145), SpritePalette.rgb(185, 195, 215), SpritePalette.rgb(65, 205, 235), SpritePalette.rgb(225, 40, 55)) // Craniummon: Black Digizoid Violet-Indigo + Silver + Cyan Claíomh Solais
             543 -> SpritePalette(SpritePalette.rgb(205, 35, 45), SpritePalette.rgb(245, 195, 50), SpritePalette.rgb(65, 185, 245), SpritePalette.rgb(255, 255, 255)) // Sleipmon: Red Digizoid centaur armor + Gold trim + Ice-Blue crossbow
             544 -> SpritePalette(SpritePalette.rgb(235, 240, 248), SpritePalette.rgb(205, 35, 45), SpritePalette.rgb(245, 195, 55), SpritePalette.rgb(55, 135, 225)) // Duftmon: White/Silver knight armor + Crimson wings + Leopard Gold
             545 -> SpritePalette(SpritePalette.rgb(215, 30, 45), SpritePalette.rgb(240, 245, 252), SpritePalette.rgb(45, 175, 165), SpritePalette.rgb(250, 205, 55)) // Examon: Dragon Emperor Crimson + White body + Caledfwlch Teal
