@@ -108,6 +108,12 @@ object DeterministicBattleSolver {
             }
 
             val remainingSecondHp = max(0, secondHp - finalDmgFirst)
+            val moveNameFirst = SignatureAttackRegistry.getAttackName(
+                speciesId = firstFighter.speciesId,
+                isCritical = isCritFirst,
+                attackType = attackTypeFirst
+            )
+
             turns.add(
                 BattleTurn(
                     round = round,
@@ -121,7 +127,8 @@ object DeterministicBattleSolver {
                     isCritical = isCritFirst,
                     attackType = attackTypeFirst,
                     hitRatePercent = if (firstIdx == 0) hitRateA else hitRateB,
-                    effectivePower = if (firstIdx == 0) effPowerA else effPowerB
+                    effectivePower = if (firstIdx == 0) effPowerA else effPowerB,
+                    moveName = moveNameFirst
                 )
             )
 
@@ -158,6 +165,12 @@ object DeterministicBattleSolver {
             val currentFirstHp = if (firstIdx == 0) hpA else hpB
             val remainingFirstHp = max(0, currentFirstHp - finalDmgSecond)
 
+            val moveNameSecond = SignatureAttackRegistry.getAttackName(
+                speciesId = secondFighter.speciesId,
+                isCritical = isCritSecond,
+                attackType = attackTypeSecond
+            )
+
             turns.add(
                 BattleTurn(
                     round = round,
@@ -171,7 +184,8 @@ object DeterministicBattleSolver {
                     isCritical = isCritSecond,
                     attackType = attackTypeSecond,
                     hitRatePercent = if (secondIdx == 0) hitRateA else hitRateB,
-                    effectivePower = if (secondIdx == 0) effPowerA else effPowerB
+                    effectivePower = if (secondIdx == 0) effPowerA else effPowerB,
+                    moveName = moveNameSecond
                 )
             )
 

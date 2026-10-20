@@ -19,6 +19,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -128,6 +129,7 @@ fun BattleScreen(
     val hubListState = rememberScalingLazyListState()
 
     var qteActive by remember { mutableStateOf(false) }
+    var turnFxProgress by remember { mutableFloatStateOf(0f) }
     var criticalBoostActive by remember { mutableStateOf(false) }
     var activeCutInSpeciesId by remember { mutableStateOf<Int?>(null) }
     var activeCutInTitle by remember { mutableStateOf("CRITICAL HIT") }
@@ -283,7 +285,10 @@ fun BattleScreen(
 
                     buzzerManager.playAttackImpactTone()
                     hapticManager.playAttackImpact()
-                    delay(700L)
+                    for (step in 1..8) {
+                        turnFxProgress = step / 8f
+                        delay(75L)
+                    }
                     i++
                 }
 
@@ -330,6 +335,18 @@ fun BattleScreen(
             contentAlignment = Alignment.Center
         ) {
             EnvironmentParticleCanvas(environmentEffect = activeEnvEffect)
+            if (currentTurn != null) {
+                val attackerSp = if (currentTurn.attackerIndex == 0) species else PetSpecies.getById(battleResult!!.fighterB.speciesId)
+                BattleClashFxCanvas(
+                    attackerIndex = currentTurn.attackerIndex,
+                    attribute = attackerSp.attribute,
+                    attackType = currentTurn.attackType,
+                    isCritical = currentTurn.isCritical,
+                    moveName = currentTurn.moveName,
+                    damage = currentTurn.damage,
+                    progress = turnFxProgress
+                )
+            }
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center,

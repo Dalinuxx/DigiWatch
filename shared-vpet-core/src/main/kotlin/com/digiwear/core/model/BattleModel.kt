@@ -1,4 +1,4 @@
-﻿package com.digiwear.core.model
+package com.digiwear.core.model
 
 import kotlinx.serialization.Serializable
 
@@ -79,7 +79,8 @@ data class BattleTurn(
     val isCritical: Boolean,
     val attackType: String = "SINGLE", // SINGLE, DOUBLE, MEGA_HIT
     val hitRatePercent: Int = 75,
-    val effectivePower: Int = damage
+    val effectivePower: Int = damage,
+    val moveName: String = ""
 )
 
 /**

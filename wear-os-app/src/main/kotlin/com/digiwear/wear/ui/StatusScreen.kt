@@ -1,4 +1,4 @@
-package com.digiwear.wear.ui
+﻿package com.digiwear.wear.ui
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border

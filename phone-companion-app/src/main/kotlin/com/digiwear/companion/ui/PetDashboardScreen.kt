@@ -1,4 +1,4 @@
-package com.digiwear.companion.ui
+﻿package com.digiwear.companion.ui
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
@@ -78,6 +78,7 @@ fun PetDashboardScreen(
     // Interactive V-Pet Brick Shell State
     var selectedShellIcon by remember { mutableIntStateOf(0) }
     var shellPreviewStance by remember { mutableIntStateOf(0) } // 0=IDLE, 1=WALK, 2=HAPPY, 3=ATTACK
+    var currentShellStyle by remember { mutableStateOf(DigiviceShellStyle.ORIGINAL_1997_GREY) }
 
     // Watch Settings State (100% parity with Watch SettingsScreen)
     var selectedTheme by remember { mutableStateOf(BackgroundTheme.CLASSIC_VPET_LCD) }
@@ -288,8 +289,45 @@ fun PetDashboardScreen(
 
         Spacer(modifier = Modifier.height(14.dp))
 
-        // Authentic 1997 Bandai Brick-Wall Casing & Interactive LCD Screen
+        // Digivice Shell Edition Selector Chips
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .horizontalScroll(rememberScrollState()),
+            horizontalArrangement = Arrangement.spacedBy(6.dp)
+        ) {
+            DigiviceShellStyle.entries.forEach { style ->
+                val isSel = currentShellStyle == style
+                Box(
+                    modifier = Modifier
+                        .background(
+                            if (isSel) style.borderColor.copy(alpha = 0.25f) else Color(0xFF141C24),
+                            RoundedCornerShape(8.dp)
+                        )
+                        .border(
+                            1.dp,
+                            if (isSel) style.borderColor else Color(0xFF263238),
+                            RoundedCornerShape(8.dp)
+                        )
+                        .clickable { currentShellStyle = style }
+                        .padding(horizontal = 8.dp, vertical = 4.dp)
+                ) {
+                    Text(
+                        text = style.shortName,
+                        fontSize = 9.sp,
+                        fontWeight = if (isSel) FontWeight.Black else FontWeight.Normal,
+                        color = if (isSel) style.borderColor else Color.Gray,
+                        fontFamily = FontFamily.Monospace
+                    )
+                }
+            }
+        }
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        // Authentic Bandai V-Pet & Digivice Shell Viewport
         VPetBrickShellFrame(
+            shellStyle = currentShellStyle,
             screenBgColor = Color(selectedTheme.primaryColorHex),
             selectedIconIndex = selectedShellIcon,
             statusLabel = "STANCE: ${stanceNames[shellPreviewStance]}",
@@ -1423,8 +1461,9 @@ fun PetDashboardScreen(
                     )
                 } else {
                     species.evolutionRules.forEach { rule ->
-                        val targetSpecies = PetSpecies.getById(rule.targetSpeciesId)
-                        val matches = EvolutionEngine.evaluateEvolution(petState)?.id == rule.targetSpeciesId
+                        val readiness = remember(petState, rule) { EvolutionEngine.evaluateConditionDetails(petState, rule) }
+                        val targetSpecies = readiness.targetSpecies
+                        val matches = readiness.overallMet
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -1467,10 +1506,31 @@ fun PetDashboardScreen(
                                         fontWeight = FontWeight.Bold,
                                         color = if (matches) Color(0xFF69F0AE) else Color.White
                                     )
+                                    Spacer(modifier = Modifier.height(3.dp))
+                                    Box(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .height(4.dp)
+                                            .background(Color(0xFF111720), RoundedCornerShape(2.dp))
+                                    ) {
+                                        Box(
+                                            modifier = Modifier
+                                                .fillMaxWidth(readiness.completionPercentage / 100f)
+                                                .height(4.dp)
+                                                .background(
+                                                    if (matches) Color(0xFF00E676) else Color(0xFFFFCA28),
+                                                    RoundedCornerShape(2.dp)
+                                                )
+                                        )
+                                    }
+                                    Spacer(modifier = Modifier.height(3.dp))
                                     Text(
-                                        text = EvolutionEngine.describeRule(rule),
-                                        fontSize = 9.5.sp,
-                                        color = Color(0xFFB0BEC5),
+                                        text = readiness.conditions.joinToString(" â€¢ ") { cond ->
+                                            val sym = if (cond.isMet) "âœ“" else "âœ—"
+                                            "$sym ${cond.label}: ${cond.current}/${cond.target}"
+                                        },
+                                        fontSize = 9.sp,
+                                        color = if (matches) Color(0xFF80CBC4) else Color(0xFF90A4AE),
                                         fontFamily = FontFamily.Monospace
                                     )
                                 }

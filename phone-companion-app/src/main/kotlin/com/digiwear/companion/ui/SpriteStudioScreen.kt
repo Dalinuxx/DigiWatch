@@ -32,6 +32,7 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -53,6 +54,7 @@ import androidx.compose.ui.unit.sp
 import com.digiwear.companion.data.PhoneDatabase
 import com.digiwear.companion.data.StoredDigimonEntity
 import com.digiwear.companion.data.SyncedPetEntity
+import com.digiwear.core.battle.SignatureAttackRegistry
 import com.digiwear.companion.datalayer.PhoneWearableManager
 import com.digiwear.companion.render.SpriteCanvasRenderer
 import com.digiwear.companion.widget.DigiWearAppWidgetProvider
@@ -290,6 +292,33 @@ fun SpriteStudioScreen(
                     Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                         StageBadge(selectedSpecies.stage.displayName)
                         AttributeBadge(selectedSpecies.attribute.displayName)
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(6.dp))
+                val signatureAttack = remember(selectedSpeciesId) { SignatureAttackRegistry.getAttackName(selectedSpeciesId) }
+                Surface(
+                    shape = RoundedCornerShape(8.dp),
+                    color = Color(0xFF131D2A),
+                    border = BorderStroke(1.dp, Color(0xFF2E4057)),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Row(
+                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                            Text("💥 SPECIAL MOVE:", fontSize = 9.sp, fontWeight = FontWeight.Bold, color = Color(0xFFFFB74D), fontFamily = FontFamily.Monospace)
+                            Text(signatureAttack, fontSize = 11.sp, fontWeight = FontWeight.Black, color = Color.White, fontFamily = FontFamily.Monospace)
+                        }
+                        val attrAdvantage = when (selectedSpecies.attribute.displayName.uppercase()) {
+                            "VACCINE" -> "STRONG VS VIRUS"
+                            "DATA" -> "STRONG VS VACCINE"
+                            "VIRUS" -> "STRONG VS DATA"
+                            else -> "NEUTRAL MATCHUP"
+                        }
+                        Text(attrAdvantage, fontSize = 8.sp, fontWeight = FontWeight.Bold, color = Color(0xFF80CBC4), fontFamily = FontFamily.Monospace)
                     }
                 }
 

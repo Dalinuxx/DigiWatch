@@ -1,4 +1,4 @@
-﻿package com.digiwear.companion.ui
+package com.digiwear.companion.ui
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
@@ -39,8 +39,8 @@ import com.digiwear.core.model.ElementalAttribute
 import com.digiwear.core.model.PetStage
 
 /**
- * Shared Bandai V-Pet (1997 Brick-Wall Casing / Digimon Color) & Cyber Digivice UI components
- * for the Phone Companion App.
+ * Shared Bandai V-Pet (1997 Brick-Wall Casing / Digimon Color / D-3 / D-Arc / Vital Bracelet)
+ * & Cyber Digivice UI components for the Phone Companion App.
  */
 object DigiWearPalette {
     val CyberBg = Color(0xFF0B0F17)
@@ -56,17 +56,103 @@ object DigiWearPalette {
     val ShellSteel = Color(0xFF263238)
 }
 
+enum class DigiviceShellStyle(
+    val id: String,
+    val displayName: String,
+    val shortName: String,
+    val shellGradient: List<Color>,
+    val borderColor: Color,
+    val buttonColors: Triple<Color, Color, Color>, // A, B, C buttons
+    val accentRivetColor: Color,
+    val lcdCageColor: Color,
+    val isBrickTextured: Boolean
+) {
+    ORIGINAL_1997_GREY(
+        id = "1997_grey",
+        displayName = "1997 Ver. 1 Classic Grey",
+        shortName = "1997 GREY",
+        shellGradient = listOf(Color(0xFF37474F), Color(0xFF263238), Color(0xFF1C262B)),
+        borderColor = Color(0xFF607D8B),
+        buttonColors = Triple(Color(0xFFFFCA28), Color(0xFF26A69A), Color(0xFFEF5350)),
+        accentRivetColor = Color(0xFF90A4AE),
+        lcdCageColor = Color(0xFF0D1412),
+        isBrickTextured = true
+    ),
+    ORIGINAL_1997_BROWN(
+        id = "1997_brown",
+        displayName = "1997 Ver. 1 Terracotta",
+        shortName = "1997 BROWN",
+        shellGradient = listOf(Color(0xFF4E342E), Color(0xFF3E2723), Color(0xFF271510)),
+        borderColor = Color(0xFF8D6E63),
+        buttonColors = Triple(Color(0xFFFFD54F), Color(0xFF81C784), Color(0xFFE57373)),
+        accentRivetColor = Color(0xFFD7CCC8),
+        lcdCageColor = Color(0xFF16120E),
+        isBrickTextured = true
+    ),
+    DIGIMON_COLOR_CLEAR(
+        id = "color_clear",
+        displayName = "Digimon Color Smoke Metal",
+        shortName = "DM COLOR",
+        shellGradient = listOf(Color(0xFF212529), Color(0xFF16191D), Color(0xFF0F1114)),
+        borderColor = Color(0xFFFFD700),
+        buttonColors = Triple(Color(0xFFFFD700), Color(0xFF00E5FF), Color(0xFFFF4081)),
+        accentRivetColor = Color(0xFFFFD700),
+        lcdCageColor = Color(0xFF080C0E),
+        isBrickTextured = false
+    ),
+    D3_DIGIVICE_BLUE(
+        id = "d3_blue",
+        displayName = "D-3 Daisuke Deep Blue",
+        shortName = "D-3 BLUE",
+        shellGradient = listOf(Color(0xFF0D47A1), Color(0xFF1565C0), Color(0xFF0A2472)),
+        borderColor = Color(0xFF80D8FF),
+        buttonColors = Triple(Color(0xFF00E5FF), Color(0xFFFFFFFF), Color(0xFFFF5252)),
+        accentRivetColor = Color(0xFF82B1FF),
+        lcdCageColor = Color(0xFF051124),
+        isBrickTextured = false
+    ),
+    D_ARC_SILVER(
+        id = "d_arc_silver",
+        displayName = "D-Arc Takato Crimson Alloy",
+        shortName = "D-ARC",
+        shellGradient = listOf(Color(0xFF78909C), Color(0xFF546E7A), Color(0xFF37474F)),
+        borderColor = Color(0xFFFF1744),
+        buttonColors = Triple(Color(0xFFFF1744), Color(0xFFB0BEC5), Color(0xFF263238)),
+        accentRivetColor = Color(0xFFFF1744),
+        lcdCageColor = Color(0xFF121920),
+        isBrickTextured = false
+    ),
+    VITAL_BRACELET_CYBER(
+        id = "vital_bracelet",
+        displayName = "Vital Bracelet BE Cyber Stealth",
+        shortName = "VITAL BE",
+        shellGradient = listOf(Color(0xFF121417), Color(0xFF0A0C0E), Color(0xFF050608)),
+        borderColor = Color(0xFF00E5FF),
+        buttonColors = Triple(Color(0xFF00E5FF), Color(0xFF00E676), Color(0xFFFF1744)),
+        accentRivetColor = Color(0xFF00E5FF),
+        lcdCageColor = Color(0xFF040608),
+        isBrickTextured = false
+    );
+
+    companion object {
+        fun fromId(id: String?): DigiviceShellStyle =
+            entries.firstOrNull { it.id.equals(id, ignoreCase = true) } ?: ORIGINAL_1997_GREY
+    }
+}
+
 private val TOP_VPET_ICONS = listOf(("⚖️" to "STAT"), ("🍖" to "FEED"), ("🥊" to "TRN"), ("⚔" to "BTL"))
 private val BOTTOM_VPET_ICONS = listOf(("💩" to "FLSH"), ("💡" to "LGT"), ("🩹" to "MED"), ("🚨" to "CALL"))
 
 /**
- * Authentic 1997 Bandai V-Pet Brick-Wall Casing & Recessed LCD Viewport.
+ * Authentic Bandai V-Pet & Digivice Shell Viewport.
+ * Supports authentic 1997 Brick-Wall, Digimon Color, D-3, D-Arc, and Vital Bracelet casings.
  * Includes top & bottom 4-icon LCD rails, dot-matrix screen grid, corner rivets,
  * and optional interactive [A] [B] [C] shell buttons.
  */
 @Composable
 fun VPetBrickShellFrame(
     modifier: Modifier = Modifier,
+    shellStyle: DigiviceShellStyle = DigiviceShellStyle.ORIGINAL_1997_GREY,
     screenBgColor: Color = DigiWearPalette.LcdSageBg,
     selectedIconIndex: Int = 0,
     statusLabel: String = "DM-COLOR // VER. 1-5",
@@ -76,56 +162,58 @@ fun VPetBrickShellFrame(
     screenHeight: Dp = 152.dp,
     content: @Composable BoxScope.() -> Unit
 ) {
-    // Outer Brick-Textured Bandai V-Pet Shell
+    // Outer Shell Container
     Box(
         modifier = modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(20.dp))
-            .background(
-                Brush.verticalGradient(
-                    colors = listOf(
-                        Color(0xFF37474F),
-                        Color(0xFF263238),
-                        Color(0xFF1C262B)
-                    )
-                )
-            )
-            .border(2.dp, Color(0xFF607D8B), RoundedCornerShape(20.dp))
+            .background(Brush.verticalGradient(colors = shellStyle.shellGradient))
+            .border(2.dp, shellStyle.borderColor, RoundedCornerShape(20.dp))
             .drawWithCache {
                 val brickColor = Color(0x22000000)
                 val highlightColor = Color(0x14FFFFFF)
+                val isBrick = shellStyle.isBrickTextured
                 onDrawBehind {
-                    // Subtle brick-wall mortar lines across the shell casing
-                    val rowH = 18.dp.toPx()
-                    val colW = 36.dp.toPx()
-                    var row = 0
-                    var y = 0f
-                    while (y < size.height) {
-                        drawLine(
-                            color = brickColor,
-                            start = Offset(0f, y),
-                            end = Offset(size.width, y),
-                            strokeWidth = 1.5f
-                        )
-                        drawLine(
-                            color = highlightColor,
-                            start = Offset(0f, y + 1.5f),
-                            end = Offset(size.width, y + 1.5f),
-                            strokeWidth = 1f
-                        )
-                        val xOffset = if (row % 2 == 0) 0f else colW / 2f
-                        var x = xOffset
-                        while (x < size.width) {
+                    if (isBrick) {
+                        // Subtle brick-wall mortar lines across the shell casing
+                        val rowH = 18.dp.toPx()
+                        val colW = 36.dp.toPx()
+                        var row = 0
+                        var y = 0f
+                        while (y < size.height) {
                             drawLine(
                                 color = brickColor,
-                                start = Offset(x, y),
-                                end = Offset(x, (y + rowH).coerceAtMost(size.height)),
+                                start = Offset(0f, y),
+                                end = Offset(size.width, y),
                                 strokeWidth = 1.5f
                             )
-                            x += colW
+                            drawLine(
+                                color = highlightColor,
+                                start = Offset(0f, y + 1.5f),
+                                end = Offset(size.width, y + 1.5f),
+                                strokeWidth = 1f
+                            )
+                            val xOffset = if (row % 2 == 0) 0f else colW / 2f
+                            var x = xOffset
+                            while (x < size.width) {
+                                drawLine(
+                                    color = brickColor,
+                                    start = Offset(x, y),
+                                    end = Offset(x, (y + rowH).coerceAtMost(size.height)),
+                                    strokeWidth = 1.5f
+                                )
+                                x += colW
+                            }
+                            y += rowH
+                            row++
                         }
-                        y += rowH
-                        row++
+                    } else {
+                        // High-tech cybernetic circuit trace lines in shell corners
+                        val traceColor = shellStyle.borderColor.copy(alpha = 0.25f)
+                        drawLine(traceColor, Offset(16f, 16f), Offset(60f, 16f), 1.5f)
+                        drawLine(traceColor, Offset(16f, 16f), Offset(16f, 60f), 1.5f)
+                        drawLine(traceColor, Offset(size.width - 16f, 16f), Offset(size.width - 60f, 16f), 1.5f)
+                        drawLine(traceColor, Offset(size.width - 16f, 16f), Offset(size.width - 16f, 60f), 1.5f)
                     }
                 }
             }
@@ -138,15 +226,15 @@ fun VPetBrickShellFrame(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                RivetDot()
+                RivetDot(color = shellStyle.accentRivetColor)
                 Text(
-                    text = "◈ DIGITAL MONSTER • $statusLabel ◈",
+                    text = "◈ ${shellStyle.shortName} • $statusLabel ◈",
                     fontSize = 10.sp,
                     fontWeight = FontWeight.Black,
                     color = DigiWearPalette.CrestGold,
                     fontFamily = FontFamily.Monospace
                 )
-                RivetDot()
+                RivetDot(color = shellStyle.accentRivetColor)
             }
 
             Spacer(modifier = Modifier.height(8.dp))
@@ -162,8 +250,8 @@ fun VPetBrickShellFrame(
                     modifier = Modifier
                         .weight(1f)
                         .clip(RoundedCornerShape(12.dp))
-                        .background(Color(0xFF0D1412))
-                        .border(2.dp, Color(0xFF455A64), RoundedCornerShape(12.dp))
+                        .background(shellStyle.lcdCageColor)
+                        .border(2.dp, shellStyle.borderColor.copy(alpha = 0.6f), RoundedCornerShape(12.dp))
                         .padding(6.dp)
                 ) {
                     // Top 4 V-Pet LCD Care Icons Rail
@@ -239,13 +327,14 @@ fun VPetBrickShellFrame(
 
                 // Right-Side Tactile [A] [B] [C] Bandai Buttons (when callbacks provided)
                 if (onButtonA != null && onButtonB != null && onButtonC != null) {
+                    val (btnAColor, btnBColor, btnCColor) = shellStyle.buttonColors
                     Column(
                         verticalArrangement = Arrangement.spacedBy(10.dp),
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
-                        ShellRoundButton(label = "A", sub = "SEL", color = Color(0xFFFFCA28), onClick = onButtonA)
-                        ShellRoundButton(label = "B", sub = "OK", color = Color(0xFF26A69A), onClick = onButtonB)
-                        ShellRoundButton(label = "C", sub = "ESC", color = Color(0xFFEF5350), onClick = onButtonC)
+                        ShellRoundButton(label = "A", sub = "SEL", color = btnAColor, onClick = onButtonA)
+                        ShellRoundButton(label = "B", sub = "OK", color = btnBColor, onClick = onButtonB)
+                        ShellRoundButton(label = "C", sub = "ESC", color = btnCColor, onClick = onButtonC)
                     }
                 }
             }
@@ -258,26 +347,26 @@ fun VPetBrickShellFrame(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                RivetDot()
+                RivetDot(color = shellStyle.accentRivetColor)
                 Text(
                     text = "D-COM / 0NL1NE LINK READY • 64x64 PX",
                     fontSize = 8.sp,
                     color = Color(0xFF90A4AE),
                     fontFamily = FontFamily.Monospace
                 )
-                RivetDot()
+                RivetDot(color = shellStyle.accentRivetColor)
             }
         }
     }
 }
 
 @Composable
-private fun RivetDot() {
+private fun RivetDot(color: Color = Color(0xFF546E7A)) {
     Box(
         modifier = Modifier
             .size(7.dp)
             .background(Color(0xFF151C20), CircleShape)
-            .border(1.dp, Color(0xFF546E7A), CircleShape)
+            .border(1.dp, color, CircleShape)
     )
 }
 

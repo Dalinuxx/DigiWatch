@@ -36,6 +36,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
 import com.digiwear.core.adventure.AdventureEngine
 import com.digiwear.core.battle.DeterministicBattleSolver
@@ -85,6 +86,7 @@ fun AdventureScreen(
     var isBattling by remember { mutableStateOf(false) }
     var qteActive by remember { mutableStateOf(false) }
     var criticalBoostActive by remember { mutableStateOf(false) }
+    var turnFxProgress by remember { mutableFloatStateOf(0f) }
     var activeCutInSpeciesId by remember { mutableStateOf<Int?>(null) }
     var activeCutInTitle by remember { mutableStateOf("CRITICAL HIT") }
     var encounterFlashEnemyId by remember { mutableStateOf<Int?>(null) }

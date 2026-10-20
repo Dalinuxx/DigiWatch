@@ -140,4 +140,101 @@ object EvolutionEngine {
         if (rule.minVitalPoints > 0) parts.add("Vitals ≥ ${rule.minVitalPoints} VP")
         return if (parts.isEmpty()) "Natural Ascension" else parts.joinToString(" • ")
     }
+
+    data class ConditionItem(
+        val label: String,
+        val current: String,
+        val target: String,
+        val isMet: Boolean
+    )
+
+    data class EvolutionReadiness(
+        val targetSpecies: PetSpecies,
+        val overallMet: Boolean,
+        val conditions: List<ConditionItem>,
+        val completionPercentage: Int
+    )
+
+    /**
+     * Evaluates a fine-grained, condition-by-condition telemetry checklist of [rule] against [state],
+     * returning specific numerical progress, completion percentage, and pass/fail status per parameter.
+     */
+    fun evaluateConditionDetails(state: PetState, rule: EvolutionRule): EvolutionReadiness {
+        val items = mutableListOf<ConditionItem>()
+        var metCount = 0
+        var totalCount = 0
+
+        if (rule.minAgeSeconds > 0L) {
+            totalCount++
+            val curH = state.ageSeconds / 3600L
+            val reqH = rule.minAgeSeconds / 3600L
+            val met = state.ageSeconds >= rule.minAgeSeconds
+            if (met) metCount++
+            items.add(ConditionItem("Age", "${curH}h", "${reqH}h", met))
+        }
+
+        if (rule.minCareMistakes > 0 || rule.maxCareMistakes < 999) {
+            totalCount++
+            val curCm = state.careMistakes
+            val met = curCm >= rule.minCareMistakes && curCm <= rule.maxCareMistakes
+            if (met) metCount++
+            val tgt = if (rule.maxCareMistakes >= 999) "≥${rule.minCareMistakes}" else "${rule.minCareMistakes}–${rule.maxCareMistakes}"
+            items.add(ConditionItem("Care Mistakes", "$curCm", tgt, met))
+        }
+
+        if (rule.minEffort > 0) {
+            totalCount++
+            val met = state.effort >= rule.minEffort
+            if (met) metCount++
+            items.add(ConditionItem("Effort", "${state.effort}★", "≥${rule.minEffort}★", met))
+        }
+
+        if (rule.minBattles > 0) {
+            totalCount++
+            val met = state.totalBattles >= rule.minBattles
+            if (met) metCount++
+            items.add(ConditionItem("Battles", "${state.totalBattles}", "≥${rule.minBattles}", met))
+        }
+
+        if (rule.minWinRatio > 0f) {
+            totalCount++
+            val curWin = (state.winRatio * 100).toInt()
+            val reqWin = (rule.minWinRatio * 100).toInt()
+            val met = state.winRatio >= rule.minWinRatio
+            if (met) metCount++
+            items.add(ConditionItem("Win Ratio", "$curWin%", "≥$reqWin%", met))
+        }
+
+        if (rule.minOverfeed > 0) {
+            totalCount++
+            val met = state.overfeedCount >= rule.minOverfeed
+            if (met) metCount++
+            items.add(ConditionItem("Overfeed", "${state.overfeedCount}", "≥${rule.minOverfeed}", met))
+        }
+
+        if (rule.minWeight > 0) {
+            totalCount++
+            val met = state.weight >= rule.minWeight
+            if (met) metCount++
+            items.add(ConditionItem("Weight", "${state.weight}g", "≥${rule.minWeight}g", met))
+        }
+
+        if (rule.minVitalPoints > 0) {
+            totalCount++
+            val met = state.vitalPoints >= rule.minVitalPoints
+            if (met) metCount++
+            items.add(ConditionItem("Vital Points", "${state.vitalPoints} VP", "≥${rule.minVitalPoints} VP", met))
+        }
+
+        val pct = if (totalCount == 0) 100 else ((metCount.toFloat() / totalCount.toFloat()) * 100).toInt()
+        val isAllMet = rule.matches(state)
+        val target = PetSpecies.getById(rule.targetSpeciesId)
+
+        return EvolutionReadiness(
+            targetSpecies = target,
+            overallMet = isAllMet,
+            conditions = items,
+            completionPercentage = pct
+        )
+    }
 }

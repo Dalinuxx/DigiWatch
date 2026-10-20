@@ -40,6 +40,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -132,6 +133,7 @@ fun BattleHubScreen(
     var currentTurnIndex by remember { mutableIntStateOf(0) }
     var qteActive by remember { mutableStateOf(false) }
     var critBoostTriggered by remember { mutableStateOf(false) }
+    var turnFxProgress by remember { mutableFloatStateOf(0f) }
     var activeCutInSpeciesId by remember { mutableStateOf<Int?>(null) }
     var activeCutInTitle by remember { mutableStateOf("CRITICAL HIT") }
     var encounterFlashEnemyId by remember { mutableStateOf<Int?>(null) }
@@ -324,7 +326,10 @@ fun BattleHubScreen(
                         buzzerManager.playAttackImpactTone()
                     }
 
-                    delay(520L)
+                    for (step in 1..8) {
+                        turnFxProgress = step / 8f
+                        delay(65L)
+                    }
                     idx++
                 }
                 if (activeRes.winnerIndex == 0) {
@@ -1220,6 +1225,18 @@ fun BattleHubScreen(
                             .padding(12.dp)
                     ) {
                         EnvironmentParticleCanvas(environmentEffect = selectedEnvironment)
+                        if (isAnimatingBattle && activeTurn != null) {
+                            val attackerSp = if (activeTurn.attackerIndex == 0) ownSp else oppSp
+                            BattleClashFxCanvas(
+                                attackerIndex = activeTurn.attackerIndex,
+                                attribute = attackerSp.attribute,
+                                attackType = activeTurn.attackType,
+                                isCritical = activeTurn.isCritical,
+                                moveName = activeTurn.moveName,
+                                damage = activeTurn.damage,
+                                progress = turnFxProgress
+                            )
+                        }
                         Column(horizontalAlignment = Alignment.CenterHorizontally) {
                             Text(
                                 text = "${selectedBattleMode.displayName.uppercase()} • ENV: ${selectedEnvironment.uppercase()}",
