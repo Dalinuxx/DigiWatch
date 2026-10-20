@@ -242,7 +242,7 @@ object ExpandedRoster {
                 EvolutionRule(targetSpeciesId = 544, minAgeSeconds = 3 * DAY, minBattles = 30, minWinRatio = 0.80f, minCareMistakes = 2, maxCareMistakes = 3, minEffort = 3),
                 EvolutionRule(targetSpeciesId = 551, minAgeSeconds = 3 * DAY, minBattles = 25, minWinRatio = 0.75f, minCareMistakes = 4, maxCareMistakes = 999)
             )),
-            sp(437, "Silphymon", PetStage.PERFECT, VA, 430, 128, 34, ascend(552, 555)),
+            sp(437, "Silphymon", PetStage.PERFECT, VA, 430, 128, 34, ascend(552, 556)),
             sp(438, "Zudomon", PetStage.PERFECT, DA, 460, 126, 55, ascend(553, 581)),
             sp(439, "Panjyamon", PetStage.PERFECT, DA, 440, 128, 48, ascend(568, 560)),
             sp(440, "Phantomon", PetStage.PERFECT, VI, 410, 125, 36, ascend(554, 532)),
@@ -255,8 +255,8 @@ object ExpandedRoster {
             sp(445, "Volcamon", PetStage.PERFECT, DA, 450, 128, 46, ascend(558, 502)),
             sp(446, "MarineDevimon", PetStage.PERFECT, VI, 440, 127, 42, ascend(533, 532)),
             sp(447, "WaruSeadramon", PetStage.PERFECT, VI, 445, 129, 44, ascend(554, 533)),
-            sp(448, "Infermon", PetStage.PERFECT, VI, 455, 132, 40, ascend(527, 571)),
-            sp(449, "Chirinmon", PetStage.PERFECT, VA, 450, 130, 38, ascend(577, 543)),
+            sp(448, "Infermon", PetStage.PERFECT, VI, 455, 132, 40, ascend(527, 528)),
+            sp(449, "Chirinmon", PetStage.PERFECT, VA, 450, 130, 38, ascend(555, 543)),
             sp(450, "Hisyaryumon", PetStage.PERFECT, VA, 455, 133, 42, ascend(561, 580)),
             sp(451, "Wingdramon", PetStage.PERFECT, VA, 450, 132, 40, ascend(562, 576)),
             sp(452, "Yatagaramon", PetStage.PERFECT, VA, 445, 131, 36, ascend(575, 544)),
@@ -266,7 +266,7 @@ object ExpandedRoster {
             sp(456, "SkullSatamon", PetStage.PERFECT, VI, 440, 133, 36, ascend(573, 532)),
             sp(457, "Mummymon", PetStage.PERFECT, VI, 435, 125, 38, ascend(566, 534)),
             sp(458, "Arukenimon", PetStage.PERFECT, VI, 435, 127, 36, ascend(571, 531)),
-            sp(459, "Grademon", PetStage.PERFECT, VA, 450, 132, 42, ascend(592, 579)),
+            sp(459, "Grademon", PetStage.PERFECT, VA, 450, 132, 42, ascend(523, 551)),
             sp(460, "Astamon", PetStage.PERFECT, VI, 445, 130, 38, ascend(582, 530)),
             sp(461, "Gargoylemon", PetStage.PERFECT, VA, 440, 128, 36, ascend(552, 574)),
             sp(462, "Mammothmon", PetStage.PERFECT, VA, 465, 128, 55, ascend(581, 553)),
@@ -276,13 +276,13 @@ object ExpandedRoster {
             // ---------------- Perfect (Ghost Game, Seekers & Modern Champions) ----------------
             sp(465, "RizeGreymon", PetStage.PERFECT, VA, 455, 133, 45, ascend(589, 576)),
             sp(466, "MachGaogamon", PetStage.PERFECT, DA, 450, 132, 42, ascend(590, 577)),
-            sp(467, "Boutmon", PetStage.PERFECT, VA, 460, 134, 46, ascend(587, 578)),
+            sp(467, "Boutmon", PetStage.PERFECT, VA, 460, 134, 46, ascend(587, 568)),
             sp(468, "Canoweissmon", PetStage.PERFECT, VA, 460, 135, 42, ascend(583, 562)),
             sp(469, "Regulusmon", PetStage.PERFECT, VI, 465, 136, 44, ascend(588, 566)),
             sp(470, "Lamortemon", PetStage.PERFECT, VA, 450, 131, 48, ascend(584, 568)),
             sp(471, "Thetismon", PetStage.PERFECT, DA, 440, 130, 36, ascend(585, 570)),
             sp(472, "Soloogarmon", PetStage.PERFECT, VI, 455, 134, 42, ascend(586, 560)),
-            sp(473, "Baalmon", PetStage.PERFECT, F, 445, 132, 38, ascend(591, 520)),
+            sp(473, "Baalmon", PetStage.PERFECT, F, 445, 132, 38, ascend(519, 591)),
             sp(474, "JewelBeemon", PetStage.PERFECT, VA, 440, 130, 35, ascend(571, 507)),
             sp(475, "Dinobeemon", PetStage.PERFECT, F, 450, 133, 40, ascend(506, 512)),
             sp(476, "SkullMeramon", PetStage.PERFECT, DA, 460, 133, 45, ascend(554, 502)),
@@ -334,7 +334,7 @@ object ExpandedRoster {
             sp(588, "Arcturusmon", PetStage.ULTIMATE, VI, 710, 218, 66, emptyArray()),
             sp(589, "ShineGreymon Burst Mode", PetStage.ULTIMATE, VA, 720, 220, 70, emptyArray()),
             sp(590, "MirageGaogamon Burst Mode", PetStage.ULTIMATE, DA, 710, 218, 66, emptyArray()),
-            sp(591, "Beelzemon Blast Mode", PetStage.ULTIMATE, VI, 725, 222, 70, emptyArray()),
+            sp(591, "Beelzemon (2010)", PetStage.ULTIMATE, VI, 725, 222, 70, emptyArray()),
             sp(592, "Omnimon Merciful Mode", PetStage.ULTIMATE, VA, 740, 225, 72, emptyArray()),
             // ---------------- BABY_I (500 Roster Expansion) ----------------
             sp(1101, "Cotsucomon", PetStage.BABY_I, F, 50, 10, 5, egg2(1102, 1103)),
@@ -535,7 +535,7 @@ object ExpandedRoster {
         JogressRecipe(322, 371, 475, FusionType.DNA_JOGRESS, "Kuwagamon and ExVeemon mutate into the mutant dragon-wasp chimera Dinobeemon."),
         JogressRecipe(576, 563, 589, FusionType.MODE_CHANGE, "ShineGreymon ignites blazing solar corona energy to awaken ShineGreymon Burst Mode."),
         JogressRecipe(577, 564, 590, FusionType.MODE_CHANGE, "MirageGaogamon reflects maximum full moon lunar energy into MirageGaogamon Burst Mode."),
-        JogressRecipe(520, 473, 591, FusionType.MODE_CHANGE, "Beelzemon absorbs Baalmon's dark mantle to awaken Beelzemon Blast Mode."),
+        JogressRecipe(519, 473, 591, FusionType.MODE_CHANGE, "Beelzemon absorbs Baalmon's dark mantle to awaken Beelzemon (2010)."),
         JogressRecipe(510, 504, 592, FusionType.MODE_CHANGE, "Omnimon dons the seraphic wings of sorrow and hope into Omnimon Merciful Mode."),
         JogressRecipe(468, 501, 583, FusionType.DNA_JOGRESS, "Canoweissmon and WarGreymon combine white dragon blades into Siriusmon."),
         JogressRecipe(470, 404, 584, FusionType.DNA_JOGRESS, "Lamortemon and WereGarurumon channel fencing precision into Diarbbitmon."),
@@ -560,10 +560,10 @@ object ExpandedRoster {
         JogressRecipe(1417, 1418, 1535, FusionType.DNA_JOGRESS, "Light and dark sea dragon cybernetics unite into Aegisdramon."),
         JogressRecipe(538, 1423, 1538, FusionType.MODE_CHANGE, "Jesmon assimilates the Legend-Arms blade core into Jesmon X."),
         JogressRecipe(539, 1408, 1539, FusionType.MODE_CHANGE, "Gankoomon manifests Hinukamuy's apex wrath into Gankoomon X."),
-        JogressRecipe(540, 1327, 1541, FusionType.MODE_CHANGE, "Craniummon reinforces Black Digizoid with golden armor into Craniummon X."),
-        JogressRecipe(541, 1419, 1540, FusionType.MODE_CHANGE, "Dynasmon unleashes dragon aura into Dynasmon X."),
-        JogressRecipe(542, 1433, 1542, FusionType.MODE_CHANGE, "Sleipmon arms six legs with glacial fortress armor into Sleipmon X."),
-        JogressRecipe(543, 1317, 1543, FusionType.MODE_CHANGE, "Duftmon adopts dark leonine strategist form into Duftmon X.")
+        JogressRecipe(542, 1327, 1541, FusionType.MODE_CHANGE, "Craniummon reinforces Black Digizoid with golden armor into Craniummon X."),
+        JogressRecipe(540, 1419, 1540, FusionType.MODE_CHANGE, "Dynasmon unleashes dragon aura into Dynasmon X."),
+        JogressRecipe(543, 1433, 1542, FusionType.MODE_CHANGE, "Sleipmon arms six legs with glacial fortress armor into Sleipmon X."),
+        JogressRecipe(544, 1317, 1543, FusionType.MODE_CHANGE, "Duftmon adopts dark leonine strategist form into Duftmon X.")
 
     )
 }

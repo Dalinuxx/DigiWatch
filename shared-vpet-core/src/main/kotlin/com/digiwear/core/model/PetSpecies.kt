@@ -769,7 +769,9 @@ data class PetSpecies(
                     basePower = 185,
                     baselineWeight = 55,
                     spriteKey = "omnimon",
-                    evolutionRules = emptyList()
+                    evolutionRules = listOf(
+                        EvolutionRule(targetSpeciesId = 592, minBattles = 35, minWinRatio = 0.85f) // Omnimon Merciful Mode
+                    )
                 ),
                 PetSpecies(
                     id = 511,
@@ -1826,7 +1828,8 @@ data class PetSpecies(
                     baselineWeight = 55,
                     spriteKey = "gallantmon",
                     evolutionRules = listOf(
-                        EvolutionRule(targetSpeciesId = 516, minBattles = 25, minWinRatio = 0.8f)
+                        EvolutionRule(targetSpeciesId = 579, minBattles = 35, minWinRatio = 0.85f), // Gallantmon X
+                        EvolutionRule(targetSpeciesId = 516, minBattles = 25, minWinRatio = 0.8f) // Gallantmon Crimson Mode
                     )
                 ),
                 PetSpecies(

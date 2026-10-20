@@ -79,6 +79,8 @@ class AdventureEngineTest {
                     val bossSp = PetSpecies.SPECIES_REGISTRY[boss.bossMonsterId]
                     if (bossSp == null) {
                         missingList.add("MISSING BOSS: campaign=${campaign.campaignId}, node=${node.nodeId} (${node.name}), bossMonsterId=${boss.bossMonsterId}, bossName=${boss.bossName}")
+                    } else if (!bossSp.name.equals(boss.bossName, ignoreCase = true)) {
+                        missingList.add("MISMATCH in ${campaign.campaignId} Node ${node.nodeId} (${node.name}): BossEncounter name='${boss.bossName}' vs SPECIES_REGISTRY[${boss.bossMonsterId}]='${bossSp.name}'")
                     }
                     assertTrue("Boss HP must be > 0", boss.bossHp > 0)
                     assertTrue("Boss Power must be > 0", boss.bossPower > 0)
