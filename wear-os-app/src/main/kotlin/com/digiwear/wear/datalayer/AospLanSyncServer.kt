@@ -152,6 +152,7 @@ object AospLanSyncServer {
                         map["theme"]?.let { repo.setTheme(BackgroundTheme.fromId(it)) }
                         map["vibration"]?.let { repo.setVibrationEnabled(it.toBoolean()) }
                         map["vpet_3button_mode"]?.let { repo.setThreeButtonMode(it.toBoolean()) }
+                        map["vpet_button_placement"]?.let { repo.setButtonPlacement(it) }
                         map["pendulum_shake_mode"]?.let { repo.setPendulumShakeMode(it.toBoolean()) }
                         map["sound_enabled"]?.let { repo.setSoundEnabled(it.toBoolean()) }
                         map["nfc_bridge_mode"]?.let { repo.setNfcBridgeMode(it) }

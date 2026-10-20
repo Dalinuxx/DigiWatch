@@ -64,7 +64,8 @@ fun SettingsScreen(
 
     val currentTheme by repository.themeFlow.collectAsState(initial = BackgroundTheme.CLASSIC_VPET_LCD)
     val isVibrationEnabled by repository.vibrationFlow.collectAsState(initial = true)
-    val isThreeButtonMode by repository.threeButtonModeFlow.collectAsState(initial = false)
+    val isThreeButtonMode by repository.threeButtonModeFlow.collectAsState(initial = true)
+    val buttonPlacement by repository.buttonPlacementFlow.collectAsState(initial = "RIGHT")
     val isPendulumShakeMode by repository.pendulumShakeModeFlow.collectAsState(initial = false)
     val isSoundEnabled by repository.soundEnabledFlow.collectAsState(initial = false)
     val nfcBridgeMode by repository.nfcBridgeModeFlow.collectAsState(initial = "NFC_DUEL")
@@ -322,7 +323,7 @@ fun SettingsScreen(
         }
 
         // ==========================================
-        // 5. 3-Button LCD Controls Toggle
+        // 5. Button Rail Position & Controls
         // ==========================================
         item {
             Spacer(modifier = Modifier.height(6.dp))
@@ -333,32 +334,45 @@ fun SettingsScreen(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Column {
+                Column(modifier = Modifier.weight(1f).padding(end = 4.dp)) {
                     Text(
-                        text = "3-BUTTON LCD CONTROLS",
+                        text = "BUTTON RAIL POSITION",
                         fontSize = 9.sp,
                         color = Color.White,
                         fontFamily = FontFamily.Monospace
                     )
                     Text(
-                        text = "[A•SEL] [B•OK] [C•ESC]",
+                        text = when (buttonPlacement) {
+                            "RIGHT" -> "Right (Bandai OG)"
+                            "LEFT" -> "Left (Southpaw)"
+                            else -> "Off (Full Touch)"
+                        },
                         fontSize = 7.5.sp,
                         color = Color.LightGray
                     )
                 }
                 Button(
                     onClick = {
-                        val next = !isThreeButtonMode
-                        repository.setThreeButtonMode(next)
+                        val next = when (buttonPlacement) {
+                            "RIGHT" -> "LEFT"
+                            "LEFT" -> "OFF"
+                            else -> "RIGHT"
+                        }
+                        repository.setButtonPlacement(next)
+                        repository.setThreeButtonMode(next != "OFF")
                         if (isVibrationEnabled) hapticManager.playStepMilestone()
                     },
-                    modifier = Modifier.size(width = 54.dp, height = 30.dp),
+                    modifier = Modifier.size(width = 58.dp, height = 30.dp),
                     colors = ButtonDefaults.buttonColors(
-                        backgroundColor = if (isThreeButtonMode) Color(0xFF2E7D32) else Color(0xFFC62828)
+                        backgroundColor = when (buttonPlacement) {
+                            "RIGHT" -> Color(0xFF00897B)
+                            "LEFT" -> Color(0xFF1E88E5)
+                            else -> Color(0xFF546E7A)
+                        }
                     )
                 ) {
                     Text(
-                        text = if (isThreeButtonMode) "ON" else "OFF",
+                        text = buttonPlacement,
                         fontSize = 8.5.sp,
                         fontWeight = FontWeight.Bold
                     )

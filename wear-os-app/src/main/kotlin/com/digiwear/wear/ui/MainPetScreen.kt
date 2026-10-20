@@ -14,6 +14,9 @@ import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.ui.draw.scale
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -53,6 +56,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.wear.compose.foundation.lazy.ScalingLazyColumn
@@ -104,7 +108,8 @@ fun MainPetScreen(
     val ambientState = LocalAmbientState.current
     val petState by repository.petStateFlow.collectAsState(initial = PetState())
     val currentTheme by repository.themeFlow.collectAsState(initial = BackgroundTheme.CLASSIC_VPET_LCD)
-    val isThreeButtonMode by repository.threeButtonModeFlow.collectAsState(initial = false)
+    val isThreeButtonMode by repository.threeButtonModeFlow.collectAsState(initial = true)
+    val buttonPlacement by repository.buttonPlacementFlow.collectAsState(initial = "RIGHT")
     val isPendulumShakeMode by repository.pendulumShakeModeFlow.collectAsState(initial = false)
     val isSoundEnabled by repository.soundEnabledFlow.collectAsState(initial = false)
     val contrastLevel by repository.contrastLevelFlow.collectAsState(initial = "MEDIUM")
@@ -386,6 +391,8 @@ fun MainPetScreen(
                 species = species,
                 petState = petState,
                 displayConfig = displayConfig,
+                buttonPlacement = buttonPlacement,
+                buzzerManager = buzzerManager,
                 selectedMenuIndex = selectedMenuIndex,
                 overrideSpriteFrame = overrideSpriteFrame,
                 actionFeedback = actionFeedback,
@@ -674,13 +681,176 @@ fun MainPetScreen(
 
 /**
  * Authentic Bandai LCD style 3-Button layout with recessed top & bottom 4-icon LCD rails,
- * framed pixel-art viewport, and tactile [A] [B] [C] shell buttons alongside physical stem input.
+ * framed pixel-art viewport, and tactile right-side [A] [B] [C] molded circular peg buttons.
  */
+@Composable
+private fun MoldedCircularButton(
+    label: String,
+    subLabel: String,
+    size: Dp,
+    rimColor: Color,
+    baseColor: Color,
+    textColor: Color,
+    onClick: () -> Unit
+) {
+    var isPressed by remember { mutableStateOf(false) }
+    val animatedScale by animateFloatAsState(
+        targetValue = if (isPressed) 0.88f else 1.0f,
+        animationSpec = androidx.compose.animation.core.spring(
+            dampingRatio = androidx.compose.animation.core.Spring.DampingRatioMediumBouncy,
+            stiffness = androidx.compose.animation.core.Spring.StiffnessLow
+        ),
+        label = "btnScale"
+    )
+
+    Box(
+        modifier = Modifier
+            .size(size)
+            .scale(animatedScale)
+            .background(
+                brush = Brush.radialGradient(
+                    colors = listOf(baseColor, Color(0xFF06090D)),
+                    radius = 55f
+                ),
+                shape = CircleShape
+            )
+            .border(
+                width = 1.75.dp,
+                brush = Brush.verticalGradient(
+                    colors = listOf(
+                        rimColor,
+                        rimColor.copy(alpha = 0.45f)
+                    )
+                ),
+                shape = CircleShape
+            )
+            .clickable {
+                onClick()
+            },
+        contentAlignment = Alignment.Center
+    ) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+            Text(
+                text = label,
+                fontSize = if (size.value >= 36f) 11.5.sp else 9.5.sp,
+                fontWeight = FontWeight.Black,
+                color = textColor,
+                fontFamily = FontFamily.Monospace,
+                lineHeight = if (size.value >= 36f) 11.5.sp else 9.5.sp
+            )
+            Text(
+                text = subLabel,
+                fontSize = if (size.value >= 36f) 6.sp else 5.sp,
+                fontWeight = FontWeight.ExtraBold,
+                color = rimColor.copy(alpha = 0.9f),
+                fontFamily = FontFamily.Monospace,
+                lineHeight = if (size.value >= 36f) 6.sp else 5.sp
+            )
+        }
+    }
+}
+
+@Composable
+private fun BandaiButtonRail(
+    displayConfig: WatchDisplayConfig,
+    onPressA: () -> Unit,
+    onPressB: () -> Unit,
+    onPressC: () -> Unit
+) {
+    Column(
+        modifier = Modifier
+            .width(displayConfig.rightRailWidth)
+            .fillMaxHeight(),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        // Button A: Select / Cycle
+        MoldedCircularButton(
+            label = "A",
+            subLabel = "SEL",
+            size = displayConfig.shellButtonSize,
+            rimColor = Color(0xFF80D8FF),
+            baseColor = Color(0xFF162530),
+            textColor = Color.White,
+            onClick = onPressA
+        )
+
+        Spacer(modifier = Modifier.height(displayConfig.shellButtonSpacing))
+
+        // Button B: Confirm / Execute / Poke
+        MoldedCircularButton(
+            label = "B",
+            subLabel = "OK",
+            size = displayConfig.shellButtonSize,
+            rimColor = Color(0xFF69F0AE),
+            baseColor = Color(0xFF142B1A),
+            textColor = Color(0xFFB9F6CA),
+            onClick = onPressB
+        )
+
+        Spacer(modifier = Modifier.height(displayConfig.shellButtonSpacing))
+
+        // Button C: Cancel / Esc / Light
+        MoldedCircularButton(
+            label = "C",
+            subLabel = "ESC",
+            size = displayConfig.shellButtonSize,
+            rimColor = Color(0xFFEA80FC),
+            baseColor = Color(0xFF281432),
+            textColor = Color(0xFFF3E5F5),
+            onClick = onPressC
+        )
+    }
+}
+
+@Composable
+private fun LcdIconCell(
+    index: Int,
+    item: VPetMenu,
+    isSelected: Boolean,
+    isCallActive: Boolean,
+    width: Dp,
+    height: Dp,
+    fontSize: androidx.compose.ui.unit.TextUnit,
+    onClick: () -> Unit
+) {
+    val bgColor = when {
+        isSelected -> Color(0xFF00B0FF)
+        isCallActive -> Color(0xFFD50000)
+        else -> Color(0x33000000)
+    }
+    val borderColor = when {
+        isSelected -> Color(0xFFFFD54F)
+        isCallActive -> Color(0xFFFFD54F)
+        else -> Color(0x4480CBC4)
+    }
+    val borderWidth = if (isSelected || isCallActive) 1.5.dp else 0.5.dp
+
+    Box(
+        modifier = Modifier
+            .size(width = if (isSelected || isCallActive) (width + 3.dp) else width, height = height)
+            .background(bgColor, RoundedCornerShape(4.dp))
+            .border(borderWidth, borderColor, RoundedCornerShape(4.dp))
+            .clickable { onClick() },
+        contentAlignment = Alignment.Center
+    ) {
+        Text(
+            text = item.icon,
+            fontSize = if (isSelected || isCallActive) (fontSize.value + 1.5f).sp else fontSize
+        )
+    }
+}
+
 @Composable
 private fun ThreeButtonPetView(
     species: PetSpecies,
     petState: PetState,
     displayConfig: WatchDisplayConfig,
+    buttonPlacement: String,
+    buzzerManager: BuzzerManager,
     selectedMenuIndex: Int?,
     overrideSpriteFrame: SpriteFrame?,
     actionFeedback: String?,
@@ -700,341 +870,306 @@ private fun ThreeButtonPetView(
         else -> Color(0xFF69F0AE)
     }
 
+    val buttonRail: @Composable () -> Unit = {
+        BandaiButtonRail(
+            displayConfig = displayConfig,
+            onPressA = {
+                buzzerManager.playButtonBeep()
+                onPressA()
+            },
+            onPressB = {
+                buzzerManager.playButtonBeep()
+                onPressB()
+            },
+            onPressC = {
+                buzzerManager.playButtonBeep()
+                onPressC()
+            }
+        )
+    }
+
     Box(
         modifier = Modifier
             .fillMaxSize()
             .padding(displayConfig.contentPadding),
         contentAlignment = Alignment.Center
     ) {
-        val isTallDisplay = displayConfig.screenHeightDp > 340
-        Column(
-            modifier = if (isTallDisplay) {
-                Modifier
-                    .widthIn(max = 280.dp)
-                    .height(300.dp)
-            } else {
-                Modifier.fillMaxSize()
-            },
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.SpaceBetween
+        Row(
+            modifier = Modifier.fillMaxSize(),
+            horizontalArrangement = Arrangement.spacedBy(4.dp),
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            // Top Recessed V-Pet LCD Rail: Food (0), Light (1), Battle (2), Flush (3)
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .background(Color(0x77091016), RoundedCornerShape(6.dp))
-                    .border(0.75.dp, Color(0x4480CBC4), RoundedCornerShape(6.dp))
-                    .padding(horizontal = 4.dp, vertical = 2.dp),
-                horizontalArrangement = Arrangement.SpaceEvenly,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                for (i in 0..3) {
-                    val item = VPetMenu.entries[i]
-                    val isSelected = selectedMenuIndex == i
-                    Box(
-                        modifier = Modifier
-                            .size(width = if (isSelected) 32.dp else 28.dp, height = 24.dp)
-                            .background(
-                                color = if (isSelected) Color(0xFF00B0FF) else Color(0x33000000),
-                                shape = RoundedCornerShape(4.dp)
-                            )
-                            .border(
-                                width = if (isSelected) 1.5.dp else 0.5.dp,
-                                color = if (isSelected) Color(0xFFFFD54F) else Color(0x5590A4AE),
-                                shape = RoundedCornerShape(4.dp)
-                            )
-                            .clickable { onSelectIcon(i) },
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(item.icon, fontSize = if (isSelected) 13.sp else 11.sp)
-                    }
-                }
+            // Optional Left Button Rail (Southpaw mode)
+            if (buttonPlacement == "LEFT") {
+                buttonRail()
             }
 
-            // Center V-Pet LCD Screen Viewport (Telemetry, Sprite, Prompt)
+            // Central Recessed V-Pet LCD Console
             Column(
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxHeight(),
                 horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center
+                verticalArrangement = Arrangement.SpaceBetween
             ) {
-                // Header line: Name, Attribute Pill, Weight, Quest & Settings
+                // Top Recessed V-Pet LCD Rail (Icons 0..3: Status, Feed, Train, Battle)
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = 6.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween,
+                        .background(Color(0x77091016), RoundedCornerShape(6.dp))
+                        .border(0.75.dp, Color(0x4480CBC4), RoundedCornerShape(6.dp))
+                        .padding(horizontal = 2.dp, vertical = 2.dp),
+                    horizontalArrangement = Arrangement.SpaceEvenly,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Text(
-                            text = species.name.take(11),
-                            fontSize = 10.sp,
-                            fontWeight = FontWeight.ExtraBold,
-                            color = Color(0xFFB9F6CA),
-                            fontFamily = FontFamily.Monospace
+                    for (i in 0..3) {
+                        val item = VPetMenu.entries[i]
+                        LcdIconCell(
+                            index = i,
+                            item = item,
+                            isSelected = selectedMenuIndex == i,
+                            isCallActive = false,
+                            width = displayConfig.lcdIconWidth,
+                            height = displayConfig.lcdIconHeight,
+                            fontSize = displayConfig.lcdIconFontSize,
+                            onClick = { onSelectIcon(i) }
                         )
-                        Spacer(modifier = Modifier.width(3.dp))
+                    }
+                }
+
+                // Center V-Pet LCD Screen Viewport (Telemetry, Sprite, Prompt)
+                Column(
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxWidth()
+                        .padding(vertical = 1.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.SpaceBetween
+                ) {
+                    // Header telemetry: Name, Attribute badge, Weight, Quest & Settings
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 4.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Text(
+                                text = species.name.take(if (displayConfig.screenWidthDp < 240) 8 else 11),
+                                fontSize = displayConfig.telemetryFontSize,
+                                fontWeight = FontWeight.ExtraBold,
+                                color = Color(0xFFB9F6CA),
+                                fontFamily = FontFamily.Monospace
+                            )
+                            Spacer(modifier = Modifier.width(2.dp))
+                            Box(
+                                modifier = Modifier
+                                    .background(attrColor.copy(alpha = 0.22f), RoundedCornerShape(3.dp))
+                                    .border(0.5.dp, attrColor, RoundedCornerShape(3.dp))
+                                    .padding(horizontal = 2.dp, vertical = 0.5.dp)
+                            ) {
+                                Text(
+                                    text = species.attribute.displayName.take(3).uppercase(),
+                                    fontSize = (displayConfig.telemetryFontSize.value - 2f).coerceAtLeast(5.5f).sp,
+                                    fontWeight = FontWeight.Black,
+                                    color = attrColor,
+                                    fontFamily = FontFamily.Monospace
+                                )
+                            }
+                        }
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Text(
+                                text = "${petState.weight}g",
+                                fontSize = (displayConfig.telemetryFontSize.value - 1f).coerceAtLeast(6.5f).sp,
+                                fontWeight = FontWeight.Bold,
+                                color = Color(0xFFE0E0E0),
+                                fontFamily = FontFamily.Monospace
+                            )
+                            Spacer(modifier = Modifier.width(2.dp))
+                            Box(
+                                modifier = Modifier
+                                    .size(if (displayConfig.screenWidthDp < 240) 16.dp else 19.dp)
+                                    .background(Color(0x66004D40), CircleShape)
+                                    .border(0.5.dp, Color(0xFF4DB6AC), CircleShape)
+                                    .clickable { onNavigateAdventure() },
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text("🗺", fontSize = (displayConfig.telemetryFontSize.value - 1f).coerceAtLeast(6.5f).sp, color = Color.White)
+                            }
+                            Spacer(modifier = Modifier.width(2.dp))
+                            Box(
+                                modifier = Modifier
+                                    .size(if (displayConfig.screenWidthDp < 240) 16.dp else 19.dp)
+                                    .background(Color(0x66263238), CircleShape)
+                                    .border(0.5.dp, Color(0xFF90A4AE), CircleShape)
+                                    .clickable { onNavigateSettings() },
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text("⚙", fontSize = (displayConfig.telemetryFontSize.value - 1f).coerceAtLeast(6.5f).sp, color = Color.White)
+                            }
+                        }
+                    }
+
+                    // Framed Hunger & Strength LCD Pills
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 4.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
                         Box(
                             modifier = Modifier
-                                .background(attrColor.copy(alpha = 0.22f), RoundedCornerShape(3.dp))
-                                .border(0.5.dp, attrColor, RoundedCornerShape(3.dp))
+                                .background(Color(0x55000000), RoundedCornerShape(3.dp))
                                 .padding(horizontal = 3.dp, vertical = 0.5.dp)
                         ) {
                             Text(
-                                text = species.attribute.displayName.take(3).uppercase(),
-                                fontSize = 6.sp,
-                                fontWeight = FontWeight.Black,
-                                color = attrColor,
+                                text = "H:${"♥".repeat(petState.hunger)}${"♡".repeat(4 - petState.hunger)}",
+                                fontSize = (displayConfig.telemetryFontSize.value - 0.5f).coerceAtLeast(6.5f).sp,
+                                fontWeight = FontWeight.Bold,
+                                color = Color(0xFFFF5252),
+                                fontFamily = FontFamily.Monospace
+                            )
+                        }
+                        if (petState.wasteCount > 0) {
+                            Text(
+                                text = "💩".repeat(petState.wasteCount),
+                                fontSize = (displayConfig.telemetryFontSize.value + 1f).sp
+                            )
+                        }
+                        Box(
+                            modifier = Modifier
+                                .background(Color(0x55000000), RoundedCornerShape(3.dp))
+                                .padding(horizontal = 3.dp, vertical = 0.5.dp)
+                        ) {
+                            Text(
+                                text = "S:${"★".repeat(petState.strength)}${"☆".repeat(4 - petState.strength)}",
+                                fontSize = (displayConfig.telemetryFontSize.value - 0.5f).coerceAtLeast(6.5f).sp,
+                                fontWeight = FontWeight.Bold,
+                                color = Color(0xFFFFD700),
                                 fontFamily = FontFamily.Monospace
                             )
                         }
                     }
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Text(
-                            text = "${petState.weight}g",
-                            fontSize = 8.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = Color(0xFFE0E0E0),
-                            fontFamily = FontFamily.Monospace
-                        )
-                        Spacer(modifier = Modifier.width(3.dp))
+
+                    if (petState.attentionCallActive) {
                         Box(
                             modifier = Modifier
-                                .size(19.dp)
-                                .background(Color(0x66004D40), CircleShape)
-                                .border(0.5.dp, Color(0xFF4DB6AC), CircleShape)
-                                .clickable { onNavigateAdventure() },
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Text("🗺", fontSize = 8.sp, color = Color.White)
-                        }
-                        Spacer(modifier = Modifier.width(2.dp))
-                        Box(
-                            modifier = Modifier
-                                .size(19.dp)
-                                .background(Color(0x66263238), CircleShape)
-                                .border(0.5.dp, Color(0xFF90A4AE), CircleShape)
-                                .clickable { onNavigateSettings() },
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Text("⚙", fontSize = 8.sp, color = Color.White)
-                        }
-                    }
-                }
-
-                Spacer(modifier = Modifier.height(1.dp))
-
-                // Framed Hunger & Strength LCD Pills
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 6.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .background(Color(0x55000000), RoundedCornerShape(4.dp))
-                            .padding(horizontal = 4.dp, vertical = 1.dp)
-                    ) {
-                        Text(
-                            text = "H:${"♥".repeat(petState.hunger)}${"♡".repeat(4 - petState.hunger)}",
-                            fontSize = 8.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = Color(0xFFFF5252),
-                            fontFamily = FontFamily.Monospace
-                        )
-                    }
-                    Box(
-                        modifier = Modifier
-                            .background(Color(0x55000000), RoundedCornerShape(4.dp))
-                            .padding(horizontal = 4.dp, vertical = 1.dp)
-                    ) {
-                        Text(
-                            text = "S:${"★".repeat(petState.strength)}${"☆".repeat(4 - petState.strength)}",
-                            fontSize = 8.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = Color(0xFFFFD700),
-                            fontFamily = FontFamily.Monospace
-                        )
-                    }
-                }
-
-                if (petState.attentionCallActive) {
-                    Box(
-                        modifier = Modifier
-                            .padding(top = 1.dp)
-                            .background(Color(0xCCD50000), RoundedCornerShape(3.dp))
-                            .padding(horizontal = 6.dp, vertical = 1.dp)
-                    ) {
-                        Text(
-                            text = "⚠ CALL SIGNAL ⚠",
-                            fontSize = 7.sp,
-                            color = Color.White,
-                            fontWeight = FontWeight.Black,
-                            fontFamily = FontFamily.Monospace
-                        )
-                    }
-                }
-
-                if (petState.wasteCount > 0) {
-                    Text(
-                        text = "💩 ".repeat(petState.wasteCount),
-                        fontSize = 9.sp
-                    )
-                }
-
-                // Center Sprite Viewport
-                Box(
-                    modifier = Modifier
-                        .size(displayConfig.mainSpriteSize)
-                        .border(
-                            width = 0.75.dp,
-                            color = if (selectedMenuIndex != null) Color(0x88FFD54F) else Color(0x33FFFFFF),
-                            shape = RoundedCornerShape(6.dp)
-                        )
-                        .clickable { onNavigateStatus() },
-                    contentAlignment = Alignment.Center
-                ) {
-                    SpriteCanvasRenderer(
-                        speciesId = petState.speciesId,
-                        isAmbient = false,
-                        overrideFrame = overrideSpriteFrame,
-                        isSleeping = petState.isSleeping,
-                        isInjured = petState.isInjured,
-                        size = displayConfig.mainSpriteSize
-                    )
-                }
-
-                // Active Menu Prompt or Action Feedback Pill
-                if (petState.isDeceased) {
-                    Box(
-                        modifier = Modifier
-                            .background(Color(0xD9381216), RoundedCornerShape(6.dp))
-                            .border(1.dp, Color(0xFFFF5252), RoundedCornerShape(6.dp))
-                            .clickable {
-                                onHatchTraitedEgg()
-                            }
-                            .padding(horizontal = 6.dp, vertical = 2.dp)
-                    ) {
-                        Text(
-                            text = "🪦 REST IN PEACE • TAP TO HATCH EGG (GEN ${petState.generation + 1})",
-                            fontSize = 7.sp,
-                            fontWeight = FontWeight.Black,
-                            color = Color(0xFFFF8A80),
-                            fontFamily = FontFamily.Monospace,
-                            textAlign = TextAlign.Center
-                        )
-                    }
-                } else {
-                    val promptText = if (selectedMenuIndex != null) {
-                        "► ${VPetMenu.entries[selectedMenuIndex].label} ◄"
-                    } else actionFeedback ?: if (petState.isSleeping) "ZZZ... SLEEPING" else null
-
-                    if (promptText != null) {
-                        Box(
-                            modifier = Modifier
-                                .background(Color(0x66091016), RoundedCornerShape(4.dp))
-                                .padding(horizontal = 6.dp, vertical = 1.dp)
+                                .background(Color(0xCCD50000), RoundedCornerShape(3.dp))
+                                .padding(horizontal = 5.dp, vertical = 0.5.dp)
                         ) {
                             Text(
-                                text = promptText,
-                                fontSize = 8.sp,
-                                color = if (selectedMenuIndex != null) Color(0xFFFFD54F) else Color(0xFFB9F6CA),
-                                fontWeight = FontWeight.Bold,
+                                text = "⚠ CALL SIGNAL ⚠",
+                                fontSize = (displayConfig.telemetryFontSize.value - 1.5f).coerceAtLeast(6f).sp,
+                                color = Color.White,
+                                fontWeight = FontWeight.Black,
+                                fontFamily = FontFamily.Monospace
+                            )
+                        }
+                    }
+
+                    // Center Sprite Viewport (Takes available space, clickable for status)
+                    Box(
+                        modifier = Modifier
+                            .weight(1f)
+                            .fillMaxWidth(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .size(displayConfig.mainSpriteSize)
+                                .border(
+                                    width = 0.75.dp,
+                                    color = if (selectedMenuIndex != null) Color(0x88FFD54F) else Color(0x33FFFFFF),
+                                    shape = RoundedCornerShape(6.dp)
+                                )
+                                .clickable { onNavigateStatus() },
+                            contentAlignment = Alignment.Center
+                        ) {
+                            SpriteCanvasRenderer(
+                                speciesId = petState.speciesId,
+                                isAmbient = false,
+                                overrideFrame = overrideSpriteFrame,
+                                isSleeping = petState.isSleeping,
+                                isInjured = petState.isInjured,
+                                size = displayConfig.mainSpriteSize
+                            )
+                        }
+                    }
+
+                    // Active Menu Prompt or Action Feedback Pill
+                    if (petState.isDeceased) {
+                        Box(
+                            modifier = Modifier
+                                .background(Color(0xD9381216), RoundedCornerShape(4.dp))
+                                .border(1.dp, Color(0xFFFF5252), RoundedCornerShape(4.dp))
+                                .clickable { onHatchTraitedEgg() }
+                                .padding(horizontal = 4.dp, vertical = 1.dp)
+                        ) {
+                            Text(
+                                text = "🪦 REST IN PEACE • TAP TO HATCH EGG (GEN ${petState.generation + 1})",
+                                fontSize = 6.5.sp,
+                                fontWeight = FontWeight.Black,
+                                color = Color(0xFFFF8A80),
                                 fontFamily = FontFamily.Monospace,
                                 textAlign = TextAlign.Center
                             )
                         }
                     } else {
-                        Spacer(modifier = Modifier.height(10.dp))
+                        val promptText = if (selectedMenuIndex != null) {
+                            "► ${VPetMenu.entries[selectedMenuIndex].label} ◄"
+                        } else actionFeedback ?: if (petState.isSleeping) "ZZZ... SLEEPING" else null
+
+                        if (promptText != null) {
+                            Box(
+                                modifier = Modifier
+                                    .background(Color(0x66091016), RoundedCornerShape(4.dp))
+                                    .padding(horizontal = 4.dp, vertical = 0.5.dp)
+                            ) {
+                                Text(
+                                    text = promptText,
+                                    fontSize = (displayConfig.telemetryFontSize.value - 0.5f).coerceAtLeast(6.5f).sp,
+                                    color = if (selectedMenuIndex != null) Color(0xFFFFD54F) else Color(0xFFB9F6CA),
+                                    fontWeight = FontWeight.Bold,
+                                    fontFamily = FontFamily.Monospace,
+                                    textAlign = TextAlign.Center
+                                )
+                            }
+                        }
+                    }
+                }
+
+                // Bottom Recessed V-Pet LCD Rail (Icons 4..7: Flush, Light, Meds, Call)
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(Color(0x77091016), RoundedCornerShape(6.dp))
+                        .border(0.75.dp, Color(0x4480CBC4), RoundedCornerShape(6.dp))
+                        .padding(horizontal = 2.dp, vertical = 2.dp),
+                    horizontalArrangement = Arrangement.SpaceEvenly,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    for (i in 4..7) {
+                        val item = VPetMenu.entries[i]
+                        val isCall = (i == 7 && petState.attentionCallActive)
+                        LcdIconCell(
+                            index = i,
+                            item = item,
+                            isSelected = selectedMenuIndex == i,
+                            isCallActive = isCall,
+                            width = displayConfig.lcdIconWidth,
+                            height = displayConfig.lcdIconHeight,
+                            fontSize = displayConfig.lcdIconFontSize,
+                            onClick = { onSelectIcon(i) }
+                        )
                     }
                 }
             }
 
-            // Bottom Recessed V-Pet LCD Rail: Flush (4), Light (5), Meds (6), Call (7)
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .background(Color(0x77091016), RoundedCornerShape(6.dp))
-                    .border(0.75.dp, Color(0x4480CBC4), RoundedCornerShape(6.dp))
-                    .padding(horizontal = 4.dp, vertical = 2.dp),
-                horizontalArrangement = Arrangement.SpaceEvenly,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                for (i in 4..7) {
-                    val item = VPetMenu.entries[i]
-                    val isSelected = selectedMenuIndex == i
-                    val isCallActive = (i == 7 && petState.attentionCallActive)
-                    Box(
-                        modifier = Modifier
-                            .size(width = if (isSelected || isCallActive) 32.dp else 28.dp, height = 24.dp)
-                            .background(
-                                color = when {
-                                    isSelected -> Color(0xFF00B0FF)
-                                    isCallActive -> Color(0xFFD50000)
-                                    else -> Color(0x33000000)
-                                },
-                                shape = RoundedCornerShape(4.dp)
-                            )
-                            .border(
-                                width = if (isSelected || isCallActive) 1.5.dp else 0.5.dp,
-                                color = when {
-                                    isSelected -> Color(0xFFFFD54F)
-                                    isCallActive -> Color(0xFFFFD54F)
-                                    else -> Color(0x5590A4AE)
-                                },
-                                shape = RoundedCornerShape(4.dp)
-                            )
-                            .clickable { onSelectIcon(i) },
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(item.icon, fontSize = if (isSelected || isCallActive) 13.sp else 11.sp)
-                    }
-                }
-            }
-
-            // Tactile Molded Bandai ( A ) ( B ) ( C ) Shell Button Bar
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 2.dp),
-                horizontalArrangement = Arrangement.SpaceEvenly,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                // Button A: Select / Cycle
-                Box(
-                    modifier = Modifier
-                        .size(width = 38.dp, height = 22.dp)
-                        .background(Color(0xFF263238), RoundedCornerShape(11.dp))
-                        .border(1.2.dp, Color(0xFF80D8FF), RoundedCornerShape(11.dp))
-                        .clickable { onPressA() },
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text("( A )", fontSize = 9.sp, fontWeight = FontWeight.Black, color = Color.White, fontFamily = FontFamily.Monospace)
-                }
-
-                // Button B: Confirm / Execute
-                Box(
-                    modifier = Modifier
-                        .size(width = 38.dp, height = 22.dp)
-                        .background(Color(0xFF1B5E20), RoundedCornerShape(11.dp))
-                        .border(1.2.dp, Color(0xFF69F0AE), RoundedCornerShape(11.dp))
-                        .clickable { onPressB() },
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text("( B )", fontSize = 9.sp, fontWeight = FontWeight.Black, color = Color(0xFFB9F6CA), fontFamily = FontFamily.Monospace)
-                }
-
-                // Button C: Cancel / Light
-                Box(
-                    modifier = Modifier
-                        .size(width = 38.dp, height = 22.dp)
-                        .background(Color(0xFF4A148C), RoundedCornerShape(11.dp))
-                        .border(1.2.dp, Color(0xFFEA80FC), RoundedCornerShape(11.dp))
-                        .clickable { onPressC() },
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text("( C )", fontSize = 9.sp, fontWeight = FontWeight.Black, color = Color(0xFFF3E5F5), fontFamily = FontFamily.Monospace)
-                }
+            // Right Button Rail (Authentic Bandai default)
+            if (buttonPlacement == "RIGHT") {
+                buttonRail()
             }
         }
     }

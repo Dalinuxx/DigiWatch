@@ -525,21 +525,21 @@ object SpriteMatrixRegistry {
     // [ID 119] Yaamon
     val YAAMON_ROM = arrayOf(
         "................",
+        ".BSWW...........",
+        "TSSSSBTW#TT#TSW.",
+        "..BSSS#SSSSSSSS.",
+        "...SSST#SSSSSSSW",
+        "..SSSS##SSSSB...",
+        "..SWSSS#S#BB#...",
+        "..SWTSSSSS#B#...",
+        "..S#B#SSWTBSB...",
+        "..#SSSSSSSTS....",
+        "...#SBSSSSS.....",
+        "......SSS.......",
         "................",
-        "................",
-        "................",
-        "................",
-        "................",
-        "...#B......B#...",
-        "..BS#B....BS#B..",
-        ".BBS#S#BB##S#BB.",
-        "...##S#S##BS#...",
-        "....#S#SB..BB...",
-        "...B.B##.B#.B...",
-        "...B#.B.BB..B...",
-        "...B........B...",
-        "....#.B#...B....",
-        ".....BB#BB#....."
+        "....SSSSSSS.....",
+        "....SSSSSSS.....",
+        "................"
     )
 
     // [ID 120] Nyaromon
@@ -1084,22 +1084,22 @@ object SpriteMatrixRegistry {
 
     // [ID 223] Salamon
     val SALAMON_ROM = arrayOf(
-        "................",
-        ".....BBBBB......",
-        "...BB..WWWBB....",
-        "..B.....WWWWB...",
-        ".B......WWWWWB..",
-        ".B.#G...G#WWWWB.",
-        "B.#G...W.G#WBWB.",
-        "B.#GGWWWGG#WBTWB",
-        "BBTT.WBWWTTWTBWB",
-        "BBWWBBWBBWWTBBWB",
-        "BTBWWWWWWTBBWBTB",
-        "BB.BBBBBBB#TB.BB",
-        "....BTTTT#TBTB..",
-        "....BBWWTTBBWTB.",
-        "...B.WBBBBWTBWB.",
-        "...BBBBB.BBBBBB."
+        "......BB........",
+        "....TWWWW#......",
+        "...TWWWWWW......",
+        "...TWWWWS#W.....",
+        "..TSWWWBTTWS....",
+        ".TBWWWW#TTWW....",
+        ".TBWWW#BTBWW....",
+        "SW..STW#STBWT...",
+        "......BTTWWTWWS.",
+        ".....TTBWWT.#WWB",
+        "...WWTB..WW.BW#.",
+        "...STW...TW.....",
+        ".........WWWS...",
+        "........TWWWT...",
+        "........BWWWT...",
+        "..........B....."
     )
 
     // [ID 224] Gaomon
@@ -4184,22 +4184,22 @@ object SpriteMatrixRegistry {
 
     // [ID 555] Kentaurosmon
     val KENTAUROSMON_ROM = arrayOf(
-        ".....BT.....TB..",
-        ".....B.BTBTB.B..",
-        "......TB...B.B..",
-        ".....BT.TB..TB..",
-        "....B..BB..B#.B#",
-        "...#B.....B.#..#",
-        "..B.BB#BB#.B.B.#",
-        "..B.B.....BB..B.",
-        ".BB#BB#BB#B.#..#",
-        "#....B.....B#..#",
-        ".#BB#B...B#B.#B.",
-        "..B.#SB#B...B#B.",
-        "..B.#B........B.",
-        "...B#B.#BB.BB..B",
-        ".....B.#.B.B.#.B",
-        ".....BB#.B#B.#BB"
+        "................",
+        ".........T..T...",
+        "..W.....TT.TT...",
+        "..TTTT#S#TTTTT..",
+        "..WTTTSSS#TTTT..",
+        "..TTT#SSS##TT...",
+        "...T##TSSSTT....",
+        "...WR##B##TW....",
+        "...RR#TSWSST....",
+        "...BSSST#SWS....",
+        "...#SSB##SS.....",
+        "....SSS#BSSB....",
+        ".....#S#W.S.....",
+        ".....S.T..S.....",
+        "......S#........",
+        "......#........."
     )
 
     // [ID 556] Magnadramon
@@ -4224,22 +4224,22 @@ object SpriteMatrixRegistry {
 
     // [ID 557] Cherubimon
     val CHERUBIMON_ROM = arrayOf(
-        "TB..........T.TB",
-        "T.TB.B.B..TB.B.B",
-        "T...T.T.TB.....B",
-        ".B.B.....BT...T.",
-        "..B.B..B..BB#B..",
-        "..B.B..B..B.....",
-        "..B.......B.....",
-        "..B..B#..#.B#...",
-        "...#BS#BB.B.#B..",
-        "..B#.B.B.#BB..B.",
-        ".#.B#.B.BB....B.",
-        ".#..#....B....B.",
-        ".#..#....B...#..",
-        "..BB#.....#BB...",
-        ".#...BB#BB...#..",
-        ".#BB#BB..B#BB#.."
+        "................",
+        "...TS......S....",
+        "....SS....SS....",
+        "......S.WSS.....",
+        "......TSST......",
+        "...SSS#SSTSSS...",
+        "...SBW#S##WBS...",
+        "...SWWWBBWWBS...",
+        "..SSBWSSSWWBS...",
+        "..#SBWSSSSWBS...",
+        "...SSBSSSSBSS...",
+        "...SSSBSSSSSS...",
+        "...TWSSS.SSSS...",
+        "....#SWSBB.B....",
+        ".......S........",
+        "........W......."
     )
 
     // Universal Archetype Safety Fallbacks

@@ -1,4 +1,4 @@
-﻿package com.digiwear.companion.ui
+package com.digiwear.companion.ui
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
@@ -85,6 +85,7 @@ fun PetDashboardScreen(
     var vibrationEnabled by remember { mutableStateOf(true) }
     var soundEnabled by remember { mutableStateOf(false) }
     var threeButtonMode by remember { mutableStateOf(true) }
+    var buttonPlacement by remember { mutableStateOf("RIGHT") }
     var pendulumShakeMode by remember { mutableStateOf(false) }
     var nfcBridgeMode by remember { mutableStateOf("NFC_DUEL") }
     var displayShapeOverride by remember { mutableStateOf("AUTO") }
@@ -150,6 +151,7 @@ fun PetDashboardScreen(
             watchSettings["theme"]?.let { selectedTheme = BackgroundTheme.fromId(it) }
             watchSettings["vibration"]?.let { vibrationEnabled = it.toBoolean() }
             watchSettings["vpet_3button_mode"]?.let { threeButtonMode = it.toBoolean() }
+            watchSettings["vpet_button_placement"]?.let { buttonPlacement = it }
             watchSettings["pendulum_shake_mode"]?.let { pendulumShakeMode = it.toBoolean() }
             watchSettings["sound_enabled"]?.let { soundEnabled = it.toBoolean(); buzzerManager.isEnabled = it.toBoolean() }
             watchSettings["nfc_bridge_mode"]?.let { nfcBridgeMode = it }
@@ -212,6 +214,7 @@ fun PetDashboardScreen(
                                     watchSettings["theme"]?.let { selectedTheme = BackgroundTheme.fromId(it) }
                                     watchSettings["vibration"]?.let { vibrationEnabled = it.toBoolean() }
                                     watchSettings["vpet_3button_mode"]?.let { threeButtonMode = it.toBoolean() }
+            watchSettings["vpet_button_placement"]?.let { buttonPlacement = it }
                                     watchSettings["pendulum_shake_mode"]?.let { pendulumShakeMode = it.toBoolean() }
                                     watchSettings["sound_enabled"]?.let { soundEnabled = it.toBoolean(); buzzerManager.isEnabled = it.toBoolean() }
                                     watchSettings["nfc_bridge_mode"]?.let { nfcBridgeMode = it }

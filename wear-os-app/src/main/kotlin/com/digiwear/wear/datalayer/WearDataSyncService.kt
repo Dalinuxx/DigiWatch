@@ -63,6 +63,9 @@ class WearDataSyncService : WearableListenerService() {
                         map["vpet_3button_mode"]?.let { btnStr ->
                             repo.setThreeButtonMode(btnStr.toBoolean())
                         }
+                        map["vpet_button_placement"]?.let { placement ->
+                            repo.setButtonPlacement(placement)
+                        }
                         map["pendulum_shake_mode"]?.let { shakeStr ->
                             repo.setPendulumShakeMode(shakeStr.toBoolean())
                         }

@@ -58,6 +58,11 @@ class PetRepository private constructor(context: Context) {
     )
     val threeButtonModeFlow: Flow<Boolean> = _threeButtonModeFlow.asStateFlow()
 
+    private val _buttonPlacementFlow = MutableStateFlow(
+        prefs.getString("vpet_button_placement", "RIGHT") ?: "RIGHT"
+    )
+    val buttonPlacementFlow: StateFlow<String> = _buttonPlacementFlow.asStateFlow()
+
     private val _pendulumShakeModeFlow = MutableStateFlow(
         prefs.getBoolean("pendulum_shake_mode", false)
     )
@@ -144,6 +149,11 @@ class PetRepository private constructor(context: Context) {
         _threeButtonModeFlow.value = enabled
     }
 
+    fun setButtonPlacement(placement: String) {
+        prefs.edit().putString("vpet_button_placement", placement).apply()
+        _buttonPlacementFlow.value = placement
+    }
+
     fun setPendulumShakeMode(enabled: Boolean) {
         prefs.edit().putBoolean("pendulum_shake_mode", enabled).apply()
         _pendulumShakeModeFlow.value = enabled
@@ -208,6 +218,7 @@ class PetRepository private constructor(context: Context) {
         "theme" to _themeFlow.value.id,
         "vibration" to _vibrationFlow.value.toString(),
         "vpet_3button_mode" to _threeButtonModeFlow.value.toString(),
+        "vpet_button_placement" to _buttonPlacementFlow.value,
         "pendulum_shake_mode" to _pendulumShakeModeFlow.value.toString(),
         "sound_enabled" to _soundEnabledFlow.value.toString(),
         "nfc_bridge_mode" to _nfcBridgeModeFlow.value,

@@ -289,6 +289,7 @@ class PhoneWearableManager(private val context: Context) {
         themeId: String,
         vibrationEnabled: Boolean,
         threeButtonMode: Boolean,
+        buttonPlacement: String = "RIGHT",
         pendulumShakeMode: Boolean = false,
         soundEnabled: Boolean = false,
         nfcBridgeMode: String = "NFC_DUEL",
@@ -307,6 +308,7 @@ class PhoneWearableManager(private val context: Context) {
             put("theme", themeId)
             put("vibration", vibrationEnabled.toString())
             put("vpet_3button_mode", threeButtonMode.toString())
+            put("vpet_button_placement", buttonPlacement)
             put("pendulum_shake_mode", pendulumShakeMode.toString())
             put("sound_enabled", soundEnabled.toString())
             put("nfc_bridge_mode", nfcBridgeMode)
