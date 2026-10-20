@@ -1,12 +1,15 @@
 package com.digiwear.wear.complication
 
 import android.app.PendingIntent
+import android.content.ComponentName
+import android.content.Context
 import android.content.Intent
 import androidx.wear.watchface.complications.data.ComplicationData
 import androidx.wear.watchface.complications.data.ComplicationType
 import androidx.wear.watchface.complications.data.PlainComplicationText
 import androidx.wear.watchface.complications.data.RangedValueComplicationData
 import androidx.wear.watchface.complications.data.ShortTextComplicationData
+import androidx.wear.watchface.complications.datasource.ComplicationDataSourceUpdateRequester
 import androidx.wear.watchface.complications.datasource.ComplicationRequest
 import androidx.wear.watchface.complications.datasource.SuspendingComplicationDataSourceService
 import com.digiwear.core.model.PetSpecies
@@ -86,4 +89,16 @@ class DigiWearComplicationService : SuspendingComplicationDataSourceService() {
 
     private fun plainText(text: String): PlainComplicationText =
         PlainComplicationText.Builder(text).build()
+
+    companion object {
+        fun requestUpdate(context: Context) {
+            try {
+                ComplicationDataSourceUpdateRequester.create(
+                    context,
+                    ComponentName(context, DigiWearComplicationService::class.java)
+                ).requestUpdateAll()
+            } catch (_: Exception) {
+            }
+        }
+    }
 }

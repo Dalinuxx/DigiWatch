@@ -1,8 +1,10 @@
-﻿package com.digiwear.wear.datalayer
+package com.digiwear.wear.datalayer
 
 import com.digiwear.core.model.BackgroundTheme
 import com.digiwear.core.model.PetState
+import com.digiwear.wear.complication.DigiWearComplicationService
 import com.digiwear.wear.data.PetRepository
+import com.digiwear.wear.tile.DigiWearTileService
 import com.google.android.gms.wearable.MessageEvent
 import com.google.android.gms.wearable.Wearable
 import com.google.android.gms.wearable.WearableListenerService
@@ -99,9 +101,9 @@ class WearDataSyncService : WearableListenerService() {
                     try {
                         val action = String(messageEvent.data, Charsets.UTF_8).trim()
                         val updatedState = when {
-                            action == "FEED_MEAL" -> repo.feedMeal()
+                            action == "FEED_MEAL" || action == "FEED" -> repo.feedMeal()
                             action == "FEED_PROTEIN" -> repo.feedProtein()
-                            action == "CLEAN_WASTE" -> repo.cleanWaste()
+                            action == "CLEAN_WASTE" || action == "CLEAN" -> repo.cleanWaste()
                             action == "TOGGLE_LIGHTS" -> repo.toggleLights()
                             action == "TOGGLE_COLD_SLEEP" -> repo.toggleColdSleep()
                             action == "CURE_INJURY" -> repo.cureInjury()
@@ -111,6 +113,10 @@ class WearDataSyncService : WearableListenerService() {
                                 repo.hatchNewEgg(eggId)
                             }
                             else -> repo.getPetState()
+                        }
+                        if (action == "FEED_MEAL" || action == "FEED" || action == "CLEAN_WASTE" || action == "CLEAN") {
+                            DigiWearComplicationService.requestUpdate(applicationContext)
+                            DigiWearTileService.requestUpdate(applicationContext)
                         }
                         val payload = json.encodeToString(updatedState).toByteArray(Charsets.UTF_8)
                         Wearable.getMessageClient(applicationContext)

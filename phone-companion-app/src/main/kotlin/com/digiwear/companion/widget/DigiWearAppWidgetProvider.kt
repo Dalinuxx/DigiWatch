@@ -27,73 +27,96 @@ class DigiWearAppWidgetProvider : AppWidgetProvider() {
 
     override fun onReceive(context: Context, intent: Intent) {
         super.onReceive(context, intent)
-        when (intent.action) {
+        val action = intent.action ?: return
+        when (action) {
             ACTION_QUICK_FEED -> {
+                val pendingResult = runCatching { goAsync() }.getOrNull()
                 CoroutineScope(Dispatchers.IO).launch {
-                    val wearableManager = PhoneWearableManager(context)
-                    val updatedState = wearableManager.sendRemoteCareCommand("FEED")
-                    val db = PhoneDatabase.getInstance(context)
-                    if (updatedState != null) {
-                        val species = PetSpecies.SPECIES_REGISTRY[updatedState.speciesId] ?: PetSpecies.SPECIES_REGISTRY[101]!!
-                        db.phoneDao().insertSnapshot(
-                            SyncedPetEntity(
-                                speciesId = updatedState.speciesId,
-                                speciesName = species.name,
-                                currentHp = updatedState.currentHp,
-                                maxHp = updatedState.maxHp,
-                                hunger = updatedState.hunger,
-                                strength = updatedState.strength,
-                                weight = updatedState.weight,
-                                ageSeconds = updatedState.ageSeconds,
-                                careMistakes = updatedState.careMistakes,
-                                effort = updatedState.effort,
-                                overfeedCount = updatedState.overfeedCount,
-                                totalBattles = updatedState.totalBattles,
-                                victories = updatedState.victories
-                            )
-                        )
-                    } else {
-                        val latest = db.phoneDao().getLatestSnapshot()
-                        if (latest != null) {
+                    try {
+                        val wearableManager = PhoneWearableManager(context)
+                        val updatedState = wearableManager.sendRemoteCareCommand(REMOTE_ACTION_FEED_MEAL)
+                        val db = PhoneDatabase.getInstance(context)
+                        if (updatedState != null) {
+                            val species = PetSpecies.SPECIES_REGISTRY[updatedState.speciesId] ?: PetSpecies.SPECIES_REGISTRY[101]!!
                             db.phoneDao().insertSnapshot(
-                                latest.copy(
-                                    id = 0,
-                                    hunger = (latest.hunger + 1).coerceAtMost(4),
-                                    weight = latest.weight + 1,
-                                    syncedTimestampUtc = System.currentTimeMillis() / 1000L
+                                SyncedPetEntity(
+                                    speciesId = updatedState.speciesId,
+                                    speciesName = species.name,
+                                    currentHp = updatedState.currentHp,
+                                    maxHp = updatedState.maxHp,
+                                    hunger = updatedState.hunger,
+                                    strength = updatedState.strength,
+                                    weight = updatedState.weight,
+                                    ageSeconds = updatedState.ageSeconds,
+                                    careMistakes = updatedState.careMistakes,
+                                    effort = updatedState.effort,
+                                    overfeedCount = updatedState.overfeedCount,
+                                    totalBattles = updatedState.totalBattles,
+                                    victories = updatedState.victories
                                 )
                             )
+                        } else {
+                            val latest = db.phoneDao().getLatestSnapshot()
+                            if (latest != null) {
+                                db.phoneDao().insertSnapshot(
+                                    latest.copy(
+                                        id = 0,
+                                        hunger = (latest.hunger + 1).coerceAtMost(4),
+                                        weight = latest.weight + 1,
+                                        syncedTimestampUtc = System.currentTimeMillis() / 1000L
+                                    )
+                                )
+                            }
                         }
+                        updateAllWidgets(context)
+                    } catch (_: Exception) {
+                    } finally {
+                        pendingResult?.finish()
                     }
-                    updateAllWidgets(context)
                 }
             }
             ACTION_QUICK_CLEAN -> {
+                val pendingResult = runCatching { goAsync() }.getOrNull()
                 CoroutineScope(Dispatchers.IO).launch {
-                    val wearableManager = PhoneWearableManager(context)
-                    val updatedState = wearableManager.sendRemoteCareCommand("CLEAN")
-                    val db = PhoneDatabase.getInstance(context)
-                    if (updatedState != null) {
-                        val species = PetSpecies.SPECIES_REGISTRY[updatedState.speciesId] ?: PetSpecies.SPECIES_REGISTRY[101]!!
-                        db.phoneDao().insertSnapshot(
-                            SyncedPetEntity(
-                                speciesId = updatedState.speciesId,
-                                speciesName = species.name,
-                                currentHp = updatedState.currentHp,
-                                maxHp = updatedState.maxHp,
-                                hunger = updatedState.hunger,
-                                strength = updatedState.strength,
-                                weight = updatedState.weight,
-                                ageSeconds = updatedState.ageSeconds,
-                                careMistakes = updatedState.careMistakes,
-                                effort = updatedState.effort,
-                                overfeedCount = updatedState.overfeedCount,
-                                totalBattles = updatedState.totalBattles,
-                                victories = updatedState.victories
+                    try {
+                        val wearableManager = PhoneWearableManager(context)
+                        val updatedState = wearableManager.sendRemoteCareCommand(REMOTE_ACTION_CLEAN_WASTE)
+                        val db = PhoneDatabase.getInstance(context)
+                        if (updatedState != null) {
+                            val species = PetSpecies.SPECIES_REGISTRY[updatedState.speciesId] ?: PetSpecies.SPECIES_REGISTRY[101]!!
+                            db.phoneDao().insertSnapshot(
+                                SyncedPetEntity(
+                                    speciesId = updatedState.speciesId,
+                                    speciesName = species.name,
+                                    currentHp = updatedState.currentHp,
+                                    maxHp = updatedState.maxHp,
+                                    hunger = updatedState.hunger,
+                                    strength = updatedState.strength,
+                                    weight = updatedState.weight,
+                                    ageSeconds = updatedState.ageSeconds,
+                                    careMistakes = updatedState.careMistakes,
+                                    effort = updatedState.effort,
+                                    overfeedCount = updatedState.overfeedCount,
+                                    totalBattles = updatedState.totalBattles,
+                                    victories = updatedState.victories
+                                )
                             )
-                        )
+                        } else {
+                            val latest = db.phoneDao().getLatestSnapshot()
+                            if (latest != null) {
+                                db.phoneDao().insertSnapshot(
+                                    latest.copy(
+                                        id = 0,
+                                        syncedTimestampUtc = System.currentTimeMillis() / 1000L
+                                    )
+                                )
+                            }
+                        }
+                        updateAllWidgets(context)
+                    } catch (_: Exception) {
+                    } finally {
+                        pendingResult?.finish()
                     }
-                    updateAllWidgets(context)
                 }
             }
         }
@@ -174,6 +197,25 @@ class DigiWearAppWidgetProvider : AppWidgetProvider() {
     companion object {
         const val ACTION_QUICK_FEED = "com.digiwear.companion.widget.ACTION_QUICK_FEED"
         const val ACTION_QUICK_CLEAN = "com.digiwear.companion.widget.ACTION_QUICK_CLEAN"
+        const val REMOTE_ACTION_FEED_MEAL = "FEED_MEAL"
+        const val REMOTE_ACTION_CLEAN_WASTE = "CLEAN_WASTE"
+        const val REMOTE_ACTION_FEED_LEGACY = "FEED"
+        const val REMOTE_ACTION_CLEAN_LEGACY = "CLEAN"
+
+        /**
+         * Resolves widget intent action to the corresponding remote care action string.
+         */
+        fun resolveRemoteCareAction(intentAction: String?): String? = when (intentAction) {
+            ACTION_QUICK_FEED -> REMOTE_ACTION_FEED_MEAL
+            ACTION_QUICK_CLEAN -> REMOTE_ACTION_CLEAN_WASTE
+            else -> null
+        }
+
+        fun isFeedCommand(action: String?): Boolean =
+            action == REMOTE_ACTION_FEED_MEAL || action == REMOTE_ACTION_FEED_LEGACY
+
+        fun isCleanCommand(action: String?): Boolean =
+            action == REMOTE_ACTION_CLEAN_WASTE || action == REMOTE_ACTION_CLEAN_LEGACY
 
         /**
          * Triggers an immediate refresh of all active DigiWear home screen widgets.

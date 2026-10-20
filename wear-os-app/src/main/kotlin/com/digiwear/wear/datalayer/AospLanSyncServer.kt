@@ -1,9 +1,11 @@
-﻿package com.digiwear.wear.datalayer
+package com.digiwear.wear.datalayer
 
 import android.content.Context
 import com.digiwear.core.model.BackgroundTheme
 import com.digiwear.core.model.PetState
+import com.digiwear.wear.complication.DigiWearComplicationService
 import com.digiwear.wear.data.PetRepository
+import com.digiwear.wear.tile.DigiWearTileService
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -169,9 +171,9 @@ object AospLanSyncServer {
                     try {
                         val action = payload.trim()
                         val updatedState = when {
-                            action == "FEED_MEAL" -> repo.feedMeal()
+                            action == "FEED_MEAL" || action == "FEED" -> repo.feedMeal()
                             action == "FEED_PROTEIN" -> repo.feedProtein()
-                            action == "CLEAN_WASTE" -> repo.cleanWaste()
+                            action == "CLEAN_WASTE" || action == "CLEAN" -> repo.cleanWaste()
                             action == "TOGGLE_LIGHTS" -> repo.toggleLights()
                             action == "TOGGLE_COLD_SLEEP" -> repo.toggleColdSleep()
                             action == "CURE_INJURY" -> repo.cureInjury()
@@ -181,6 +183,10 @@ object AospLanSyncServer {
                                 repo.hatchNewEgg(eggId)
                             }
                             else -> repo.getPetState()
+                        }
+                        if (action == "FEED_MEAL" || action == "FEED" || action == "CLEAN_WASTE" || action == "CLEAN") {
+                            DigiWearComplicationService.requestUpdate(context)
+                            DigiWearTileService.requestUpdate(context)
                         }
                         json.encodeToString(updatedState)
                     } catch (_: Exception) {

@@ -6,6 +6,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 /**
  * Authentic 1997 Bandai Piezo Buzzer Sound Engine.
@@ -190,6 +191,68 @@ class BuzzerManager {
                 } catch (_: Exception) {}
                 delay(duration + 25L)
             }
+        }
+    }
+
+    /**
+     * Authentic Bandai Piezo Buzzer Evolution Alarm.
+     * Plays a high-priority three-phase sequence upon digital monster mutation:
+     * 1. 6-beep burst (TONE_PROP_BEEP, 60ms pulse, 50ms pause)
+     * 2. Digital glitch warble (TONE_CDMA_NETWORK_USA_RINGBACK, 120ms)
+     * 3. 4-tone ascending victory fanfare:
+     *    - TONE_PROP_BEEP (80ms)
+     *    - TONE_PROP_BEEP2 (80ms)
+     *    - TONE_PROP_PROMPT (120ms)
+     *    - TONE_CDMA_ALERT_NETWORK_LITE (250ms)
+     *
+     * Suspending function allowing background workers (such as PetDecayWorker)
+     * to hold execution alive until the entire sequence completes (~1.5s total).
+     */
+    suspend fun playEvolutionAlert() {
+        if (!isEnabled) return
+        withContext(Dispatchers.Default) {
+            val gen = toneGenerator ?: return@withContext
+            try {
+                // Phase 1: 6-beep burst (60ms pulse, 50ms pause)
+                for (i in 0 until 6) {
+                    try {
+                        gen.startTone(ToneGenerator.TONE_PROP_BEEP, 60)
+                    } catch (_: Exception) {}
+                    delay(110L)
+                }
+                delay(40L)
+
+                // Phase 2: 1 digital glitch warble (120ms)
+                try {
+                    gen.startTone(ToneGenerator.TONE_CDMA_NETWORK_USA_RINGBACK, 120)
+                } catch (_: Exception) {}
+                delay(160L)
+
+                // Phase 3: 4-tone ascending victory fanfare
+                val fanfare = listOf(
+                    ToneGenerator.TONE_PROP_BEEP to 80L,
+                    ToneGenerator.TONE_PROP_BEEP2 to 80L,
+                    ToneGenerator.TONE_PROP_PROMPT to 120L,
+                    ToneGenerator.TONE_CDMA_ALERT_NETWORK_LITE to 250L
+                )
+                for ((tone, duration) in fanfare) {
+                    try {
+                        gen.startTone(tone, duration.toInt())
+                    } catch (_: Exception) {}
+                    delay(duration + 30L)
+                }
+            } catch (_: Exception) {}
+        }
+    }
+
+    /**
+     * Asynchronous fire-and-forget evolution alert trigger for UI consumption
+     * (e.g. EvolutionCelebrationOverlay or non-coroutine UI event handlers).
+     */
+    fun playEvolutionAlertAsync() {
+        if (!isEnabled) return
+        scope.launch {
+            playEvolutionAlert()
         }
     }
 

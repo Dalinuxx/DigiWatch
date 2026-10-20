@@ -206,5 +206,12 @@ class DigiWearTileService : TileService() {
 
     companion object {
         private const val RESOURCES_VERSION = "1"
+
+        fun requestUpdate(context: Context) {
+            try {
+                TileService.getUpdater(context).requestUpdate(DigiWearTileService::class.java)
+            } catch (_: Exception) {
+            }
+        }
     }
 }

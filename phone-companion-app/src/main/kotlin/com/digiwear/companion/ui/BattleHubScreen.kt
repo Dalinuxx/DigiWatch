@@ -24,15 +24,19 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.LaunchedEffect
 import com.digiwear.companion.NfcBattleBridge
 import com.digiwear.companion.nfc.NfcDuelManager
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material.icons.filled.Bolt
+import androidx.compose.material.icons.filled.CameraAlt
 import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.QrCodeScanner
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
+import com.digiwear.core.qrcode.QrMatrixGenerator
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedButton
@@ -75,6 +79,7 @@ import com.digiwear.core.model.PetSpecies
 import com.digiwear.core.model.PetStage
 import com.digiwear.core.model.PetState
 import com.digiwear.core.model.SpriteFrame
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlin.random.Random
@@ -122,6 +127,10 @@ fun BattleHubScreen(
     var battleResult by remember { mutableStateOf<BattleResult?>(null) }
     var beamStatus by remember { mutableStateOf<String?>(null) }
 
+    var showQrMatrix by remember { mutableStateOf(false) }
+    var isCameraScannerOpen by remember { mutableStateOf(false) }
+    var scannerStatusError by remember { mutableStateOf<String?>(null) }
+
     // 4-Mode Battle Command Center State
     var selectedBattleMode by remember { mutableStateOf(BattleMode.NFC_TAP_DUEL) }
     var barcodeScanInput by remember { mutableStateOf("4902425617220") }
@@ -129,6 +138,7 @@ fun BattleHubScreen(
     var selectedEnvironment by remember { mutableStateOf("Normal") }
 
     // Live Animated Face-to-Face Battle Arena State
+    var battleJob by remember { mutableStateOf<Job?>(null) }
     var isAnimatingBattle by remember { mutableStateOf(false) }
     var currentTurnIndex by remember { mutableIntStateOf(0) }
     var qteActive by remember { mutableStateOf(false) }
@@ -235,7 +245,19 @@ fun BattleHubScreen(
         )
     }
 
-    val launchAnimatedBattle: (String, BattleMode, String) -> Unit = { codeToFight, mode, envHazard ->
+    val ownQrMatrix = remember(generatedCode) {
+        if (generatedCode.isNotBlank()) {
+            try {
+                QrMatrixGenerator.generateQrMatrix(generatedCode)
+            } catch (_: Exception) {
+                null
+            }
+        } else null
+    }
+
+    val launchAnimatedBattle: (String, BattleMode, String) -> Unit = launchAnimatedBattle@{ codeToFight, mode, envHazard ->
+        if (isAnimatingBattle) return@launchAnimatedBattle
+        battleJob?.cancel()
         try {
             val payload = CommCodeCodec.decodeAuto(codeToFight)
             decodedOpponent = payload
@@ -292,55 +314,62 @@ fun BattleHubScreen(
             currentTurnIndex = 0
             critBoostTriggered = false
 
-            scope.launch {
-                // Dramatic Encounter Flash Sequence
-                encounterFlashEnemyId = fB.speciesId
-                buzzerManager.playAttentionBeep()
-                delay(1050L)
-                encounterFlashEnemyId = null
+            battleJob = scope.launch {
+                try {
+                    // Dramatic Encounter Flash Sequence
+                    encounterFlashEnemyId = fB.speciesId
+                    buzzerManager.playAttentionBeep()
+                    delay(1050L)
+                    encounterFlashEnemyId = null
 
-                var idx = 0
-                while (idx < activeRes.turns.size) {
-                    currentTurnIndex = idx
-                    val turn = activeRes.turns[idx]
-                    if (turn.attackerIndex == 0) {
-                        qteActive = true
-                        delay(420L)
-                        qteActive = false
-                        if (critBoostTriggered) {
-                            activeRes = critRes
-                            battleResult = critRes
+                    var idx = 0
+                    while (idx < activeRes.turns.size) {
+                        currentTurnIndex = idx
+                        val turn = activeRes.turns[idx]
+                        if (turn.attackerIndex == 0) {
+                            qteActive = true
+                            delay(420L)
+                            qteActive = false
+                            if (critBoostTriggered) {
+                                activeRes = critRes
+                                battleResult = critRes
+                            }
                         }
-                    }
 
-                    // Authentic Color V-Pet Cut-In on Critical Hit / Mega Hit
-                    val isCrit = turn.attackType == "MEGA_HIT" || (turn.attackerIndex == 0 && critBoostTriggered)
-                    if (isCrit) {
-                        val attackerId = if (turn.attackerIndex == 0) fA.speciesId else fB.speciesId
-                        activeCutInTitle = if (turn.attackType == "MEGA_HIT") "MEGA HIT" else "CRITICAL HIT"
-                        activeCutInSpeciesId = attackerId
-                        buzzerManager.playCriticalCutInTone()
-                        delay(850L)
-                        activeCutInSpeciesId = null
+                        // Authentic Color V-Pet Cut-In on Critical Hit / Mega Hit
+                        val isCrit = turn.attackType == "MEGA_HIT" || (turn.attackerIndex == 0 && critBoostTriggered)
+                        if (isCrit) {
+                            val attackerId = if (turn.attackerIndex == 0) fA.speciesId else fB.speciesId
+                            activeCutInTitle = if (turn.attackType == "MEGA_HIT") "MEGA HIT" else "CRITICAL HIT"
+                            activeCutInSpeciesId = attackerId
+                            buzzerManager.playCriticalCutInTone()
+                            delay(850L)
+                            activeCutInSpeciesId = null
+                        } else {
+                            buzzerManager.playAttackImpactTone()
+                        }
+
+                        for (step in 1..8) {
+                            turnFxProgress = step / 8f
+                            delay(65L)
+                        }
+                        idx++
+                    }
+                    if (activeRes.winnerIndex == 0) {
+                        buzzerManager.playVictoryFanfare()
                     } else {
-                        buzzerManager.playAttackImpactTone()
+                        buzzerManager.playDefeatJingle()
                     }
-
-                    for (step in 1..8) {
-                        turnFxProgress = step / 8f
-                        delay(65L)
-                    }
-                    idx++
+                } finally {
+                    isAnimatingBattle = false
+                    encounterFlashEnemyId = null
+                    activeCutInSpeciesId = null
+                    qteActive = false
                 }
-                if (activeRes.winnerIndex == 0) {
-                    buzzerManager.playVictoryFanfare()
-                } else {
-                    buzzerManager.playDefeatJingle()
-                }
-                isAnimatingBattle = false
             }
         } catch (e: Exception) {
             validationError = "Validation Failed: ${e.message}"
+            isAnimatingBattle = false
         }
     }
 
@@ -538,41 +567,118 @@ fun BattleHubScreen(
 
                 Spacer(modifier = Modifier.height(8.dp))
 
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .background(DigiWearPalette.CardInner, RoundedCornerShape(10.dp))
-                        .border(1.dp, Color(0xFF263238), RoundedCornerShape(10.dp))
-                        .padding(12.dp)
+                // Toggle Bar for QR Matrix vs Text Comm Code
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Column {
+                    Text(
+                        text = if (showQrMatrix) "▸ BATTLE QR MATRIX (INSTANT MATCHMAKING)" else "▸ 128-BIT BASE32 & DIGIROM",
+                        fontSize = 9.5.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color(0xFF78909C),
+                        fontFamily = FontFamily.Monospace
+                    )
+                    OutlinedButton(
+                        onClick = { showQrMatrix = !showQrMatrix },
+                        contentPadding = PaddingValues(horizontal = 8.dp, vertical = 2.dp),
+                        modifier = Modifier.height(26.dp)
+                    ) {
                         Text(
-                            text = "128-BIT BASE32 COMM CODE:",
-                            fontSize = 9.sp,
-                            color = Color(0xFF78909C),
-                            fontFamily = FontFamily.Monospace
-                        )
-                        Text(
-                            text = CommCodeCodec.formatWithHyphens(generatedCode),
-                            fontSize = 13.sp,
+                            text = if (showQrMatrix) "📄 SHOW TEXT CODE" else "🏁 SHOW QR MATRIX",
+                            fontSize = 8.5.sp,
                             fontWeight = FontWeight.Bold,
-                            color = Color(0xFF00E676),
-                            fontFamily = FontFamily.Monospace
+                            fontFamily = FontFamily.Monospace,
+                            color = if (showQrMatrix) DigiWearPalette.DigiviceCyan else Color(0xFF00E676)
                         )
-                        Spacer(modifier = Modifier.height(6.dp))
-                        Text(
-                            text = "A-COM / D-COM / WIFICOM / 0NL1NE DIGIROM:",
-                            fontSize = 9.sp,
-                            color = Color(0xFF78909C),
-                            fontFamily = FontFamily.Monospace
-                        )
-                        Text(
-                            text = generatedDigiRom,
-                            fontSize = 13.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = DigiWearPalette.CrestGold,
-                            fontFamily = FontFamily.Monospace
-                        )
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(6.dp))
+
+                if (showQrMatrix) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .background(DigiWearPalette.CardInner, RoundedCornerShape(10.dp))
+                            .border(1.dp, Color(0xFF263238), RoundedCornerShape(10.dp))
+                            .padding(12.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .size(180.dp)
+                                    .background(Color.White, RoundedCornerShape(8.dp))
+                                    .padding(8.dp),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                if (ownQrMatrix != null) {
+                                    QrCodeMatrixView(
+                                        matrix = ownQrMatrix,
+                                        modifier = Modifier.fillMaxSize()
+                                    )
+                                } else {
+                                    Text("Generating QR Matrix...", fontSize = 10.sp, color = Color.DarkGray)
+                                }
+                            }
+                            Spacer(modifier = Modifier.height(6.dp))
+                            Text(
+                                text = "POINT COMPANION CAMERA SCANNER TO DUEL",
+                                fontSize = 9.5.sp,
+                                fontWeight = FontWeight.Black,
+                                color = DigiWearPalette.CrestGold,
+                                fontFamily = FontFamily.Monospace
+                            )
+                            Text(
+                                text = CommCodeCodec.formatWithHyphens(generatedCode),
+                                fontSize = 8.5.sp,
+                                color = Color(0xFF90A4AE),
+                                fontFamily = FontFamily.Monospace
+                            )
+                        }
+                    }
+                } else {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .background(DigiWearPalette.CardInner, RoundedCornerShape(10.dp))
+                            .border(1.dp, Color(0xFF263238), RoundedCornerShape(10.dp))
+                            .padding(12.dp)
+                    ) {
+                        Column {
+                            Text(
+                                text = "128-BIT BASE32 COMM CODE:",
+                                fontSize = 9.sp,
+                                color = Color(0xFF78909C),
+                                fontFamily = FontFamily.Monospace
+                            )
+                            Text(
+                                text = CommCodeCodec.formatWithHyphens(generatedCode),
+                                fontSize = 13.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = Color(0xFF00E676),
+                                fontFamily = FontFamily.Monospace
+                            )
+                            Spacer(modifier = Modifier.height(6.dp))
+                            Text(
+                                text = "A-COM / D-COM / WIFICOM / 0NL1NE DIGIROM:",
+                                fontSize = 9.sp,
+                                color = Color(0xFF78909C),
+                                fontFamily = FontFamily.Monospace
+                            )
+                            Text(
+                                text = generatedDigiRom,
+                                fontSize = 13.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = DigiWearPalette.CrestGold,
+                                fontFamily = FontFamily.Monospace
+                            )
+                        }
                     }
                 }
 
@@ -801,6 +907,18 @@ fun BattleHubScreen(
                                 colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF2E7D32))
                             ) {
                                 Text("SCAN", fontSize = 11.sp, fontWeight = FontWeight.Black, fontFamily = FontFamily.Monospace)
+                            }
+                            Button(
+                                onClick = {
+                                    scannerStatusError = null
+                                    isCameraScannerOpen = true
+                                    buzzerManager.playButtonBeep()
+                                },
+                                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF00897B))
+                            ) {
+                                Icon(Icons.Default.CameraAlt, contentDescription = "Camera Scan", modifier = Modifier.size(14.dp))
+                                Spacer(modifier = Modifier.width(4.dp))
+                                Text("CAM", fontSize = 11.sp, fontWeight = FontWeight.Black, fontFamily = FontFamily.Monospace)
                             }
                         }
                         Spacer(modifier = Modifier.height(8.dp))
@@ -1058,6 +1176,21 @@ fun BattleHubScreen(
                     color = Color(0xFFFF8A80),
                     fontFamily = FontFamily.Monospace
                 )
+                Spacer(modifier = Modifier.height(8.dp))
+
+                Button(
+                    onClick = {
+                        scannerStatusError = null
+                        isCameraScannerOpen = true
+                        buzzerManager.playButtonBeep()
+                    },
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF00897B))
+                ) {
+                    Icon(Icons.Default.QrCodeScanner, contentDescription = "Scan QR", modifier = Modifier.size(16.dp))
+                    Spacer(modifier = Modifier.width(6.dp))
+                    Text("📷 POINT-AND-SHOOT CAMERA SCANNER", fontSize = 10.5.sp, fontWeight = FontWeight.Black, fontFamily = FontFamily.Monospace)
+                }
                 Spacer(modifier = Modifier.height(8.dp))
 
                 OutlinedTextField(
@@ -1585,6 +1718,59 @@ fun BattleHubScreen(
             enemySpeciesId = enemyId,
             isBoss = false,
             onFinished = { encounterFlashEnemyId = null }
+        )
+    }
+
+    // Real-Time Optical CameraX / MLKit QR Battle Scanner Overlay
+    if (isCameraScannerOpen) {
+        CameraBattleScanner(
+            statusMessage = scannerStatusError,
+            onDismiss = {
+                isCameraScannerOpen = false
+                scannerStatusError = null
+            },
+            onCodeScanned = { scannedCode ->
+                if (!isAnimatingBattle) {
+                    if (selectedBattleMode == BattleMode.WILD_SCAN) {
+                        try {
+                            val enc = WildScanEncounterGenerator.generateFromScan(
+                                rawScanData = scannedCode,
+                                scanSource = "CAMERA_SCAN",
+                                playerStage = ownSpecies.stage
+                            )
+                            buzzerManager.playAttentionBeep()
+                            activeWildEncounter = enc
+                            inputCode = enc.commCode128
+                            selectedEnvironment = enc.environmentHazard
+                            decodedOpponent = CommCodeCodec.decodeAuto(enc.commCode128)
+                            beamStatus = "📡 Camera Scanned Wild ${enc.species.name} (${enc.habitatZone})!"
+                            isCameraScannerOpen = false
+                            scannerStatusError = null
+                            launchAnimatedBattle(enc.commCode128, BattleMode.WILD_SCAN, enc.environmentHazard)
+                        } catch (e: Exception) {
+                            scannerStatusError = "SCAN ERROR: ${e.message}"
+                        }
+                    } else {
+                        try {
+                            val payload = CommCodeCodec.decodeAuto(scannedCode)
+                            // Cryptographically validated via HMAC-16!
+                            buzzerManager.playAttentionBeep()
+                            inputCode = CommCodeCodec.formatWithHyphens(scannedCode)
+                            decodedOpponent = payload
+                            validationError = null
+                            scannerStatusError = null
+                            isCameraScannerOpen = false
+                            val oppSpecies = PetSpecies.getById(payload.monsterId)
+                            beamStatus = "📷 QR Verified: Opponent ${oppSpecies.name} locked into Arena!"
+                            // Immediately launch face-to-face battle arena!
+                            launchAnimatedBattle(scannedCode, selectedBattleMode, selectedEnvironment)
+                        } catch (e: Exception) {
+                            // HMAC-16 fails or corrupted data: update status and keep scanning!
+                            scannerStatusError = "HMAC-16 VERIFY FAILED: ${e.message ?: "Invalid checksum"}"
+                        }
+                    }
+                }
+            }
         )
     }
 }

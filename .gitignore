@@ -57,6 +57,7 @@ RELEASE_DRAFT*.md
 # Temporary Files, Logs & Scratches
 *.log
 scratch/
+.agents/
 *.dump
 *.tmp
 *.bak

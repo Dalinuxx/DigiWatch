@@ -45,6 +45,7 @@ import com.digiwear.core.battle.DeterministicBattleSolver
 import com.digiwear.core.battle.WildScanEncounter
 import com.digiwear.core.battle.WildScanEncounterGenerator
 import com.digiwear.core.codec.CommCodeCodec
+import com.digiwear.core.qrcode.QrMatrixGenerator
 import com.digiwear.core.fusion.JogressEngine
 import com.digiwear.core.model.BattleFighter
 import com.digiwear.core.model.BattleMode
@@ -104,6 +105,15 @@ fun BattleScreen(
             battleRngSeed = ownSeed
         )
     }
+
+    val ownQrMatrix = remember(ownCode) {
+        try {
+            QrMatrixGenerator.generateQrMatrix(ownCode)
+        } catch (_: Exception) {
+            emptyArray()
+        }
+    }
+    var showQrMatrix by remember { mutableStateOf(false) }
 
     val beamedCode by repository.beamedCommCodeFlow.collectAsState()
     var selectedBattleMode by remember {
@@ -817,7 +827,7 @@ fun BattleScreen(
             }
         }
 
-        // Own Comm Code Card + Copy Button
+        // Own Comm Code Card + QR Matrix Toggle
         item {
             Column(
                 modifier = Modifier
@@ -828,34 +838,96 @@ fun BattleScreen(
                     .padding(6.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Text("YOUR 128-BIT / DIGIROM:", fontSize = 7.sp, color = Color(0xFF90A4AE), fontFamily = FontFamily.Monospace)
-                Text(
-                    text = CommCodeCodec.formatWithHyphens(ownCode).take(19) + "...",
-                    fontSize = 8.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = Color(0xFF80D8FF),
-                    fontFamily = FontFamily.Monospace,
-                    textAlign = TextAlign.Center
-                )
-                Text(
-                    text = "0NL1NE: $ownDigiRom",
-                    fontSize = 8.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = Color(0xFFFFD54F),
-                    fontFamily = FontFamily.Monospace,
-                    textAlign = TextAlign.Center
-                )
-                Spacer(modifier = Modifier.height(3.dp))
-                Button(
-                    onClick = {
-                        clipboardManager.setText(AnnotatedString(ownCode))
-                        battleStatusText = "Code Copied!"
-                        hapticManager.playStepMilestone()
-                    },
-                    modifier = Modifier.height(24.dp),
-                    colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFF00838F))
-                ) {
-                    Text("📋 COPY CODE", fontSize = 7.sp, fontWeight = FontWeight.Bold, fontFamily = FontFamily.Monospace)
+                if (showQrMatrix) {
+                    Text(
+                        text = "COMM CODE QR MATRIX",
+                        fontSize = 7.5.sp,
+                        fontWeight = FontWeight.Black,
+                        color = Color(0xFF80D8FF),
+                        fontFamily = FontFamily.Monospace
+                    )
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Box(
+                        modifier = Modifier
+                            .size(if (displayConfig.screenWidthDp >= 300) 150.dp else 140.dp)
+                            .background(Color.White, RoundedCornerShape(6.dp))
+                            .padding(4.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        QrCodeMatrixView(
+                            matrix = ownQrMatrix,
+                            modifier = Modifier.fillMaxSize()
+                        )
+                    }
+                    Spacer(modifier = Modifier.height(3.dp))
+                    Text(
+                        text = "Scan with Companion Phone",
+                        fontSize = 6.5.sp,
+                        color = Color(0xFF90A4AE),
+                        fontFamily = FontFamily.Monospace
+                    )
+                    Spacer(modifier = Modifier.height(3.dp))
+                    Button(
+                        onClick = {
+                            showQrMatrix = false
+                            hapticManager.playStepMilestone()
+                        },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(24.dp),
+                        colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFF37474F))
+                    ) {
+                        Text("📄 SHOW TEXT CODE", fontSize = 7.sp, fontWeight = FontWeight.Bold, fontFamily = FontFamily.Monospace)
+                    }
+                } else {
+                    Text("YOUR 128-BIT / DIGIROM:", fontSize = 7.sp, color = Color(0xFF90A4AE), fontFamily = FontFamily.Monospace)
+                    Text(
+                        text = CommCodeCodec.formatWithHyphens(ownCode).take(19) + "...",
+                        fontSize = 8.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color(0xFF80D8FF),
+                        fontFamily = FontFamily.Monospace,
+                        textAlign = TextAlign.Center
+                    )
+                    Text(
+                        text = "0NL1NE: $ownDigiRom",
+                        fontSize = 8.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color(0xFFFFD54F),
+                        fontFamily = FontFamily.Monospace,
+                        textAlign = TextAlign.Center
+                    )
+                    Spacer(modifier = Modifier.height(3.dp))
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(3.dp)
+                    ) {
+                        Button(
+                            onClick = {
+                                clipboardManager.setText(AnnotatedString(ownCode))
+                                battleStatusText = "Code Copied!"
+                                hapticManager.playStepMilestone()
+                            },
+                            modifier = Modifier
+                                .weight(1f)
+                                .height(24.dp),
+                            colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFF00838F))
+                        ) {
+                            Text("📋 COPY", fontSize = 7.sp, fontWeight = FontWeight.Bold, fontFamily = FontFamily.Monospace)
+                        }
+                        Button(
+                            onClick = {
+                                showQrMatrix = true
+                                hapticManager.playStepMilestone()
+                            },
+                            modifier = Modifier
+                                .weight(1f)
+                                .height(24.dp),
+                            colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFF2E7D32))
+                        ) {
+                            Text("🏁 SHOW QR MATRIX", fontSize = 7.sp, fontWeight = FontWeight.Bold, fontFamily = FontFamily.Monospace)
+                        }
+                    }
                 }
             }
         }

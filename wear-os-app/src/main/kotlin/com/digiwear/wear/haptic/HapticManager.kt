@@ -1,4 +1,4 @@
-﻿package com.digiwear.wear.haptic
+package com.digiwear.wear.haptic
 
 import android.content.Context
 import android.os.Build
@@ -36,6 +36,10 @@ class HapticManager(context: Context) {
         VibrationEffect.createWaveform(longArrayOf(0, 80, 60, 80), -1)
     }
 
+    private val evolutionAlertEffect: VibrationEffect by lazy(LazyThreadSafetyMode.NONE) {
+        VibrationEffect.createWaveform(longArrayOf(0, 80, 60, 80, 60, 80, 60, 80, 120, 250, 100, 450), -1)
+    }
+
     var isEnabled: Boolean = true
     var buzzerManager: com.digiwear.wear.sound.BuzzerManager? = null
 
@@ -61,5 +65,22 @@ class HapticManager(context: Context) {
         buzzerManager?.playButtonBeep()
         if (!isEnabled) return
         vibrator?.vibrate(stepMilestoneEffect)
+    }
+
+    /**
+     * Triggers the iconic Bandai evolution wrist haptic alert:
+     * rapid 4-pulse stutter followed by escalating dual rumble.
+     * Also triggers asynchronous buzzer fanfare if buzzerManager is bound.
+     */
+    fun playEvolutionAlert() {
+        buzzerManager?.playEvolutionAlertAsync()
+        if (!isEnabled) return
+        try {
+            vibrator?.vibrate(evolutionAlertEffect)
+        } catch (_: Exception) {}
+    }
+
+    fun triggerEvolutionAlert() {
+        playEvolutionAlert()
     }
 }

@@ -20,6 +20,10 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
+    testOptions {
+        unitTests.isReturnDefaultValues = true
+    }
+
     signingConfigs {
         create("release") {
             val keystoreFile = rootProject.file(System.getenv("KEYSTORE_FILE") ?: "signing/digiwear-release.jks")

@@ -20,6 +20,10 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
+    testOptions {
+        unitTests.isReturnDefaultValues = true
+    }
+
     signingConfigs {
         create("release") {
             val keystoreFile = rootProject.file(System.getenv("KEYSTORE_FILE") ?: "signing/digiwear-release.jks")
@@ -96,6 +100,14 @@ dependencies {
     // Kotlinx
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.kotlinx.coroutines.android)
+
+    // CameraX (Camera2, Lifecycle, View)
+    implementation(libs.androidx.camera.camera2)
+    implementation(libs.androidx.camera.lifecycle)
+    implementation(libs.androidx.camera.view)
+
+    // MLKit Barcode Scanning
+    implementation(libs.mlkit.barcode.scanning)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.test.ext.junit)
