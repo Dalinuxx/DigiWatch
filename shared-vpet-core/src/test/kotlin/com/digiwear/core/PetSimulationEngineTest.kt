@@ -127,4 +127,30 @@ class PetSimulationEngineTest {
         val cured = PetSimulationEngine.cureInjury(cleaned)
         assertFalse(cured.isInjured)
     }
+
+    @Test
+    fun testColdSleepPausesAllDecay() {
+        val initial = PetState(
+            speciesId = 201, // Agumon
+            hunger = 4,
+            strength = 4,
+            wasteCount = 0,
+            isFrozen = true,
+            lastProcessedTimestampUtc = 43200L
+        )
+
+        // 8 hours pass while frozen in cold sleep stasis
+        val after8Hours = PetSimulationEngine.processDelta(initial, 43200L + 28800L, ZoneOffset.UTC)
+        assertEquals(4, after8Hours.hunger)
+        assertEquals(4, after8Hours.strength)
+        assertEquals(0, after8Hours.wasteCount)
+        assertEquals(0L, after8Hours.ageSeconds)
+        assertFalse(after8Hours.attentionCallActive)
+        assertEquals(0, after8Hours.careMistakes)
+        assertTrue(after8Hours.isFrozen)
+
+        // Waking up from cold sleep
+        val awakened = PetSimulationEngine.toggleColdSleep(after8Hours, 43200L + 28800L)
+        assertFalse(awakened.isFrozen)
+    }
 }

@@ -1,4 +1,4 @@
-package com.digiwear.core.model
+﻿package com.digiwear.core.model
 
 import kotlinx.serialization.Serializable
 
@@ -23,6 +23,7 @@ data class PetState(
     val wasteCount: Int = 0,          // 0 to 4 uncleaned waste units
     val isSleeping: Boolean = false,
     val lightsOff: Boolean = false,
+    val isFrozen: Boolean = false,
     val isInjured: Boolean = false,
     val lastProcessedTimestampUtc: Long = 0L,
     val attentionCallActive: Boolean = false,

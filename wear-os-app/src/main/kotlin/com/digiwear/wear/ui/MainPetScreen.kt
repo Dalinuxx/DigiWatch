@@ -1,4 +1,4 @@
-﻿package com.digiwear.wear.ui
+package com.digiwear.wear.ui
 
 import android.content.Context
 import android.hardware.Sensor
@@ -123,6 +123,7 @@ fun MainPetScreen(
     // Training Minigame Quick Time Event state
     var isTrainingActive by remember { mutableStateOf(false) }
     var showTrainingPicker by remember { mutableStateOf(false) }
+    var showLightPicker by remember { mutableStateOf(false) }
     var flushAnimationProgress by remember { mutableFloatStateOf(-1f) }
     var medsAnimationProgress by remember { mutableFloatStateOf(-1f) }
     var lastObservedSpeciesId by remember { mutableIntStateOf(petState.speciesId) }
@@ -173,13 +174,7 @@ fun MainPetScreen(
                 }
             }
             VPetMenu.LIGHT -> {
-                scope.launch {
-                    repository.toggleLights()
-                    hapticManager.playStepMilestone()
-                    actionFeedback = if (petState.lightsOff) "Lights ON" else "Lights OFF"
-                    delay(1000L)
-                    actionFeedback = null
-                }
+                showLightPicker = true
             }
             VPetMenu.BATTLE -> {
                 onNavigateBattle()
@@ -550,6 +545,97 @@ fun MainPetScreen(
 
                     Button(
                         onClick = { showTrainingPicker = false },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(22.dp),
+                        colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFF37474F)),
+                        shape = RoundedCornerShape(11.dp)
+                    ) {
+                        Text("CANCEL", fontSize = 7.sp, fontFamily = FontFamily.Monospace, color = Color.LightGray)
+                    }
+                }
+            }
+        }
+
+        if (showLightPicker) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(Color(0xDD070B0E))
+                    .clickable { showLightPicker = false },
+                contentAlignment = Alignment.Center
+            ) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth(0.9f)
+                        .background(Color(0xFF111822), RoundedCornerShape(12.dp))
+                        .border(1.dp, Color(0xFFFFD54F), RoundedCornerShape(12.dp))
+                        .padding(10.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(6.dp)
+                ) {
+                    Text(
+                        text = "LIGHT & COLD SLEEP",
+                        fontSize = 9.sp,
+                        fontWeight = FontWeight.Black,
+                        fontFamily = FontFamily.Monospace,
+                        color = Color(0xFFFFD54F)
+                    )
+
+                    Button(
+                        onClick = {
+                            showLightPicker = false
+                            scope.launch {
+                                repository.toggleLights()
+                                hapticManager.playStepMilestone()
+                                buzzerManager.playButtonBeep()
+                                actionFeedback = if (petState.lightsOff) "Lights ON" else "Lights OFF"
+                                delay(900L)
+                                actionFeedback = null
+                            }
+                        },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(28.dp),
+                        colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFFE65100)),
+                        shape = RoundedCornerShape(14.dp)
+                    ) {
+                        Text(
+                            text = if (petState.lightsOff) "LIGHTS ON" else "LIGHTS OFF",
+                            fontSize = 8.sp,
+                            fontWeight = FontWeight.Bold,
+                            fontFamily = FontFamily.Monospace
+                        )
+                    }
+
+                    Button(
+                        onClick = {
+                            showLightPicker = false
+                            scope.launch {
+                                repository.toggleColdSleep()
+                                hapticManager.playStepMilestone()
+                                buzzerManager.playHealTone()
+                                actionFeedback = if (!petState.isFrozen) "Cold Sleep Active!" else "Awakened!"
+                                delay(1000L)
+                                actionFeedback = null
+                            }
+                        },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(28.dp),
+                        colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFF00838F)),
+                        shape = RoundedCornerShape(14.dp)
+                    ) {
+                        Text(
+                            text = if (petState.isFrozen) "WAKE UP" else "COLD SLEEP (REST)",
+                            fontSize = 8.sp,
+                            fontWeight = FontWeight.Bold,
+                            fontFamily = FontFamily.Monospace
+                        )
+                    }
+
+                    Button(
+                        onClick = { showLightPicker = false },
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(22.dp),

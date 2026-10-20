@@ -1,4 +1,4 @@
-package com.digiwear.wear.data
+﻿package com.digiwear.wear.data
 
 import android.content.Context
 import androidx.room.Room
@@ -423,6 +423,13 @@ class PetRepository private constructor(context: Context) {
     suspend fun cleanWaste(): PetState = withContext(Dispatchers.IO) {
         val current = getPetState()
         val updated = PetSimulationEngine.cleanWaste(current)
+        savePetState(updated)
+        updated
+    }
+
+    suspend fun toggleColdSleep(currentUtc: Long = System.currentTimeMillis() / 1000L): PetState = withContext(Dispatchers.IO) {
+        val current = getPetState()
+        val updated = PetSimulationEngine.toggleColdSleep(current, currentUtc)
         savePetState(updated)
         updated
     }

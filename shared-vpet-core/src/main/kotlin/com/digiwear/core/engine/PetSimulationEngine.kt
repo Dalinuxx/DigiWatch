@@ -1,4 +1,4 @@
-package com.digiwear.core.engine
+﻿package com.digiwear.core.engine
 
 import com.digiwear.core.model.PetSpecies
 import com.digiwear.core.model.PetStage
@@ -35,6 +35,11 @@ object PetSimulationEngine {
 
         val deltaSeconds = max(0L, currentTimestampUtc - lastTime)
         if (deltaSeconds == 0L) return currentState
+
+        // Cold Sleep / Freezer Mode: complete physiological stasis (all decay & aging paused)
+        if (currentState.isFrozen) {
+            return currentState.copy(lastProcessedTimestampUtc = currentTimestampUtc)
+        }
 
         val species = PetSpecies.getById(currentState.speciesId)
         val stage = species.stage
@@ -203,6 +208,20 @@ object PetSimulationEngine {
     /**
      * Toggles lights on or off (essential during sleep windows to prevent care mistakes).
      */
+    /**
+     * Toggles Cold Sleep (Rest Mode / Freezer Mode).
+     * Pauses all aging, hunger decay, strength decay, and care mistake accumulation.
+     */
+    fun toggleColdSleep(state: PetState, currentTimestampUtc: Long = System.currentTimeMillis() / 1000L): PetState {
+        val nextFrozen = !state.isFrozen
+        return state.copy(
+            isFrozen = nextFrozen,
+            attentionCallActive = if (nextFrozen) false else state.attentionCallActive,
+            attentionCallTimestampUtc = if (nextFrozen) null else state.attentionCallTimestampUtc,
+            lastProcessedTimestampUtc = currentTimestampUtc
+        )
+    }
+
     fun toggleLights(state: PetState, currentTimestampUtc: Long): PetState {
         val newLightsOff = !state.lightsOff
         val updated = state.copy(

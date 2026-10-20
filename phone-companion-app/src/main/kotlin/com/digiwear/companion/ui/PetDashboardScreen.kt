@@ -1,4 +1,4 @@
-﻿package com.digiwear.companion.ui
+package com.digiwear.companion.ui
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
@@ -385,6 +385,27 @@ fun PetDashboardScreen(
                     color = DigiWearPalette.DigiviceCyan,
                     fontFamily = FontFamily.Monospace
                 )
+                
+                if (petState.isFrozen) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .background(Color(0x3300E5FF), RoundedCornerShape(8.dp))
+                            .border(1.dp, Color(0xFF00E5FF), RoundedCornerShape(8.dp))
+                            .padding(horizontal = 10.dp, vertical = 4.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = "COLD SLEEP STASIS ACTIVE â€¢ ALL DECAY & AGING PAUSED",
+                            fontSize = 10.sp,
+                            fontWeight = FontWeight.Black,
+                            color = Color(0xFF80D8FF),
+                            fontFamily = FontFamily.Monospace
+                        )
+                    }
+                    Spacer(modifier = Modifier.height(6.dp))
+                }
+
                 Spacer(modifier = Modifier.height(10.dp))
 
                 SegmentedGaugeRow(
@@ -548,6 +569,31 @@ fun PetDashboardScreen(
                     ) {
                         Text("💉 HEAL", fontSize = 10.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
                     }
+                }
+                Spacer(modifier = Modifier.height(6.dp))
+
+                OutlinedButton(
+                    onClick = {
+                        buzzerManager.playHealTone()
+                        executeCareAction(
+                            "TOGGLE_COLD_SLEEP",
+                            { PetSimulationEngine.toggleColdSleep(it, System.currentTimeMillis() / 1000L) },
+                            if (!petState.isFrozen) "Cold Sleep Active (Paused)" else "Awakened from Cold Sleep"
+                        )
+                    },
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = ButtonDefaults.outlinedButtonColors(
+                        containerColor = if (petState.isFrozen) Color(0x3300E5FF) else Color.Transparent
+                    ),
+                    border = BorderStroke(1.dp, if (petState.isFrozen) Color(0xFF00E5FF) else Color(0xFF546E7A))
+                ) {
+                    Text(
+                        text = if (petState.isFrozen) "WAKE UP FROM COLD SLEEP" else "COLD SLEEP / REST MODE (PAUSE DECAY)",
+                        fontSize = 10.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = if (petState.isFrozen) Color(0xFF00E5FF) else Color(0xFF80D8FF),
+                        fontFamily = FontFamily.Monospace
+                    )
                 }
 
                 Spacer(modifier = Modifier.height(8.dp))

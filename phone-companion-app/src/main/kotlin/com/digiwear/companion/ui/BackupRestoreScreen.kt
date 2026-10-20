@@ -47,6 +47,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.digiwear.companion.data.CustomCampaignEntity
 import com.digiwear.companion.data.PhoneDatabase
+import com.digiwear.companion.data.CompanionMemorialEntity
 import com.digiwear.companion.data.StoredDigimonEntity
 import com.digiwear.companion.data.SyncedPetEntity
 import com.digiwear.companion.datalayer.PhoneWearableManager
@@ -67,6 +68,7 @@ import java.util.Locale
 data class FullCompanionArchive(
     val activePet: PetState = PetState(),
     val vaultPets: List<StoredDigimonEntity> = emptyList(),
+    val memorials: List<CompanionMemorialEntity> = emptyList(),
     val customCampaigns: List<CustomCampaignEntity> = emptyList(),
     val exportedAtUtc: Long = System.currentTimeMillis() / 1000L
 )
@@ -78,6 +80,7 @@ fun BackupRestoreScreen(
 ) {
     val snapshots by db.phoneDao().getAllSnapshotsFlow().collectAsState(initial = emptyList())
     val vaultPets by db.phoneDao().getAllVaultPetsFlow().collectAsState(initial = emptyList())
+    val memorials by db.phoneDao().getAllMemorialsFlow().collectAsState(initial = emptyList())
     val customCampaigns by db.phoneDao().getAllCampaignsFlow().collectAsState(initial = emptyList())
     val json = remember { Json { prettyPrint = true; ignoreUnknownKeys = true } }
     val scope = rememberCoroutineScope()
@@ -265,10 +268,11 @@ fun BackupRestoreScreen(
                                 val archive = FullCompanionArchive(
                                     activePet = activePet,
                                     vaultPets = vaultPets.map { it.copy(id = 0) },
+                                    memorials = memorials.map { it.copy(id = 0) },
                                     customCampaigns = customCampaigns
                                 )
                                 jsonExportString = json.encodeToString(archive)
-                                statusMessage = "Generated Full Companion Archive (${vaultPets.size} Vault pets, ${customCampaigns.size} Campaigns)!"
+                                statusMessage = "Generated Full Companion Archive (${vaultPets.size} Vault pets, ${memorials.size} Memorials, ${customCampaigns.size} Campaigns)!"
                             },
                             modifier = Modifier.height(30.dp)
                         ) {
@@ -316,12 +320,13 @@ fun BackupRestoreScreen(
                                         val archive = json.decodeFromString<FullCompanionArchive>(jsonExportString)
                                         persistStateSnapshot(archive.activePet)
                                         archive.vaultPets.forEach { db.phoneDao().insertVaultPet(it.copy(id = 0)) }
+                                        archive.memorials.forEach { db.phoneDao().insertMemorial(it.copy(id = 0)) }
                                         archive.customCampaigns.forEach { db.phoneDao().insertOrUpdateCampaign(it) }
                                         val ok = wearableManager.sendPetStateToWatch(archive.activePet)
                                         statusMessage = if (ok) {
-                                            "Restored Full Archive (${archive.vaultPets.size} Vault pets) + Synced Watch!"
+                                            "Restored Full Archive (${archive.vaultPets.size} Vault, ${archive.memorials.size} Memorials) + Synced Watch!"
                                         } else {
-                                            "Restored Full Archive locally (${archive.vaultPets.size} Vault pets)!"
+                                            "Restored Full Archive locally (${archive.vaultPets.size} Vault, ${archive.memorials.size} Memorials)!"
                                         }
                                     } else {
                                         val state = json.decodeFromString<PetState>(jsonExportString)

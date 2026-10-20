@@ -1,4 +1,4 @@
-package com.digiwear.wear.datalayer
+﻿package com.digiwear.wear.datalayer
 
 import com.digiwear.core.model.BackgroundTheme
 import com.digiwear.core.model.PetState
@@ -103,6 +103,7 @@ class WearDataSyncService : WearableListenerService() {
                             action == "FEED_PROTEIN" -> repo.feedProtein()
                             action == "CLEAN_WASTE" -> repo.cleanWaste()
                             action == "TOGGLE_LIGHTS" -> repo.toggleLights()
+                            action == "TOGGLE_COLD_SLEEP" -> repo.toggleColdSleep()
                             action == "CURE_INJURY" -> repo.cureInjury()
                             action == "TRAIN_WIN" -> repo.train(won = true)
                             action.startsWith("HATCH_EGG:") -> {
