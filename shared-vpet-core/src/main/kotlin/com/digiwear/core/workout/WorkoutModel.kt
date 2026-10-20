@@ -56,7 +56,8 @@ data class WorkoutSummary(
     val effectiveAdventureSteps: Int,
     val weightGramsBurned: Int,
     val effortGained: Int,
-    val energizedBuffGranted: Boolean
+    val energizedBuffGranted: Boolean,
+    val vitalPointsGained: Int = 0
 )
 
 /**
@@ -122,9 +123,14 @@ object WorkoutEngine {
         // Sessions of 3+ minutes grant an energized buff for battles
         val energized = durationSeconds >= 180L || avgBpm >= 120
 
+        // Vital Points calculation: 10 VP per minute + 1 VP per 10 effective steps (optional Vital Bracelet mechanic)
+        val vpGained = max(10, ((durationSeconds / 60L) * 10 + (effectiveSteps / 10)).toInt())
+        val newVitalPoints = currentState.vitalPoints + vpGained
+
         val updatedState = currentState.copy(
             weight = newWeight,
             effort = newEffort,
+            vitalPoints = newVitalPoints,
             lastProcessedTimestampUtc = currentTimestampUtc
         )
 
@@ -138,7 +144,8 @@ object WorkoutEngine {
             effectiveAdventureSteps = effectiveSteps,
             weightGramsBurned = weightBurned,
             effortGained = effortGained,
-            energizedBuffGranted = energized
+            energizedBuffGranted = energized,
+            vitalPointsGained = vpGained
         )
 
         return Pair(updatedState, summary)

@@ -23,6 +23,7 @@ data class PetEntity(
     val wasteCount: Int = 0,
     val isSleeping: Boolean = false,
     val lightsOff: Boolean = false,
+    val isFrozen: Boolean = false,
     val isInjured: Boolean = false,
     val lastProcessedTimestampUtc: Long = System.currentTimeMillis() / 1000L,
     val attentionCallActive: Boolean = false,
@@ -33,7 +34,8 @@ data class PetEntity(
     val generation: Int = 1,
     val lifespanDays: Int = 14,
     val isDeceased: Boolean = false,
-    val traitedEggBonus: Int = 0
+    val traitedEggBonus: Int = 0,
+    val vitalPoints: Int = 0
 ) {
     fun toDomain(): PetState = PetState(
         speciesId = speciesId,
@@ -51,6 +53,7 @@ data class PetEntity(
         wasteCount = wasteCount,
         isSleeping = isSleeping,
         lightsOff = lightsOff,
+        isFrozen = isFrozen,
         isInjured = isInjured,
         lastProcessedTimestampUtc = lastProcessedTimestampUtc,
         attentionCallActive = attentionCallActive,
@@ -61,7 +64,8 @@ data class PetEntity(
         generation = generation,
         lifespanDays = lifespanDays,
         isDeceased = isDeceased,
-        traitedEggBonus = traitedEggBonus
+        traitedEggBonus = traitedEggBonus,
+        vitalPoints = vitalPoints
     )
 
     companion object {
@@ -82,6 +86,7 @@ data class PetEntity(
             wasteCount = domain.wasteCount,
             isSleeping = domain.isSleeping,
             lightsOff = domain.lightsOff,
+            isFrozen = domain.isFrozen,
             isInjured = domain.isInjured,
             lastProcessedTimestampUtc = domain.lastProcessedTimestampUtc,
             attentionCallActive = domain.attentionCallActive,
@@ -92,7 +97,8 @@ data class PetEntity(
             generation = domain.generation,
             lifespanDays = domain.lifespanDays,
             isDeceased = domain.isDeceased,
-            traitedEggBonus = domain.traitedEggBonus
+            traitedEggBonus = domain.traitedEggBonus,
+            vitalPoints = domain.vitalPoints
         )
     }
 }

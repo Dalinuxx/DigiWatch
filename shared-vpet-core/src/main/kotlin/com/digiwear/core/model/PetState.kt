@@ -1,4 +1,4 @@
-﻿package com.digiwear.core.model
+package com.digiwear.core.model
 
 import kotlinx.serialization.Serializable
 
@@ -34,7 +34,8 @@ data class PetState(
     val generation: Int = 1,
     val lifespanDays: Int = 14,
     val isDeceased: Boolean = false,
-    val traitedEggBonus: Int = 0
+    val traitedEggBonus: Int = 0,
+    val vitalPoints: Int = 0
 ) {
     val ageDays: Int
         get() = (ageSeconds / 86400L).toInt()

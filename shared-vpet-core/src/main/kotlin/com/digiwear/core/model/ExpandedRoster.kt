@@ -119,14 +119,14 @@ object ExpandedRoster {
 
             // ---------------- Baby II (Master Expansion) ----------------
             sp(123, "Tsumemon", PetStage.BABY_II, VI, 80, 20, 10, hatch(250, 231, 234)),
-            sp(124, "Hopmon", PetStage.BABY_II, F, 80, 20, 10, hatch(229, 244, 245)),
+            sp(124, "Hopmon", PetStage.BABY_II, F, 80, 20, 10, hatch4(229, 244, 245, 257)),
             sp(125, "Kapurimon", PetStage.BABY_II, F, 80, 20, 10, hatch(237, 249, 233)),
             sp(126, "Minomon", PetStage.BABY_II, F, 80, 20, 10, hatch(238, 213, 228)),
             sp(127, "Sunmon", PetStage.BABY_II, F, 80, 20, 10, hatch4(247, 235, 201, 258)),
             sp(128, "Moonmon", PetStage.BABY_II, F, 80, 20, 10, hatch4(248, 236, 217, 259)),
             sp(129, "Ketomon", PetStage.BABY_II, F, 80, 20, 10, hatch(244, 240, 227)),
-            sp(133, "Poromon", PetStage.BABY_II, F, 80, 20, 10, hatch4(251, 252, 253, 254)),
-            sp(134, "Upamon", PetStage.BABY_II, F, 80, 20, 10, hatch4(255, 256, 257, 260)),
+            sp(133, "Poromon", PetStage.BABY_II, F, 80, 20, 10, hatch4(225, 252, 253, 254)),
+            sp(134, "Upamon", PetStage.BABY_II, F, 80, 20, 10, hatch4(226, 255, 256, 260)),
 
             // ---------------- Child (Original Expansion) ----------------
             sp(223, "Salamon", PetStage.CHILD, VA, 130, 35, 18, arrayOf(
@@ -344,11 +344,11 @@ object ExpandedRoster {
             sp(1111, "Choromon", PetStage.BABY_I, F, 50, 10, 5, egg2(1112, 1114)),
             sp(1113, "Bubbmon Color", PetStage.BABY_I, F, 50, 10, 5, egg2(1115, 1114)),
             // ---------------- BABY_II (500 Roster Expansion) ----------------
-            sp(1102, "Kakkinmon", PetStage.BABY_II, F, 70, 15, 10, grow3(1220, 1218, 1205)),
+            sp(1102, "Kakkinmon", PetStage.BABY_II, F, 70, 15, 10, hatch4(252, 1220, 1218, 1205)),
             sp(1103, "Sakuttomon", PetStage.BABY_II, F, 70, 15, 10, grow3(1218, 1216, 1225)),
             sp(1105, "Chibimon", PetStage.BABY_II, F, 70, 15, 10, grow3(1204, 1201, 1217)),
             sp(1107, "Algomon Baby II", PetStage.BABY_II, F, 70, 15, 10, grow(1212, 1211)),
-            sp(1109, "Bibimon", PetStage.BABY_II, F, 70, 15, 10, grow3(1221, 1207, 1210)),
+            sp(1109, "Bibimon", PetStage.BABY_II, F, 70, 15, 10, hatch4(251, 1221, 1207, 1210)),
             sp(1110, "Wanyamon", PetStage.BABY_II, F, 70, 15, 10, grow3(1203, 1202, 1223)),
             sp(1112, "Caprimon Color", PetStage.BABY_II, F, 70, 15, 10, grow3(1219, 1213, 1214)),
             sp(1114, "Mochimon Color", PetStage.BABY_II, F, 70, 15, 10, grow(1215, 1206)),
@@ -541,7 +541,7 @@ object ExpandedRoster {
         JogressRecipe(470, 404, 584, FusionType.DNA_JOGRESS, "Lamortemon and WereGarurumon channel fencing precision into Diarbbitmon."),
         JogressRecipe(471, 570, 585, FusionType.DNA_JOGRESS, "Thetismon and MarineAngemon synchronize deep sea virtue into Amphimon."),
         JogressRecipe(472, 460, 586, FusionType.DNA_JOGRESS, "Soloogarmon and Astamon ignite the demonic core into Fenriloogamon."),
-        JogressRecipe(467, 374, 587, FusionType.DNA_JOGRESS, "Boutmon and Bulkmon channel thunderous electricity into Kazuchimon."),
+        JogressRecipe(1501, 1502, 1523, FusionType.DNA_JOGRESS, "Holy sword and shield resonance awaken the sovereign Legend-Arms emperor."),
 
         // 500 Roster Expansion Canonical Fusions & X-Antibodies
         JogressRecipe(1507, 1508, 1529, FusionType.DNA_JOGRESS, "King and Queen of Olympos harmonize sovereign divinity into Huanglongmon."),

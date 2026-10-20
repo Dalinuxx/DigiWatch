@@ -1,4 +1,4 @@
-﻿package com.digiwear.core.model
+package com.digiwear.core.model
 
 import kotlinx.serialization.Serializable
 
@@ -16,10 +16,13 @@ data class EvolutionRule(
     val minOverfeed: Int = 0,
     val minBattles: Int = 0,
     val minWinRatio: Float = 0.0f,
-    val minWeight: Int = 0
+    val minWeight: Int = 0,
+    val minVitalPoints: Int = 0
 ) {
     /**
      * Checks whether the given [state] satisfies all condition constraints.
+     * Note: [minVitalPoints] is strictly optional; when > 0, it acts as an additional fast-track/mastery requirement
+     * if the user engages with Workout Mode, but classic care parameters (CM, effort, battles) provide the primary gate.
      */
     fun matches(state: PetState): Boolean {
         if (state.ageSeconds < minAgeSeconds) return false
@@ -29,6 +32,7 @@ data class EvolutionRule(
         if (state.totalBattles < minBattles) return false
         if (state.winRatio < minWinRatio) return false
         if (state.weight < minWeight) return false
+        if (minVitalPoints > 0 && state.vitalPoints < minVitalPoints) return false
         return true
     }
 }

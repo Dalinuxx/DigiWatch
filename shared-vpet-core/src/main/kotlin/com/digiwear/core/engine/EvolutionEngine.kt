@@ -137,6 +137,7 @@ object EvolutionEngine {
         if (rule.minWinRatio > 0f) parts.add("Win ≥ ${(rule.minWinRatio * 100).toInt()}%")
         if (rule.minWeight > 0) parts.add("Weight ≥ ${rule.minWeight}G")
         if (rule.minOverfeed > 0) parts.add("Overfeed ≥ ${rule.minOverfeed}")
+        if (rule.minVitalPoints > 0) parts.add("Vitals ≥ ${rule.minVitalPoints} VP")
         return if (parts.isEmpty()) "Natural Ascension" else parts.joinToString(" • ")
     }
 }

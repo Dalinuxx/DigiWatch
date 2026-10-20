@@ -26,6 +26,7 @@ data class SyncedPetEntity(
     val lifespanDays: Int = 14,
     val isDeceased: Boolean = false,
     val traitedEggBonus: Int = 0,
+    val vitalPoints: Int = 0,
     val syncedTimestampUtc: Long = System.currentTimeMillis() / 1000L
 )
 

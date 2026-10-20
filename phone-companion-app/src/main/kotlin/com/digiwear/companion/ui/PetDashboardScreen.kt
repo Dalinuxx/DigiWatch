@@ -396,7 +396,7 @@ fun PetDashboardScreen(
                         contentAlignment = Alignment.Center
                     ) {
                         Text(
-                            text = "COLD SLEEP STASIS ACTIVE â€¢ ALL DECAY & AGING PAUSED",
+                            text = "COLD SLEEP STASIS ACTIVE • ALL DECAY & AGING PAUSED",
                             fontSize = 10.sp,
                             fontWeight = FontWeight.Black,
                             color = Color(0xFF80D8FF),
