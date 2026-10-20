@@ -1,4 +1,4 @@
-﻿package com.digiwear.wear.ui
+package com.digiwear.wear.ui
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -182,7 +182,13 @@ fun BattleScreen(
         }
     }
 
-    val startBattleWithCode: (String, BattleMode, String) -> Unit = { code, mode, envEffect ->
+    fun startBattleWithCode(code: String, mode: BattleMode, envEffect: String) {
+        if (petState.isInjured) {
+            battleStatusText = "💀 INJURED! Cure with [MEDS] first!"
+            buzzerManager.playAttentionBeep()
+            hapticManager.playAttentionAlert()
+            return
+        }
         try {
             activeEnvEffect = envEffect
             val opponentPayload = CommCodeCodec.decodeAuto(code)
@@ -293,11 +299,17 @@ fun BattleScreen(
                 }
 
                 val won = activeResult.winnerIndex == 0
+                val (finalState, wasInjured) = repository.recordBattleResult(won)
                 if (won) {
                     buzzerManager.playVictoryFanfare()
                     hapticManager.playVictoryFanfare()
+                } else {
+                    buzzerManager.playDefeatJingle()
+                    if (wasInjured) {
+                        hapticManager.playAttentionAlert()
+                        battleStatusText = "💀 INJURED IN BATTLE! Treat with medicine!"
+                    }
                 }
-                repository.recordBattleResult(won)
                 isBattling = false
             }
         } catch (e: Exception) {
@@ -592,6 +604,29 @@ fun BattleScreen(
         contentPadding = displayConfig.contentPadding,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
+        if (petState.isInjured) {
+            item {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = displayConfig.horizontalPadding, vertical = 2.dp)
+                        .background(Color(0xFF381216), RoundedCornerShape(8.dp))
+                        .border(1.dp, Color(0xFFFF5252), RoundedCornerShape(8.dp))
+                        .padding(6.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = "💀 PARTNER IS INJURED!\nCannot battle until cured with [MEDS].",
+                        fontSize = 7.5.sp,
+                        fontWeight = FontWeight.Black,
+                        color = Color(0xFFFF5252),
+                        fontFamily = FontFamily.Monospace,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
+            }
+        }
         item {
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 Text(

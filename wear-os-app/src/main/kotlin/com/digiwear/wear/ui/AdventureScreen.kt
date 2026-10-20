@@ -1,4 +1,4 @@
-﻿package com.digiwear.wear.ui
+package com.digiwear.wear.ui
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -112,6 +112,11 @@ fun AdventureScreen(
     val stepRatio = (progress.accumulatedStepsCurrentNode.toFloat() / currentNode.requiredSteps.coerceAtLeast(1).toFloat()).coerceIn(0f, 1f)
 
     val executeAdventureCombat: suspend (Int, Int?, Int?, BossEncounter?) -> Unit = { enemySpeciesId, hpOverride, powerOverride, bossToClear ->
+        if (petState.isInjured) {
+            eventMessage = "💀 Partner is injured! Cure with [MEDS] first."
+            buzzerManager.playAttentionBeep()
+            hapticManager.playAttentionAlert()
+        } else {
         val enemySpecies = PetSpecies.getById(enemySpeciesId)
         val enemyHp = hpOverride ?: enemySpecies.baseHp
         val enemyPower = powerOverride ?: enemySpecies.basePower
@@ -220,7 +225,7 @@ fun AdventureScreen(
         }
 
         val won = chosenResult.winnerIndex == 0
-        repository.recordBattleResult(won)
+        val (finalState, wasInjured) = repository.recordBattleResult(won)
         isBattling = false
         activeBattleResult = null
 
@@ -239,9 +244,11 @@ fun AdventureScreen(
                 val defeatLine = if (bossToClear.defeatDialogue.isNotBlank()) "\n\"${bossToClear.defeatDialogue}\"" else ""
                 eventMessage = "🏆 Boss ${enemySpecies.name} Defeated!$defeatLine$eggRewardMsg$itemRewardMsg"
             } else {
+                buzzerManager.playDefeatJingle()
                 hapticManager.playAttentionAlert()
                 val introLine = if (bossToClear.introDialogue.isNotBlank()) "\n\"${bossToClear.introDialogue}\"" else ""
-                eventMessage = "💀 Boss ${enemySpecies.name} held the gate (HP: ${chosenResult.fighterBFinalHp}).$introLine"
+                val injuryNotice = if (wasInjured) "\n💀 INJURED IN COMBAT! Needs Medicine!" else ""
+                eventMessage = "💀 Boss ${enemySpecies.name} held the gate (HP: ${chosenResult.fighterBFinalHp}).$introLine$injuryNotice"
             }
         } else {
             wildEncounterMonsterId = null
@@ -250,11 +257,14 @@ fun AdventureScreen(
                 hapticManager.playVictoryFanfare()
                 eventMessage = "⚔ Defeated Wild ${enemySpecies.name} (${chosenResult.turns.size} turns)! +1 Win"
             } else {
+                buzzerManager.playDefeatJingle()
                 hapticManager.playAttackImpact()
-                eventMessage = "Wild ${enemySpecies.name} fled after a fierce clash!"
+                val injuryNotice = if (wasInjured) " 💀 INJURED! Needs Medicine!" else ""
+                eventMessage = "Wild ${enemySpecies.name} overwhelmed your partner!$injuryNotice"
             }
         }
     }
+}
 
     LaunchedEffect(currentNode, progress, wildEncounterMonsterId, petState, isBattling, showSagaPicker) {
         HardwareInputManager.buttonEvents.collect { button ->

@@ -1,4 +1,4 @@
-﻿package com.digiwear.wear.data
+package com.digiwear.wear.data
 
 import android.content.Context
 import androidx.room.Room
@@ -113,6 +113,11 @@ class PetRepository private constructor(context: Context) {
     )
     val lifespanCanonicalEnabledFlow: StateFlow<Boolean> = _lifespanCanonicalEnabledFlow.asStateFlow()
 
+    private val _combatInjuriesEnabledFlow = MutableStateFlow(
+        prefs.getBoolean("combat_injuries_enabled", true)
+    )
+    val combatInjuriesEnabledFlow: StateFlow<Boolean> = _combatInjuriesEnabledFlow.asStateFlow()
+
     private val _beamedCommCodeFlow = MutableStateFlow<String?>(null)
     val beamedCommCodeFlow: StateFlow<String?> = _beamedCommCodeFlow.asStateFlow()
 
@@ -194,6 +199,11 @@ class PetRepository private constructor(context: Context) {
         _lifespanCanonicalEnabledFlow.value = enabled
     }
 
+    fun setCombatInjuriesEnabled(enabled: Boolean) {
+        prefs.edit().putBoolean("combat_injuries_enabled", enabled).apply()
+        _combatInjuriesEnabledFlow.value = enabled
+    }
+
     fun getSettingsMap(): Map<String, String> = mapOf(
         "theme" to _themeFlow.value.id,
         "vibration" to _vibrationFlow.value.toString(),
@@ -208,7 +218,8 @@ class PetRepository private constructor(context: Context) {
         "ambient_display_style" to _ambientStyleFlow.value,
         "hazard_alerts_enabled" to _hazardAlertsFlow.value.toString(),
         "clock_format_24h" to _clockFormatFlow.value.toString(),
-        "lifespan_canonical_enabled" to _lifespanCanonicalEnabledFlow.value.toString()
+        "lifespan_canonical_enabled" to _lifespanCanonicalEnabledFlow.value.toString(),
+        "combat_injuries_enabled" to _combatInjuriesEnabledFlow.value.toString()
     )
 
     fun setBeamedCommCode(code: String?) {
@@ -455,11 +466,12 @@ class PetRepository private constructor(context: Context) {
         updated
     }
 
-    suspend fun recordBattleResult(won: Boolean): PetState = withContext(Dispatchers.IO) {
+    suspend fun recordBattleResult(won: Boolean): Pair<PetState, Boolean> = withContext(Dispatchers.IO) {
         val current = getPetState()
-        val updated = current.copy(
-            totalBattles = current.totalBattles + 1,
-            victories = if (won) current.victories + 1 else current.victories
+        val (updated, wasInjured) = PetSimulationEngine.processBattleOutcome(
+            state = current,
+            won = won,
+            combatInjuriesEnabled = _combatInjuriesEnabledFlow.value
         )
         val evolved = EvolutionEngine.evaluateEvolution(updated)
         val finalState = if (evolved != null) {
@@ -468,7 +480,7 @@ class PetRepository private constructor(context: Context) {
             updated
         }
         savePetState(finalState)
-        finalState
+        Pair(finalState, wasInjured)
     }
 
     suspend fun addAdventureSteps(steps: Int): AdventureStepResult = withContext(Dispatchers.IO) {

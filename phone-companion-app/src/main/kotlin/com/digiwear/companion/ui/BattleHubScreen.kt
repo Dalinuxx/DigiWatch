@@ -1,4 +1,4 @@
-﻿package com.digiwear.companion.ui
+package com.digiwear.companion.ui
 
 import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
@@ -334,6 +334,8 @@ fun BattleHubScreen(
                 }
                 if (activeRes.winnerIndex == 0) {
                     buzzerManager.playVictoryFanfare()
+                } else {
+                    buzzerManager.playDefeatJingle()
                 }
                 isAnimatingBattle = false
             }

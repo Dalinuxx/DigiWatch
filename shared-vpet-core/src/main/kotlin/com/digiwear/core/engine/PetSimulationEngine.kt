@@ -1,4 +1,4 @@
-﻿package com.digiwear.core.engine
+package com.digiwear.core.engine
 
 import com.digiwear.core.model.PetSpecies
 import com.digiwear.core.model.PetStage
@@ -329,5 +329,30 @@ object PetSimulationEngine {
             timestampUtc = System.currentTimeMillis() / 1000L,
             traitedEggBonusGiven = state.traitedEggBonus + 1
         )
+    }
+
+    /**
+     * Authentic Bandai combat result processing:
+     * Increments total battles, and increments victories on win.
+     * On defeat (or knockout), rolls a canonical ~25% chance of battle injury if [combatInjuriesEnabled] is true.
+     * Returns Pair<UpdatedState, WasInjuredInBattle>.
+     */
+    fun processBattleOutcome(
+        state: PetState,
+        won: Boolean,
+        combatInjuriesEnabled: Boolean = true,
+        injuryRoll: Int = (0..99).random()
+    ): Pair<PetState, Boolean> {
+        val newBattles = state.totalBattles + 1
+        val newWins = if (won) state.victories + 1 else state.victories
+        val getsInjured = !won && combatInjuriesEnabled && (injuryRoll < 25)
+        val finalInjured = state.isInjured || getsInjured
+
+        val updated = state.copy(
+            totalBattles = newBattles,
+            victories = newWins,
+            isInjured = finalInjured
+        )
+        return Pair(updated, getsInjured)
     }
 }

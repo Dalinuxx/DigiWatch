@@ -177,7 +177,17 @@ fun MainPetScreen(
                 showLightPicker = true
             }
             VPetMenu.BATTLE -> {
-                onNavigateBattle()
+                if (petState.isInjured) {
+                    actionFeedback = "Injured! Needs Meds"
+                    buzzerManager.playAttentionBeep()
+                    hapticManager.playAttentionAlert()
+                    scope.launch {
+                        delay(1200L)
+                        actionFeedback = null
+                    }
+                } else {
+                    onNavigateBattle()
+                }
             }
             VPetMenu.FLUSH -> {
                 scope.launch {

@@ -176,6 +176,28 @@ class BuzzerManager(context: Context) {
         }
     }
 
+    /**
+     * Descending 4-tone defeat jingle.
+     */
+    fun playDefeatJingle() {
+        if (!isEnabled) return
+        scope.launch {
+            val gen = toneGenerator ?: return@launch
+            val tones = listOf(
+                ToneGenerator.TONE_PROP_PROMPT to 90L,
+                ToneGenerator.TONE_PROP_BEEP2 to 90L,
+                ToneGenerator.TONE_PROP_BEEP to 110L,
+                ToneGenerator.TONE_CDMA_ABBR_ALERT to 220L
+            )
+            for ((tone, duration) in tones) {
+                try {
+                    gen.startTone(tone, duration.toInt())
+                } catch (_: Exception) {}
+                delay(duration + 25L)
+            }
+        }
+    }
+
     fun release() {
         try {
             toneGenerator?.release()

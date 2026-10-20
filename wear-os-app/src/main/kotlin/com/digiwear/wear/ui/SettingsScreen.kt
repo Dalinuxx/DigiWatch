@@ -76,6 +76,7 @@ fun SettingsScreen(
     val hazardAlertsEnabled by repository.hazardAlertsFlow.collectAsState(initial = true)
     val clockFormat24h by repository.clockFormatFlow.collectAsState(initial = false)
     val isLifespanCanonical by repository.lifespanCanonicalEnabledFlow.collectAsState(initial = false)
+    val combatInjuriesEnabled by repository.combatInjuriesEnabledFlow.collectAsState(initial = true)
 
     var feedbackMessage by remember { mutableStateOf<String?>(null) }
     var showEggSelector by remember { mutableStateOf(false) }
@@ -731,7 +732,52 @@ fun SettingsScreen(
         }
 
         // ==========================================
-        // 13. Hatch New Starter Digi-Egg (Full 16 Lineages)
+        // 14. Combat Battle Injuries (Canonical 25% Defeat Risk)
+        // ==========================================
+        item {
+            Spacer(modifier = Modifier.height(6.dp))
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = displayConfig.horizontalPadding),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = "BATTLE INJURIES",
+                        fontSize = 9.sp,
+                        color = Color.White,
+                        fontFamily = FontFamily.Monospace
+                    )
+                    Text(
+                        text = if (combatInjuriesEnabled) "Canonical 25% Defeat Risk (Needs Meds)" else "Disabled (Safe Sparring)",
+                        fontSize = 7.5.sp,
+                        color = if (combatInjuriesEnabled) Color(0xFFFF8A80) else Color(0xFF80D8FF)
+                    )
+                }
+                Button(
+                    onClick = {
+                        val next = !combatInjuriesEnabled
+                        repository.setCombatInjuriesEnabled(next)
+                        if (isVibrationEnabled) hapticManager.playStepMilestone()
+                    },
+                    modifier = Modifier.size(width = 58.dp, height = 30.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        backgroundColor = if (combatInjuriesEnabled) Color(0xFFC62828) else Color(0xFF00695C)
+                    )
+                ) {
+                    Text(
+                        text = if (combatInjuriesEnabled) "CANON" else "SAFE",
+                        fontSize = 8.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+            }
+        }
+
+        // ==========================================
+        // 15. Hatch New Starter Digi-Egg (Full 16 Lineages)
         // ==========================================
         item {
             Spacer(modifier = Modifier.height(10.dp))

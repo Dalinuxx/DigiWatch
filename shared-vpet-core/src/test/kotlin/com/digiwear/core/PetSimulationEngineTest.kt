@@ -1,4 +1,4 @@
-﻿package com.digiwear.core
+package com.digiwear.core
 
 import com.digiwear.core.engine.PetSimulationEngine
 import com.digiwear.core.model.PetStage
@@ -152,5 +152,68 @@ class PetSimulationEngineTest {
         // Waking up from cold sleep
         val awakened = PetSimulationEngine.toggleColdSleep(after8Hours, 43200L + 28800L)
         assertFalse(awakened.isFrozen)
+    }
+
+    @Test
+    fun testBattleVictoryIncrementsWinsAndBattlesWithoutInjury() {
+        val initial = PetState(totalBattles = 5, victories = 3, isInjured = false)
+        val (updated, wasInjured) = PetSimulationEngine.processBattleOutcome(
+            state = initial,
+            won = true,
+            combatInjuriesEnabled = true,
+            injuryRoll = 10
+        )
+        assertEquals(6, updated.totalBattles)
+        assertEquals(4, updated.victories)
+        assertFalse(updated.isInjured)
+        assertFalse(wasInjured)
+    }
+
+    @Test
+    fun testBattleDefeatCanInflictCanonicalInjuryWhenRollBelow25() {
+        val initial = PetState(totalBattles = 5, victories = 3, isInjured = false)
+        // Roll of 15 (< 25) on defeat triggers canonical injury
+        val (updated, wasInjured) = PetSimulationEngine.processBattleOutcome(
+            state = initial,
+            won = false,
+            combatInjuriesEnabled = true,
+            injuryRoll = 15
+        )
+        assertEquals(6, updated.totalBattles)
+        assertEquals(3, updated.victories)
+        assertTrue(updated.isInjured)
+        assertTrue(wasInjured)
+    }
+
+    @Test
+    fun testBattleDefeatDoesNotInflictInjuryWhenRoll25OrHigher() {
+        val initial = PetState(totalBattles = 5, victories = 3, isInjured = false)
+        // Roll of 40 (>= 25) on defeat does not trigger injury
+        val (updated, wasInjured) = PetSimulationEngine.processBattleOutcome(
+            state = initial,
+            won = false,
+            combatInjuriesEnabled = true,
+            injuryRoll = 40
+        )
+        assertEquals(6, updated.totalBattles)
+        assertEquals(3, updated.victories)
+        assertFalse(updated.isInjured)
+        assertFalse(wasInjured)
+    }
+
+    @Test
+    fun testBattleDefeatDoesNotInflictInjuryWhenDisabled() {
+        val initial = PetState(totalBattles = 5, victories = 3, isInjured = false)
+        // Roll of 5 (< 25) but combatInjuriesEnabled = false
+        val (updated, wasInjured) = PetSimulationEngine.processBattleOutcome(
+            state = initial,
+            won = false,
+            combatInjuriesEnabled = false,
+            injuryRoll = 5
+        )
+        assertEquals(6, updated.totalBattles)
+        assertEquals(3, updated.victories)
+        assertFalse(updated.isInjured)
+        assertFalse(wasInjured)
     }
 }
