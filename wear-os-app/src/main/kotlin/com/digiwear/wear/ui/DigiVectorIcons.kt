@@ -207,105 +207,118 @@ fun MedsPillOverlayIcon(
 }
 
 // ============================================================================
-// Vector Drawing Implementations
+// Vector Drawing Implementations (Canonical Bandai V-Pet & DMC Styling)
 // ============================================================================
 
 private fun DrawScope.drawMedicalPillIcon(w: Float, h: Float, s: Float, hasTint: Boolean, tint: Color) {
-    // Iconic 45-degree Two-Tone Medical Pill Capsule (NEVER a syringe!)
-    withTransform({
-        rotate(degrees = -38f, pivot = Offset(w * 0.5f, h * 0.5f))
-    }) {
-        val pillW = w * 0.80f
-        val pillH = h * 0.42f
-        val left = (w - pillW) * 0.5f
-        val top = (h - pillH) * 0.5f
-        val radius = pillH * 0.5f
+    // Authentic Bandai Two-Tone Crossed Pill Capsules First Aid Icon (NEVER a syringe!)
+    val capColor = if (hasTint) tint else Color(0xFFFF5252)
+    val bodyColor = if (hasTint) tint.copy(alpha = 0.45f) else Color(0xFFF5F7FA)
+    val borderColor = if (hasTint) tint else Color(0xFF1A1E26)
+    val strokeWidth = (s * 0.075f).coerceAtLeast(1.1f)
 
-        val leftColor = if (hasTint) tint else Color(0xFFFF5252)
-        val rightColor = if (hasTint) tint.copy(alpha = 0.45f) else Color(0xFFF5F7FA)
-        val borderColor = if (hasTint) tint else Color(0xFF1A1E26)
+    val pillLen = s * 0.78f
+    val pillThickness = s * 0.28f
+    val radius = pillThickness * 0.5f
 
-        // Full capsule base (right half white)
-        drawRoundRect(
-            color = rightColor,
-            topLeft = Offset(left, top),
-            size = Size(pillW, pillH),
-            cornerRadius = CornerRadius(radius, radius)
-        )
+    // Helper to draw a single 2-tone pill capsule
+    fun drawCapsule(angleDeg: Float) {
+        withTransform({
+            rotate(degrees = angleDeg, pivot = Offset(w * 0.5f, h * 0.5f))
+        }) {
+            val left = (w - pillLen) * 0.5f
+            val top = (h - pillThickness) * 0.5f
 
-        // Left half crimson red cap
-        drawRoundRect(
-            color = leftColor,
-            topLeft = Offset(left, top),
-            size = Size(pillW * 0.54f, pillH),
-            cornerRadius = CornerRadius(radius, radius)
-        )
-        drawRect(
-            color = leftColor,
-            topLeft = Offset(left + pillW * 0.30f, top),
-            size = Size(pillW * 0.22f, pillH)
-        )
-
-        // Center divider band
-        drawLine(
-            color = borderColor,
-            start = Offset(w * 0.5f, top),
-            end = Offset(w * 0.5f, top + pillH),
-            strokeWidth = (s * 0.08f).coerceAtLeast(1.2f)
-        )
-
-        // Specular shine strip along top edge
-        drawLine(
-            color = Color.White.copy(alpha = 0.85f),
-            start = Offset(left + radius * 0.65f, top + pillH * 0.26f),
-            end = Offset(left + pillW - radius * 0.65f, top + pillH * 0.26f),
-            strokeWidth = (s * 0.07f).coerceAtLeast(1f),
-            cap = StrokeCap.Round
-        )
-
-        // Outer capsule outline
-        drawRoundRect(
-            color = borderColor,
-            topLeft = Offset(left, top),
-            size = Size(pillW, pillH),
-            cornerRadius = CornerRadius(radius, radius),
-            style = Stroke(width = (s * 0.08f).coerceAtLeast(1.1f))
-        )
+            // Full capsule body (white base)
+            drawRoundRect(
+                color = bodyColor,
+                topLeft = Offset(left, top),
+                size = Size(pillLen, pillThickness),
+                cornerRadius = CornerRadius(radius, radius)
+            )
+            // Left half colored cap (crimson red)
+            drawRoundRect(
+                color = capColor,
+                topLeft = Offset(left, top),
+                size = Size(pillLen * 0.52f, pillThickness),
+                cornerRadius = CornerRadius(radius, radius)
+            )
+            drawRect(
+                color = capColor,
+                topLeft = Offset(left + pillLen * 0.25f, top),
+                size = Size(pillLen * 0.25f, pillThickness)
+            )
+            // Center seam divider
+            drawLine(
+                color = borderColor,
+                start = Offset(w * 0.5f, top),
+                end = Offset(w * 0.5f, top + pillThickness),
+                strokeWidth = strokeWidth
+            )
+            // Capsule outline
+            drawRoundRect(
+                color = borderColor,
+                topLeft = Offset(left, top),
+                size = Size(pillLen, pillThickness),
+                cornerRadius = CornerRadius(radius, radius),
+                style = Stroke(width = strokeWidth)
+            )
+        }
     }
+
+    // Pill 1 (diagonal -40 degrees)
+    drawCapsule(-40f)
+    // Pill 2 (diagonal +40 degrees) crossing Pill 1 to form the authentic first aid cross
+    drawCapsule(40f)
 }
 
 private fun DrawScope.drawMeatIcon(w: Float, h: Float, s: Float, hasTint: Boolean, tint: Color) {
+    // Authentic Bandai Food Icon: Roasted Meat Roast on Bone + Protein Tablet
     val boneColor = if (hasTint) tint.copy(alpha = 0.85f) else Color(0xFFF5F0E6)
     val meatColor = if (hasTint) tint else Color(0xFFD84315)
     val highlightColor = if (hasTint) Color.White.copy(alpha = 0.6f) else Color(0xFFFF8A65)
+    val pillColor = if (hasTint) tint else Color(0xFFFFB300)
 
-    // Bone shaft
+    // Bone shaft protruding from left
     drawRoundRect(
         color = boneColor,
-        topLeft = Offset(w * 0.08f, h * 0.42f),
-        size = Size(w * 0.84f, h * 0.16f),
-        cornerRadius = CornerRadius(s * 0.06f, s * 0.06f)
+        topLeft = Offset(w * 0.08f, h * 0.44f),
+        size = Size(w * 0.32f, h * 0.14f),
+        cornerRadius = CornerRadius(s * 0.04f, s * 0.04f)
     )
-    // Bone knobs (left & right)
-    val knobR = s * 0.11f
-    drawCircle(boneColor, radius = knobR, center = Offset(w * 0.14f, h * 0.39f))
-    drawCircle(boneColor, radius = knobR, center = Offset(w * 0.14f, h * 0.61f))
-    drawCircle(boneColor, radius = knobR, center = Offset(w * 0.86f, h * 0.39f))
-    drawCircle(boneColor, radius = knobR, center = Offset(w * 0.86f, h * 0.61f))
+    // Bone knobs on left
+    val knobR = s * 0.09f
+    drawCircle(boneColor, radius = knobR, center = Offset(w * 0.12f, h * 0.40f))
+    drawCircle(boneColor, radius = knobR, center = Offset(w * 0.12f, h * 0.62f))
 
-    // Meat roast center
+    // Roasted meat chunk in center
     drawRoundRect(
         color = meatColor,
-        topLeft = Offset(w * 0.25f, h * 0.20f),
-        size = Size(w * 0.50f, h * 0.60f),
-        cornerRadius = CornerRadius(s * 0.16f, s * 0.16f)
+        topLeft = Offset(w * 0.24f, h * 0.22f),
+        size = Size(w * 0.42f, h * 0.56f),
+        cornerRadius = CornerRadius(s * 0.14f, s * 0.14f)
     )
-    // Highlight
+    // Meat highlight sheen
     drawRoundRect(
         color = highlightColor,
-        topLeft = Offset(w * 0.32f, h * 0.27f),
-        size = Size(w * 0.36f, h * 0.12f),
-        cornerRadius = CornerRadius(s * 0.05f, s * 0.05f)
+        topLeft = Offset(w * 0.30f, h * 0.28f),
+        size = Size(w * 0.30f, h * 0.12f),
+        cornerRadius = CornerRadius(s * 0.04f, s * 0.04f)
+    )
+
+    // Protein Vitamin Capsule on right side
+    drawRoundRect(
+        color = pillColor,
+        topLeft = Offset(w * 0.70f, h * 0.36f),
+        size = Size(w * 0.22f, h * 0.30f),
+        cornerRadius = CornerRadius(s * 0.10f, s * 0.10f)
+    )
+    // Capsule divider seam
+    drawLine(
+        color = Color(0xFF263238),
+        start = Offset(w * 0.81f, h * 0.36f),
+        end = Offset(w * 0.81f, h * 0.66f),
+        strokeWidth = (s * 0.06f).coerceAtLeast(1f)
     )
 }
 
@@ -335,103 +348,203 @@ private fun DrawScope.drawVitaminIcon(w: Float, h: Float, s: Float, hasTint: Boo
 }
 
 private fun DrawScope.drawScaleIcon(w: Float, h: Float, s: Float, color: Color) {
-    val stroke = (s * 0.09f).coerceAtLeast(1.2f)
-    // Base & center pillar
-    drawLine(color, Offset(w * 0.25f, h * 0.86f), Offset(w * 0.75f, h * 0.86f), strokeWidth = stroke, cap = StrokeCap.Round)
-    drawLine(color, Offset(w * 0.50f, h * 0.22f), Offset(w * 0.50f, h * 0.86f), strokeWidth = stroke, cap = StrokeCap.Round)
-    // Balance beam
-    drawLine(color, Offset(w * 0.16f, h * 0.34f), Offset(w * 0.84f, h * 0.34f), strokeWidth = stroke, cap = StrokeCap.Round)
-    // Left & right pans
-    drawArc(
+    // Authentic Bandai Status Scale / Meter Dial
+    val stroke = (s * 0.085f).coerceAtLeast(1.1f)
+    val cx = w * 0.50f
+    val cy = h * 0.50f
+    val radius = s * 0.40f
+
+    // Outer circular gauge bezel
+    drawCircle(color = color, radius = radius, center = Offset(cx, cy), style = Stroke(width = stroke))
+
+    // Inner tick mark arc across upper hemisphere (from -160 deg to -20 deg)
+    val tickAngles = floatArrayOf(-160f, -125f, -90f, -55f, -20f)
+    for (deg in tickAngles) {
+        val rad = Math.toRadians(deg.toDouble())
+        val rInner = s * 0.25f
+        val rOuter = s * 0.36f
+        val cosA = cos(rad).toFloat()
+        val sinA = sin(rad).toFloat()
+        drawLine(
+            color = color,
+            start = Offset(cx + rInner * cosA, cy + rInner * sinA),
+            end = Offset(cx + rOuter * cosA, cy + rOuter * sinA),
+            strokeWidth = stroke * 0.9f,
+            cap = StrokeCap.Round
+        )
+    }
+
+    // Needle pivot hub at lower center
+    val pivotY = cy + s * 0.12f
+    drawCircle(color = color, radius = s * 0.07f, center = Offset(cx, pivotY))
+
+    // Gauge needle pointing up-left (~-115 degrees)
+    val needleRad = Math.toRadians(-115.0)
+    val needleLen = s * 0.28f
+    drawLine(
         color = color,
-        startAngle = 0f,
-        sweepAngle = 180f,
-        useCenter = true,
-        topLeft = Offset(w * 0.10f, h * 0.44f),
-        size = Size(w * 0.28f, h * 0.22f)
-    )
-    drawArc(
-        color = color,
-        startAngle = 0f,
-        sweepAngle = 180f,
-        useCenter = true,
-        topLeft = Offset(w * 0.62f, h * 0.44f),
-        size = Size(w * 0.28f, h * 0.22f)
+        start = Offset(cx, pivotY),
+        end = Offset(cx + needleLen * cos(needleRad).toFloat(), pivotY + needleLen * sin(needleRad).toFloat()),
+        strokeWidth = stroke * 1.3f,
+        cap = StrokeCap.Round
     )
 }
 
 private fun DrawScope.drawGloveIcon(w: Float, h: Float, s: Float, color: Color) {
-    // Padded main fist
+    // Authentic Bandai Training Icon: Hanging Punching Bag + Sparring Boxer
+    val stroke = (s * 0.09f).coerceAtLeast(1.2f)
+
+    // 1. Hanging Punching Bag (Left)
+    // Ceiling chain / strap
+    drawLine(
+        color = color,
+        start = Offset(w * 0.28f, h * 0.10f),
+        end = Offset(w * 0.28f, h * 0.22f),
+        strokeWidth = stroke * 0.9f
+    )
+    // Cylindrical heavy bag
     drawRoundRect(
         color = color,
-        topLeft = Offset(w * 0.20f, h * 0.16f),
-        size = Size(w * 0.62f, h * 0.48f),
-        cornerRadius = CornerRadius(s * 0.18f, s * 0.18f)
+        topLeft = Offset(w * 0.18f, h * 0.22f),
+        size = Size(w * 0.20f, h * 0.62f),
+        cornerRadius = CornerRadius(s * 0.08f, s * 0.08f)
     )
-    // Thumb lobe
-    drawRoundRect(
-        color = color.copy(alpha = 0.85f),
-        topLeft = Offset(w * 0.12f, h * 0.34f),
-        size = Size(w * 0.24f, h * 0.26f),
-        cornerRadius = CornerRadius(s * 0.10f, s * 0.10f)
+    // Bag reinforcement stripe
+    drawLine(
+        color = Color(0xFF141820),
+        start = Offset(w * 0.18f, h * 0.44f),
+        end = Offset(w * 0.38f, h * 0.44f),
+        strokeWidth = stroke * 0.7f
     )
-    // Wrist cuff
-    drawRoundRect(
-        color = Color(0xFFECEFF1),
-        topLeft = Offset(w * 0.28f, h * 0.66f),
-        size = Size(w * 0.46f, h * 0.20f),
-        cornerRadius = CornerRadius(s * 0.06f, s * 0.06f)
+
+    // 2. Sparring Boxer (Right)
+    // Head
+    drawCircle(color = color, radius = s * 0.08f, center = Offset(w * 0.68f, h * 0.26f))
+    // Torso
+    drawLine(
+        color = color,
+        start = Offset(w * 0.68f, h * 0.35f),
+        end = Offset(w * 0.68f, h * 0.62f),
+        strokeWidth = stroke * 1.3f,
+        cap = StrokeCap.Round
+    )
+    // Extended punching arm striking the bag
+    drawLine(
+        color = color,
+        start = Offset(w * 0.68f, h * 0.44f),
+        end = Offset(w * 0.38f, h * 0.44f),
+        strokeWidth = stroke * 1.2f,
+        cap = StrokeCap.Round
+    )
+    // Fighting stance legs
+    drawLine(
+        color = color,
+        start = Offset(w * 0.68f, h * 0.62f),
+        end = Offset(w * 0.54f, h * 0.86f),
+        strokeWidth = stroke * 1.2f,
+        cap = StrokeCap.Round
+    )
+    drawLine(
+        color = color,
+        start = Offset(w * 0.68f, h * 0.62f),
+        end = Offset(w * 0.80f, h * 0.86f),
+        strokeWidth = stroke * 1.2f,
+        cap = StrokeCap.Round
     )
 }
 
 private fun DrawScope.drawCrossedSwordsIcon(w: Float, h: Float, s: Float, color: Color) {
-    val stroke = (s * 0.10f).coerceAtLeast(1.3f)
-    // Blade 1 (bottom-left to top-right)
-    drawLine(color, Offset(w * 0.18f, h * 0.82f), Offset(w * 0.82f, h * 0.18f), strokeWidth = stroke, cap = StrokeCap.Round)
-    // Guard 1
-    drawLine(color, Offset(w * 0.16f, h * 0.64f), Offset(w * 0.36f, h * 0.84f), strokeWidth = stroke, cap = StrokeCap.Round)
-    // Blade 2 (top-left to bottom-right)
-    drawLine(color, Offset(w * 0.18f, h * 0.18f), Offset(w * 0.82f, h * 0.82f), strokeWidth = stroke, cap = StrokeCap.Round)
-    // Guard 2
-    drawLine(color, Offset(w * 0.64f, h * 0.84f), Offset(w * 0.84f, h * 0.64f), strokeWidth = stroke, cap = StrokeCap.Round)
+    // Authentic Bandai Battle Icon: Two Digimon Fighters Clashing Fists in Combat
+    val stroke = (s * 0.09f).coerceAtLeast(1.2f)
+
+    // Fighter 1 (Left, facing right)
+    drawCircle(color = color, radius = s * 0.08f, center = Offset(w * 0.28f, h * 0.26f))
+    drawLine(color, Offset(w * 0.28f, h * 0.35f), Offset(w * 0.28f, h * 0.62f), strokeWidth = stroke * 1.3f, cap = StrokeCap.Round)
+    drawLine(color, Offset(w * 0.28f, h * 0.44f), Offset(w * 0.48f, h * 0.44f), strokeWidth = stroke * 1.2f, cap = StrokeCap.Round)
+    drawLine(color, Offset(w * 0.28f, h * 0.62f), Offset(w * 0.16f, h * 0.86f), strokeWidth = stroke * 1.2f, cap = StrokeCap.Round)
+    drawLine(color, Offset(w * 0.28f, h * 0.62f), Offset(w * 0.38f, h * 0.86f), strokeWidth = stroke * 1.2f, cap = StrokeCap.Round)
+
+    // Fighter 2 (Right, facing left)
+    drawCircle(color = color, radius = s * 0.08f, center = Offset(w * 0.72f, h * 0.26f))
+    drawLine(color, Offset(w * 0.72f, h * 0.35f), Offset(w * 0.72f, h * 0.62f), strokeWidth = stroke * 1.3f, cap = StrokeCap.Round)
+    drawLine(color, Offset(w * 0.72f, h * 0.44f), Offset(w * 0.52f, h * 0.44f), strokeWidth = stroke * 1.2f, cap = StrokeCap.Round)
+    drawLine(color, Offset(w * 0.72f, h * 0.62f), Offset(w * 0.62f, h * 0.86f), strokeWidth = stroke * 1.2f, cap = StrokeCap.Round)
+    drawLine(color, Offset(w * 0.72f, h * 0.62f), Offset(w * 0.84f, h * 0.86f), strokeWidth = stroke * 1.2f, cap = StrokeCap.Round)
+
+    // Combat clash spark between their fists
+    drawCircle(color = Color.White, radius = s * 0.045f, center = Offset(w * 0.50f, h * 0.44f))
 }
 
 private fun DrawScope.drawFlushWaveIcon(w: Float, h: Float, s: Float, color: Color) {
-    val stroke = (s * 0.10f).coerceAtLeast(1.2f)
-    for (i in 0..2) {
-        val y = h * (0.28f + i * 0.22f)
-        val path = Path().apply {
-            moveTo(w * 0.12f, y)
-            quadraticBezierTo(w * 0.31f, y - h * 0.14f, w * 0.50f, y)
-            quadraticBezierTo(w * 0.69f, y + h * 0.14f, w * 0.88f, y)
-        }
-        drawPath(path, color = color, style = Stroke(width = stroke, cap = StrokeCap.Round))
+    // Authentic Bandai Poop / Flush Icon: 3-Tier Coiled Waste on Base Tray
+    val stroke = (s * 0.09f).coerceAtLeast(1.2f)
+
+    // Base plate / tray line
+    drawLine(
+        color = color,
+        start = Offset(w * 0.14f, h * 0.84f),
+        end = Offset(w * 0.86f, h * 0.84f),
+        strokeWidth = stroke * 1.3f,
+        cap = StrokeCap.Round
+    )
+    // Tier 1 (bottom coil)
+    drawRoundRect(
+        color = color,
+        topLeft = Offset(w * 0.18f, h * 0.62f),
+        size = Size(w * 0.64f, h * 0.18f),
+        cornerRadius = CornerRadius(s * 0.08f, s * 0.08f)
+    )
+    // Tier 2 (middle coil)
+    drawRoundRect(
+        color = color,
+        topLeft = Offset(w * 0.26f, h * 0.44f),
+        size = Size(w * 0.48f, h * 0.17f),
+        cornerRadius = CornerRadius(s * 0.08f, s * 0.08f)
+    )
+    // Tier 3 (top coil & tip)
+    drawRoundRect(
+        color = color,
+        topLeft = Offset(w * 0.36f, h * 0.26f),
+        size = Size(w * 0.28f, h * 0.17f),
+        cornerRadius = CornerRadius(s * 0.08f, s * 0.08f)
+    )
+    val tip = Path().apply {
+        moveTo(w * 0.44f, h * 0.28f)
+        lineTo(w * 0.50f, h * 0.14f)
+        lineTo(w * 0.56f, h * 0.28f)
+        close()
     }
+    drawPath(tip, color = color)
 }
 
 private fun DrawScope.drawLightOnIcon(w: Float, h: Float, s: Float, color: Color) {
-    val stroke = (s * 0.08f).coerceAtLeast(1.1f)
-    // Bulb globe
-    drawCircle(color = color, radius = s * 0.26f, center = Offset(w * 0.5f, h * 0.42f))
-    // Screw base
+    // Authentic Bandai Radiant Light / Sun Symbol
+    val stroke = (s * 0.085f).coerceAtLeast(1.1f)
+    val cx = w * 0.50f
+    val cy = h * 0.46f
+
+    // Center bulb globe
+    drawCircle(color = color, radius = s * 0.20f, center = Offset(cx, cy))
+    // Bulb collar / socket base
     drawRoundRect(
         color = Color(0xFFB0BEC5),
-        topLeft = Offset(w * 0.36f, h * 0.66f),
-        size = Size(w * 0.28f, h * 0.18f),
-        cornerRadius = CornerRadius(s * 0.04f, s * 0.04f)
+        topLeft = Offset(w * 0.40f, h * 0.64f),
+        size = Size(w * 0.20f, h * 0.12f),
+        cornerRadius = CornerRadius(s * 0.03f, s * 0.03f)
     )
-    // Rays
-    val angles = floatArrayOf(-150f, -90f, -30f, 20f, 160f)
+
+    // 8 symmetrical radiant sunbeams (N, NE, E, SE, S, SW, W, NW)
+    val angles = floatArrayOf(0f, 45f, 90f, 135f, 180f, 225f, 270f, 315f)
+    val rInner = s * 0.27f
+    val rOuter = s * 0.43f
     for (deg in angles) {
         val rad = Math.toRadians(deg.toDouble())
-        val r1 = s * 0.34f
-        val r2 = s * 0.46f
-        val cx = w * 0.5f
-        val cy = h * 0.42f
+        val cosA = cos(rad).toFloat()
+        val sinA = sin(rad).toFloat()
         drawLine(
             color = color,
-            start = Offset(cx + (r1 * cos(rad)).toFloat(), cy + (r1 * sin(rad)).toFloat()),
-            end = Offset(cx + (r2 * cos(rad)).toFloat(), cy + (r2 * sin(rad)).toFloat()),
+            start = Offset(cx + rInner * cosA, cy + rInner * sinA),
+            end = Offset(cx + rOuter * cosA, cy + rOuter * sinA),
             strokeWidth = stroke,
             cap = StrokeCap.Round
         )
@@ -452,23 +565,41 @@ private fun DrawScope.drawLightOffMoonIcon(w: Float, h: Float, s: Float, color: 
 }
 
 private fun DrawScope.drawAttentionBeaconIcon(w: Float, h: Float, s: Float, color: Color) {
-    val path = Path().apply {
-        moveTo(w * 0.50f, h * 0.12f)
-        lineTo(w * 0.88f, h * 0.84f)
-        lineTo(w * 0.12f, h * 0.84f)
+    // Authentic Bandai Calling Attention Icon: Shouting Creature Face + Concentric Sound Waves (: >)
+    val stroke = (s * 0.09f).coerceAtLeast(1.2f)
+
+    // Creature Head / Profile on Left
+    // Eye dot
+    drawCircle(color = color, radius = s * 0.05f, center = Offset(w * 0.28f, h * 0.36f))
+
+    // Snout / Open calling mouth (< shape facing right)
+    val headPath = Path().apply {
+        moveTo(w * 0.16f, h * 0.32f)
+        lineTo(w * 0.24f, h * 0.24f)
+        lineTo(w * 0.38f, h * 0.34f)
+        lineTo(w * 0.44f, h * 0.48f) // upper lip
+        lineTo(w * 0.26f, h * 0.52f) // throat cavity
+        lineTo(w * 0.42f, h * 0.56f) // lower jaw
+        lineTo(w * 0.32f, h * 0.72f)
+        lineTo(w * 0.18f, h * 0.68f)
         close()
     }
-    drawPath(path, color = color.copy(alpha = 0.22f))
-    drawPath(path, color = color, style = Stroke(width = (s * 0.09f).coerceAtLeast(1.2f), join = StrokeJoin.Round))
-    // Exclamation mark
-    drawLine(
-        color = color,
-        start = Offset(w * 0.50f, h * 0.36f),
-        end = Offset(w * 0.50f, h * 0.60f),
-        strokeWidth = (s * 0.10f).coerceAtLeast(1.3f),
-        cap = StrokeCap.Round
-    )
-    drawCircle(color = color, radius = s * 0.055f, center = Offset(w * 0.50f, h * 0.73f))
+    drawPath(headPath, color = color)
+
+    // 3 Concentric Sound Waves radiating right from the open mouth
+    val waveCenter = Offset(w * 0.42f, h * 0.52f)
+    val radii = floatArrayOf(s * 0.15f, s * 0.28f, s * 0.41f)
+    for (r in radii) {
+        drawArc(
+            color = color,
+            startAngle = -42f,
+            sweepAngle = 84f,
+            useCenter = false,
+            topLeft = Offset(waveCenter.x - r, waveCenter.y - r),
+            size = Size(r * 2f, r * 2f),
+            style = Stroke(width = stroke, cap = StrokeCap.Round)
+        )
+    }
 }
 
 private fun DrawScope.drawCoiledWasteIcon(w: Float, h: Float, s: Float, hasTint: Boolean, tint: Color) {
