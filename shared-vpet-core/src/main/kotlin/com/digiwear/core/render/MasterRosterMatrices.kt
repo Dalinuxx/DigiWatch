@@ -1,4 +1,4 @@
-package com.digiwear.core.render
+﻿package com.digiwear.core.render
 
 /**
  * Dot-matrix pixel art matrices and palettes for all master expansion species.
@@ -73,22 +73,22 @@ object MasterRosterMatrices {
 
     // [ID 126] Minomon (hanging leaf pinecone)
     val MINOMON_ROM = arrayOf(
-        ".......B........",
-        "...BT......BT...",
-        "...B..TBT...T...",
-        "....TB..T.TB....",
-        "...#............",
-        "..B..B...#BB#...",
-        "..B..B#.....#B..",
-        ".B.#..#.B....B..",
-        "...#BB#.B#.B..B.",
-        ".BB.......B..B..",
-        "...B..B.BB......",
-        "..BB#BB.....B...",
-        "....#B...B......",
-        "....#.B..B#.....",
-        "................",
-        "................"
+        ".......BB.......",
+        ".......B#B......",
+        ".....BBBBBB.....",
+        "....BSSSSSSB....",
+        "...BSSTTTTSSB...",
+        "..BSSTSSSSSTSB..",
+        "..BSSSSSSSSSSB..",
+        "..BBBBBBBBBBBB..",
+        "..B##########B..",
+        ".B##W######W##B.",
+        ".B##B######B##B.",
+        "..B###TTTT###B..",
+        "..BSSSSSSSSSSB..",
+        "...BSSTTTTSSB...",
+        "....BSSSSSSB....",
+        ".....BBBBBB....."
     )
 
     // [ID 127] Sunmon (shining sun with flame tips)
@@ -517,22 +517,22 @@ object MasterRosterMatrices {
 
     // [ID 250] Keramon (wireframe tentacle rookie)
     val KERAMON_ROM = arrayOf(
-        "................",
-        "................",
-        "................",
-        "................",
-        "................",
-        ".....B...B......",
-        ".....B.B........",
-        "....BTTT#B#.....",
-        ".....STSB#..B...",
-        "....BSWB#.......",
-        "..BSBBTTTBBBB...",
-        "..BB#.BTS.#.S...",
-        "...#.#.#TB......",
-        ".......BBTG.....",
-        ".......BBB......",
-        "................"
+        "..BBB......BBB..",
+        ".B##B......B##B.",
+        ".B###BBBBBB###B.",
+        "..B##########B..",
+        "..B#TW####WT#B..",
+        "..B##########B..",
+        "..B#WWWWWWWW#B..",
+        "...B#SSSSSS#B...",
+        "..BBTTTTTTTTBB..",
+        ".B###BBBBBB###B.",
+        "B##BB######BB##B",
+        "BB..B######B..BB",
+        "....B##SS##B....",
+        "...B###BB###B...",
+        "...B##B..B##B...",
+        "...BBB....BBB..."
     )
 
     // =========================================================================
@@ -1769,21 +1769,21 @@ object MasterRosterMatrices {
 
     // [ID 575] Ravemon (shadow blade winged raven ninja)
     val RAVEMON_ROM = arrayOf(
-        "................",
-        "................",
-        "................",
-        "...BT...........",
-        ".T.SBB..S....##.",
-        "..SBBBBB..#S#...",
-        "....TSBR#SW.....",
-        "......BBSB.S....",
-        "......BSS.......",
-        ".......SSSS.....",
-        "......SWS..BR...",
-        ".......S........",
-        "......R.........",
-        "................",
-        "................",
+        ".....BBB..BBB...",
+        "....BTTB.BSSB...",
+        "...BTTTBBSSWB...",
+        ".BB#####BSSWBB..",
+        "B###W##W#BSWWB..",
+        "B###T##T#BSSWB..",
+        ".BBTTTTTTBSSBB..",
+        "..B##SS##TTB#B..",
+        ".B##SSSS##TB##B.",
+        "B###SSSSS#B###B.",
+        "BB.B#SSSS#B..BB.",
+        "...B######B.....",
+        "..B###BB###B....",
+        "..BTTB..BSSB....",
+        "..BBBB..BBBB....",
         "................"
     )
 
@@ -1909,22 +1909,22 @@ object MasterRosterMatrices {
 
     // [ID 582] Beelzemon X (awakened X-Antibody demon lord of gluttony)
     val BEELZEMON_X_ROM = arrayOf(
-        "................",
-        "...........BB...",
-        "..BBBBBS..S#S...",
-        "....#.BSBBBSB.S.",
-        "..BBBB##SSBB....",
-        "....BB...SB...W.",
-        ".........#BB....",
-        "........BBBB....",
-        "........BSBS....",
-        ".......B#BBB....",
-        "......B..SWB....",
-        "........#BBBB...",
-        ".........SBWB...",
-        "........S#BBB...",
-        "........SBBBB...",
-        "........B......."
+        ".BBB..BBBB..BBB.",
+        "BSSB.BTTTTB.BSSB",
+        "BSSB.B#SS#B.BSSB",
+        ".BSSB#W##W#BSSB.",
+        "..BSB######BSB..",
+        ".BWWB##TT##BWWB.",
+        ".BWWB#SSSS#BWWB.",
+        "..BBB##TT##BBB..",
+        ".BSSB######BSSB.",
+        "BSSB.B#TT#B.BSSB",
+        "BBB..B####B..BBB",
+        "....B##BB##B....",
+        "....B#B..B#B....",
+        "...BSSB..BSSB...",
+        "...BTTB..BTTB...",
+        "...BBBB..BBBB..."
     )
 
     // =========================================================================
@@ -3073,20 +3073,20 @@ object MasterRosterMatrices {
 
     // [ID 1108] Dokimon (BABY_I)
     val DOKIMON_ROM = arrayOf(
-        "................",
-        "................",
-        ".......B........",
-        ".......B........",
-        "....B..B........",
-        "....B.T.........",
-        "......BT........",
-        "....BBB.........",
-        "...BSS.SSS..B...",
-        "...B.WSW#B..B...",
-        "...BB.W.BT..B...",
-        "...B..B.B.TTB...",
-        "....B######B....",
-        "................",
+        ".......BB.......",
+        "......BTTB......",
+        ".....BTTB.......",
+        "......BTBB......",
+        "....BBB##BBB....",
+        "...B########B...",
+        "..B##S####S##B..",
+        ".B##SW####WS##B.",
+        ".B##SS####SS##B.",
+        ".B####TTTT####B.",
+        "..B##########B..",
+        "..B##S####S##B..",
+        "...B########B...",
+        "....BBBBBBBB....",
         "................",
         "................"
     )
@@ -3134,21 +3134,21 @@ object MasterRosterMatrices {
     // [ID 1111] Choromon (BABY_I)
     val CHOROMON_ROM = arrayOf(
         "................",
-        "................",
-        "................",
-        "................",
-        "................",
-        "................",
-        "................",
-        "................",
-        "......BB.#......",
-        ".....BT#B.......",
-        ".....BTTB.......",
-        "....BTTTTBB.....",
-        "....BWWWWWB.....",
-        "....BWWWWWWB....",
-        "....BWWWWWWB....",
-        "....BBBBBBBB...."
+        ".......BB.......",
+        "......BTTB......",
+        ".......BB.......",
+        ".....BBBBBB.....",
+        "...BBTTTTTTBB...",
+        "..BTT######TTB..",
+        ".BT##R####R##TB.",
+        ".BT##W####W##TB.",
+        ".B############B.",
+        ".B###SSSSSS###B.",
+        "..B##########B..",
+        "...BBBBBBBBBB...",
+        "....BSSB.BSSB...",
+        "....BBBB.BBBB...",
+        "................"
     )
 
     // [ID 1112] Caprimon Color (BABY_II)
@@ -3174,21 +3174,21 @@ object MasterRosterMatrices {
     // [ID 1113] Bubbmon Color (BABY_I)
     val BUBBMON_COLOR_ROM = arrayOf(
         "................",
+        "......BBBB......",
+        ".....B#WW#B.....",
+        "......BBBB......",
+        "....BBBBBBBB....",
+        "..BB###WW###BB..",
+        ".B####WWWW####B.",
+        ".B##B######B##B.",
+        ".B#####TT#####B.",
+        ".B###TTTTTT###B.",
+        ".B##SSSSSSSS##B.",
+        "..B##########B..",
+        "...BBSSSSSSBB...",
+        ".....BBBBBB.....",
         "................",
-        "................",
-        "................",
-        "................",
-        "................",
-        "................",
-        "................",
-        "................",
-        "....##..........",
-        ".......BBB.B#...",
-        ".....BBTTTBB....",
-        ".....BWWWWWB....",
-        "....BWWWWWWWB...",
-        "....BWWWWWWWB...",
-        ".....BBBBBBB...."
+        "................"
     )
 
     // [ID 1114] Mochimon Color (BABY_II)
@@ -3533,21 +3533,21 @@ object MasterRosterMatrices {
 
     // [ID 1215] KoKabuterimon (CHILD)
     val KOKABUTERIMON_ROM = arrayOf(
-        "................",
-        "................",
-        "................",
-        "................",
-        "................",
-        "................",
-        "...BBB#.........",
-        "...BBB..........",
-        ".....BBBB.......",
-        ".....BTTTBBB....",
-        ".....BTTTTTB....",
-        ".....BTTTTTTB...",
-        "....BWWWWWWWB...",
-        "....BWWWWWWB....",
-        "....BBBBBBBB....",
+        "......BBBB......",
+        ".....B#TT#B.....",
+        "......B##B......",
+        "....BBB##BBB....",
+        "...B########B...",
+        "..B##R####R##B..",
+        "..B##W####W##B..",
+        ".B###TTTTTT###B.",
+        "B##B########B##B",
+        "B#B.B##SS##B.B#B",
+        "BB..BSSSSSSB..BB",
+        "....B######B....",
+        "...B###BB###B...",
+        "...B##B..B##B...",
+        "...BBBB..BBBB...",
         "................"
     )
 
@@ -3694,21 +3694,21 @@ object MasterRosterMatrices {
     // [ID 1223] Strabimon (CHILD)
     val STRABIMON_ROM = arrayOf(
         "................",
-        "................",
-        "................",
-        "......B.B.......",
-        ".....TB#S.......",
-        "....B#TS........",
-        "....BSBW#.BBT...",
-        "....BWWSBBB.....",
-        "....BBB.TBB.....",
-        "...BB.#W#.B#....",
-        "..BB#.###..B....",
-        "...B.##B#B.B....",
-        ".....B#.##......",
-        "................",
-        "................",
-        "................"
+        "..BBB......BBB..",
+        ".BSSB......BSSB.",
+        ".BSSBBBBBBBBSSB.",
+        "..BSSSSSSSSSSB..",
+        "..BS#W####W#SB..",
+        "..B##E####E##B..",
+        "...B###TT###B...",
+        "..BB########BB..",
+        ".BTTB##SS##BTTB.",
+        ".BTTB#SSSS#BTTB.",
+        "..BB.B####B..BB.",
+        "....B##BB##B....",
+        "...B##B..B##B...",
+        "...BSSB..BSSB...",
+        "...BBBB..BBBB..."
     )
 
     // [ID 1224] Plotmon Color (CHILD)
@@ -5936,6 +5936,1011 @@ object MasterRosterMatrices {
     /**
      * Looks up the dot-matrix ROM array for species in the master roster.
      */
+
+    // =========================================================================
+    // 550 Roster Expansion: Pantheon & Capstones (50 New Canonical Species)
+    // =========================================================================
+
+    // [ID 261] Spadamon
+    val SPADAMON_ROM = arrayOf(
+        ".....BBB........",
+        "....B##TB.......",
+        "....B###TB......",
+        "...B##W##TB.....",
+        "..BB#W#W##TB....",
+        "..B##W#W###B....",
+        ".B##T#####T#B...",
+        ".B##TT###TT#B...",
+        "B#T#BB###BB#TB..",
+        "BTTB.B###B.BTTB.",
+        ".BB..B#T#B..BB..",
+        ".....B###B......",
+        "....B#B.B#B.....",
+        "....B#B.B#B.....",
+        "...BB#B.B#BB....",
+        "...BBB...BBB...."
+    )
+
+    // [ID 262] Pteromon
+    val PTEROMON_ROM = arrayOf(
+        ".......BB.......",
+        "......B##B......",
+        ".....B#WW#B.....",
+        "....B##WW##B....",
+        "...B###WW###B...",
+        "..B#E######E#B..",
+        "..B##########B..",
+        ".B#T#TT##TT#T#B.",
+        "B##TTTT##TTTT##B",
+        "B#TTT######TTT#B",
+        ".BB##########BB.",
+        "...B#B####B#B...",
+        "...B##B##B##B...",
+        "...B##B##B##B...",
+        "....B##..##B....",
+        ".....BB..BB....."
+    )
+
+    // [ID 263] Shoemon
+    val SHOEMON_ROM = arrayOf(
+        "......BBB.......",
+        ".....B###B......",
+        "....B#####B.....",
+        "...B##W#W##B....",
+        "...B#WT#TW#B....",
+        "...B##T#T##B....",
+        "....B#####B.....",
+        "...BB#####BB....",
+        "..B#T#####T#B...",
+        "..B##TT#TT##B...",
+        ".B###T###T###B..",
+        ".B############B.",
+        "..B###B##B###B..",
+        "...BSSB..BSSB...",
+        "..BSSSB..BSSSB..",
+        "..BBBBB..BBBBB.."
+    )
+
+    // [ID 388] Zubaeagermon
+    val ZUBAEAGERMON_ROM = arrayOf(
+        "........BB......",
+        ".......B##B.....",
+        "......B####B....",
+        ".....B##WW##B...",
+        "....B###WW###B..",
+        "...B#TT####TT#B.",
+        "..B##TT####TT##B",
+        ".B####T####T###B",
+        ".B#E##########EB",
+        "B##############B",
+        "B#T############B",
+        ".B##BB######BB#B",
+        "..BB.B##..##B.BB",
+        ".....B##..##B...",
+        "....B###..###B..",
+        "....BBBB..BBBB.."
+    )
+
+    // [ID 389] TiaLudomon
+    val TIALUDOMON_ROM = arrayOf(
+        ".....BBBBBB.....",
+        "....B######B....",
+        "...B##SSSS##B...",
+        "..B##S####S##B..",
+        ".B##S######S##B.",
+        ".B#S##WWWW##S#B.",
+        "B#S###WWWW###S#B",
+        "B#S####TT####S#B",
+        "B#S####TT####S#B",
+        "B#S##########S#B",
+        ".B#S########S#B.",
+        ".B##S######S##B.",
+        "..B##SSSSSS##B..",
+        "...B########B...",
+        "....B##..##B....",
+        "....BBB..BBB...."
+    )
+
+    // [ID 390] Meicoomon
+    val MEICOOMON_ROM = arrayOf(
+        "...BB......BB...",
+        "..B##B....B##B..",
+        "..B#T#B..B#T#B..",
+        ".B##T##BB##T##B.",
+        ".B############B.",
+        ".B#E########E#B.",
+        ".B#WW######WW#B.",
+        "..B##T####T##B..",
+        "..B##########B..",
+        ".B############B.",
+        ".B#T########T#B.",
+        "B##T#B####B#T##B",
+        "B##TB.B##B.BT##B",
+        ".BB...B##B...BB.",
+        ".....B####B.....",
+        ".....BB..BB....."
+    )
+
+    // [ID 391] Runnermon
+    val RUNNERMON_ROM = arrayOf(
+        "........BBB.....",
+        ".......B###B....",
+        "......B##S##B...",
+        ".....B###S###B..",
+        "....B####S####B.",
+        "...B#E########B.",
+        "...B#WW###TT##B.",
+        "..B###W##TTTT#B.",
+        ".B#######TTTT#B.",
+        "B###SS######S#B.",
+        "B##SSS######SSB.",
+        ".BB##B#####B##B.",
+        "....B#B...B#B...",
+        "...B##B...B##B..",
+        "..B###B...B###B.",
+        "..BBBB.....BBBB."
+    )
+
+    // [ID 392] Exermon
+    val EXERMON_ROM = arrayOf(
+        ".....B....B.....",
+        "....B#B..B#B....",
+        "....B##BB##B....",
+        ".....B####B.....",
+        "....B######B....",
+        "...B##E##E##B...",
+        "...B########B...",
+        "....B#SSSS#B....",
+        "..BBB######BBB..",
+        ".B##T######T##B.",
+        ".B##T#SSSS#T##B.",
+        "..BBB######BBB..",
+        "....B#T##T#B....",
+        "....B##..##B....",
+        "...B###..###B...",
+        "...BBBB..BBBB..."
+    )
+
+    // [ID 393] Namakemon
+    val NAMAKEMON_ROM = arrayOf(
+        "....BBBBBBBB....",
+        "...B########B...",
+        "..B##S####S##B..",
+        "..B#SS####SS#B..",
+        ".B############B.",
+        ".B##E######E##B.",
+        ".B###W####W###B.",
+        ".B############B.",
+        "..B##T####T##B..",
+        ".B############B.",
+        "B##TT######TT##B",
+        "B##TT######TT##B",
+        ".BB##########BB.",
+        "...B#B####B#B...",
+        "...B#B####B#B...",
+        "...BBB....BBB..."
+    )
+
+    // [ID 394] Galemon
+    val GALEMON_ROM = arrayOf(
+        ".......BB.......",
+        "......B##B......",
+        ".....B#TT#B.....",
+        "....B######B....",
+        "...B###WW###B...",
+        "..B###E##E###B..",
+        ".B############B.",
+        "B##S########S##B",
+        "B#SS########SS#B",
+        "BB############BB",
+        ".B###TT##TT###B.",
+        "..B##########B..",
+        "...B##B##B##B...",
+        "...B##B##B##B...",
+        "....BB....BB....",
+        "....BB....BB...."
+    )
+
+    // [ID 395] Shoeshoemon
+    val SHOESHOEMON_ROM = arrayOf(
+        "..BB......BB....",
+        ".B##B....B##B...",
+        ".B###B..B###B...",
+        "..B###BB###B....",
+        "...B######B.....",
+        "..B##E##E##B....",
+        "..B########B....",
+        "..B##T##T##B....",
+        "...B######B.....",
+        "..BB######BB....",
+        ".B##TT##TT##B...",
+        ".B##########B...",
+        "..B###B##B##B...",
+        "..BSSB..BSSB....",
+        ".BSSSB..BSSSB...",
+        ".BBBBB..BBBBB..."
+    )
+
+    // [ID 396] Shoutmon X4
+    val SHOUTMON_X4_ROM = arrayOf(
+        "......BBBB......",
+        ".....B####B.....",
+        "....B##TT##B....",
+        "...B###TT###B...",
+        "..B##########B..",
+        ".B#E########E#B.",
+        ".B#####WW#####B.",
+        "..B###TTTT###B..",
+        ".BB##########BB.",
+        "B##S###TT###S##B",
+        "B##S########S##B",
+        ".BB###SSSS###BB.",
+        "...B########B...",
+        "...B##B##B##B...",
+        "..B###B..B###B..",
+        "..BBBB....BBBB.."
+    )
+
+    // [ID 397] Garmmon
+    val GARMMON_ROM = arrayOf(
+        "....BB....BB....",
+        "...B##B..B##B...",
+        "..B###B..B###B..",
+        ".B#####BB#####B.",
+        ".B############B.",
+        "B##E########E##B",
+        "B##W########W##B",
+        "B###T######T###B",
+        ".B###TT##TT###B.",
+        ".B#SS######SS#B.",
+        "B##SS######SS##B",
+        "B###B######B###B",
+        ".BB..B####B..BB.",
+        ".....B#..#B.....",
+        "....B##..##B....",
+        "....BBB..BBB...."
+    )
+
+    // [ID 398] Kuwagamon X
+    val KUWAGAMON_X_ROM = arrayOf(
+        "B..B........B..B",
+        "B##B........B##B",
+        ".B##B......B##B.",
+        "..B##B....B##B..",
+        "...B##BBBB##B...",
+        "....B######B....",
+        "...B#E####E#B...",
+        "...B########B...",
+        "..B##TT##TT##B..",
+        ".B############B.",
+        "B##S########S##B",
+        "B##S########S##B",
+        ".BB##########BB.",
+        "...B##B##B##B...",
+        "...B##B##B##B...",
+        "....BB....BB...."
+    )
+
+    // [ID 478] RaijiLudomon
+    val RAIJILUDOMON_ROM = arrayOf(
+        "....BBBBBBBB....",
+        "...B########B...",
+        "..B##SS##SS##B..",
+        ".B###SS##SS###B.",
+        ".B############B.",
+        "B##E########E##B",
+        "B##WW######WW##B",
+        "B###TTTTTTTT###B",
+        "B##############B",
+        ".B#SSSSSSSSSS#B.",
+        ".B############B.",
+        "..B##TT##TT##B..",
+        "...B########B...",
+        "...B##B##B##B...",
+        "..B###B..B###B..",
+        "..BBBB....BBBB.."
+    )
+
+    // [ID 479] Meicrackmon
+    val MEICRACKMON_ROM = arrayOf(
+        "...BB......BB...",
+        "..B##B....B##B..",
+        ".B####B..B####B.",
+        ".B############B.",
+        "B##E########E##B",
+        "B##WW######WW##B",
+        "B##############B",
+        ".B###TT##TT###B.",
+        "..B##########B..",
+        ".B############B.",
+        "B##S########S##B",
+        "B##S########S##B",
+        ".BB###SSSS###BB.",
+        "...B########B...",
+        "...B##B##B##B...",
+        "...BBB....BBB..."
+    )
+
+    // [ID 480] Helloogarmon
+    val HELLOOGARMON_ROM = arrayOf(
+        "....BB....BB....",
+        "...B##B..B##B...",
+        "..B####BB####B..",
+        ".B############B.",
+        "B##E########E##B",
+        "B##W########W##B",
+        "B##############B",
+        ".B###TT##TT###B.",
+        ".B#SS######SS#B.",
+        "B##SS######SS##B",
+        "B##############B",
+        ".B###TTTTTT###B.",
+        "..B##########B..",
+        "...B##B##B##B...",
+        "..B###B..B###B..",
+        "..BBBB....BBBB.."
+    )
+
+    // [ID 481] GrandGalemon
+    val GRANDGALEMON_ROM = arrayOf(
+        ".......BB.......",
+        "......B##B......",
+        ".....B####B.....",
+        "....B##TT##B....",
+        "...B###WW###B...",
+        "..B###E##E###B..",
+        ".B############B.",
+        "B##S########S##B",
+        "B##SS######SS##B",
+        "B##############B",
+        ".B###TT##TT###B.",
+        "..B##########B..",
+        "...B########B...",
+        "...B##B##B##B...",
+        "..B###B..B###B..",
+        "..BBBB....BBBB.."
+    )
+
+    // [ID 482] Chaperomon
+    val CHAPEROMON_ROM = arrayOf(
+        ".....BBBBBB.....",
+        "....B######B....",
+        "...B########B...",
+        "..B##########B..",
+        "..B##E####E##B..",
+        "..B####WW####B..",
+        "...B########B...",
+        "..BB########BB..",
+        ".B###TT##TT###B.",
+        ".B############B.",
+        "B##S########S##B",
+        "B##S########S##B",
+        ".BB##########BB.",
+        "...B########B...",
+        "...B##B##B##B...",
+        "...BBB....BBB..."
+    )
+
+    // [ID 483] OmegaShoutmon
+    val OMEGA_SHOUTMON_ROM = arrayOf(
+        "......BBBB......",
+        ".....B####B.....",
+        "....B######B....",
+        "...B###TT###B...",
+        "..B##########B..",
+        ".B#E########E#B.",
+        ".B#####WW#####B.",
+        "..B###TTTT###B..",
+        ".BB##########BB.",
+        "B##SS######SS##B",
+        "B##############B",
+        ".BB###SSSS###BB.",
+        "...B########B...",
+        "...B##B##B##B...",
+        "..B###B..B###B..",
+        "..BBBB....BBBB.."
+    )
+
+    // [ID 484] Shoutmon X5
+    val SHOUTMON_X5_ROM = arrayOf(
+        "BB....BBBB....BB",
+        "B#B..B####B..B#B",
+        "B##B.B####B.B##B",
+        ".B##B######B##B.",
+        "..B##########B..",
+        ".B#E########E#B.",
+        ".B#####WW#####B.",
+        "..B###TTTT###B..",
+        ".BB##########BB.",
+        "B##SS######SS##B",
+        "B##############B",
+        ".BB##########BB.",
+        "...B########B...",
+        "...B##B##B##B...",
+        "..B###B..B###B..",
+        "..BBBB....BBBB.."
+    )
+
+    // [ID 485] Climbmon
+    val CLIMBMON_ROM = arrayOf(
+        "....BB....BB....",
+        "...B##B..B##B...",
+        "..B####BB####B..",
+        "..B##########B..",
+        ".B##E######E##B.",
+        ".B############B.",
+        "..B####TT####B..",
+        "..B##########B..",
+        ".B###SS##SS###B.",
+        "B##############B",
+        "B##TT######TT##B",
+        ".BB##########BB.",
+        "...B########B...",
+        "...B##B##B##B...",
+        "..B###B..B###B..",
+        "..BBBB....BBBB.."
+    )
+
+    // [ID 486] Divemon
+    val DIVEMON_ROM = arrayOf(
+        ".......BB.......",
+        "......B##B......",
+        ".....B####B.....",
+        "....B######B....",
+        "...B###WW###B...",
+        "..B###E##E###B..",
+        ".B############B.",
+        "B##SS######SS##B",
+        "B##############B",
+        "B###TT####TT###B",
+        ".B############B.",
+        "..B##########B..",
+        "...B########B...",
+        "...B##B##B##B...",
+        "....B######B....",
+        ".....BB..BB....."
+    )
+
+    // [ID 487] Shootmon
+    val SHOOTMON_ROM = arrayOf(
+        "....BB....BB....",
+        "...B##B..B##B...",
+        "..B####BB####B..",
+        ".B############B.",
+        "B##E########E##B",
+        "B##W########W##B",
+        "B##############B",
+        ".B###TTTTTT###B.",
+        ".B#SS######SS#B.",
+        "B##SS######SS##B",
+        "B##############B",
+        ".BB##########BB.",
+        "...B########B...",
+        "...B##B##B##B...",
+        "..B###B..B###B..",
+        "..BBBB....BBBB.."
+    )
+
+    // [ID 488] Tempomon
+    val TEMPOMON_ROM = arrayOf(
+        "....BBBBBBBB....",
+        "...B########B...",
+        "..B##TT##TT##B..",
+        ".B############B.",
+        ".B##E######E##B.",
+        ".B####WWWW####B.",
+        "..B##########B..",
+        ".B###SSSSSS###B.",
+        "B##############B",
+        "B##TT######TT##B",
+        ".BB##########BB.",
+        "...B########B...",
+        "...B##B##B##B...",
+        "..B###B..B###B..",
+        "..B###B..B###B..",
+        "..BBBB....BBBB.."
+    )
+
+    // [ID 593] Merukimon
+    val MERUKIMON_ROM = arrayOf(
+        ".....BBBBBB.....",
+        "....B######B....",
+        "...B###TT###B...",
+        "..B##########B..",
+        ".B#E########E#B.",
+        ".B#####WW#####B.",
+        "B##############B",
+        "B##SS######SS##B",
+        "B##SS######SS##B",
+        ".B###TTTTTT###B.",
+        ".B############B.",
+        "..B##########B..",
+        "...B########B...",
+        "...B##B##B##B...",
+        "..B###B..B###B..",
+        "..BBBB....BBBB.."
+    )
+
+    // [ID 594] Durandamon
+    val DURANDAMON_ROM = arrayOf(
+        ".......BB.......",
+        "......B##B......",
+        ".....B####B.....",
+        "....B##TT##B....",
+        "...B###TT###B...",
+        "..B###WWWW###B..",
+        ".B#E########E#B.",
+        "B##############B",
+        "B##SS######SS##B",
+        "B##SS######SS##B",
+        ".B###TTTTTT###B.",
+        "..B##########B..",
+        "...B########B...",
+        "...B##B##B##B...",
+        "..B###B..B###B..",
+        "..BBBB....BBBB.."
+    )
+
+    // [ID 595] BryweLudramon
+    val BRYWELUDRAMON_ROM = arrayOf(
+        "....BBBBBBBB....",
+        "...B########B...",
+        "..B##SSSSSS##B..",
+        ".B############B.",
+        "B##E########E##B",
+        "B##WW######WW##B",
+        "B##############B",
+        "B###TT####TT###B",
+        "B###TT####TT###B",
+        ".B#SSSSSSSSSS#B.",
+        ".B############B.",
+        "..B##########B..",
+        "...B########B...",
+        "...B##B##B##B...",
+        "..B###B..B###B..",
+        "..BBBB....BBBB.."
+    )
+
+    // [ID 596] RagnaLoardmon
+    val RAGNALOARDMON_ROM = arrayOf(
+        "BB....BBBB....BB",
+        "B#B..B####B..B#B",
+        "B##BB######BB##B",
+        ".B############B.",
+        "B##E########E##B",
+        "B##WW######WW##B",
+        "B##############B",
+        "B###TTTTTTTT###B",
+        ".B#SSSSSSSSSS#B.",
+        ".B############B.",
+        "B##############B",
+        ".B###TT##TT###B.",
+        "..B##########B..",
+        "...B##B##B##B...",
+        "..B###B..B###B..",
+        "..BBBB....BBBB.."
+    )
+
+    // [ID 597] Proximamon
+    val PROXIMAMON_ROM = arrayOf(
+        "BBBB........BBBB",
+        "B##B........B##B",
+        ".B##B..BB..B##B.",
+        "..B##B####B##B..",
+        "...B########B...",
+        "..B#E######E#B..",
+        "..B##########B..",
+        ".B###WW##WW###B.",
+        ".B############B.",
+        "B##SS######SS##B",
+        "B##############B",
+        ".B###TTTTTT###B.",
+        "..B##########B..",
+        "...B##B##B##B...",
+        "..B###B..B###B..",
+        "..BBBB....BBBB.."
+    )
+
+    // [ID 598] Raguelmon
+    val RAGUELMON_ROM = arrayOf(
+        "BB............BB",
+        "B#B..........B#B",
+        ".B#B...BB...B#B.",
+        "..B#B.B##B.B#B..",
+        "...B########B...",
+        "..B#E######E#B..",
+        "..B##########B..",
+        ".B###TT##TT###B.",
+        ".B############B.",
+        "B##SS######SS##B",
+        "B##############B",
+        ".B###SSSSSS###B.",
+        "..B##########B..",
+        "...B##B##B##B...",
+        "..B###B..B###B..",
+        "..BBBB....BBBB.."
+    )
+
+    // [ID 599] Ordinemon
+    val ORDINEMON_ROM = arrayOf(
+        "BB............BB",
+        "B#B..........B#B",
+        ".B##B......B##B.",
+        "..B##B.BB.B##B..",
+        "...B########B...",
+        "..B##########B..",
+        "..B##WW##WW##B..",
+        ".B###TT##TT###B.",
+        ".B############B.",
+        "B##SS######SS##B",
+        "B##############B",
+        ".B###SSSSSS###B.",
+        "..B##########B..",
+        "...B##B##B##B...",
+        "..B###B..B###B..",
+        "..BBBB....BBBB.."
+    )
+
+    // [ID 1546] Agumon (Bond of Courage)
+    val AGUMON_BOND_OF_COURAGE_ROM = arrayOf(
+        ".......BBB......",
+        "......B##TB.....",
+        ".....B####TB....",
+        "....B##RR##B....",
+        "...B###TT###B...",
+        "..B#E######E#B..",
+        "..B####WW####B..",
+        "...B##TTTT##B...",
+        "..BB########BB..",
+        ".B#SS######SS#B.",
+        "B##############B",
+        "B#RRB######B##B.",
+        ".B##B######B##B.",
+        "...B########B...",
+        "..B###B..B###B..",
+        "..BBBB....BBBB.."
+    )
+
+    // [ID 1547] Gabumon (Bond of Friendship)
+    val GABUMON_BOND_OF_FRIENDSHIP_ROM = arrayOf(
+        "....BB....BB....",
+        "...B##B..B##B...",
+        "..B####BB####B..",
+        ".B############B.",
+        "B##E########E##B",
+        "B##W########W##B",
+        "B##############B",
+        ".B###TT##TT###B.",
+        ".B#SS######SS#B.",
+        "B##SS######SS##B",
+        "B##############B",
+        ".BB##########BB.",
+        "...B########B...",
+        "...B##B##B##B...",
+        "..B###B..B###B..",
+        "..BBBB....BBBB.."
+    )
+
+    // [ID 1548] Achillesmon
+    val ACHILLESMON_ROM = arrayOf(
+        "......BBBB......",
+        ".....B#TT#B.....",
+        "....B######B..B.",
+        "...B###TT###B.B#",
+        "..B##########B#B",
+        ".B#E########EB#B",
+        ".B#####WW####B#B",
+        "B##############B",
+        "B##SS######SS#BB",
+        "B##SS######SS#B.",
+        ".B###TTTTTT###B.",
+        "..B##########B..",
+        "...B########B...",
+        "..TB##B##B##BT..",
+        ".T#B##B..B##B#T.",
+        ".TTBBB....BBBTT."
+    )
+
+    // [ID 1549] Shivamon
+    val SHIVAMON_ROM = arrayOf(
+        "BB....BBBB....BB",
+        "B#B..B####B..B#B",
+        ".B#BB##TT##BB#B.",
+        "..B##########B..",
+        "BB##E######E##BB",
+        "B##WW######WW##B",
+        "B##############B",
+        ".B###TT##TT###B.",
+        "BB#SS######SS#BB",
+        "B##############B",
+        ".B###SSSSSS###B.",
+        "..BB########BB..",
+        "...B########B...",
+        "..B##########B..",
+        ".B############B.",
+        ".BBBBBBBBBBBBBB."
+    )
+
+    // [ID 1550] Shroudmon
+    val SHROUDMON_ROM = arrayOf(
+        "....BBBBBBBB....",
+        "...B########B...",
+        "..B##TT##TT##B..",
+        ".B############B.",
+        "B##E########E##B",
+        "B##WW######WW##B",
+        "B##############B",
+        ".B###TTTTTT###B.",
+        ".B#SS######SS#B.",
+        "B##SS######SS##B",
+        "B##############B",
+        ".BB##########BB.",
+        "...B########B...",
+        "...B##B##B##B...",
+        "..B###B..B###B..",
+        "..BBBB....BBBB.."
+    )
+
+    // [ID 1551] Zephagamon
+    val ZEPHAGAMON_ROM = arrayOf(
+        ".......BB.......",
+        "......B##B......",
+        ".....B####B.....",
+        "....B##TT##B....",
+        "...B###WW###B...",
+        "..B###E##E###B..",
+        ".B############B.",
+        "B##SS######SS##B",
+        "B##############B",
+        "B###TT####TT###B",
+        ".B############B.",
+        "..B##########B..",
+        "...B########B...",
+        "...B##B##B##B...",
+        "..B###B..B###B..",
+        "..BBBB....BBBB.."
+    )
+
+    // [ID 1552] Cendrillmon
+    val CENDRILLMON_ROM = arrayOf(
+        ".....BBBBBB.....",
+        "....B######B....",
+        "...B###TT###B...",
+        "..B##########B..",
+        ".B#E########E#B.",
+        ".B#####WW#####B.",
+        "..B##########B..",
+        ".B###TT##TT###B.",
+        "B##############B",
+        "B##WW######WW##B",
+        "B##WW######WW##B",
+        "B##############B",
+        ".B###TTTTTT###B.",
+        "..B##########B..",
+        ".B############B.",
+        ".BBBBBBBBBBBBBB."
+    )
+
+    // [ID 1553] Fenriloogamon: Takemikazuchi
+    val TAKEMIKAZUCHI_ROM = arrayOf(
+        "C..BB....BB....C",
+        ".CB##B..B##B..C.",
+        "..B##BBBB##B.C..",
+        "...B########BC..",
+        "..B#E######E#B..",
+        "..B##WW##WW##B..",
+        ".B############B.",
+        ".B###TTTTTT###B.",
+        "B##CC######CC##B",
+        "B##############B",
+        "B##############B",
+        ".B###TT##TT###B.",
+        "..B##########B..",
+        "...B##B##B##B...",
+        "..B###B..B###B..",
+        "..BBBB....BBBB.."
+    )
+
+    // [ID 1554] Shoutmon X7
+    val SHOUTMON_X7_ROM = arrayOf(
+        "BB....BBBB....BB",
+        "B#B..B#TT#B..B#B",
+        "B##BB##TT##BB##B",
+        ".B###WW##WW###B.",
+        ".B#E########E#B.",
+        ".B############B.",
+        "..B##TTTTTT##B..",
+        ".BB##########BB.",
+        "B##SS######SS##B",
+        "B#W##########W#B",
+        "B#W##########W#B",
+        ".BB##########BB.",
+        "...B########B...",
+        "...B##B##B##B...",
+        "..B###B..B###B..",
+        "..BBBB....BBBB.."
+    )
+
+    // [ID 1555] Bagramon
+    val BAGRAMON_ROM = arrayOf(
+        "BB............BB",
+        "B#B..........B#B",
+        ".B##B......B##B.",
+        "..B##B.BB.B##B..",
+        "...B########B...",
+        "..B#E######E#B..",
+        "..B##########B..",
+        ".B###TT##TT###B.",
+        ".B############B.",
+        "B##SS######SS##B",
+        "B##############B",
+        ".B###SSSSSS###B.",
+        "..B##########B..",
+        "...B##B##B##B...",
+        "..B###B..B###B..",
+        "..BBBB....BBBB.."
+    )
+
+    // [ID 1556] Tactimon
+    val TACTIMON_ROM = arrayOf(
+        "....BBBBBBBB....",
+        "...B########B...",
+        "..B##SS##SS##B..",
+        ".B############B.",
+        "B##E########E##B",
+        "B##WW######WW##B",
+        "B##############B",
+        ".B###TTTTTT###B.",
+        ".B#SSSSSSSSSS#B.",
+        "B##SS######SS##B",
+        "B##############B",
+        ".BB##########BB.",
+        "...B########B...",
+        "...B##B##B##B...",
+        "..B###B..B###B..",
+        "..BBBB....BBBB.."
+    )
+
+    // [ID 1557] Death-X-DORUgoramon
+    val DEATH_X_DORUGORAMON_ROM = arrayOf(
+        "BB............BB",
+        "B#B..........B#B",
+        ".B##B......B##B.",
+        "..B##B.BB.B##B..",
+        "...B########B...",
+        "..B#E######E#B..",
+        "..B##########B..",
+        ".B###TT##TT###B.",
+        ".B#S#S#S#S#S#B..",
+        "B##S#S#S#S#S##B.",
+        "B##TT######TT##B",
+        ".B###SSSSSS###B.",
+        "..B##########B..",
+        "...B##B##B##B...",
+        "..B###B..B###B..",
+        "..BBBB....BBBB.."
+    )
+
+    // [ID 1558] Omnimon Alter-B
+    val OMNIMON_ALTER_B_ROM = arrayOf(
+        "BBBB........BBBB",
+        "B##B........B##B",
+        ".B##B..BB..B##B.",
+        "..B##B####B##B..",
+        "...B########B...",
+        "..B#E######E#B..",
+        "..B##########B..",
+        ".B###WW##WW###B.",
+        "BB#SS######SS#BB",
+        "B##############B",
+        "B##############B",
+        ".B###TTTTTT###B.",
+        "..B##########B..",
+        "...B##B##B##B...",
+        "..B###B..B###B..",
+        "..BBBB....BBBB.."
+    )
+
+    // [ID 1559] Omnimon Zwart Defeat
+    val OMNIMON_ZWART_DEFEAT_ROM = arrayOf(
+        "BBBB........BBBB",
+        "B##B........B##B",
+        ".B##B..BB..B##B.",
+        "..B##B####B##B..",
+        "...B########B...",
+        "..B#E######E#B..",
+        "..B##TT##TT##B..",
+        ".B############B.",
+        ".B#TT######TT#B.",
+        "B##SS######SS##B",
+        "B##TT######TT##B",
+        ".B############B.",
+        "..B##########B..",
+        "...B##B##B##B...",
+        "..B###B..B###B..",
+        "..BBBB....BBBB.."
+    )
+
+    // [ID 1560] BanchoStingmon
+    val BANCHO_STINGMON_ROM = arrayOf(
+        "....BB....BB....",
+        "...B##B..B##B...",
+        "..B####BB####B..",
+        ".B############B.",
+        "B##E########E##B",
+        "B##W########W##B",
+        "B###TT####TT###B",
+        ".B############B.",
+        "BB#SS######SS#BB",
+        "B##SS######SS##B",
+        "BB############BB",
+        ".BB##########BB.",
+        "...B########B...",
+        "...B##B##B##B...",
+        "..B###B..B###B..",
+        "..BBBB....BBBB.."
+    )
+
+    // [ID 1561] BanchoLilimon
+    val BANCHO_LILIMON_ROM = arrayOf(
+        ".....BBBBBB.....",
+        "....B######B....",
+        "...B###TT###B...",
+        "..B##########B..",
+        ".B#E########E#B.",
+        ".B#####WW#####B.",
+        "B##############B",
+        "B##SS######SS##B",
+        "B##SS######SS##B",
+        ".B###TT##TT###B.",
+        ".B############B.",
+        "..B##########BT.",
+        "...B########B.T.",
+        "...B##B##B##B#T.",
+        "..B###B..B###BT.",
+        "..BBBB....BBBB.."
+    )
+
+    // [ID 1562] BanchoMamemon
+    val BANCHO_MAMEMON_ROM = arrayOf(
+        "....BBBBBBBB.T..",
+        "...B########B#T.",
+        "..B##TT##TT##BT.",
+        ".B############BT",
+        "B##E########E#BT",
+        "B##WW######WW#BT",
+        "B##############B",
+        ".B###TTTTTT###B.",
+        ".B#SS######SS#B.",
+        "B##SS######SS##B",
+        "B##############B",
+        ".BB##########BB.",
+        "...B########B...",
+        "...B##B##B##B...",
+        "..B###B..B###B..",
+        "..BBBB....BBBB.."
+    )
+
+    // [ID 1563] BanchoGolemon
+    val BANCHO_GOLEMON_ROM = arrayOf(
+        "....BBBBBBBB....",
+        "...B########B...",
+        "..B##SS##SS##B..",
+        ".B############B.",
+        "B##E########E##B",
+        "B##WW######WW##B",
+        "B##############B",
+        "B###TTTTTTTT###B",
+        ".B#SSSSSSSSSS#B.",
+        ".B############B.",
+        "B##############B",
+        ".B###TT##TT###B.",
+        "..B##########B..",
+        "...B##B##B##B...",
+        "..B###B..B###B..",
+        "..BBBB....BBBB.."
+    )
+
     fun getMatrix(sid: Int): Array<String>? {
         return when (sid) {
             123 -> TSUMEMON_ROM
@@ -6237,6 +7242,56 @@ object MasterRosterMatrices {
             1543 -> DUFTMON_X_ROM
             1544 -> MAGNAMON_X_ROM
             1545 -> CHAOSDRAMON_X_ROM
+            261 -> SPADAMON_ROM
+            262 -> PTEROMON_ROM
+            263 -> SHOEMON_ROM
+            388 -> ZUBAEAGERMON_ROM
+            389 -> TIALUDOMON_ROM
+            390 -> MEICOOMON_ROM
+            391 -> RUNNERMON_ROM
+            392 -> EXERMON_ROM
+            393 -> NAMAKEMON_ROM
+            394 -> GALEMON_ROM
+            395 -> SHOESHOEMON_ROM
+            396 -> SHOUTMON_X4_ROM
+            397 -> GARMMON_ROM
+            398 -> KUWAGAMON_X_ROM
+            478 -> RAIJILUDOMON_ROM
+            479 -> MEICRACKMON_ROM
+            480 -> HELLOOGARMON_ROM
+            481 -> GRANDGALEMON_ROM
+            482 -> CHAPEROMON_ROM
+            483 -> OMEGA_SHOUTMON_ROM
+            484 -> SHOUTMON_X5_ROM
+            485 -> CLIMBMON_ROM
+            486 -> DIVEMON_ROM
+            487 -> SHOOTMON_ROM
+            488 -> TEMPOMON_ROM
+            593 -> MERUKIMON_ROM
+            594 -> DURANDAMON_ROM
+            595 -> BRYWELUDRAMON_ROM
+            596 -> RAGNALOARDMON_ROM
+            597 -> PROXIMAMON_ROM
+            598 -> RAGUELMON_ROM
+            599 -> ORDINEMON_ROM
+            1546 -> AGUMON_BOND_OF_COURAGE_ROM
+            1547 -> GABUMON_BOND_OF_FRIENDSHIP_ROM
+            1548 -> ACHILLESMON_ROM
+            1549 -> SHIVAMON_ROM
+            1550 -> SHROUDMON_ROM
+            1551 -> ZEPHAGAMON_ROM
+            1552 -> CENDRILLMON_ROM
+            1553 -> TAKEMIKAZUCHI_ROM
+            1554 -> SHOUTMON_X7_ROM
+            1555 -> BAGRAMON_ROM
+            1556 -> TACTIMON_ROM
+            1557 -> DEATH_X_DORUGORAMON_ROM
+            1558 -> OMNIMON_ALTER_B_ROM
+            1559 -> OMNIMON_ZWART_DEFEAT_ROM
+            1560 -> BANCHO_STINGMON_ROM
+            1561 -> BANCHO_LILIMON_ROM
+            1562 -> BANCHO_MAMEMON_ROM
+            1563 -> BANCHO_GOLEMON_ROM
 
             else -> null
         }
@@ -6403,7 +7458,7 @@ object MasterRosterMatrices {
             1105 -> SpritePalette(SpritePalette.rgb(66, 136, 226), SpritePalette.rgb(42, 96, 186), SpritePalette.rgb(246, 246, 252), SpritePalette.rgb(226, 42, 52)) // Chibimon
             1106 -> SpritePalette(SpritePalette.rgb(126, 202, 52), SpritePalette.rgb(76, 136, 32), SpritePalette.rgb(226, 36, 46), SpritePalette.rgb(246, 226, 52)) // Algomon Baby I
             1107 -> SpritePalette(SpritePalette.rgb(112, 186, 46), SpritePalette.rgb(66, 122, 26), SpritePalette.rgb(222, 52, 42), SpritePalette.rgb(246, 212, 46)) // Algomon Baby II
-            1108 -> SpritePalette(SpritePalette.rgb(180, 180, 180), SpritePalette.rgb(33, 255, 0), SpritePalette.rgb(220, 220, 220), SpritePalette.rgb(0, 0, 0)) // Dokimon
+            1108 -> SpritePalette(SpritePalette.rgb(75, 80, 95), SpritePalette.rgb(125, 245, 55), SpritePalette.rgb(245, 235, 65), SpritePalette.rgb(55, 235, 95)) // Dokimon
             1109 -> SpritePalette(SpritePalette.rgb(245, 220, 45), SpritePalette.rgb(45, 48, 55), SpritePalette.rgb(45, 215, 235), SpritePalette.rgb(225, 45, 45)) // Bibimon
             1110 -> SpritePalette(SpritePalette.rgb(86, 176, 236), SpritePalette.rgb(46, 122, 196), SpritePalette.rgb(248, 248, 246), SpritePalette.rgb(42, 92, 182)) // Wanyamon
             1111 -> SpritePalette(SpritePalette.rgb(166, 172, 182), SpritePalette.rgb(112, 116, 126), SpritePalette.rgb(246, 246, 252), SpritePalette.rgb(236, 42, 42)) // Choromon
@@ -6434,14 +7489,14 @@ object MasterRosterMatrices {
             1220 -> SpritePalette(SpritePalette.rgb(206, 216, 226), SpritePalette.rgb(46, 86, 176), SpritePalette.rgb(246, 196, 46), SpritePalette.rgb(226, 42, 42)) // Ludomon
             1221 -> SpritePalette(SpritePalette.rgb(246, 240, 222), SpritePalette.rgb(86, 62, 126), SpritePalette.rgb(250, 216, 46), SpritePalette.rgb(42, 146, 226)) // Herissmon
             1222 -> SpritePalette(SpritePalette.rgb(96, 186, 242), SpritePalette.rgb(176, 156, 226), SpritePalette.rgb(250, 212, 52), SpritePalette.rgb(52, 112, 216)) // Morphomon
-            1223 -> SpritePalette(SpritePalette.rgb(56, 61, 61), SpritePalette.rgb(137, 124, 180), SpritePalette.rgb(167, 156, 203), SpritePalette.rgb(0, 0, 0)) // Strabimon
+            1223 -> SpritePalette(SpritePalette.rgb(85, 135, 215), SpritePalette.rgb(225, 235, 250), SpritePalette.rgb(225, 45, 55), SpritePalette.rgb(250, 210, 50)) // Strabimon
             1224 -> SpritePalette(SpritePalette.rgb(248, 242, 222), SpritePalette.rgb(192, 136, 82), SpritePalette.rgb(186, 196, 212), SpritePalette.rgb(46, 132, 212)) // Plotmon Color
             1225 -> SpritePalette(SpritePalette.rgb(240, 225, 180), SpritePalette.rgb(175, 110, 50), SpritePalette.rgb(230, 85, 115), SpritePalette.rgb(65, 160, 80)) // Bokomon
-            1301 -> SpritePalette(SpritePalette.rgb(82, 33, 16), SpritePalette.rgb(58, 16, 0), SpritePalette.rgb(132, 49, 33), SpritePalette.rgb(0, 0, 0)) // Darklizamon
+            1301 -> SpritePalette(SpritePalette.rgb(235, 85, 30), SpritePalette.rgb(250, 200, 50), SpritePalette.rgb(235, 232, 220), SpritePalette.rgb(225, 35, 35)) // Darklizamon
             1302 -> SpritePalette(SpritePalette.rgb(41, 101, 181), SpritePalette.rgb(123, 130, 123), SpritePalette.rgb(255, 251, 206), SpritePalette.rgb(8, 4, 33)) // Deltamon
             1303 -> SpritePalette(SpritePalette.rgb(230, 215, 33), SpritePalette.rgb(239, 231, 189), SpritePalette.rgb(156, 130, 58), SpritePalette.rgb(25, 20, 0)) // Tortamon
             1304 -> SpritePalette(SpritePalette.rgb(58, 123, 66), SpritePalette.rgb(123, 197, 132), SpritePalette.rgb(0, 132, 49), SpritePalette.rgb(0, 0, 0)) // Snimon
-            1305 -> SpritePalette(SpritePalette.rgb(74, 41, 16), SpritePalette.rgb(82, 66, 58), SpritePalette.rgb(90, 74, 58), SpritePalette.rgb(0, 0, 0)) // Gokimon
+            1305 -> SpritePalette(SpritePalette.rgb(165, 110, 65), SpritePalette.rgb(215, 175, 125), SpritePalette.rgb(115, 75, 45), SpritePalette.rgb(225, 40, 40)) // Gokimon
             1306 -> SpritePalette(SpritePalette.rgb(255, 251, 197), SpritePalette.rgb(239, 231, 148), SpritePalette.rgb(222, 210, 107), SpritePalette.rgb(0, 0, 0)) // Cockatrimon
             1307 -> SpritePalette(SpritePalette.rgb(206, 198, 189), SpritePalette.rgb(33, 28, 25), SpritePalette.rgb(140, 8, 49), SpritePalette.rgb(25, 20, 0)) // Kiwimon
             1308 -> SpritePalette(SpritePalette.rgb(255, 32, 16), SpritePalette.rgb(165, 36, 24), SpritePalette.rgb(173, 146, 99), SpritePalette.rgb(0, 0, 0)) // Musyamon
@@ -6460,7 +7515,7 @@ object MasterRosterMatrices {
             1321 -> SpritePalette(SpritePalette.rgb(214, 214, 214), SpritePalette.rgb(197, 197, 197), SpritePalette.rgb(189, 58, 58), SpritePalette.rgb(0, 0, 0)) // Harpymon
             1322 -> SpritePalette(SpritePalette.rgb(76, 186, 216), SpritePalette.rgb(246, 206, 52), SpritePalette.rgb(246, 248, 252), SpritePalette.rgb(36, 36, 46)) // Manbomon
             1323 -> SpritePalette(SpritePalette.rgb(197, 8, 8), SpritePalette.rgb(0, 58, 140), SpritePalette.rgb(8, 49, 99), SpritePalette.rgb(0, 0, 0)) // Pipismon
-            1324 -> SpritePalette(SpritePalette.rgb(49, 41, 8), SpritePalette.rgb(214, 181, 58), SpritePalette.rgb(115, 25, 8), SpritePalette.rgb(0, 0, 0)) // Baromon
+            1324 -> SpritePalette(SpritePalette.rgb(215, 50, 45), SpritePalette.rgb(245, 200, 55), SpritePalette.rgb(240, 242, 248), SpritePalette.rgb(55, 205, 95)) // Baromon
             1325 -> SpritePalette(SpritePalette.rgb(74, 82, 115), SpritePalette.rgb(107, 107, 156), SpritePalette.rgb(49, 49, 74), SpritePalette.rgb(0, 0, 0)) // Pteranomon
             1326 -> SpritePalette(SpritePalette.rgb(255, 32, 173), SpritePalette.rgb(206, 32, 148), SpritePalette.rgb(189, 199, 206), SpritePalette.rgb(0, 0, 0)) // Marin Bullmon
             1327 -> SpritePalette(SpritePalette.rgb(191, 159, 39), SpritePalette.rgb(148, 127, 44), SpritePalette.rgb(238, 225, 187), SpritePalette.rgb(0, 0, 0)) // Kongoumon
@@ -6475,7 +7530,7 @@ object MasterRosterMatrices {
             1406 -> SpritePalette(SpritePalette.rgb(42, 96, 186), SpritePalette.rgb(146, 156, 172), SpritePalette.rgb(246, 126, 36), SpritePalette.rgb(250, 216, 52)) // Scorpiomon
             1407 -> SpritePalette(SpritePalette.rgb(255, 255, 33), SpritePalette.rgb(255, 255, 197), SpritePalette.rgb(255, 223, 0), SpritePalette.rgb(0, 32, 8)) // Blossomon
             1408 -> SpritePalette(SpritePalette.rgb(148, 146, 148), SpritePalette.rgb(206, 206, 206), SpritePalette.rgb(82, 81, 82), SpritePalette.rgb(0, 0, 0)) // Asuramon
-            1409 -> SpritePalette(SpritePalette.rgb(34, 16, 6), SpritePalette.rgb(165, 162, 162), SpritePalette.rgb(209, 207, 207), SpritePalette.rgb(1, 0, 0)) // Aegiochusmon
+            1409 -> SpritePalette(SpritePalette.rgb(215, 45, 55), SpritePalette.rgb(235, 238, 245), SpritePalette.rgb(245, 200, 50), SpritePalette.rgb(55, 125, 225)) // Aegiochusmon
             1410 -> SpritePalette(SpritePalette.rgb(232, 52, 36), SpritePalette.rgb(62, 50, 52), SpritePalette.rgb(250, 196, 46), SpritePalette.rgb(52, 202, 246)) // Vritramon
             1411 -> SpritePalette(SpritePalette.rgb(226, 46, 36), SpritePalette.rgb(242, 182, 46), SpritePalette.rgb(222, 226, 236), SpritePalette.rgb(46, 186, 236)) // Aldamon
             1412 -> SpritePalette(SpritePalette.rgb(226, 236, 246), SpritePalette.rgb(42, 86, 186), SpritePalette.rgb(246, 196, 46), SpritePalette.rgb(226, 42, 46)) // Beowolfmon
@@ -6488,13 +7543,13 @@ object MasterRosterMatrices {
             1419 -> SpritePalette(SpritePalette.rgb(222, 219, 222), SpritePalette.rgb(189, 186, 189), SpritePalette.rgb(82, 65, 189), SpritePalette.rgb(8, 4, 33)) // Aero V-dramon
             1420 -> SpritePalette(SpritePalette.rgb(205, 35, 45), SpritePalette.rgb(52, 54, 62), SpritePalette.rgb(242, 242, 246), SpritePalette.rgb(245, 195, 45)) // Arachnemon
             1421 -> SpritePalette(SpritePalette.rgb(246, 244, 236), SpritePalette.rgb(46, 46, 56), SpritePalette.rgb(246, 196, 46), SpritePalette.rgb(222, 36, 46)) // Lucemon Falldown Mode
-            1422 -> SpritePalette(SpritePalette.rgb(85, 86, 90), SpritePalette.rgb(40, 42, 44), SpritePalette.rgb(58, 58, 63), SpritePalette.rgb(0, 0, 0)) // Cerberumon
+            1422 -> SpritePalette(SpritePalette.rgb(95, 90, 125), SpritePalette.rgb(215, 225, 240), SpritePalette.rgb(65, 215, 115), SpritePalette.rgb(235, 40, 50)) // Cerberumon
             1423 -> SpritePalette(SpritePalette.rgb(246, 196, 46), SpritePalette.rgb(212, 222, 232), SpritePalette.rgb(226, 36, 46), SpritePalette.rgb(42, 162, 242)) // Duramon
             1424 -> SpritePalette(SpritePalette.rgb(66, 70, 78), SpritePalette.rgb(166, 36, 46), SpritePalette.rgb(216, 206, 186), SpritePalette.rgb(246, 196, 42)) // Mephismon
             1425 -> SpritePalette(SpritePalette.rgb(240, 140, 35), SpritePalette.rgb(85, 56, 146), SpritePalette.rgb(245, 205, 45), SpritePalette.rgb(225, 40, 45)) // Mihiramon
-            1426 -> SpritePalette(SpritePalette.rgb(78, 90, 114), SpritePalette.rgb(0, 0, 0), SpritePalette.rgb(61, 70, 88), SpritePalette.rgb(0, 0, 0)) // Vajramon
+            1426 -> SpritePalette(SpritePalette.rgb(185, 115, 65), SpritePalette.rgb(245, 200, 55), SpritePalette.rgb(215, 225, 240), SpritePalette.rgb(225, 40, 45)) // Vajramon
             1427 -> SpritePalette(SpritePalette.rgb(165, 134, 82), SpritePalette.rgb(198, 170, 123), SpritePalette.rgb(189, 162, 231), SpritePalette.rgb(8, 0, 0)) // Andiramon Deva
-            1428 -> SpritePalette(SpritePalette.rgb(74, 74, 82), SpritePalette.rgb(49, 49, 58), SpritePalette.rgb(107, 107, 115), SpritePalette.rgb(0, 0, 0)) // Cerberumon Werewolf Mode
+            1428 -> SpritePalette(SpritePalette.rgb(85, 90, 120), SpritePalette.rgb(225, 45, 55), SpritePalette.rgb(220, 228, 242), SpritePalette.rgb(250, 205, 50)) // Cerberumon Werewolf Mode
             1429 -> SpritePalette(SpritePalette.rgb(216, 226, 236), SpritePalette.rgb(232, 46, 42), SpritePalette.rgb(246, 196, 46), SpritePalette.rgb(46, 186, 242)) // Justimon Blitz Arm
             1430 -> SpritePalette(SpritePalette.rgb(33, 40, 90), SpritePalette.rgb(181, 49, 58), SpritePalette.rgb(90, 101, 156), SpritePalette.rgb(8, 4, 33)) // Thunderballmon
             1431 -> SpritePalette(SpritePalette.rgb(82, 196, 242), SpritePalette.rgb(46, 96, 182), SpritePalette.rgb(246, 252, 255), SpritePalette.rgb(250, 206, 46)) // Crys Paledramon
@@ -6504,8 +7559,8 @@ object MasterRosterMatrices {
             1501 -> SpritePalette(SpritePalette.rgb(172, 184, 218), SpritePalette.rgb(215, 223, 237), SpritePalette.rgb(132, 145, 194), SpritePalette.rgb(0, 0, 0)) // Marsmon
             1502 -> SpritePalette(SpritePalette.rgb(96, 146, 76), SpritePalette.rgb(206, 156, 66), SpritePalette.rgb(226, 42, 52), SpritePalette.rgb(46, 146, 226)) // Minervamon
             1503 -> SpritePalette(SpritePalette.rgb(46, 82, 166), SpritePalette.rgb(196, 212, 226), SpritePalette.rgb(246, 196, 46), SpritePalette.rgb(42, 206, 236)) // Neptunemon
-            1504 -> SpritePalette(SpritePalette.rgb(18, 63, 58), SpritePalette.rgb(90, 89, 87), SpritePalette.rgb(165, 23, 17), SpritePalette.rgb(35, 15, 5)) // Vulcanusmon
-            1505 -> SpritePalette(SpritePalette.rgb(45, 89, 23), SpritePalette.rgb(28, 64, 10), SpritePalette.rgb(131, 96, 38), SpritePalette.rgb(3, 25, 14)) // Ceresmon
+            1504 -> SpritePalette(SpritePalette.rgb(225, 65, 40), SpritePalette.rgb(245, 195, 55), SpritePalette.rgb(75, 155, 165), SpritePalette.rgb(255, 220, 60)) // Vulcanusmon
+            1505 -> SpritePalette(SpritePalette.rgb(85, 185, 65), SpritePalette.rgb(225, 55, 75), SpritePalette.rgb(175, 130, 75), SpritePalette.rgb(250, 215, 55)) // Ceresmon
             1506 -> SpritePalette(SpritePalette.rgb(229, 5, 140), SpritePalette.rgb(195, 5, 119), SpritePalette.rgb(159, 9, 100), SpritePalette.rgb(16, 6, 36)) // Bacchusmon
             1507 -> SpritePalette(SpritePalette.rgb(151, 135, 42), SpritePalette.rgb(208, 195, 84), SpritePalette.rgb(157, 166, 191), SpritePalette.rgb(25, 20, 5)) // Jupitermon
             1508 -> SpritePalette(SpritePalette.rgb(170, 151, 73), SpritePalette.rgb(247, 231, 176), SpritePalette.rgb(102, 81, 14), SpritePalette.rgb(25, 20, 5)) // Junomon
@@ -6527,14 +7582,14 @@ object MasterRosterMatrices {
             1524 -> SpritePalette(SpritePalette.rgb(222, 232, 244), SpritePalette.rgb(46, 86, 176), SpritePalette.rgb(226, 42, 46), SpritePalette.rgb(46, 186, 236)) // Magna Garurumon
             1525 -> SpritePalette(SpritePalette.rgb(140, 132, 197), SpritePalette.rgb(90, 82, 165), SpritePalette.rgb(206, 206, 230), SpritePalette.rgb(0, 0, 0)) // Baihumon
             1526 -> SpritePalette(SpritePalette.rgb(65, 135, 230), SpritePalette.rgb(165, 205, 240), SpritePalette.rgb(245, 205, 45), SpritePalette.rgb(225, 40, 45)) // Qinglongmon
-            1527 -> SpritePalette(SpritePalette.rgb(0, 74, 16), SpritePalette.rgb(0, 41, 8), SpritePalette.rgb(115, 82, 66), SpritePalette.rgb(0, 0, 0)) // Xuanwumon
+            1527 -> SpritePalette(SpritePalette.rgb(65, 175, 85), SpritePalette.rgb(225, 235, 242), SpritePalette.rgb(155, 110, 70), SpritePalette.rgb(235, 45, 45)) // Xuanwumon
             1528 -> SpritePalette(SpritePalette.rgb(206, 25, 25), SpritePalette.rgb(255, 197, 49), SpritePalette.rgb(156, 16, 16), SpritePalette.rgb(0, 0, 0)) // Zhuqiaomon
             1529 -> SpritePalette(SpritePalette.rgb(250, 206, 46), SpritePalette.rgb(216, 156, 36), SpritePalette.rgb(136, 76, 186), SpritePalette.rgb(46, 206, 246)) // Huanglongmon
             1530 -> SpritePalette(SpritePalette.rgb(165, 166, 165), SpritePalette.rgb(140, 138, 140), SpritePalette.rgb(197, 194, 197), SpritePalette.rgb(0, 0, 0)) // Metal Etemon
             1531 -> SpritePalette(SpritePalette.rgb(183, 150, 105), SpritePalette.rgb(225, 184, 55), SpritePalette.rgb(165, 175, 190), SpritePalette.rgb(226, 35, 45)) // King Etemon
-            1532 -> SpritePalette(SpritePalette.rgb(58, 49, 41), SpritePalette.rgb(99, 101, 99), SpritePalette.rgb(33, 32, 33), SpritePalette.rgb(0, 0, 0)) // Ebemon
+            1532 -> SpritePalette(SpritePalette.rgb(205, 215, 230), SpritePalette.rgb(235, 65, 105), SpritePalette.rgb(95, 225, 115), SpritePalette.rgb(250, 215, 55)) // Ebemon
             1533 -> SpritePalette(SpritePalette.rgb(140, 148, 156), SpritePalette.rgb(206, 222, 230), SpritePalette.rgb(49, 49, 123), SpritePalette.rgb(0, 0, 0)) // Belial Vamdemon
-            1534 -> SpritePalette(SpritePalette.rgb(33, 32, 33), SpritePalette.rgb(148, 20, 16), SpritePalette.rgb(214, 49, 25), SpritePalette.rgb(33, 12, 0)) // Venom Vamdemon
+            1534 -> SpritePalette(SpritePalette.rgb(205, 35, 45), SpritePalette.rgb(95, 65, 135), SpritePalette.rgb(245, 200, 55), SpritePalette.rgb(255, 225, 65)) // Venom Vamdemon
             1535 -> SpritePalette(SpritePalette.rgb(247, 215, 115), SpritePalette.rgb(148, 138, 140), SpritePalette.rgb(239, 223, 173), SpritePalette.rgb(0, 0, 0)) // Aegisdramon
             1536 -> SpritePalette(SpritePalette.rgb(46, 46, 54), SpritePalette.rgb(216, 42, 46), SpritePalette.rgb(236, 182, 46), SpritePalette.rgb(250, 42, 42)) // Belphemon Rage Mode
             1537 -> SpritePalette(SpritePalette.rgb(96, 96, 106), SpritePalette.rgb(226, 36, 46), SpritePalette.rgb(106, 56, 146), SpritePalette.rgb(250, 206, 46)) // Ogudomon
@@ -6546,6 +7601,56 @@ object MasterRosterMatrices {
             1543 -> SpritePalette(SpritePalette.rgb(246, 196, 46), SpritePalette.rgb(246, 246, 252), SpritePalette.rgb(226, 42, 46), SpritePalette.rgb(46, 186, 236)) // Duftmon X
             1544 -> SpritePalette(SpritePalette.rgb(250, 206, 46), SpritePalette.rgb(46, 96, 196), SpritePalette.rgb(222, 232, 244), SpritePalette.rgb(226, 42, 46)) // Magnamon X
             1545 -> SpritePalette(SpritePalette.rgb(196, 36, 42), SpritePalette.rgb(46, 50, 58), SpritePalette.rgb(246, 186, 42), SpritePalette.rgb(52, 216, 246)) // Chaosdramon X
+            261 -> SpritePalette(SpritePalette.rgb(73, 142, 227), SpritePalette.rgb(241, 246, 253), SpritePalette.rgb(246, 194, 53), SpritePalette.rgb(221, 39, 44)) // Spadamon
+            262 -> SpritePalette(SpritePalette.rgb(83, 187, 93), SpritePalette.rgb(247, 244, 252), SpritePalette.rgb(247, 202, 48), SpritePalette.rgb(42, 118, 217)) // Pteromon
+            263 -> SpritePalette(SpritePalette.rgb(67, 193, 217), SpritePalette.rgb(197, 143, 93), SpritePalette.rgb(243, 147, 43), SpritePalette.rgb(33, 42, 48)) // Shoemon
+            388 -> SpritePalette(SpritePalette.rgb(247, 203, 53), SpritePalette.rgb(217, 223, 237), SpritePalette.rgb(227, 43, 53), SpritePalette.rgb(47, 133, 227)) // Zubaeagermon
+            389 -> SpritePalette(SpritePalette.rgb(193, 137, 87), SpritePalette.rgb(113, 127, 138), SpritePalette.rgb(57, 193, 137), SpritePalette.rgb(247, 203, 48)) // TiaLudomon
+            390 -> SpritePalette(SpritePalette.rgb(238, 142, 48), SpritePalette.rgb(247, 233, 217), SpritePalette.rgb(113, 77, 43), SpritePalette.rgb(47, 183, 177)) // Meicoomon
+            391 -> SpritePalette(SpritePalette.rgb(247, 213, 47), SpritePalette.rgb(47, 48, 62), SpritePalette.rgb(47, 143, 237), SpritePalette.rgb(233, 57, 43)) // Runnermon
+            392 -> SpritePalette(SpritePalette.rgb(97, 183, 87), SpritePalette.rgb(227, 53, 52), SpritePalette.rgb(243, 237, 208), SpritePalette.rgb(42, 43, 57)) // Exermon
+            393 -> SpritePalette(SpritePalette.rgb(157, 113, 77), SpritePalette.rgb(93, 147, 63), SpritePalette.rgb(227, 43, 52), SpritePalette.rgb(238, 232, 207)) // Namakemon
+            394 -> SpritePalette(SpritePalette.rgb(63, 177, 103), SpritePalette.rgb(243, 247, 248), SpritePalette.rgb(247, 193, 47), SpritePalette.rgb(217, 43, 52)) // Galemon
+            395 -> SpritePalette(SpritePalette.rgb(77, 183, 207), SpritePalette.rgb(187, 123, 73), SpritePalette.rgb(247, 133, 47), SpritePalette.rgb(233, 67, 117)) // Shoeshoemon
+            396 -> SpritePalette(SpritePalette.rgb(227, 43, 47), SpritePalette.rgb(47, 46, 56), SpritePalette.rgb(247, 203, 52), SpritePalette.rgb(243, 247, 248)) // Shoutmon X4
+            397 -> SpritePalette(SpritePalette.rgb(217, 223, 233), SpritePalette.rgb(57, 93, 187), SpritePalette.rgb(247, 193, 47), SpritePalette.rgb(227, 43, 52)) // Garmmon
+            398 -> SpritePalette(SpritePalette.rgb(217, 38, 47), SpritePalette.rgb(247, 193, 47), SpritePalette.rgb(47, 46, 53), SpritePalette.rgb(238, 242, 247)) // Kuwagamon X
+            478 -> SpritePalette(SpritePalette.rgb(97, 123, 177), SpritePalette.rgb(247, 213, 57), SpritePalette.rgb(217, 223, 242), SpritePalette.rgb(47, 48, 67)) // RaijiLudomon
+            479 -> SpritePalette(SpritePalette.rgb(237, 123, 47), SpritePalette.rgb(247, 238, 227), SpritePalette.rgb(117, 63, 47), SpritePalette.rgb(217, 43, 57)) // Meicrackmon
+            480 -> SpritePalette(SpritePalette.rgb(57, 63, 117), SpritePalette.rgb(67, 173, 237), SpritePalette.rgb(197, 203, 222), SpritePalette.rgb(227, 43, 57)) // Helloogarmon
+            481 -> SpritePalette(SpritePalette.rgb(57, 163, 97), SpritePalette.rgb(217, 223, 237), SpritePalette.rgb(247, 183, 47), SpritePalette.rgb(37, 113, 197)) // GrandGalemon
+            482 -> SpritePalette(SpritePalette.rgb(217, 43, 57), SpritePalette.rgb(247, 238, 222), SpritePalette.rgb(77, 173, 197), SpritePalette.rgb(47, 46, 57)) // Chaperomon
+            483 -> SpritePalette(SpritePalette.rgb(248, 212, 43), SpritePalette.rgb(247, 243, 250), SpritePalette.rgb(227, 43, 47), SpritePalette.rgb(47, 163, 237)) // OmegaShoutmon
+            484 -> SpritePalette(SpritePalette.rgb(227, 43, 47), SpritePalette.rgb(243, 247, 250), SpritePalette.rgb(247, 203, 52), SpritePalette.rgb(47, 48, 62)) // Shoutmon X5
+            485 -> SpritePalette(SpritePalette.rgb(67, 143, 197), SpritePalette.rgb(247, 213, 52), SpritePalette.rgb(227, 53, 47), SpritePalette.rgb(42, 43, 57)) // Climbmon
+            486 -> SpritePalette(SpritePalette.rgb(47, 113, 197), SpritePalette.rgb(87, 203, 187), SpritePalette.rgb(243, 247, 248), SpritePalette.rgb(227, 43, 52)) // Divemon
+            487 -> SpritePalette(SpritePalette.rgb(187, 53, 47), SpritePalette.rgb(57, 58, 77), SpritePalette.rgb(247, 203, 52), SpritePalette.rgb(47, 183, 237)) // Shootmon
+            488 -> SpritePalette(SpritePalette.rgb(167, 63, 197), SpritePalette.rgb(47, 203, 217), SpritePalette.rgb(247, 233, 57), SpritePalette.rgb(42, 43, 57)) // Tempomon
+            593 -> SpritePalette(SpritePalette.rgb(197, 153, 67), SpritePalette.rgb(47, 173, 167), SpritePalette.rgb(227, 53, 47), SpritePalette.rgb(243, 247, 248)) // Merukimon
+            594 -> SpritePalette(SpritePalette.rgb(247, 213, 57), SpritePalette.rgb(227, 233, 247), SpritePalette.rgb(227, 43, 47), SpritePalette.rgb(47, 133, 237)) // Durandamon
+            595 -> SpritePalette(SpritePalette.rgb(197, 63, 57), SpritePalette.rgb(117, 123, 147), SpritePalette.rgb(247, 193, 47), SpritePalette.rgb(47, 48, 67)) // BryweLudramon
+            596 -> SpritePalette(SpritePalette.rgb(227, 43, 52), SpritePalette.rgb(247, 203, 52), SpritePalette.rgb(47, 48, 67), SpritePalette.rgb(237, 233, 247)) // RagnaLoardmon
+            597 -> SpritePalette(SpritePalette.rgb(247, 243, 250), SpritePalette.rgb(47, 43, 57), SpritePalette.rgb(227, 43, 47), SpritePalette.rgb(67, 183, 247)) // Proximamon
+            598 -> SpritePalette(SpritePalette.rgb(227, 113, 47), SpritePalette.rgb(237, 233, 247), SpritePalette.rgb(217, 43, 57), SpritePalette.rgb(47, 43, 57)) // Raguelmon
+            599 -> SpritePalette(SpritePalette.rgb(52, 46, 64), SpritePalette.rgb(242, 238, 250), SpritePalette.rgb(217, 33, 47), SpritePalette.rgb(127, 43, 167)) // Ordinemon
+            1546 -> SpritePalette(SpritePalette.rgb(227, 43, 42), SpritePalette.rgb(248, 203, 52), SpritePalette.rgb(247, 243, 250), SpritePalette.rgb(47, 173, 237)) // Agumon (Bond of Courage)
+            1547 -> SpritePalette(SpritePalette.rgb(57, 93, 197), SpritePalette.rgb(227, 233, 250), SpritePalette.rgb(247, 193, 47), SpritePalette.rgb(227, 43, 52)) // Gabumon (Bond of Friendship)
+            1548 -> SpritePalette(SpritePalette.rgb(247, 203, 57), SpritePalette.rgb(227, 233, 247), SpritePalette.rgb(47, 133, 227), SpritePalette.rgb(227, 43, 47)) // Achillesmon
+            1549 -> SpritePalette(SpritePalette.rgb(77, 183, 117), SpritePalette.rgb(247, 213, 57), SpritePalette.rgb(227, 53, 67), SpritePalette.rgb(47, 48, 67)) // Shivamon
+            1550 -> SpritePalette(SpritePalette.rgb(47, 46, 60), SpritePalette.rgb(217, 43, 52), SpritePalette.rgb(247, 203, 57), SpritePalette.rgb(117, 43, 147)) // Shroudmon
+            1551 -> SpritePalette(SpritePalette.rgb(57, 173, 107), SpritePalette.rgb(247, 213, 57), SpritePalette.rgb(237, 238, 250), SpritePalette.rgb(47, 123, 217)) // Zephagamon
+            1552 -> SpritePalette(SpritePalette.rgb(97, 193, 227), SpritePalette.rgb(247, 243, 250), SpritePalette.rgb(247, 173, 57), SpritePalette.rgb(217, 43, 97)) // Cendrillmon
+            1553 -> SpritePalette(SpritePalette.rgb(77, 63, 137), SpritePalette.rgb(248, 213, 52), SpritePalette.rgb(67, 183, 247), SpritePalette.rgb(227, 43, 57)) // Fenriloogamon: Takemikazuchi
+            1554 -> SpritePalette(SpritePalette.rgb(247, 243, 250), SpritePalette.rgb(227, 43, 47), SpritePalette.rgb(247, 203, 52), SpritePalette.rgb(47, 133, 227)) // Shoutmon X7
+            1555 -> SpritePalette(SpritePalette.rgb(227, 33, 47), SpritePalette.rgb(237, 233, 247), SpritePalette.rgb(47, 46, 60), SpritePalette.rgb(157, 103, 67)) // Bagramon
+            1556 -> SpritePalette(SpritePalette.rgb(47, 46, 60), SpritePalette.rgb(227, 43, 52), SpritePalette.rgb(247, 203, 57), SpritePalette.rgb(187, 193, 212)) // Tactimon
+            1557 -> SpritePalette(SpritePalette.rgb(57, 50, 62), SpritePalette.rgb(177, 113, 67), SpritePalette.rgb(217, 43, 47), SpritePalette.rgb(137, 143, 162)) // Death-X-DORUgoramon
+            1558 -> SpritePalette(SpritePalette.rgb(44, 43, 57), SpritePalette.rgb(217, 33, 47), SpritePalette.rgb(127, 63, 177), SpritePalette.rgb(237, 233, 247)) // Omnimon Alter-B
+            1559 -> SpritePalette(SpritePalette.rgb(40, 38, 50), SpritePalette.rgb(237, 193, 47), SpritePalette.rgb(217, 43, 47), SpritePalette.rgb(167, 173, 192)) // Omnimon Zwart Defeat
+            1560 -> SpritePalette(SpritePalette.rgb(47, 173, 87), SpritePalette.rgb(40, 38, 50), SpritePalette.rgb(227, 43, 52), SpritePalette.rgb(247, 203, 57)) // BanchoStingmon
+            1561 -> SpritePalette(SpritePalette.rgb(237, 73, 147), SpritePalette.rgb(40, 38, 50), SpritePalette.rgb(87, 183, 97), SpritePalette.rgb(247, 213, 57)) // BanchoLilimon
+            1562 -> SpritePalette(SpritePalette.rgb(197, 173, 147), SpritePalette.rgb(40, 38, 50), SpritePalette.rgb(247, 203, 52), SpritePalette.rgb(227, 43, 47)) // BanchoMamemon
+            1563 -> SpritePalette(SpritePalette.rgb(117, 108, 117), SpritePalette.rgb(42, 40, 52), SpritePalette.rgb(217, 53, 47), SpritePalette.rgb(237, 193, 47)) // BanchoGolemon
 
             else -> null
         }

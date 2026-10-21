@@ -31,8 +31,8 @@ enum class QuickCareAction {
 /**
  * Background BroadcastReceiver handling 1-tap quick care actions triggered directly
  * from the Wear OS notification drawer / stream card:
- * - [ 🍖 FEED MEAT ] -> ACTION_QUICK_FEED
- * - [ 🧹 FLUSH POOP ] -> ACTION_QUICK_CLEAN
+ * - [ FEED MEAT ] -> ACTION_QUICK_FEED
+ * - [ FLUSH WASTE ] -> ACTION_QUICK_CLEAN
  *
  * Runs non-blocking via goAsync() on Dispatchers.IO (<500ms execution latency).
  * Updates Room SQLite, triggers haptic feedback, invalidates complications and tiles,

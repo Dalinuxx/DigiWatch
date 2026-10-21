@@ -1,11 +1,12 @@
-﻿package com.digiwear.core
+package com.digiwear.core
 
 import com.digiwear.core.battle.DeterministicBattleSolver
+import com.digiwear.core.battle.SignatureAttackRegistry
 import com.digiwear.core.model.BattleFighter
 import com.digiwear.core.model.ElementalAttribute
+import com.digiwear.core.model.PetSpecies
 import com.digiwear.core.model.PetStage
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
@@ -191,5 +192,125 @@ class DeterministicBattleSolverTest {
 
         assertTrue("glitch_fog must boost Virus damage ($virusDmgGlitch > $virusDmgClear)", virusDmgGlitch > virusDmgClear)
         assertTrue("cosmic_nihilism must boost damage ($virusDmgCosmic > $virusDmgClear)", virusDmgCosmic > virusDmgClear)
+    }
+
+    @Test
+    fun testAll550SpeciesHaveCanonicalSignatureAttacks() {
+        val roster = PetSpecies.SPECIES_REGISTRY
+        assertEquals(550, roster.size)
+        for ((speciesId, species) in roster) {
+            assertTrue(
+                "Species #$speciesId (${species.name}) must have an explicit canonical signature attack",
+                SignatureAttackRegistry.hasCanonicalAttack(speciesId)
+            )
+            val attack = SignatureAttackRegistry.getAttackName(speciesId)
+            assertTrue(
+                "Species #$speciesId (${species.name}) must not use generic fallback",
+                attack.isNotBlank()
+            )
+        }
+        // Specific canonical checks
+        assertEquals("Transcendent Sword", SignatureAttackRegistry.getAttackName(510))
+        assertEquals("Trump Sword", SignatureAttackRegistry.getAttackName(509))
+        assertEquals("Quo Vadis", SignatureAttackRegistry.getAttackName(516))
+        assertEquals("Giga Death", SignatureAttackRegistry.getAttackName(513))
+    }
+
+    @Test
+    fun testStrengthHeartsAndColosseumSpaceSeparatedEnvironmentEffects() {
+        val weakFighter = BattleFighter(
+            id = "weak",
+            speciesId = 301,
+            name = "Greymon",
+            stage = PetStage.ADULT,
+            attribute = ElementalAttribute.VACCINE,
+            maxHp = 500,
+            currentHp = 500,
+            basePower = 100,
+            victories = 0,
+            effort = 0,
+            strength = 0,
+            battleSeed = 0x1111
+        )
+        val strongFighter = weakFighter.copy(strength = 4)
+        val dummy = BattleFighter(
+            id = "dummy",
+            speciesId = 303,
+            name = "Devimon",
+            stage = PetStage.ADULT,
+            attribute = ElementalAttribute.DATA,
+            maxHp = 500,
+            currentHp = 500,
+            basePower = 100,
+            victories = 0,
+            effort = 0,
+            strength = 0,
+            battleSeed = 0x2222
+        )
+
+        val resWeak = DeterministicBattleSolver.resolveBattle(weakFighter, dummy)
+        val resStrong = DeterministicBattleSolver.resolveBattle(strongFighter, dummy)
+        val dmgWeak = resWeak.turns.first { it.attackerIndex == 0 }.damage
+        val dmgStrong = resStrong.turns.first { it.attackerIndex == 0 }.damage
+        assertTrue("Full strength hearts must increase combat damage ($dmgStrong > $dmgWeak)", dmgStrong > dmgWeak)
+
+        val resDataClear = DeterministicBattleSolver.resolveBattle(dummy, weakFighter, environmentEffect = "none")
+        val resDataStorm = DeterministicBattleSolver.resolveBattle(dummy, weakFighter, environmentEffect = "Data Storm")
+        val dmgDataClear = resDataClear.turns.first { it.attackerIndex == 0 }.damage
+        val dmgDataStorm = resDataStorm.turns.first { it.attackerIndex == 0 }.damage
+        assertTrue("Space-separated 'Data Storm' must boost DATA attribute damage ($dmgDataStorm > $dmgDataClear)", dmgDataStorm > dmgDataClear)
+    }
+
+    @Test
+    fun testAll550SpritesHaveFullColorFillAndVisibility() {
+        val roster = PetSpecies.SORTED_SPECIES
+        val sparseSprites = mutableListOf<String>()
+        for (sp in roster) {
+            val mat = com.digiwear.core.render.SpriteMatrixRegistry.getMatrix(sp.id, com.digiwear.core.model.SpriteFrame.IDLE_A)
+            val pal = com.digiwear.core.render.SpriteMatrixRegistry.getPalette(sp.id)
+            var totalLit = 0
+            var coloredLit = 0
+            var visibleBrightPixels = 0
+            for (r in 0 until 16) {
+                for (c in 0 until 16) {
+                    val ch = mat[r][c]
+                    if (ch != '.') {
+                        totalLit++
+                        if (ch != 'B' && ch != 'K') {
+                            coloredLit++
+                            val argb = when (ch) {
+                                '#' -> pal.primary
+                                'S' -> pal.secondary
+                                'T' -> pal.tertiary
+                                'E' -> pal.eye
+                                'W' -> (0xFF shl 24) or (250 shl 16) or (250 shl 8) or 250
+                                'R' -> (0xFF shl 24) or (244 shl 16) or (67 shl 8) or 54
+                                'G' -> (0xFF shl 24) or (67 shl 16) or (185 shl 8) or 85
+                                'C' -> (0xFF shl 24) or (0 shl 16) or (229 shl 8) or 255
+                                else -> pal.primary
+                            }
+                            val red = (argb shr 16) and 0xFF
+                            val green = (argb shr 8) and 0xFF
+                            val blue = argb and 0xFF
+                            val luma = 0.299 * red + 0.587 * green + 0.114 * blue
+                            if (luma > 38.0) visibleBrightPixels++
+                        }
+                    }
+                }
+            }
+            if (coloredLit < 30 || totalLit < 45 || visibleBrightPixels < 25) {
+                println("SPARSE_OR_DARK_SPRITE: #${sp.id} ${sp.name} (${sp.stage}) -> totalLit=$totalLit, coloredLit=$coloredLit, bright=$visibleBrightPixels")
+                sparseSprites.add("#${sp.id} ${sp.name} (total=$totalLit, colored=$coloredLit, bright=$visibleBrightPixels)")
+            }
+            // Verify all 12 animation frames render cleanly
+            for (frame in com.digiwear.core.model.SpriteFrame.entries) {
+                val frameMat = com.digiwear.core.render.SpriteMatrixRegistry.getMatrix(sp.id, frame)
+                assertEquals("Frame $frame for #${sp.id} must have 16 rows", 16, frameMat.size)
+                assertTrue("Frame $frame for #${sp.id} must have 16 cols per row", frameMat.all { it.length == 16 })
+                val frameLit = frameMat.sumOf { row -> row.count { it != '.' } }
+                assertTrue("Frame $frame for #${sp.id} must retain visible pixels ($frameLit)", frameLit >= 35)
+            }
+        }
+        assertTrue("All 550 sprites must have full color fill and visibility! Sparse: $sparseSprites", sparseSprites.isEmpty())
     }
 }

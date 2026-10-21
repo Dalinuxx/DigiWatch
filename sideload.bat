@@ -3,14 +3,14 @@ title DigiWear Sideloading Assistant
 chcp 65001 >nul
 cls
 
-:: Check if PowerShell is available
+:: Delegate to PowerShell wizard (supports interactive menu + --watch / --phone / --all / --rebuild / --help)
 where powershell.exe >nul 2>&1
 if %ERRORLEVEL% EQU 0 (
     powershell.exe -NoProfile -ExecutionPolicy Bypass -File "%~dp0sideload.ps1" %*
     goto :EOF
 )
 
-:: Fallback if PowerShell is somehow not installed
+:: Fallback if PowerShell is unavailable
 echo ======================================================================
 echo             DIGIWEAR SIDELOADING ASSISTANT (Batch Mode)
 echo ======================================================================
@@ -36,52 +36,68 @@ echo ======================================================================
 echo             DIGIWEAR SIDELOADING ASSISTANT (Batch Mode)
 echo ======================================================================
 echo.
-echo   [1] Install Wear OS Watch App (Wi-Fi)
-echo   [2] Install Wear OS Watch App (USB/Connected)
+echo   [1] Install Wear OS / AOSP Watch App (Wi-Fi)
+echo   [2] Install Wear OS / AOSP Watch App (USB / Connected)
 echo   [3] Install Phone Companion App
 echo   [4] Check Connected Devices
+echo   [5] Pair New Wireless Watch (Wi-Fi Pairing Code)
+echo   [6] Rebuild Release APKs from Source
 echo   [0] Exit
 echo.
-set /p CHOICE="Select an option [0-4]: "
+set /p CHOICE="Select an option [0-6]: "
 
 if "%CHOICE%"=="0" exit /b 0
 if "%CHOICE%"=="1" (
     set /p WATCH_IP="Enter Watch IP:Port (e.g. 192.168.1.50:5555): "
     "%ADB_CMD%" connect %WATCH_IP%
-    if exist "%~dp0release_bin\DigiWear-WearOS-release.apk" (
-        "%ADB_CMD%" install -r -d "%~dp0release_bin\DigiWear-WearOS-release.apk"
-    ) else if exist "%~dp0release_bin\wear-os-app-release.apk" (
-        "%ADB_CMD%" install -r -d "%~dp0release_bin\wear-os-app-release.apk"
+    if exist "%~dp0wear-os-app\build\outputs\apk\release\wear-os-app-release.apk" (
+        "%ADB_CMD%" install -r -d -g "%~dp0wear-os-app\build\outputs\apk\release\wear-os-app-release.apk"
+    ) else if exist "%~dp0release_bin\DigiWear-WearOS-release.apk" (
+        "%ADB_CMD%" install -r -d -g "%~dp0release_bin\DigiWear-WearOS-release.apk"
     ) else (
-        "%ADB_CMD%" install -r -d "%~dp0wear-os-app\build\outputs\apk\release\wear-os-app-release.apk"
+        "%ADB_CMD%" install -r -d -g "%~dp0release_bin\wear-os-app-release.apk"
     )
     pause
     goto MENU
 )
 if "%CHOICE%"=="2" (
-    if exist "%~dp0release_bin\DigiWear-WearOS-release.apk" (
-        "%ADB_CMD%" install -r -d "%~dp0release_bin\DigiWear-WearOS-release.apk"
-    ) else if exist "%~dp0release_bin\wear-os-app-release.apk" (
-        "%ADB_CMD%" install -r -d "%~dp0release_bin\wear-os-app-release.apk"
+    if exist "%~dp0wear-os-app\build\outputs\apk\release\wear-os-app-release.apk" (
+        "%ADB_CMD%" install -r -d -g "%~dp0wear-os-app\build\outputs\apk\release\wear-os-app-release.apk"
+    ) else if exist "%~dp0release_bin\DigiWear-WearOS-release.apk" (
+        "%ADB_CMD%" install -r -d -g "%~dp0release_bin\DigiWear-WearOS-release.apk"
     ) else (
-        "%ADB_CMD%" install -r -d "%~dp0wear-os-app\build\outputs\apk\release\wear-os-app-release.apk"
+        "%ADB_CMD%" install -r -d -g "%~dp0release_bin\wear-os-app-release.apk"
     )
     pause
     goto MENU
 )
 if "%CHOICE%"=="3" (
-    if exist "%~dp0release_bin\DigiWear-Companion-release.apk" (
-        "%ADB_CMD%" install -r -d "%~dp0release_bin\DigiWear-Companion-release.apk"
-    ) else if exist "%~dp0release_bin\phone-companion-app-release.apk" (
-        "%ADB_CMD%" install -r -d "%~dp0release_bin\phone-companion-app-release.apk"
+    if exist "%~dp0phone-companion-app\build\outputs\apk\release\phone-companion-app-release.apk" (
+        "%ADB_CMD%" install -r -d -g "%~dp0phone-companion-app\build\outputs\apk\release\phone-companion-app-release.apk"
+    ) else if exist "%~dp0release_bin\DigiWear-Companion-release.apk" (
+        "%ADB_CMD%" install -r -d -g "%~dp0release_bin\DigiWear-Companion-release.apk"
     ) else (
-        "%ADB_CMD%" install -r -d "%~dp0phone-companion-app\build\outputs\apk\release\phone-companion-app-release.apk"
+        "%ADB_CMD%" install -r -d -g "%~dp0release_bin\phone-companion-app-release.apk"
     )
     pause
     goto MENU
 )
 if "%CHOICE%"=="4" (
     "%ADB_CMD%" devices -l
+    pause
+    goto MENU
+)
+if "%CHOICE%"=="5" (
+    set /p PAIR_IP="Enter Watch Pairing IP:Port (e.g. 192.168.1.50:42135): "
+    set /p PAIR_CODE="Enter 6-digit Pairing Code: "
+    "%ADB_CMD%" pair %PAIR_IP% %PAIR_CODE%
+    pause
+    goto MENU
+)
+if "%CHOICE%"=="6" (
+    pushd "%~dp0"
+    call gradlew.bat assembleRelease assembleDebug
+    popd
     pause
     goto MENU
 )

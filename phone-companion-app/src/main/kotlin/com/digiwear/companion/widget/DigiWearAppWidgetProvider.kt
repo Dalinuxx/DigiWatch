@@ -6,6 +6,7 @@ import android.appwidget.AppWidgetProvider
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
+import android.graphics.Bitmap
 import android.widget.RemoteViews
 import com.digiwear.companion.MainActivity
 import com.digiwear.companion.R
@@ -52,7 +53,12 @@ class DigiWearAppWidgetProvider : AppWidgetProvider() {
                                     effort = updatedState.effort,
                                     overfeedCount = updatedState.overfeedCount,
                                     totalBattles = updatedState.totalBattles,
-                                    victories = updatedState.victories
+                                    victories = updatedState.victories,
+                                    generation = updatedState.generation,
+                                    lifespanDays = updatedState.lifespanDays,
+                                    isDeceased = updatedState.isDeceased,
+                                    traitedEggBonus = updatedState.traitedEggBonus,
+                                    vitalPoints = updatedState.vitalPoints
                                 )
                             )
                         } else {
@@ -98,7 +104,12 @@ class DigiWearAppWidgetProvider : AppWidgetProvider() {
                                     effort = updatedState.effort,
                                     overfeedCount = updatedState.overfeedCount,
                                     totalBattles = updatedState.totalBattles,
-                                    victories = updatedState.victories
+                                    victories = updatedState.victories,
+                                    generation = updatedState.generation,
+                                    lifespanDays = updatedState.lifespanDays,
+                                    isDeceased = updatedState.isDeceased,
+                                    traitedEggBonus = updatedState.traitedEggBonus,
+                                    vitalPoints = updatedState.vitalPoints
                                 )
                             )
                         } else {
@@ -123,73 +134,82 @@ class DigiWearAppWidgetProvider : AppWidgetProvider() {
     }
 
     override fun onUpdate(context: Context, appWidgetManager: AppWidgetManager, appWidgetIds: IntArray) {
+        val pendingResult = runCatching { goAsync() }.getOrNull()
         CoroutineScope(Dispatchers.IO).launch {
-            val db = PhoneDatabase.getInstance(context)
-            val latest = db.phoneDao().getLatestSnapshot()
-            val speciesId = latest?.speciesId ?: 101
-            val species = PetSpecies.SPECIES_REGISTRY[speciesId] ?: PetSpecies.SPECIES_REGISTRY[101]!!
-            val hunger = latest?.hunger ?: 4
-            val strength = latest?.strength ?: 4
-            val weight = latest?.weight ?: 5
-            val careMistakes = latest?.careMistakes ?: 0
-            val battles = latest?.totalBattles ?: 0
-            val victories = latest?.victories ?: 0
+            try {
+                val db = PhoneDatabase.getInstance(context)
+                val latest = db.phoneDao().getLatestSnapshot()
+                val speciesId = latest?.speciesId ?: 101
+                val species = PetSpecies.SPECIES_REGISTRY[speciesId] ?: PetSpecies.SPECIES_REGISTRY[101]!!
+                val hunger = latest?.hunger ?: 4
+                val strength = latest?.strength ?: 4
+                val weight = latest?.weight ?: 5
+                val careMistakes = latest?.careMistakes ?: 0
+                val battles = latest?.totalBattles ?: 0
+                val victories = latest?.victories ?: 0
 
-            val bitmap = PixelArtMatrices.getAndroidBitmap(speciesId, SpriteFrame.IDLE_A, false)
+                val rawBitmap = PixelArtMatrices.getAndroidBitmap(speciesId, SpriteFrame.IDLE_A, false)
+                val bitmap = Bitmap.createScaledBitmap(rawBitmap, 192, 192, false)
 
-            for (appWidgetId in appWidgetIds) {
-                val views = RemoteViews(context.packageName, R.layout.digiwear_app_widget)
+                for (appWidgetId in appWidgetIds) {
+                    val views = RemoteViews(context.packageName, R.layout.digiwear_app_widget)
 
-                views.setImageViewBitmap(R.id.widget_pet_sprite, bitmap)
-                views.setTextViewText(R.id.widget_pet_name, species.name)
-                views.setTextViewText(R.id.widget_pet_stage_attr, "• ${species.stage.displayName}")
-                views.setTextViewText(
-                    R.id.widget_pet_stats,
-                    "♥".repeat(hunger.coerceIn(0, 4)) + "♡".repeat(4 - hunger.coerceIn(0, 4)) + "  " +
-                    "★".repeat(strength.coerceIn(0, 4)) + "☆".repeat(4 - strength.coerceIn(0, 4))
-                )
-                views.setTextViewText(
-                    R.id.widget_pet_meta,
-                    "Wt: ${weight}g • Care: $careMistakes • Battles: $victories/$battles"
-                )
+                    views.setImageViewBitmap(R.id.widget_pet_sprite, bitmap)
+                    views.setTextViewText(R.id.widget_pet_name, species.name)
+                    views.setTextViewText(R.id.widget_pet_stage_attr, "// ${species.stage.displayName}")
+                    val hClamped = hunger.coerceIn(0, 4)
+                    val sClamped = strength.coerceIn(0, 4)
+                    views.setTextViewText(
+                        R.id.widget_pet_stats,
+                        "HNG [" + "#".repeat(hClamped) + "-".repeat(4 - hClamped) + "]  " +
+                        "STR [" + "#".repeat(sClamped) + "-".repeat(4 - sClamped) + "]"
+                    )
+                    views.setTextViewText(
+                        R.id.widget_pet_meta,
+                        "Wt: ${weight}g | Care: $careMistakes | Battles: $victories/$battles"
+                    )
 
-                // Launch MainActivity when widget is tapped
-                val intent = Intent(context, MainActivity::class.java).apply {
-                    flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
+                    // Launch MainActivity when widget is tapped
+                    val intent = Intent(context, MainActivity::class.java).apply {
+                        flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
+                    }
+                    val pendingIntent = PendingIntent.getActivity(
+                        context,
+                        0,
+                        intent,
+                        PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+                    )
+                    views.setOnClickPendingIntent(R.id.widget_root, pendingIntent)
+
+                    // Quick Care: Feed Button
+                    val feedIntent = Intent(context, DigiWearAppWidgetProvider::class.java).apply {
+                        action = ACTION_QUICK_FEED
+                    }
+                    val feedPendingIntent = PendingIntent.getBroadcast(
+                        context,
+                        101,
+                        feedIntent,
+                        PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+                    )
+                    views.setOnClickPendingIntent(R.id.widget_btn_feed, feedPendingIntent)
+
+                    // Quick Care: Clean Button
+                    val cleanIntent = Intent(context, DigiWearAppWidgetProvider::class.java).apply {
+                        action = ACTION_QUICK_CLEAN
+                    }
+                    val cleanPendingIntent = PendingIntent.getBroadcast(
+                        context,
+                        102,
+                        cleanIntent,
+                        PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+                    )
+                    views.setOnClickPendingIntent(R.id.widget_btn_clean, cleanPendingIntent)
+
+                    appWidgetManager.updateAppWidget(appWidgetId, views)
                 }
-                val pendingIntent = PendingIntent.getActivity(
-                    context,
-                    0,
-                    intent,
-                    PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-                )
-                views.setOnClickPendingIntent(R.id.widget_root, pendingIntent)
-
-                // Quick Care: Feed Button
-                val feedIntent = Intent(context, DigiWearAppWidgetProvider::class.java).apply {
-                    action = ACTION_QUICK_FEED
-                }
-                val feedPendingIntent = PendingIntent.getBroadcast(
-                    context,
-                    101,
-                    feedIntent,
-                    PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-                )
-                views.setOnClickPendingIntent(R.id.widget_btn_feed, feedPendingIntent)
-
-                // Quick Care: Clean Button
-                val cleanIntent = Intent(context, DigiWearAppWidgetProvider::class.java).apply {
-                    action = ACTION_QUICK_CLEAN
-                }
-                val cleanPendingIntent = PendingIntent.getBroadcast(
-                    context,
-                    102,
-                    cleanIntent,
-                    PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-                )
-                views.setOnClickPendingIntent(R.id.widget_btn_clean, cleanPendingIntent)
-
-                appWidgetManager.updateAppWidget(appWidgetId, views)
+            } catch (_: Exception) {
+            } finally {
+                pendingResult?.finish()
             }
         }
     }

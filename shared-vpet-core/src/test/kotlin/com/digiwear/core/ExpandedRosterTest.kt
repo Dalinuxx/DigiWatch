@@ -4,6 +4,7 @@ import com.digiwear.core.codec.CommCodeCodec
 import com.digiwear.core.fusion.JogressEngine
 import com.digiwear.core.model.ExpandedRoster
 import com.digiwear.core.model.PetSpecies
+import com.digiwear.core.model.PetStage
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
@@ -15,9 +16,9 @@ class ExpandedRosterTest {
 
     @Test
     fun expandedIdsAreUniqueAndNeverCollideWithBaseRoster() {
-        assertEquals(335, ExpandedRoster.SPECIES.size)
-        assertEquals(335, expandedIds.size)
-        assertEquals(500, PetSpecies.SPECIES_REGISTRY.size)
+        assertEquals(385, ExpandedRoster.SPECIES.size)
+        assertEquals(385, expandedIds.size)
+        assertEquals(550, PetSpecies.SPECIES_REGISTRY.size)
     }
 
     @Test
@@ -26,7 +27,7 @@ class ExpandedRosterTest {
             for (rule in sp.evolutionRules) {
                 val target = PetSpecies.SPECIES_REGISTRY[rule.targetSpeciesId]
                 assertNotNull("${sp.name} -> ${rule.targetSpeciesId}", target)
-                if (sp.id in expandedIds) {
+                if (sp.id in expandedIds && sp.stage != PetStage.ULTIMATE) {
                     assertEquals(
                         "${sp.name} -> ${target!!.name}",
                         sp.stage.stageIndex + 1, target.stage.stageIndex

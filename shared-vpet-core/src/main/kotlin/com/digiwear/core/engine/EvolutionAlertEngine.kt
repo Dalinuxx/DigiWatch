@@ -31,7 +31,36 @@ object EvolutionAlertEngine {
         val summaryText: String,
         val matrix: Array<String>,
         val palette: SpritePalette
-    )
+    ) {
+        override fun equals(other: Any?): Boolean {
+            if (this === other) return true
+            if (other !is EvolutionAlertPayload) return false
+            return initialSpeciesId == other.initialSpeciesId &&
+                finalSpeciesId == other.finalSpeciesId &&
+                speciesName == other.speciesName &&
+                stage == other.stage &&
+                stageDisplayName == other.stageDisplayName &&
+                notificationTitle == other.notificationTitle &&
+                contentText == other.contentText &&
+                summaryText == other.summaryText &&
+                matrix.contentEquals(other.matrix) &&
+                palette == other.palette
+        }
+
+        override fun hashCode(): Int {
+            var result = initialSpeciesId
+            result = 31 * result + finalSpeciesId
+            result = 31 * result + speciesName.hashCode()
+            result = 31 * result + stage.hashCode()
+            result = 31 * result + stageDisplayName.hashCode()
+            result = 31 * result + notificationTitle.hashCode()
+            result = 31 * result + contentText.hashCode()
+            result = 31 * result + summaryText.hashCode()
+            result = 31 * result + matrix.contentHashCode()
+            result = 31 * result + palette.hashCode()
+            return result
+        }
+    }
 
     /**
      * Evaluates whether an evolution occurred between [initialState] and [finalState].
@@ -88,12 +117,16 @@ object EvolutionAlertEngine {
     fun processDecayAndEvaluateAlert(
         initialState: PetState,
         currentUtc: Long,
-        isCanonicalLifespanEnabled: Boolean = false
+        isCanonicalLifespanEnabled: Boolean = false,
+        timeZoneOffset: java.time.ZoneOffset = java.time.ZoneOffset.UTC,
+        sleepScheduleMode: String = "CANONICAL"
     ): Pair<PetState, EvolutionAlertPayload?> {
         val updated = PetSimulationEngine.processDelta(
             currentState = initialState,
             currentTimestampUtc = currentUtc,
-            isCanonicalLifespanEnabled = isCanonicalLifespanEnabled
+            timeZoneOffset = timeZoneOffset,
+            isCanonicalLifespanEnabled = isCanonicalLifespanEnabled,
+            sleepScheduleMode = sleepScheduleMode
         )
 
         val evolvedSpecies = if (!updated.isDeceased && !updated.isFrozen) {

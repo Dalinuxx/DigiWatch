@@ -118,7 +118,9 @@ object AdventureEngine {
                 updatedProgress = updatedProgress,
                 nodeCleared = true,
                 campaignCompleted = completed,
-                narrativeEvent = if (!completed) nodes[nextIdx].narrativeText else "Campaign Completed! All sectors of '${story.title}' restored."
+                narrativeEvent = if (!completed) nodes[nextIdx].narrativeText else "Campaign Completed! All sectors of '${story.title}' restored.",
+                rewardItem = currentNode.bossEncounter?.rewardItem?.takeIf { it.isNotBlank() },
+                rewardEggId = currentNode.bossEncounter?.rewardEggId
             )
         }
 
@@ -145,6 +147,9 @@ object AdventureEngine {
         progress: AdventureProgress,
         boss: BossEncounter
     ): AdventureProgress {
+        if (progress.isCompleted || progress.currentNodeIndex !in story.nodes.indices) {
+            return progress
+        }
         val newFlags = progress.clearedFlags + boss.completionFlag
         val newEggs = if (boss.rewardEggId != null) progress.unlockedEggs + boss.rewardEggId else progress.unlockedEggs
         val newItems = if (boss.rewardItem.isNotBlank()) progress.collectedItems + boss.rewardItem else progress.collectedItems

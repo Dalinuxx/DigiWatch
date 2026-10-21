@@ -527,7 +527,8 @@ data class PetSpecies(
                     baselineWeight = 42,
                     spriteKey = "weregarurumon",
                     evolutionRules = listOf(
-                        EvolutionRule(targetSpeciesId = 503, minAgeSeconds = 259200L, minBattles = 30, minWinRatio = 0.80f, minEffort = 4) // MetalGarurumon
+                        EvolutionRule(targetSpeciesId = 503, minAgeSeconds = 259200L, minBattles = 30, minWinRatio = 0.80f, minEffort = 4), // MetalGarurumon
+                        EvolutionRule(targetSpeciesId = 593, minAgeSeconds = 259200L, minBattles = 25, minWinRatio = 0.70f) // Merukimon
                     )
                 ),
                 PetSpecies(
@@ -554,7 +555,8 @@ data class PetSpecies(
                     baselineWeight = 35,
                     spriteKey = "lillymon",
                     evolutionRules = listOf(
-                        EvolutionRule(targetSpeciesId = 505, minAgeSeconds = 259200L, minBattles = 30, minWinRatio = 0.80f) // Rosemon
+                        EvolutionRule(targetSpeciesId = 505, minAgeSeconds = 259200L, minBattles = 30, minWinRatio = 0.80f, minCareMistakes = 0, maxCareMistakes = 2), // Rosemon
+                        EvolutionRule(targetSpeciesId = 1561, minAgeSeconds = 259200L, minBattles = 25, minWinRatio = 0.70f, minCareMistakes = 3, maxCareMistakes = 999) // BanchoLilimon
                     )
                 ),
                 PetSpecies(
@@ -648,7 +650,8 @@ data class PetSpecies(
                     baselineWeight = 32,
                     spriteKey = "metalmamemon",
                     evolutionRules = listOf(
-                        EvolutionRule(targetSpeciesId = 502, minAgeSeconds = 259200L, minBattles = 25, minWinRatio = 0.75f)
+                        EvolutionRule(targetSpeciesId = 502, minAgeSeconds = 259200L, minBattles = 30, minWinRatio = 0.80f, minCareMistakes = 0, maxCareMistakes = 2), // Machinedramon
+                        EvolutionRule(targetSpeciesId = 1562, minAgeSeconds = 259200L, minBattles = 25, minWinRatio = 0.70f, minCareMistakes = 3, maxCareMistakes = 999) // BanchoMamemon
                     )
                 ),
 
@@ -665,7 +668,8 @@ data class PetSpecies(
                     baselineWeight = 50,
                     spriteKey = "wargreymon",
                     evolutionRules = listOf(
-                        EvolutionRule(targetSpeciesId = 510, minBattles = 40, minWinRatio = 0.85f, minEffort = 4) // Omnimon
+                        EvolutionRule(targetSpeciesId = 510, minBattles = 40, minWinRatio = 0.85f, minEffort = 4), // Omnimon
+                        EvolutionRule(targetSpeciesId = 1546, minBattles = 35, minWinRatio = 0.80f, minEffort = 3) // Agumon (Bond of Courage)
                     )
                 ),
                 PetSpecies(
@@ -689,7 +693,8 @@ data class PetSpecies(
                     baselineWeight = 48,
                     spriteKey = "metalgarurumon",
                     evolutionRules = listOf(
-                        EvolutionRule(targetSpeciesId = 535, minBattles = 40, minWinRatio = 0.85f, minEffort = 4) // Omnimon Alter-S
+                        EvolutionRule(targetSpeciesId = 535, minBattles = 40, minWinRatio = 0.85f, minEffort = 4), // Omnimon Alter-S
+                        EvolutionRule(targetSpeciesId = 1547, minBattles = 35, minWinRatio = 0.80f, minEffort = 3) // Gabumon (Bond of Friendship)
                     )
                 ),
                 PetSpecies(
@@ -2058,7 +2063,9 @@ data class PetSpecies(
                     basePower = 206,
                     baselineWeight = 56,
                     spriteKey = "omnimon_alters",
-                    evolutionRules = emptyList()
+                    evolutionRules = listOf(
+                        EvolutionRule(targetSpeciesId = 1558, minBattles = 35, minWinRatio = 0.85f) // Omnimon Alter-B
+                    )
                 ),
                 PetSpecies(
                     id = 536,
@@ -2069,7 +2076,9 @@ data class PetSpecies(
                     basePower = 204,
                     baselineWeight = 56,
                     spriteKey = "omnimon_zwart",
-                    evolutionRules = emptyList()
+                    evolutionRules = listOf(
+                        EvolutionRule(targetSpeciesId = 1559, minBattles = 35, minWinRatio = 0.85f) // Omnimon Zwart Defeat
+                    )
                 ),
                 PetSpecies(
                     id = 537,
@@ -2091,7 +2100,9 @@ data class PetSpecies(
                     basePower = 198,
                     baselineWeight = 54,
                     spriteKey = "jesmon",
-                    evolutionRules = emptyList()
+                    evolutionRules = listOf(
+                        EvolutionRule(targetSpeciesId = 1538, minBattles = 35, minWinRatio = 0.85f) // Jesmon X
+                    )
                 ),
                 PetSpecies(
                     id = 539,
@@ -2102,7 +2113,9 @@ data class PetSpecies(
                     basePower = 196,
                     baselineWeight = 58,
                     spriteKey = "gankoomon",
-                    evolutionRules = emptyList()
+                    evolutionRules = listOf(
+                        EvolutionRule(targetSpeciesId = 1539, minBattles = 35, minWinRatio = 0.85f) // Gankoomon X
+                    )
                 ),
                 PetSpecies(
                     id = 540,
@@ -2220,6 +2233,18 @@ data class PetSpecies(
                 )
 
             ).plus(ExpandedRoster.SPECIES).associateBy { it.id }
+        }
+
+        val SORTED_SPECIES: List<PetSpecies> by lazy {
+            SPECIES_REGISTRY.values.sortedBy { it.id }
+        }
+
+        val SPECIES_BY_STAGE: Map<PetStage, List<PetSpecies>> by lazy {
+            SORTED_SPECIES.groupBy { it.stage }
+        }
+
+        val COMBAT_ELIGIBLE_SPECIES: List<PetSpecies> by lazy {
+            SPECIES_REGISTRY.values.filter { it.stage != PetStage.BABY_I && it.stage != PetStage.BABY_II }
         }
 
         fun getById(speciesId: Int): PetSpecies =

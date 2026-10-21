@@ -139,13 +139,20 @@ fun EvolutionCelebrationOverlay(
                         .background(Color.White),
                     contentAlignment = Alignment.Center
                 ) {
-                    Text(
-                        text = "⚡ DIGIVOLVING! ⚡",
-                        fontSize = 14.sp,
-                        fontWeight = FontWeight.Black,
-                        fontFamily = FontFamily.Monospace,
-                        color = Color.Black
-                    )
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(4.dp)
+                    ) {
+                        DigiVectorIcon(type = DigiIconType.BOLT, size = 14.dp, tint = Color.Black)
+                        Text(
+                            text = "DIGIVOLVING!",
+                            fontSize = 14.sp,
+                            fontWeight = FontWeight.Black,
+                            fontFamily = FontFamily.Monospace,
+                            color = Color.Black
+                        )
+                        DigiVectorIcon(type = DigiIconType.BOLT, size = 14.dp, tint = Color.Black)
+                    }
                 }
             }
 
@@ -197,14 +204,21 @@ fun EvolutionCelebrationOverlay(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.SpaceBetween
                 ) {
-                    Text(
-                        text = "★ EVOLUTION COMPLETE! ★",
-                        fontSize = 9.sp,
-                        fontWeight = FontWeight.Black,
-                        fontFamily = FontFamily.Monospace,
-                        color = Color(0xFFFFD54F),
-                        textAlign = TextAlign.Center
-                    )
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(4.dp)
+                    ) {
+                        DigiVectorIcon(type = DigiIconType.STAR_FULL, size = 10.dp, tint = Color(0xFFFFD54F))
+                        Text(
+                            text = "EVOLUTION COMPLETE!",
+                            fontSize = 9.sp,
+                            fontWeight = FontWeight.Black,
+                            fontFamily = FontFamily.Monospace,
+                            color = Color(0xFFFFD54F),
+                            textAlign = TextAlign.Center
+                        )
+                        DigiVectorIcon(type = DigiIconType.STAR_FULL, size = 10.dp, tint = Color(0xFFFFD54F))
+                    }
 
                     // Portrait viewport
                     Box(

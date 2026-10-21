@@ -1,4 +1,4 @@
-﻿package com.digiwear.companion.render
+package com.digiwear.companion.render
 
 import android.graphics.Bitmap
 import android.graphics.Canvas
@@ -16,19 +16,23 @@ import com.digiwear.core.render.SpriteMatrixRegistry
  */
 object PixelArtMatrices {
 
-    private val cache = java.util.concurrent.ConcurrentHashMap<Int, ImageBitmap>()
-    private val androidBitmapCache = java.util.concurrent.ConcurrentHashMap<Int, Bitmap>()
+    private const val MAX_CACHE_ENTRIES = 512
+    private val cache = android.util.LruCache<Int, ImageBitmap>(MAX_CACHE_ENTRIES)
+    private val androidBitmapCache = android.util.LruCache<Int, Bitmap>(MAX_CACHE_ENTRIES)
 
     fun getFrameBitmap(speciesId: Int, frame: SpriteFrame, isAmbient: Boolean = false): ImageBitmap {
         val key = (speciesId shl 5) or (frame.frameIndex shl 1) or (if (isAmbient) 1 else 0)
-        return cache.getOrPut(key) {
-            getAndroidBitmap(speciesId, frame, isAmbient).asImageBitmap()
-        }
+        cache.get(key)?.let { return it }
+        val img = getAndroidBitmap(speciesId, frame, isAmbient).asImageBitmap()
+        cache.put(key, img)
+        return img
     }
 
     fun getAndroidBitmap(speciesId: Int, frame: SpriteFrame = SpriteFrame.IDLE_A, isAmbient: Boolean = false): Bitmap {
         val key = (speciesId shl 5) or (frame.frameIndex shl 1) or (if (isAmbient) 1 else 0)
-        return androidBitmapCache.getOrPut(key) {
+        androidBitmapCache.get(key)?.let { return it }
+        synchronized(androidBitmapCache) {
+            androidBitmapCache.get(key)?.let { return it }
             val bmp = Bitmap.createBitmap(64, 64, Bitmap.Config.ARGB_8888)
             val canvas = Canvas(bmp)
             val paint = Paint().apply {
@@ -40,7 +44,8 @@ object PixelArtMatrices {
             if (!isAmbient) {
                 applyVPetPixelOutline(bmp)
             }
-            bmp
+            androidBitmapCache.put(key, bmp)
+            return bmp
         }
     }
 
@@ -93,21 +98,22 @@ object PixelArtMatrices {
             SpriteMatrixRegistry.getMatrix(speciesId, frame)
         }
 
-        // Frame offsets for dynamic life
+        // Frame offsets aligned with SpriteMatrixRegistry directional transforms
         val xOffset = when (frame) {
-            SpriteFrame.WALK_A -> 2f
-            SpriteFrame.WALK_B -> -2f
-            SpriteFrame.ATTACK_CHARGE -> -3f
-            SpriteFrame.ATTACK_RELEASE -> 4f
-            SpriteFrame.REFUSAL -> -2f
-            SpriteFrame.INJURED -> -2f
+            SpriteFrame.WALK_A -> -1.5f
+            SpriteFrame.WALK_B -> 1.5f
+            SpriteFrame.FEED_START -> -1f
+            SpriteFrame.ATTACK_CHARGE -> 2f
+            SpriteFrame.ATTACK_RELEASE -> -2f
+            SpriteFrame.REFUSAL -> 1.5f
+            SpriteFrame.INJURED -> 1f
             else -> 0f
         }
 
         val yBob = when (frame) {
-            SpriteFrame.IDLE_B -> -1f
-            SpriteFrame.WALK_A, SpriteFrame.WALK_B -> 1f
-            SpriteFrame.SLEEP_A, SpriteFrame.SLEEP_B -> 2f
+            SpriteFrame.IDLE_B -> 0.5f
+            SpriteFrame.WALK_A, SpriteFrame.WALK_B -> -0.5f
+            SpriteFrame.SLEEP_A, SpriteFrame.SLEEP_B -> 1.5f
             SpriteFrame.JOY_EAT -> -2f
             else -> 0f
         }
@@ -157,15 +163,15 @@ object PixelArtMatrices {
         // ==========================================
         when (frame) {
             SpriteFrame.FEED_START, SpriteFrame.JOY_EAT -> {
-                // Classic V-Pet Meat-on-Bone pixel sprite
+                // Classic V-Pet Meat-on-Bone pixel sprite in front (left side) of partner
                 paint.color = Color.rgb(245, 240, 230)
-                canvas.drawRect(48f + xOffset, 25f + yBob, 58f + xOffset, 28f + yBob, paint)
+                canvas.drawRect(2f, 26f + yBob, 12f, 29f + yBob, paint)
                 paint.color = Color.rgb(205, 55, 45)
                 if (frame == SpriteFrame.FEED_START) {
-                    canvas.drawRect(50f + xOffset, 22f + yBob, 56f + xOffset, 31f + yBob, paint)
+                    canvas.drawRect(4f, 23f + yBob, 10f, 32f + yBob, paint)
                 } else {
                     // Half-eaten meat + Pixel Heart above head
-                    canvas.drawRect(51f + xOffset, 24f + yBob, 55f + xOffset, 29f + yBob, paint)
+                    canvas.drawRect(5f, 25f + yBob, 9f, 30f + yBob, paint)
                     paint.color = Color.rgb(255, 65, 110)
                     canvas.drawRect(29f + xOffset, 5f + yBob, 32f + xOffset, 8f + yBob, paint)
                     canvas.drawRect(33f + xOffset, 5f + yBob, 36f + xOffset, 8f + yBob, paint)
@@ -208,12 +214,15 @@ object PixelArtMatrices {
                 canvas.drawRect(47f, 14f, 57f, 16f, paint)
             }
             SpriteFrame.INJURED -> {
-                // Classic V-Pet Skull / Medical Cross alert in top-right
-                paint.color = Color.rgb(245, 245, 250)
-                canvas.drawRect(48f, 7f, 58f, 15f, paint)
-                paint.color = Color.rgb(235, 45, 45)
-                canvas.drawRect(52f, 8f, 54f, 14f, paint)
-                canvas.drawRect(50f, 10f, 56f, 12f, paint)
+                // Classic V-Pet Two-Tone Medical Pill Capsule alert in top-right
+                paint.color = Color.rgb(26, 28, 36)
+                canvas.drawRect(46f, 7f, 60f, 15f, paint)
+                paint.color = Color.rgb(239, 68, 68)
+                canvas.drawRect(47f, 8f, 53f, 14f, paint)
+                paint.color = Color.rgb(245, 247, 250)
+                canvas.drawRect(53f, 8f, 59f, 14f, paint)
+                paint.color = Color.rgb(255, 255, 255)
+                canvas.drawRect(48f, 9f, 58f, 10f, paint)
             }
             else -> Unit
         }

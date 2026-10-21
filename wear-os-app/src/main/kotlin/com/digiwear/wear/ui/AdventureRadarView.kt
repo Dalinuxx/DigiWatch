@@ -90,19 +90,27 @@ fun AdventureRadarView(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = "◈ RADAR SCANNER // NET-LOC ◈",
+                text = ":: RADAR SCANNER // NET-LOC ::",
                 fontSize = 7.5.sp,
                 fontWeight = FontWeight.Black,
                 color = if (isNearBoss) Color(0xFFFF5252) else Color(0xFF64FFDA),
                 fontFamily = FontFamily.Monospace
             )
-            Text(
-                text = if (isNearBoss) "⚠ BOSS CLOSE" else "TRACKING",
-                fontSize = 7.sp,
-                fontWeight = FontWeight.Bold,
-                color = if (isNearBoss) Color(0xFFFF5252) else Color(0xFF80CBC4),
-                fontFamily = FontFamily.Monospace
-            )
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(2.dp)
+            ) {
+                if (isNearBoss) {
+                    DigiVectorIcon(type = DigiIconType.ATTENTION, size = 8.dp, tint = Color(0xFFFF5252))
+                }
+                Text(
+                    text = if (isNearBoss) "BOSS CLOSE" else "TRACKING",
+                    fontSize = 7.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = if (isNearBoss) Color(0xFFFF5252) else Color(0xFF80CBC4),
+                    fontFamily = FontFamily.Monospace
+                )
+            }
         }
 
         Spacer(modifier = Modifier.height(4.dp))
@@ -169,12 +177,20 @@ fun AdventureRadarView(
         Spacer(modifier = Modifier.height(4.dp))
 
         // Distance & Status Readout
-        Text(
-            text = if (remSteps == 0) "🎯 DESTINATION REACHED • ENCOUNTER READY" else "LOCK: -$remSteps STEPS TO ${bossName?.uppercase() ?: "SECTOR BOSS"}",
-            fontSize = 7.sp,
-            fontWeight = FontWeight.Bold,
-            color = if (isNearBoss) Color(0xFFFFD54F) else Color(0xFFB0BEC5),
-            fontFamily = FontFamily.Monospace
-        )
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(3.dp)
+        ) {
+            if (remSteps == 0) {
+                DigiVectorIcon(type = DigiIconType.SCAN, size = 9.dp, tint = Color(0xFFFFD54F))
+            }
+            Text(
+                text = if (remSteps == 0) "DESTINATION REACHED - ENCOUNTER READY" else "LOCK: -$remSteps STEPS TO ${bossName?.uppercase() ?: "SECTOR BOSS"}",
+                fontSize = 7.sp,
+                fontWeight = FontWeight.Bold,
+                color = if (isNearBoss) Color(0xFFFFD54F) else Color(0xFFB0BEC5),
+                fontFamily = FontFamily.Monospace
+            )
+        }
     }
 }

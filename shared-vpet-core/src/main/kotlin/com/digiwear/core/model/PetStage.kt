@@ -1,4 +1,4 @@
-﻿package com.digiwear.core.model
+package com.digiwear.core.model
 
 import kotlinx.serialization.Serializable
 
@@ -93,10 +93,10 @@ enum class PetStage(
 
         return if (start > end) {
             // Wraps over midnight (e.g. 21:00 to 08:00)
-            hour >= start || hour < end || (hour == end && minute == 0)
+            hour >= start || hour < end
         } else {
             // Same-day window
-            hour in start until end || (hour == end && minute == 0)
+            hour in start until end
         }
     }
 

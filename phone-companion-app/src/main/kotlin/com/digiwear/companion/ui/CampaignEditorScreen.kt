@@ -169,7 +169,7 @@ fun CampaignEditorScreen(
                                     )
                                 ) {
                                     Text(
-                                        text = if (isCurrent) "LOADED ✓" else "LOAD SAGA",
+                                        text = if (isCurrent) "LOADED [OK]" else "LOAD SAGA",
                                         fontSize = 9.5.sp,
                                         fontWeight = FontWeight.Bold,
                                         fontFamily = FontFamily.Monospace
@@ -320,13 +320,16 @@ fun CampaignEditorScreen(
                                             )
                                             Spacer(modifier = Modifier.width(8.dp))
                                             Column {
-                                                Text(
-                                                    text = "☠ BOSS: ${bossDisplayName.uppercase()}",
-                                                    fontSize = 11.sp,
-                                                    fontWeight = FontWeight.Black,
-                                                    color = Color(0xFFFF8A80),
-                                                    fontFamily = FontFamily.Monospace
-                                                )
+                                                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(5.dp)) {
+                                                    DigiVectorIcon(type = DigiIconType.SKULL_INJURY, size = 11.dp, tint = Color(0xFFFF8A80))
+                                                    Text(
+                                                        text = "BOSS: ${bossDisplayName.uppercase()}",
+                                                        fontSize = 11.sp,
+                                                        fontWeight = FontWeight.Black,
+                                                        color = Color(0xFFFF8A80),
+                                                        fontFamily = FontFamily.Monospace
+                                                    )
+                                                }
                                                 if (boss.introDialogue.isNotBlank()) {
                                                     Text(
                                                         text = "\"${boss.introDialogue}\"",
@@ -342,15 +345,18 @@ fun CampaignEditorScreen(
                                                 )
                                                 if (boss.rewardItem.isNotBlank() || boss.rewardEggId != null) {
                                                     val rewardStr = buildString {
-                                                        if (boss.rewardEggId != null) append("🥚 Unlocks Egg #${boss.rewardEggId} • ")
+                                                        if (boss.rewardEggId != null) append("Unlocks Egg #${boss.rewardEggId} • ")
                                                         if (boss.rewardItem.isNotBlank()) append(boss.rewardItem)
                                                     }
-                                                    Text(
-                                                        text = "🎁 $rewardStr",
-                                                        fontSize = 8.sp,
-                                                        color = Color(0xFFFFD54F),
-                                                        fontFamily = FontFamily.Monospace
-                                                    )
+                                                    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                                                        DigiVectorIcon(type = DigiIconType.TROPHY_CROWN, size = 10.dp, tint = Color(0xFFFFD54F))
+                                                        Text(
+                                                            text = rewardStr,
+                                                            fontSize = 8.sp,
+                                                            color = Color(0xFFFFD54F),
+                                                            fontFamily = FontFamily.Monospace
+                                                        )
+                                                    }
                                                 }
                                             }
                                         }

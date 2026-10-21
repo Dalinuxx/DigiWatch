@@ -1,4 +1,4 @@
-﻿package com.digiwear.companion.render
+package com.digiwear.companion.render
 
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.Box
@@ -20,11 +20,12 @@ fun SpriteCanvasRenderer(
     speciesId: Int,
     frame: SpriteFrame = SpriteFrame.IDLE_A,
     flipHorizontal: Boolean = false,
+    isAmbient: Boolean = false,
     modifier: Modifier = Modifier,
     size: Dp = 100.dp
 ) {
-    val imageBitmap = remember(speciesId, frame) {
-        PixelArtMatrices.getFrameBitmap(speciesId, frame)
+    val imageBitmap = remember(speciesId, frame, isAmbient) {
+        PixelArtMatrices.getFrameBitmap(speciesId, frame, isAmbient)
     }
 
     Box(

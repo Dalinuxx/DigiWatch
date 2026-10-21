@@ -16,6 +16,8 @@ import com.digiwear.core.model.BossEncounter
 import com.digiwear.core.model.CampaignStory
 import com.digiwear.core.model.PetSpecies
 import com.digiwear.core.model.PetState
+import com.digiwear.wear.complication.DigiWearComplicationService
+import com.digiwear.wear.tile.DigiWearTileService
 import com.digiwear.wear.worker.PetDecayWorker
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -26,12 +28,17 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
+import java.time.Instant
+import java.time.ZoneId
 import java.util.concurrent.TimeUnit
 
 class PetRepository private constructor(context: Context) {
 
     private val appContext = context.applicationContext
+    private val stateMutex = Mutex()
 
     private val db = Room.databaseBuilder(
         appContext,
@@ -268,9 +275,9 @@ class PetRepository private constructor(context: Context) {
     }
 
     val petStateFlow: Flow<PetState> = dao.getPetStateFlow().map { entity ->
-        val domain = entity?.toDomain() ?: PetState(speciesId = 201)
+        val domain = entity?.toDomain() ?: PetState(speciesId = 101)
         if (domain.speciesId <= 1 || !PetSpecies.SPECIES_REGISTRY.containsKey(domain.speciesId)) {
-            domain.copy(speciesId = 201)
+            domain.copy(speciesId = 101)
         } else {
             domain
         }
@@ -299,7 +306,12 @@ class PetRepository private constructor(context: Context) {
     }.distinctUntilChanged()
 
     suspend fun getPetState(): PetState = withContext(Dispatchers.IO) {
-        dao.getPetState()?.toDomain() ?: PetState()
+        val domain = dao.getPetState()?.toDomain() ?: PetState(speciesId = 101)
+        if (domain.speciesId <= 1 || !PetSpecies.SPECIES_REGISTRY.containsKey(domain.speciesId)) {
+            domain.copy(speciesId = 101)
+        } else {
+            domain
+        }
     }
 
     suspend fun getAdventureProgress(): AdventureProgress = withContext(Dispatchers.IO) {
@@ -325,8 +337,85 @@ class PetRepository private constructor(context: Context) {
         }
     }
 
+    private fun notifySurfaceUpdates() {
+        DigiWearComplicationService.requestUpdate(appContext)
+        DigiWearTileService.requestUpdate(appContext)
+    }
+
     suspend fun savePetState(state: PetState) = withContext(Dispatchers.IO) {
         dao.insertOrUpdatePet(PetEntity.fromDomain(state))
+        notifySurfaceUpdates()
+    }
+
+    val backupPetStateFlow: Flow<PetState?> = dao.getBackupPetStateFlow().map { entity ->
+        entity?.toDomain()
+    }.distinctUntilChanged()
+
+    suspend fun getBackupPetState(): PetState? = withContext(Dispatchers.IO) {
+        dao.getBackupPetState()?.toDomain()
+    }
+
+    suspend fun saveBackupPetState(state: PetState?) = withContext(Dispatchers.IO) {
+        stateMutex.withLock {
+            if (state == null) {
+                dao.deleteBackupPet()
+            } else {
+                dao.insertOrUpdatePet(PetEntity.fromDomain(state.copy(isFrozen = true), id = 2))
+            }
+        }
+    }
+
+    suspend fun depositActiveToBackup(): Boolean = withContext(Dispatchers.IO) {
+        stateMutex.withLock {
+            val active = dao.getPetState() ?: return@withContext false
+            val now = System.currentTimeMillis() / 1000L
+            val backup = active.copy(id = 2, isFrozen = true, lastProcessedTimestampUtc = now)
+            dao.insertOrUpdatePet(backup)
+            val freshEgg = PetState(speciesId = 101, lastProcessedTimestampUtc = now)
+            dao.insertOrUpdatePet(PetEntity.fromDomain(freshEgg, id = 1))
+            notifySurfaceUpdates()
+            true
+        }
+    }
+
+    suspend fun swapActiveAndBackup(): Boolean = withContext(Dispatchers.IO) {
+        stateMutex.withLock {
+            val active = dao.getPetState() ?: return@withContext false
+            val backup = dao.getBackupPetState() ?: return@withContext false
+
+            val now = System.currentTimeMillis() / 1000L
+            val newBackup = active.copy(id = 2, isFrozen = true, lastProcessedTimestampUtc = now)
+            val newActive = backup.copy(id = 1, isFrozen = false, lastProcessedTimestampUtc = now)
+
+            dao.insertOrUpdatePet(newActive)
+            dao.insertOrUpdatePet(newBackup)
+            notifySurfaceUpdates()
+            true
+        }
+    }
+
+    suspend fun performDirectJogress(): PetState? = withContext(Dispatchers.IO) {
+        stateMutex.withLock {
+            val active = dao.getPetState()?.toDomain() ?: return@withContext null
+            val backup = dao.getBackupPetState()?.toDomain() ?: return@withContext null
+
+            val recipe = com.digiwear.core.fusion.JogressEngine.findFusionRecipe(
+                active.speciesId,
+                backup.speciesId
+            ) ?: return@withContext null
+
+            val targetSpecies = PetSpecies.getById(recipe.targetSpeciesId)
+            val now = System.currentTimeMillis() / 1000L
+            val evolved = EvolutionEngine.evolve(active, targetSpecies, now).copy(
+                isFrozen = false,
+                traitedEggBonus = active.traitedEggBonus + backup.traitedEggBonus + 1
+            )
+
+            dao.insertOrUpdatePet(PetEntity.fromDomain(evolved, id = 1))
+            dao.deleteBackupPet()
+            notifySurfaceUpdates()
+            evolved
+        }
     }
 
     val memorialsFlow: Flow<List<com.digiwear.core.model.MemorialRecord>> = dao.getAllMemorialsFlow().map { list ->
@@ -345,42 +434,46 @@ class PetRepository private constructor(context: Context) {
      * Resets current state to hatch a new Digi-Egg.
      */
     suspend fun hatchNewEgg(starterSpeciesId: Int = 101): PetState = withContext(Dispatchers.IO) {
-        val species = PetSpecies.getById(starterSpeciesId)
-        val fresh = PetState(
-            speciesId = starterSpeciesId,
-            currentHp = species.baseHp,
-            maxHp = species.baseHp,
-            hunger = 4,
-            strength = 4,
-            weight = species.baselineWeight,
-            ageSeconds = 0L,
-            careMistakes = 0,
-            effort = 0,
-            overfeedCount = 0,
-            totalBattles = 0,
-            victories = 0,
-            wasteCount = 0,
-            isSleeping = false,
-            lightsOff = false,
-            isInjured = false,
-            lastProcessedTimestampUtc = System.currentTimeMillis() / 1000L,
-            attentionCallActive = false,
-            attentionCallTimestampUtc = null
-        )
-        savePetState(fresh)
-        fresh
+        stateMutex.withLock {
+            val species = PetSpecies.getById(starterSpeciesId)
+            val fresh = PetState(
+                speciesId = starterSpeciesId,
+                currentHp = species.baseHp,
+                maxHp = species.baseHp,
+                hunger = 4,
+                strength = 4,
+                weight = species.baselineWeight,
+                ageSeconds = 0L,
+                careMistakes = 0,
+                effort = 0,
+                overfeedCount = 0,
+                totalBattles = 0,
+                victories = 0,
+                wasteCount = 0,
+                isSleeping = false,
+                lightsOff = false,
+                isInjured = false,
+                lastProcessedTimestampUtc = System.currentTimeMillis() / 1000L,
+                attentionCallActive = false,
+                attentionCallTimestampUtc = null
+            )
+            savePetState(fresh)
+            fresh
+        }
     }
 
     /**
      * Hatches a Generation N+1 Traited Digitama inheriting stat and lifespan bonuses from the departed partner.
      */
     suspend fun hatchTraitedEgg(starterSpeciesId: Int = 101): PetState = withContext(Dispatchers.IO) {
-        val current = getPetState()
-        val memorial = PetSimulationEngine.createMemorialRecord(current)
-        dao.insertMemorial(MemorialEntity.fromDomain(memorial))
-        val nextPet = PetSimulationEngine.createTraitedEggState(current, starterSpeciesId)
-        dao.insertOrUpdatePet(PetEntity.fromDomain(nextPet))
-        nextPet
+        stateMutex.withLock {
+            val current = getPetState()
+            val memorial = PetSimulationEngine.createMemorialRecord(current)
+            dao.insertMemorial(MemorialEntity.fromDomain(memorial))
+            val nextPet = PetSimulationEngine.createTraitedEggState(current, starterSpeciesId)
+            savePetState(nextPet)
+            nextPet
+        }
     }
 
     /**
@@ -389,212 +482,244 @@ class PetRepository private constructor(context: Context) {
      * or at least 60 seconds have elapsed since the last persisted checkpoint.
      */
     suspend fun processDecay(currentUtc: Long = System.currentTimeMillis() / 1000L): PetState = withContext(Dispatchers.IO) {
-        val current = getPetState()
-        val isCanonical = _lifespanCanonicalEnabledFlow.value
-        val updated = PetSimulationEngine.processDelta(
-            currentState = current,
-            currentTimestampUtc = currentUtc,
-            isCanonicalLifespanEnabled = isCanonical
-        )
-        if (updated.isDeceased && !current.isDeceased) {
-            val memorial = PetSimulationEngine.createMemorialRecord(updated)
-            dao.insertMemorial(MemorialEntity.fromDomain(memorial))
-        }
-        val evolved = if (!updated.isDeceased) EvolutionEngine.evaluateEvolution(updated) else null
-        val finalState = if (evolved != null) {
-            EvolutionEngine.evolve(updated, evolved, currentUtc)
-        } else {
-            updated
-        }
+        stateMutex.withLock {
+            val current = getPetState()
+            val isCanonical = _lifespanCanonicalEnabledFlow.value
+            val localOffset = ZoneId.systemDefault().rules.getOffset(Instant.ofEpochSecond(currentUtc))
+            val sleepMode = _sleepScheduleFlow.value
+            val updated = PetSimulationEngine.processDelta(
+                currentState = current,
+                currentTimestampUtc = currentUtc,
+                timeZoneOffset = localOffset,
+                sleepScheduleMode = sleepMode,
+                isCanonicalLifespanEnabled = isCanonical
+            )
+            if (updated.isDeceased && !current.isDeceased) {
+                val memorial = PetSimulationEngine.createMemorialRecord(updated)
+                dao.insertMemorial(MemorialEntity.fromDomain(memorial))
+            }
+            val evolved = if (!updated.isDeceased) EvolutionEngine.evaluateEvolution(updated) else null
+            val finalState = if (evolved != null) {
+                EvolutionEngine.evolve(updated, evolved, currentUtc)
+            } else {
+                updated
+            }
 
-        val biologicalStateChanged =
-            finalState.speciesId != current.speciesId ||
-            finalState.hunger != current.hunger ||
-            finalState.strength != current.strength ||
-            finalState.wasteCount != current.wasteCount ||
-            finalState.careMistakes != current.careMistakes ||
-            finalState.isSleeping != current.isSleeping ||
-            finalState.isInjured != current.isInjured ||
-            finalState.isDeceased != current.isDeceased ||
-            finalState.attentionCallActive != current.attentionCallActive ||
-            finalState.attentionCallTimestampUtc != current.attentionCallTimestampUtc
+            val biologicalStateChanged =
+                finalState.speciesId != current.speciesId ||
+                finalState.hunger != current.hunger ||
+                finalState.strength != current.strength ||
+                finalState.wasteCount != current.wasteCount ||
+                finalState.careMistakes != current.careMistakes ||
+                finalState.isSleeping != current.isSleeping ||
+                finalState.lightsOff != current.lightsOff ||
+                finalState.isInjured != current.isInjured ||
+                finalState.isDeceased != current.isDeceased ||
+                finalState.attentionCallActive != current.attentionCallActive ||
+                finalState.attentionCallTimestampUtc != current.attentionCallTimestampUtc
 
-        val checkpointDue = current.lastProcessedTimestampUtc <= 0L ||
-            (currentUtc - current.lastProcessedTimestampUtc) >= 60L
+            val checkpointDue = current.lastProcessedTimestampUtc <= 0L ||
+                (currentUtc - current.lastProcessedTimestampUtc) >= 60L
 
-        if (biologicalStateChanged || checkpointDue) {
-            savePetState(finalState)
+            if (biologicalStateChanged || checkpointDue) {
+                savePetState(finalState)
+            }
+            finalState
         }
-        finalState
     }
 
     suspend fun feedMeal(currentUtc: Long = System.currentTimeMillis() / 1000L): PetState = withContext(Dispatchers.IO) {
-        val current = getPetState()
-        val updated = PetSimulationEngine.feedMeal(current, currentUtc)
-        savePetState(updated)
-        updated
+        stateMutex.withLock {
+            val current = getPetState()
+            val updated = PetSimulationEngine.feedMeal(current, currentUtc)
+            savePetState(updated)
+            updated
+        }
     }
 
     suspend fun feedProtein(currentUtc: Long = System.currentTimeMillis() / 1000L): PetState = withContext(Dispatchers.IO) {
-        val current = getPetState()
-        val updated = PetSimulationEngine.feedProtein(current, currentUtc)
-        savePetState(updated)
-        updated
+        stateMutex.withLock {
+            val current = getPetState()
+            val updated = PetSimulationEngine.feedProtein(current, currentUtc)
+            savePetState(updated)
+            updated
+        }
     }
 
     suspend fun cleanWaste(): PetState = withContext(Dispatchers.IO) {
-        val current = getPetState()
-        val updated = PetSimulationEngine.cleanWaste(current)
-        savePetState(updated)
-        updated
+        stateMutex.withLock {
+            val current = getPetState()
+            val updated = PetSimulationEngine.cleanWaste(current)
+            savePetState(updated)
+            updated
+        }
     }
 
     suspend fun toggleColdSleep(currentUtc: Long = System.currentTimeMillis() / 1000L): PetState = withContext(Dispatchers.IO) {
-        val current = getPetState()
-        val updated = PetSimulationEngine.toggleColdSleep(current, currentUtc)
-        savePetState(updated)
-        updated
+        stateMutex.withLock {
+            val current = getPetState()
+            val updated = PetSimulationEngine.toggleColdSleep(current, currentUtc)
+            savePetState(updated)
+            updated
+        }
     }
 
     suspend fun toggleLights(currentUtc: Long = System.currentTimeMillis() / 1000L): PetState = withContext(Dispatchers.IO) {
-        val current = getPetState()
-        val updated = PetSimulationEngine.toggleLights(current, currentUtc)
-        savePetState(updated)
-        updated
+        stateMutex.withLock {
+            val current = getPetState()
+            val updated = PetSimulationEngine.toggleLights(current, currentUtc)
+            savePetState(updated)
+            updated
+        }
     }
 
     suspend fun train(won: Boolean, currentUtc: Long = System.currentTimeMillis() / 1000L): PetState = withContext(Dispatchers.IO) {
-        val current = getPetState()
-        val updated = PetSimulationEngine.train(current, won, currentUtc)
-        savePetState(updated)
-        updated
+        stateMutex.withLock {
+            val current = getPetState()
+            val updated = PetSimulationEngine.train(current, won, currentUtc)
+            savePetState(updated)
+            updated
+        }
     }
 
     suspend fun cureInjury(): PetState = withContext(Dispatchers.IO) {
-        val current = getPetState()
-        val updated = PetSimulationEngine.cureInjury(current)
-        savePetState(updated)
-        updated
+        stateMutex.withLock {
+            val current = getPetState()
+            val updated = PetSimulationEngine.cureInjury(current)
+            savePetState(updated)
+            updated
+        }
     }
 
     suspend fun recordBattleResult(won: Boolean): Pair<PetState, Boolean> = withContext(Dispatchers.IO) {
-        val current = getPetState()
-        val (updated, wasInjured) = PetSimulationEngine.processBattleOutcome(
-            state = current,
-            won = won,
-            combatInjuriesEnabled = _combatInjuriesEnabledFlow.value
-        )
-        val evolved = EvolutionEngine.evaluateEvolution(updated)
-        val finalState = if (evolved != null) {
-            EvolutionEngine.evolve(updated, evolved, System.currentTimeMillis() / 1000L)
-        } else {
-            updated
+        stateMutex.withLock {
+            val current = getPetState()
+            val (updated, wasInjured) = PetSimulationEngine.processBattleOutcome(
+                state = current,
+                won = won,
+                combatInjuriesEnabled = _combatInjuriesEnabledFlow.value
+            )
+            val evolved = EvolutionEngine.evaluateEvolution(updated)
+            val finalState = if (evolved != null) {
+                EvolutionEngine.evolve(updated, evolved, System.currentTimeMillis() / 1000L)
+            } else {
+                updated
+            }
+            savePetState(finalState)
+            Pair(finalState, wasInjured)
         }
-        savePetState(finalState)
-        Pair(finalState, wasInjured)
     }
 
     suspend fun addAdventureSteps(steps: Int): AdventureStepResult = withContext(Dispatchers.IO) {
-        val story = getActiveCampaign()
-        val currentEntity = dao.getAdventureState()
-        val flags = if (currentEntity?.clearedFlagsCsv.isNullOrBlank()) emptySet() else currentEntity!!.clearedFlagsCsv.split(",").toSet()
-        val eggs = if (currentEntity?.unlockedEggsCsv.isNullOrBlank()) emptySet() else currentEntity!!.unlockedEggsCsv.split(",").mapNotNull { it.toIntOrNull() }.toSet()
-        val items = if (currentEntity?.collectedItemsCsv.isNullOrBlank()) emptySet() else currentEntity!!.collectedItemsCsv.split(",").filter { it.isNotBlank() }.toSet()
-        val campaigns = if (currentEntity?.unlockedCampaignsCsv.isNullOrBlank()) emptySet() else currentEntity!!.unlockedCampaignsCsv.split(",").filter { it.isNotBlank() }.toSet()
-        val progress = AdventureProgress(
-            campaignId = currentEntity?.campaignId ?: story.campaignId,
-            currentNodeIndex = currentEntity?.currentNodeIndex ?: 0,
-            accumulatedStepsCurrentNode = currentEntity?.accumulatedStepsCurrentNode ?: 0,
-            totalAdventureSteps = currentEntity?.totalAdventureSteps ?: 0,
-            clearedFlags = flags,
-            isCompleted = currentEntity?.isCompleted ?: false,
-            unlockedEggs = eggs,
-            collectedItems = items,
-            unlockedCampaigns = campaigns
-        )
-
-        val result = AdventureEngine.processSteps(story, progress, steps)
-        val updated = result.updatedProgress
-        dao.insertOrUpdateAdventure(
-            AdventureEntity(
-                id = 1,
-                campaignId = updated.campaignId,
-                currentNodeIndex = updated.currentNodeIndex,
-                accumulatedStepsCurrentNode = updated.accumulatedStepsCurrentNode,
-                totalAdventureSteps = updated.totalAdventureSteps,
-                clearedFlagsCsv = updated.clearedFlags.joinToString(","),
-                isCompleted = updated.isCompleted,
-                unlockedEggsCsv = updated.unlockedEggs.joinToString(","),
-                collectedItemsCsv = updated.collectedItems.joinToString(","),
-                unlockedCampaignsCsv = updated.unlockedCampaigns.joinToString(",")
+        stateMutex.withLock {
+            val story = getActiveCampaign()
+            val currentEntity = dao.getAdventureState()
+            val flags = if (currentEntity?.clearedFlagsCsv.isNullOrBlank()) emptySet() else currentEntity!!.clearedFlagsCsv.split(",").toSet()
+            val eggs = if (currentEntity?.unlockedEggsCsv.isNullOrBlank()) emptySet() else currentEntity!!.unlockedEggsCsv.split(",").mapNotNull { it.toIntOrNull() }.toSet()
+            val items = if (currentEntity?.collectedItemsCsv.isNullOrBlank()) emptySet() else currentEntity!!.collectedItemsCsv.split(",").filter { it.isNotBlank() }.toSet()
+            val campaigns = if (currentEntity?.unlockedCampaignsCsv.isNullOrBlank()) emptySet() else currentEntity!!.unlockedCampaignsCsv.split(",").filter { it.isNotBlank() }.toSet()
+            val progress = AdventureProgress(
+                campaignId = currentEntity?.campaignId ?: story.campaignId,
+                currentNodeIndex = currentEntity?.currentNodeIndex ?: 0,
+                accumulatedStepsCurrentNode = currentEntity?.accumulatedStepsCurrentNode ?: 0,
+                totalAdventureSteps = currentEntity?.totalAdventureSteps ?: 0,
+                clearedFlags = flags,
+                isCompleted = currentEntity?.isCompleted ?: false,
+                unlockedEggs = eggs,
+                collectedItems = items,
+                unlockedCampaigns = campaigns
             )
-        )
-        result
+
+            val result = AdventureEngine.processSteps(story, progress, steps)
+            val updated = result.updatedProgress
+            dao.insertOrUpdateAdventure(
+                AdventureEntity(
+                    id = 1,
+                    campaignId = updated.campaignId,
+                    currentNodeIndex = updated.currentNodeIndex,
+                    accumulatedStepsCurrentNode = updated.accumulatedStepsCurrentNode,
+                    totalAdventureSteps = updated.totalAdventureSteps,
+                    clearedFlagsCsv = updated.clearedFlags.joinToString(","),
+                    isCompleted = updated.isCompleted,
+                    unlockedEggsCsv = updated.unlockedEggs.joinToString(","),
+                    collectedItemsCsv = updated.collectedItems.joinToString(","),
+                    unlockedCampaignsCsv = updated.unlockedCampaigns.joinToString(",")
+                )
+            )
+            notifySurfaceUpdates()
+            result
+        }
     }
 
     suspend fun recordBossVictory(boss: BossEncounter): AdventureProgress = withContext(Dispatchers.IO) {
-        val story = getActiveCampaign()
-        val currentEntity = dao.getAdventureState()
-        val flags = if (currentEntity?.clearedFlagsCsv.isNullOrBlank()) emptySet() else currentEntity!!.clearedFlagsCsv.split(",").toSet()
-        val eggs = if (currentEntity?.unlockedEggsCsv.isNullOrBlank()) emptySet() else currentEntity!!.unlockedEggsCsv.split(",").mapNotNull { it.toIntOrNull() }.toSet()
-        val items = if (currentEntity?.collectedItemsCsv.isNullOrBlank()) emptySet() else currentEntity!!.collectedItemsCsv.split(",").filter { it.isNotBlank() }.toSet()
-        val campaigns = if (currentEntity?.unlockedCampaignsCsv.isNullOrBlank()) emptySet() else currentEntity!!.unlockedCampaignsCsv.split(",").filter { it.isNotBlank() }.toSet()
-        val progress = AdventureProgress(
-            campaignId = currentEntity?.campaignId ?: story.campaignId,
-            currentNodeIndex = currentEntity?.currentNodeIndex ?: 0,
-            accumulatedStepsCurrentNode = currentEntity?.accumulatedStepsCurrentNode ?: 0,
-            totalAdventureSteps = currentEntity?.totalAdventureSteps ?: 0,
-            clearedFlags = flags,
-            isCompleted = currentEntity?.isCompleted ?: false,
-            unlockedEggs = eggs,
-            collectedItems = items,
-            unlockedCampaigns = campaigns
-        )
-
-        val updated = AdventureEngine.recordBossVictory(story, progress, boss)
-        dao.insertOrUpdateAdventure(
-            AdventureEntity(
-                id = 1,
-                campaignId = updated.campaignId,
-                currentNodeIndex = updated.currentNodeIndex,
-                accumulatedStepsCurrentNode = updated.accumulatedStepsCurrentNode,
-                totalAdventureSteps = updated.totalAdventureSteps,
-                clearedFlagsCsv = updated.clearedFlags.joinToString(","),
-                isCompleted = updated.isCompleted,
-                unlockedEggsCsv = updated.unlockedEggs.joinToString(","),
-                collectedItemsCsv = updated.collectedItems.joinToString(","),
-                unlockedCampaignsCsv = updated.unlockedCampaigns.joinToString(",")
+        stateMutex.withLock {
+            val story = getActiveCampaign()
+            val currentEntity = dao.getAdventureState()
+            val flags = if (currentEntity?.clearedFlagsCsv.isNullOrBlank()) emptySet() else currentEntity!!.clearedFlagsCsv.split(",").toSet()
+            val eggs = if (currentEntity?.unlockedEggsCsv.isNullOrBlank()) emptySet() else currentEntity!!.unlockedEggsCsv.split(",").mapNotNull { it.toIntOrNull() }.toSet()
+            val items = if (currentEntity?.collectedItemsCsv.isNullOrBlank()) emptySet() else currentEntity!!.collectedItemsCsv.split(",").filter { it.isNotBlank() }.toSet()
+            val campaigns = if (currentEntity?.unlockedCampaignsCsv.isNullOrBlank()) emptySet() else currentEntity!!.unlockedCampaignsCsv.split(",").filter { it.isNotBlank() }.toSet()
+            val progress = AdventureProgress(
+                campaignId = currentEntity?.campaignId ?: story.campaignId,
+                currentNodeIndex = currentEntity?.currentNodeIndex ?: 0,
+                accumulatedStepsCurrentNode = currentEntity?.accumulatedStepsCurrentNode ?: 0,
+                totalAdventureSteps = currentEntity?.totalAdventureSteps ?: 0,
+                clearedFlags = flags,
+                isCompleted = currentEntity?.isCompleted ?: false,
+                unlockedEggs = eggs,
+                collectedItems = items,
+                unlockedCampaigns = campaigns
             )
-        )
-        updated
+
+            val updated = AdventureEngine.recordBossVictory(story, progress, boss)
+            dao.insertOrUpdateAdventure(
+                AdventureEntity(
+                    id = 1,
+                    campaignId = updated.campaignId,
+                    currentNodeIndex = updated.currentNodeIndex,
+                    accumulatedStepsCurrentNode = updated.accumulatedStepsCurrentNode,
+                    totalAdventureSteps = updated.totalAdventureSteps,
+                    clearedFlagsCsv = updated.clearedFlags.joinToString(","),
+                    isCompleted = updated.isCompleted,
+                    unlockedEggsCsv = updated.unlockedEggs.joinToString(","),
+                    collectedItemsCsv = updated.collectedItems.joinToString(","),
+                    unlockedCampaignsCsv = updated.unlockedCampaigns.joinToString(",")
+                )
+            )
+            notifySurfaceUpdates()
+            updated
+        }
     }
 
     /**
      * Switches the active campaign on the watch to one of the built-in sagas.
      */
     suspend fun switchCampaign(campaignId: String) = withContext(Dispatchers.IO) {
-        val builtIn = AdventureEngine.getCampaignById(campaignId)
-        val json = if (builtIn != null) {
-            AdventureEngine.serializeCampaign(builtIn)
-        } else {
-            AdventureEngine.DEFAULT_CAMPAIGN_JSON
-        }
-        saveCustomCampaignJson(json)
-        val current = dao.getAdventureState()
-        dao.insertOrUpdateAdventure(
-            AdventureEntity(
-                id = 1,
-                campaignId = campaignId,
-                currentNodeIndex = 0,
-                accumulatedStepsCurrentNode = 0,
-                totalAdventureSteps = current?.totalAdventureSteps ?: 0,
-                clearedFlagsCsv = "",
-                isCompleted = false,
-                unlockedEggsCsv = current?.unlockedEggsCsv ?: "",
-                collectedItemsCsv = current?.collectedItemsCsv ?: "",
-                unlockedCampaignsCsv = current?.unlockedCampaignsCsv ?: ""
+        stateMutex.withLock {
+            val builtIn = AdventureEngine.getCampaignById(campaignId)
+            val json = if (builtIn != null) {
+                AdventureEngine.serializeCampaign(builtIn)
+            } else {
+                AdventureEngine.DEFAULT_CAMPAIGN_JSON
+            }
+            saveCustomCampaignJson(json)
+            val current = dao.getAdventureState()
+            dao.insertOrUpdateAdventure(
+                AdventureEntity(
+                    id = 1,
+                    campaignId = campaignId,
+                    currentNodeIndex = 0,
+                    accumulatedStepsCurrentNode = 0,
+                    totalAdventureSteps = current?.totalAdventureSteps ?: 0,
+                    clearedFlagsCsv = "",
+                    isCompleted = false,
+                    unlockedEggsCsv = current?.unlockedEggsCsv ?: "",
+                    collectedItemsCsv = current?.collectedItemsCsv ?: "",
+                    unlockedCampaignsCsv = current?.unlockedCampaignsCsv ?: ""
+                )
             )
-        )
+            notifySurfaceUpdates()
+        }
     }
 
     /**

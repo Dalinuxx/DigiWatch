@@ -43,6 +43,7 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
@@ -136,6 +137,7 @@ fun BattleHubScreen(
     var barcodeScanInput by remember { mutableStateOf("4902425617220") }
     var activeWildEncounter by remember { mutableStateOf<WildScanEncounter?>(null) }
     var selectedEnvironment by remember { mutableStateOf("Normal") }
+    var showBattleTower by remember { mutableStateOf(false) }
 
     // Live Animated Face-to-Face Battle Arena State
     var battleJob by remember { mutableStateOf<Job?>(null) }
@@ -154,6 +156,13 @@ fun BattleHubScreen(
     val clipboardManager = LocalClipboardManager.current
     val buzzerManager = remember { com.digiwear.companion.sound.BuzzerManager(context) }
     var retroSoundEnabled by remember { mutableStateOf(buzzerManager.isEnabled) }
+
+    DisposableEffect(Unit) {
+        onDispose {
+            battleJob?.cancel()
+            buzzerManager.release()
+        }
+    }
 
     val ownSpecies = remember(ownMonsterId) { PetSpecies.getById(ownMonsterId) }
 
@@ -179,7 +188,7 @@ fun BattleHubScreen(
                     activeWildEncounter = enc
                     inputCode = enc.commCode128
                     selectedEnvironment = enc.environmentHazard
-                    beamStatus = "📡 Wild ${enc.species.name} (${enc.habitatZone}) spawned from NFC Tag!"
+                    beamStatus = "[SCAN] Wild ${enc.species.name} (${enc.habitatZone}) spawned from NFC Tag!"
                 } else if (selectedBattleMode == BattleMode.ACOM_DCOM_WIFICOM) {
                     // NFC Tap from Watch to Phone in A-Com Relay mode: import Watch fighter or challenge!
                     try {
@@ -189,16 +198,16 @@ fun BattleHubScreen(
                         ownEffort = payload.trainingEffort
                         ownSeed = payload.battleRngSeed
                         val sp = PetSpecies.getById(payload.monsterId)
-                        beamStatus = "🌐 NFC Watch Relay: Loaded ${sp.name} (${scannedCode.take(14)}) into A-Com Transceiver!"
+                        beamStatus = "[RELAY] NFC Watch Relay: Loaded ${sp.name} (${scannedCode.take(14)}) into A-Com Transceiver!"
                     } catch (_: Exception) {
                         inputCode = scannedCode
-                        beamStatus = "🌐 Scanned A-Com / DigiROM Packet via NFC!"
+                        beamStatus = "[RELAY] Scanned A-Com / DigiROM Packet via NFC!"
                     }
                 } else {
                     inputCode = scannedCode
                     validationError = null
                     decodedOpponent = try { CommCodeCodec.decodeAuto(scannedCode) } catch (_: Exception) { null }
-                    beamStatus = "📶 Opponent scanned via NFC Tap-to-Duel!"
+                    beamStatus = "[NFC] Opponent scanned via NFC Tap-to-Duel!"
                 }
                 NfcBattleBridge.incomingCodeFlow.value = null
             }
@@ -215,9 +224,9 @@ fun BattleHubScreen(
                     ownMonsterId = payload.monsterId
                     ownSeed = payload.battleRngSeed
                     val sp = PetSpecies.getById(payload.monsterId)
-                    beamStatus = "📲 Watch A-Com Relay Received: ${sp.name} ($watchDigiRom) ready for Online Battle!"
+                    beamStatus = "[WATCH] A-Com Relay Received: ${sp.name} ($watchDigiRom) ready for Online Battle!"
                 } catch (_: Exception) {
-                    beamStatus = "📲 Watch A-Com Relay Received: $watchDigiRom"
+                    beamStatus = "[WATCH] A-Com Relay Received: $watchDigiRom"
                 }
                 NfcBattleBridge.incomingWatchRelayFlow.value = null
             }
@@ -325,8 +334,8 @@ fun BattleHubScreen(
                     var idx = 0
                     while (idx < activeRes.turns.size) {
                         currentTurnIndex = idx
-                        val turn = activeRes.turns[idx]
-                        if (turn.attackerIndex == 0) {
+                        val initialTurn = activeRes.turns[idx]
+                        if (initialTurn.attackerIndex == 0) {
                             qteActive = true
                             delay(420L)
                             qteActive = false
@@ -336,13 +345,14 @@ fun BattleHubScreen(
                             }
                         }
 
+                        val turn = activeRes.turns.getOrNull(idx) ?: break
+
                         // Authentic Color V-Pet Cut-In on Critical Hit / Mega Hit
                         val isCrit = turn.attackType == "MEGA_HIT" || (turn.attackerIndex == 0 && critBoostTriggered)
                         if (isCrit) {
                             val attackerId = if (turn.attackerIndex == 0) fA.speciesId else fB.speciesId
                             activeCutInTitle = if (turn.attackType == "MEGA_HIT") "MEGA HIT" else "CRITICAL HIT"
                             activeCutInSpeciesId = attackerId
-                            buzzerManager.playCriticalCutInTone()
                             delay(850L)
                             activeCutInSpeciesId = null
                         } else {
@@ -371,6 +381,15 @@ fun BattleHubScreen(
             validationError = "Validation Failed: ${e.message}"
             isAnimatingBattle = false
         }
+    }
+
+    if (showBattleTower) {
+        BattleTowerScreen(
+            db = db,
+            wearableManager = wearableManager,
+            onBack = { showBattleTower = false }
+        )
+        return
     }
 
     Box(modifier = Modifier.fillMaxSize()) {
@@ -407,13 +426,20 @@ fun BattleHubScreen(
                     }
                     .padding(horizontal = 10.dp, vertical = 5.dp)
             ) {
-                Text(
-                    text = if (retroSoundEnabled) "🔊 RETRO BUZZER: ON" else "🔇 RETRO BUZZER: MUTED",
-                    fontSize = 10.sp,
-                    fontFamily = FontFamily.Monospace,
-                    color = if (retroSoundEnabled) Color(0xFF00E676) else Color(0xFFB0BEC5),
-                    fontWeight = FontWeight.Bold
-                )
+                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(5.dp)) {
+                    DigiVectorIcon(
+                        type = if (retroSoundEnabled) DigiIconType.SOUND_ON else DigiIconType.SOUND_OFF,
+                        size = 11.dp,
+                        tint = if (retroSoundEnabled) Color(0xFF00E676) else Color(0xFFB0BEC5)
+                    )
+                    Text(
+                        text = if (retroSoundEnabled) "RETRO BUZZER: ON" else "RETRO BUZZER: MUTED",
+                        fontSize = 10.sp,
+                        fontFamily = FontFamily.Monospace,
+                        color = if (retroSoundEnabled) Color(0xFF00E676) else Color(0xFFB0BEC5),
+                        fontWeight = FontWeight.Bold
+                    )
+                }
             }
         }
 
@@ -421,16 +447,19 @@ fun BattleHubScreen(
 
         // 4 Distinct Battle Mode Selector Tabs
         val battleModes = listOf(
-            BattleMode.NFC_TAP_DUEL to "📶 NFC DUEL",
-            BattleMode.WILD_SCAN to "📡 WILD SCAN",
-            BattleMode.ACOM_DCOM_WIFICOM to "🌐 A-COM / WIFI",
-            BattleMode.ADVENTURE to "🏟 COLOSSEUM"
+            Triple(BattleMode.NFC_TAP_DUEL, DigiIconType.NFC_WAVE, "NFC DUEL"),
+            Triple(BattleMode.WILD_SCAN, DigiIconType.RADAR_SCAN, "WILD SCAN"),
+            Triple(BattleMode.ACOM_DCOM_WIFICOM, DigiIconType.GLOBE_NET, "A-COM / WIFI"),
+            Triple(BattleMode.ADVENTURE, DigiIconType.TROPHY_CROWN, "COLOSSEUM")
         )
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(6.dp)
         ) {
-            battleModes.forEach { (mode, label) ->
+            battleModes.forEach { opt ->
+                val mode = opt.first
+                val iconType = opt.second
+                val label = opt.third
                 val active = selectedBattleMode == mode
                 Box(
                     modifier = Modifier
@@ -448,13 +477,20 @@ fun BattleHubScreen(
                         .padding(vertical = 9.dp, horizontal = 4.dp),
                     contentAlignment = Alignment.Center
                 ) {
-                    Text(
-                        text = label,
-                        fontSize = 9.5.sp,
-                        fontWeight = FontWeight.Black,
-                        color = if (active) Color(0xFFFF8A80) else Color(0xFFB0BEC5),
-                        fontFamily = FontFamily.Monospace
-                    )
+                    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                        DigiVectorIcon(
+                            type = iconType,
+                            size = 10.dp,
+                            tint = if (active) Color(0xFFFF8A80) else Color(0xFFB0BEC5)
+                        )
+                        Text(
+                            text = label,
+                            fontSize = 9.5.sp,
+                            fontWeight = FontWeight.Black,
+                            color = if (active) Color(0xFFFF8A80) else Color(0xFFB0BEC5),
+                            fontFamily = FontFamily.Monospace
+                        )
+                    }
                 }
             }
         }
@@ -553,7 +589,7 @@ fun BattleHubScreen(
                             fontFamily = FontFamily.Monospace
                         )
                         Text(
-                            text = "BASE ${ownSpecies.basePower}P → EFF PWR ${ownEffPower}P • ${ownSpecies.baseHp} HP • ${ownEffort}★ EFFORT",
+                            text = "BASE ${ownSpecies.basePower}P -> EFF PWR ${ownEffPower}P • ${ownSpecies.baseHp} HP • ${ownEffort}/4 EFFORT",
                             fontSize = 9.5.sp,
                             color = Color(0xFF80CBC4),
                             fontFamily = FontFamily.Monospace
@@ -585,13 +621,20 @@ fun BattleHubScreen(
                         contentPadding = PaddingValues(horizontal = 8.dp, vertical = 2.dp),
                         modifier = Modifier.height(26.dp)
                     ) {
-                        Text(
-                            text = if (showQrMatrix) "📄 SHOW TEXT CODE" else "🏁 SHOW QR MATRIX",
-                            fontSize = 8.5.sp,
-                            fontWeight = FontWeight.Bold,
-                            fontFamily = FontFamily.Monospace,
-                            color = if (showQrMatrix) DigiWearPalette.DigiviceCyan else Color(0xFF00E676)
-                        )
+                        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                            DigiVectorIcon(
+                                type = if (showQrMatrix) DigiIconType.COMM_LINK else DigiIconType.QR_MATRIX,
+                                size = 10.dp,
+                                tint = if (showQrMatrix) DigiWearPalette.DigiviceCyan else Color(0xFF00E676)
+                            )
+                            Text(
+                                text = if (showQrMatrix) "SHOW TEXT CODE" else "SHOW QR MATRIX",
+                                fontSize = 8.5.sp,
+                                fontWeight = FontWeight.Bold,
+                                fontFamily = FontFamily.Monospace,
+                                color = if (showQrMatrix) DigiWearPalette.DigiviceCyan else Color(0xFF00E676)
+                            )
+                        }
                     }
                 }
 
@@ -738,7 +781,7 @@ fun BattleHubScreen(
                                     ownVictories = watchState.victories
                                     ownEffort = watchState.effort
                                     val sp = PetSpecies.getById(watchState.speciesId)
-                                    beamStatus = "📲 Pulled live ${sp.name} from Smartwatch!"
+                                    beamStatus = "[SYNC] Pulled live ${sp.name} from Smartwatch!"
                                 } else {
                                     beamStatus = "Watch offline — tap Watch to Phone via NFC or use local fighter"
                                 }
@@ -829,7 +872,7 @@ fun BattleHubScreen(
                                     val tag = NfcBattleBridge.pendingTagToWrite
                                     if (tag != null) {
                                         val ok = NfcDuelManager.writeDuelCodeToTag(tag, generatedDigiRom)
-                                        beamStatus = if (ok) "✓ Wrote ${ownSpecies.name} DigiROM to physical NFC Tag!" else "Tag write failed (Check tag write-lock)"
+                                        beamStatus = if (ok) "[OK] Wrote ${ownSpecies.name} DigiROM to physical NFC Tag!" else "Tag write failed (Check tag write-lock)"
                                     } else {
                                         beamStatus = "Hold a physical NFC tag to back of phone, then click Write"
                                     }
@@ -902,7 +945,7 @@ fun BattleHubScreen(
                                     inputCode = enc.commCode128
                                     selectedEnvironment = enc.environmentHazard
                                     decodedOpponent = CommCodeCodec.decodeAuto(enc.commCode128)
-                                    beamStatus = "📡 Decoded Barcode → Wild ${enc.species.name} in ${enc.habitatZone}!"
+                                    beamStatus = "[SCAN] Decoded Barcode -> Wild ${enc.species.name} in ${enc.habitatZone}!"
                                 },
                                 colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF2E7D32))
                             ) {
@@ -966,7 +1009,7 @@ fun BattleHubScreen(
                                     Spacer(modifier = Modifier.width(8.dp))
                                     Column {
                                         Text(
-                                            text = "${if (enc.isRareAnomaly) "★ RARE BOSS: " else "WILD: "}${enc.species.name}",
+                                            text = "${if (enc.isRareAnomaly) "[RARE BOSS] " else "WILD: "}${enc.species.name}",
                                             fontSize = 12.sp,
                                             fontWeight = FontWeight.Black,
                                             color = if (enc.isRareAnomaly) DigiWearPalette.CrestGold else Color(0xFF69F0AE)
@@ -1109,15 +1152,41 @@ fun BattleHubScreen(
                 ) {
                     Column(modifier = Modifier.padding(14.dp)) {
                         Text(
-                            text = "▸ MODE 4: COLOSSEUM & ENVIRONMENTAL WEATHER ARENA",
+                            text = "MODE 4: COLOSSEUM & 100-FLOOR BATTLE TOWER",
                             fontSize = 11.sp,
                             fontWeight = FontWeight.Bold,
                             color = Color(0xFF64FFDA),
                             fontFamily = FontFamily.Monospace
                         )
-                        Spacer(modifier = Modifier.height(4.dp))
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Button(
+                            onClick = {
+                                buzzerManager.playButtonBeep()
+                                showBattleTower = true
+                            },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(44.dp),
+                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF00E5FF)),
+                            shape = RoundedCornerShape(8.dp)
+                        ) {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(6.dp)
+                            ) {
+                                DigiVectorIcon(type = DigiIconType.TROPHY_CROWN, size = 14.dp, tint = Color.Black)
+                                Text(
+                                    text = "ENTER 100-FLOOR BATTLE TOWER GAUNTLET",
+                                    fontSize = 10.5.sp,
+                                    fontWeight = FontWeight.Black,
+                                    color = Color.Black,
+                                    fontFamily = FontFamily.Monospace
+                                )
+                            }
+                        }
+                        Spacer(modifier = Modifier.height(10.dp))
                         Text(
-                            text = "Select an active Digital World sector hazard to test canonical Attribute & Weather modifiers:",
+                            text = "Or select an active Digital World sector hazard to test canonical Attribute & Weather modifiers:",
                             fontSize = 10.sp,
                             color = Color.LightGray
                         )
@@ -1144,13 +1213,20 @@ fun BattleHubScreen(
                                         .clickable { selectedEnvironment = env }
                                         .padding(horizontal = 10.dp, vertical = 6.dp)
                                 ) {
-                                    Text(
-                                        text = "⚡ $env",
-                                        fontSize = 9.5.sp,
-                                        fontWeight = if (active) FontWeight.Bold else FontWeight.Normal,
-                                        color = if (active) Color.White else Color.LightGray,
-                                        fontFamily = FontFamily.Monospace
-                                    )
+                                    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                                        DigiVectorIcon(
+                                            type = DigiIconType.LIGHTNING_BOLT,
+                                            size = 10.dp,
+                                            tint = if (active) Color(0xFF64FFDA) else Color.LightGray
+                                        )
+                                        Text(
+                                            text = env,
+                                            fontSize = 9.5.sp,
+                                            fontWeight = if (active) FontWeight.Bold else FontWeight.Normal,
+                                            color = if (active) Color.White else Color.LightGray,
+                                            fontFamily = FontFamily.Monospace
+                                        )
+                                    }
                                 }
                             }
                         }
@@ -1189,7 +1265,7 @@ fun BattleHubScreen(
                 ) {
                     Icon(Icons.Default.QrCodeScanner, contentDescription = "Scan QR", modifier = Modifier.size(16.dp))
                     Spacer(modifier = Modifier.width(6.dp))
-                    Text("📷 POINT-AND-SHOOT CAMERA SCANNER", fontSize = 10.5.sp, fontWeight = FontWeight.Black, fontFamily = FontFamily.Monospace)
+                    Text("POINT-AND-SHOOT CAMERA SCANNER", fontSize = 10.5.sp, fontWeight = FontWeight.Black, fontFamily = FontFamily.Monospace)
                 }
                 Spacer(modifier = Modifier.height(8.dp))
 
@@ -1214,13 +1290,16 @@ fun BattleHubScreen(
                 }
                 if (compatibleHubFusions.isNotEmpty()) {
                     Spacer(modifier = Modifier.height(8.dp))
-                    Text(
-                        text = "⚡ 1-TAP JOGRESS / DIGIXROS PARTNER CODES FOR ${ownSpecies.name.uppercase()}:",
-                        fontSize = 9.5.sp,
-                        fontWeight = FontWeight.Black,
-                        color = Color(0xFFEA80FC),
-                        fontFamily = FontFamily.Monospace
-                    )
+                    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(5.dp)) {
+                        DigiVectorIcon(type = DigiIconType.DNA_HELIX, size = 11.dp, tint = Color(0xFFEA80FC))
+                        Text(
+                            text = "1-TAP JOGRESS / DIGIXROS PARTNER CODES FOR ${ownSpecies.name.uppercase()}:",
+                            fontSize = 9.5.sp,
+                            fontWeight = FontWeight.Black,
+                            color = Color(0xFFEA80FC),
+                            fontFamily = FontFamily.Monospace
+                        )
+                    }
                     Spacer(modifier = Modifier.height(4.dp))
                     Row(
                         modifier = Modifier
@@ -1249,13 +1328,16 @@ fun BattleHubScreen(
                                 },
                                 border = BorderStroke(1.dp, Color(recipe.fusionType.badgeColorHex))
                             ) {
-                                Text(
-                                    text = "⚡ +${partnerSp.name} → ${targetSp.name} (${recipe.fusionType.displayName})",
-                                    fontSize = 9.5.sp,
-                                    color = Color(recipe.fusionType.badgeColorHex),
-                                    fontWeight = FontWeight.Bold,
-                                    fontFamily = FontFamily.Monospace
-                                )
+                                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                                    DigiVectorIcon(type = DigiIconType.DNA_HELIX, size = 10.dp, tint = Color(recipe.fusionType.badgeColorHex))
+                                    Text(
+                                        text = "+${partnerSp.name} -> ${targetSp.name} (${recipe.fusionType.displayName})",
+                                        fontSize = 9.5.sp,
+                                        color = Color(recipe.fusionType.badgeColorHex),
+                                        fontWeight = FontWeight.Bold,
+                                        fontFamily = FontFamily.Monospace
+                                    )
+                                }
                             }
                         }
                     }
@@ -1388,9 +1470,21 @@ fun BattleHubScreen(
                             ) {
                                 // Left Fighter (Player - flipped horizontally to face Right!)
                                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                    val playerArenaFrame = when {
+                                        !isAnimatingBattle && battleResult != null ->
+                                            if (battleResult!!.winnerIndex == 0) SpriteFrame.JOY_EAT else SpriteFrame.INJURED
+                                        activeTurn == null -> SpriteFrame.IDLE_A
+                                        activeTurn.attackerIndex == 0 -> when {
+                                            qteActive || turnFxProgress < 0.25f -> SpriteFrame.ATTACK_CHARGE
+                                            turnFxProgress < 0.65f -> SpriteFrame.ATTACK_RELEASE
+                                            else -> SpriteFrame.IDLE_B
+                                        }
+                                        turnFxProgress >= 0.65f -> SpriteFrame.INJURED
+                                        else -> SpriteFrame.IDLE_A
+                                    }
                                     SpriteCanvasRenderer(
                                         speciesId = ownSp.id,
-                                        frame = if (activeTurn?.attackerIndex == 0) SpriteFrame.ATTACK_RELEASE else SpriteFrame.ATTACK_CHARGE,
+                                        frame = playerArenaFrame,
                                         size = 64.dp,
                                         flipHorizontal = true
                                     )
@@ -1422,9 +1516,9 @@ fun BattleHubScreen(
                                     ) {
                                         Text(
                                             text = when {
-                                                activeTurn?.attackType == "MEGA_HIT" -> "⚡MEGA HIT⚡"
-                                                activeTurn?.attackerIndex == 0 -> "●━━━▶"
-                                                activeTurn?.attackerIndex == 1 -> "◀━━━●"
+                                                activeTurn?.attackType == "MEGA_HIT" -> "[ MEGA HIT ]"
+                                                activeTurn?.attackerIndex == 0 -> "[ ===> ]"
+                                                activeTurn?.attackerIndex == 1 -> "[ <=== ]"
                                                 else -> "VS"
                                             },
                                             fontSize = 11.sp,
@@ -1446,9 +1540,21 @@ fun BattleHubScreen(
 
                                 // Right Fighter (Opponent - faces Left toward Player!)
                                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                    val oppArenaFrame = when {
+                                        !isAnimatingBattle && battleResult != null ->
+                                            if (battleResult!!.winnerIndex == 1) SpriteFrame.JOY_EAT else SpriteFrame.INJURED
+                                        activeTurn == null -> SpriteFrame.IDLE_A
+                                        activeTurn.attackerIndex == 1 -> when {
+                                            turnFxProgress < 0.25f -> SpriteFrame.ATTACK_CHARGE
+                                            turnFxProgress < 0.65f -> SpriteFrame.ATTACK_RELEASE
+                                            else -> SpriteFrame.IDLE_B
+                                        }
+                                        turnFxProgress >= 0.65f -> SpriteFrame.INJURED
+                                        else -> SpriteFrame.IDLE_A
+                                    }
                                     SpriteCanvasRenderer(
                                         speciesId = oppSp.id,
-                                        frame = if (activeTurn?.attackerIndex == 1) SpriteFrame.ATTACK_RELEASE else SpriteFrame.ATTACK_CHARGE,
+                                        frame = oppArenaFrame,
                                         size = 64.dp,
                                         flipHorizontal = false
                                     )
@@ -1490,7 +1596,11 @@ fun BattleHubScreen(
                                         },
                                         colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFF1744))
                                     ) {
-                                        Text("⚡ TAP TO MEGA-BOOST (+25% CRIT)! ⚡", fontSize = 10.sp, fontWeight = FontWeight.Black, fontFamily = FontFamily.Monospace)
+                                        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(5.dp)) {
+                                            DigiVectorIcon(type = DigiIconType.LIGHTNING_BOLT, size = 11.dp, tint = Color.White)
+                                            Text("TAP TO MEGA-BOOST (+25% CRIT)!", fontSize = 10.sp, fontWeight = FontWeight.Black, fontFamily = FontFamily.Monospace)
+                                            DigiVectorIcon(type = DigiIconType.LIGHTNING_BOLT, size = 11.dp, tint = Color.White)
+                                        }
                                     }
                                 }
                             }
@@ -1743,7 +1853,7 @@ fun BattleHubScreen(
                             inputCode = enc.commCode128
                             selectedEnvironment = enc.environmentHazard
                             decodedOpponent = CommCodeCodec.decodeAuto(enc.commCode128)
-                            beamStatus = "📡 Camera Scanned Wild ${enc.species.name} (${enc.habitatZone})!"
+                            beamStatus = "[SCAN] Camera Scanned Wild ${enc.species.name} (${enc.habitatZone})!"
                             isCameraScannerOpen = false
                             scannerStatusError = null
                             launchAnimatedBattle(enc.commCode128, BattleMode.WILD_SCAN, enc.environmentHazard)
@@ -1761,7 +1871,7 @@ fun BattleHubScreen(
                             scannerStatusError = null
                             isCameraScannerOpen = false
                             val oppSpecies = PetSpecies.getById(payload.monsterId)
-                            beamStatus = "📷 QR Verified: Opponent ${oppSpecies.name} locked into Arena!"
+                            beamStatus = "[QR] Verified: Opponent ${oppSpecies.name} locked into Arena!"
                             // Immediately launch face-to-face battle arena!
                             launchAnimatedBattle(scannedCode, selectedBattleMode, selectedEnvironment)
                         } catch (e: Exception) {

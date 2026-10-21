@@ -216,4 +216,59 @@ class PetSimulationEngineTest {
         assertFalse(updated.isInjured)
         assertFalse(wasInjured)
     }
+
+    @Test
+    fun testOvernightDeltaOnlyDecaysDuringAwakeHoursAndResetsLights() {
+        // Agumon (Child: sleeps 21:00..08:00, hunger/strength decay every 30 min = 1800s, waste every 60 min = 3600s)
+        // Start at 20:50 UTC (10 minutes before 21:00 sleep window) with lights turned off during sleep
+        val startUtc = 20L * 3600L + 50L * 60L // 75,000s
+        val initial = PetState(
+            speciesId = 201,
+            hunger = 4,
+            strength = 4,
+            wasteCount = 0,
+            lightsOff = true,
+            isSleeping = false,
+            lastProcessedTimestampUtc = startUtc
+        )
+
+        // Advance overnight to 09:00 UTC next day (24h + 9h = 33h = 118,800s)
+        // Awake time should ONLY be 10m (20:50..21:00) + 60m (08:00..09:00) = 70 minutes (4,200s)
+        // 4,200s / 1,800s = 2 hunger/strength lost (remaining = 2), 4,200s / 3,600s = 1 waste
+        val morningUtc = 33L * 3600L // 118,800s
+        val morningState = PetSimulationEngine.processDelta(initial, morningUtc, ZoneOffset.UTC)
+
+        assertFalse("Pet should be awake at 09:00", morningState.isSleeping)
+        assertFalse("Lights should auto-turn back on upon waking", morningState.lightsOff)
+        assertEquals("Only 70 awake minutes elapsed -> 2 hunger lost", 2, morningState.hunger)
+        assertEquals("Only 70 awake minutes elapsed -> 2 strength lost", 2, morningState.strength)
+        assertEquals("Only 70 awake minutes elapsed -> 1 waste generated", 1, morningState.wasteCount)
+        assertEquals("No care mistakes should occur overnight when full before bed", 0, morningState.careMistakes)
+    }
+
+    @Test
+    fun testTraitedEggBonusHpPreservedAcrossEvolution() {
+        val departed = PetState(
+            speciesId = 501,
+            generation = 2,
+            traitedEggBonus = 1,
+            victories = 25,
+            isDeceased = true
+        )
+        val traitedBotamon = PetSimulationEngine.createTraitedEggState(
+            departedState = departed,
+            starterSpeciesId = 101,
+            nowUtc = 1000L
+        )
+        // Botamon baseHp (50) + 2 * 5 = 60
+        assertEquals(2, traitedBotamon.traitedEggBonus)
+        assertEquals(60, traitedBotamon.maxHp)
+
+        val agedBotamon = traitedBotamon.copy(ageSeconds = 700L)
+        val koromonSpecies = com.digiwear.core.model.PetSpecies.getById(102)
+        val evolvedKoromon = com.digiwear.core.engine.EvolutionEngine.evolve(agedBotamon, koromonSpecies, 1700L)
+        // Koromon baseHp (80) + 2 * 5 = 90
+        assertEquals(90, evolvedKoromon.maxHp)
+        assertEquals(2, evolvedKoromon.traitedEggBonus)
+    }
 }

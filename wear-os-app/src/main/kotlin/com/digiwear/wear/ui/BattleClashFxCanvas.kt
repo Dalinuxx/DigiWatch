@@ -45,7 +45,7 @@ fun BattleClashFxCanvas(
     progress: Float, // 0f to 1f over the turn
     modifier: Modifier = Modifier
 ) {
-    val (primaryColor, secondaryColor) = remember(attribute, isCritical) {
+    val (primaryColor, secondaryColor) = remember(attribute, isCritical, attackType) {
         when {
             isCritical || attackType == "MEGA_HIT" -> Pair(Color(0xFFFFD54F), Color(0xFFFFFFFF)) // Solar Gold / Pure White
             attribute == ElementalAttribute.VACCINE -> Pair(Color(0xFFFF7043), Color(0xFFFFEB3B)) // Solar Flame

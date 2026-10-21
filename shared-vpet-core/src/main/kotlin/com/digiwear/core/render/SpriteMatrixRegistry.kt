@@ -151,12 +151,12 @@ object SpriteMatrixRegistry {
         "................",
         "................",
         ".....BB...BB....",
-        ".....BBBBBBB....",
-        "....BBBBBBBSB...",
-        "...BBBBBBBBB#B..",
-        "...BBBBBBBBB#B..",
-        "...BBBBTTTBB#B..",
-        "...BSBBBBBBS#B..",
+        ".....BWBBBWB....",
+        "....BWWWWWWSB...",
+        "...BWWWWWWTW#B..",
+        "...BWWBWWWBW#B..",
+        "...BWWWTTTWW#B..",
+        "...BSWWWWWWS#B..",
         "....BSS#####B...",
         ".....BBBBBBB....",
         "................"
@@ -445,21 +445,21 @@ object SpriteMatrixRegistry {
     // [ID 115] Gigimon
     val GIGIMON_ROM = arrayOf(
         "................",
-        "................",
-        "................",
-        "................",
-        "................",
-        "................",
-        "....BB#BB...#...",
-        "...#......BB..B.",
-        ".......BB#.B.BB.",
-        "........B#..#.B.",
-        ".#.....#B.......",
-        ".#BB.B.#BB......",
-        "....#.........B.",
-        "..B..........#..",
-        "....#BB#BB#.....",
-        "................"
+        "..BBB......BBB..",
+        ".BB#BB....BB#BB.",
+        ".B###BBBBBB###B.",
+        "..B##########B..",
+        "..B#WT####TW#B..",
+        "..B#TB####BT#B..",
+        "..B##SSSSSS##B..",
+        "...B#SBBBBBS#B..",
+        "..BB########BB..",
+        ".B###BSSSSB###B.",
+        ".B##BSSSSSSB##BB",
+        "..BB#SSSSSS#B##B",
+        "...B###BB###BBB.",
+        "..B###B..B###B..",
+        "..BBBB....BBBB.."
     )
 
     // [ID 116] Viximon
@@ -605,21 +605,21 @@ object SpriteMatrixRegistry {
     // [ID 130] Nyokimon
     val NYOKIMON_ROM = arrayOf(
         "................",
-        "................",
-        "................",
-        "................",
-        "................",
-        "................",
-        "................",
-        "................",
-        "................",
-        "......BB.BB.....",
-        ".....BTTBTTB....",
-        "......BBTBB.....",
-        "........B.......",
-        "......BBBB......",
-        ".....BTSTSB.....",
-        ".....BBBBBB....."
+        "...BBBB..BBBB...",
+        "..BSSTBBBTTSB...",
+        "..BSSSSSSSSSB...",
+        "...BBSSSSSBB....",
+        ".....BB#BB......",
+        "...BBB###BBB....",
+        "..B##T###T##B...",
+        ".B###########B..",
+        ".B##W#####W##B..",
+        ".B##E#####E##B..",
+        ".B###TTTTT###B..",
+        "..B#########B...",
+        "...B#######B....",
+        "....BBBBBBB.....",
+        "................"
     )
 
     // [ID 131] Pichimon
@@ -4254,12 +4254,19 @@ object SpriteMatrixRegistry {
     val ARCHETYPE_PLANT = PALMON_ROM
     val ARCHETYPE_BABY = BOTAMON_IDLE
 
+    private val MATRIX_CACHE = java.util.concurrent.ConcurrentHashMap<Int, Array<String>>()
+    private val AMBIENT_CACHE = java.util.concurrent.ConcurrentHashMap<Int, Array<String>>()
+    private val PALETTE_CACHE = java.util.concurrent.ConcurrentHashMap<Int, SpritePalette>()
+
     /**
      * Returns the 16x16 pixel matrix for the given species and frame.
      * Supports all 12 SpriteFrame states with authentic V-Pet stance and eye animations.
      */
     fun getMatrix(speciesId: Int, frame: SpriteFrame = SpriteFrame.WALK_A): Array<String> {
         val sid = if (speciesId <= 1) 201 else speciesId
+        val cacheKey = (sid shl 4) or (frame.ordinal and 0x0F)
+        MATRIX_CACHE[cacheKey]?.let { return it }
+
         val base = when (sid) {
             201 -> when (frame) {
                 SpriteFrame.SLEEP_A, SpriteFrame.SLEEP_B -> AGUMON_SLEEP
@@ -4271,7 +4278,7 @@ object SpriteMatrixRegistry {
             102 -> if (frame == SpriteFrame.SLEEP_A || frame == SpriteFrame.SLEEP_B) KOROMON_SLEEP else KOROMON_IDLE
             else -> getBaseMatrix(sid)
         }
-        return applyFrameTransform(base, frame)
+        return applyFrameTransform(base, frame).also { MATRIX_CACHE[cacheKey] = it }
     }
 
     private fun shiftRowLeft(row: String, amount: Int = 1): String {
@@ -4284,88 +4291,166 @@ object SpriteMatrixRegistry {
         return ".".repeat(s) + row.substring(0, 16 - s)
     }
 
-    private fun closeEyes(row: String): String =
-        row.replace('W', 'B')
+    private fun closeEyePixels(
+        base: Array<String>,
+        topRow: Int,
+        eyeLimitRow: Int,
+        eyelidChar: Char
+    ): Array<String> {
+        val hasDedicatedEyes = (topRow..eyeLimitRow).any { r -> base[r].contains('E') }
+        val upperWCount = (topRow..eyeLimitRow).sumOf { r -> base[r].count { it == 'W' } }
+        return Array(16) { r ->
+            val row = base[r]
+            if (r !in topRow..eyeLimitRow) {
+                row
+            } else if (hasDedicatedEyes) {
+                val chars = row.toCharArray()
+                for (c in 0 until 16) {
+                    if (row[c] == 'E') {
+                        chars[c] = eyelidChar
+                    } else if (row[c] == 'W') {
+                        val adjE = (c > 0 && row[c - 1] == 'E') || (c < 15 && row[c + 1] == 'E')
+                        if (adjE) chars[c] = eyelidChar
+                    }
+                }
+                String(chars)
+            } else if (upperWCount <= 4) {
+                // Sprites where 'W' is strictly 1-2px eye glints (not white body/wing/armor fill)
+                val chars = row.toCharArray()
+                var c = 0
+                while (c < 16) {
+                    if (row[c] == 'W') {
+                        var end = c
+                        while (end + 1 < 16 && row[end + 1] == 'W') end++
+                        val runLen = end - c + 1
+                        if (runLen <= 2) {
+                            for (k in c..end) chars[k] = eyelidChar
+                        }
+                        c = end + 1
+                    } else {
+                        c++
+                    }
+                }
+                String(chars)
+            } else {
+                // White-bodied / winged / armored sprites ('W' is primary white fill):
+                // Preserve 100% of 'W' pixels; only close isolated 1px iris tokens ('R'/'C'/'G') inside white face
+                val chars = row.toCharArray()
+                for (c in 1 until 15) {
+                    val ch = row[c]
+                    if ((ch == 'R' || ch == 'C' || ch == 'G') && row[c - 1] == 'W' && row[c + 1] == 'W') {
+                        chars[c] = eyelidChar
+                    }
+                }
+                String(chars)
+            }
+        }
+    }
 
     private fun applyFrameTransform(base: Array<String>, frame: SpriteFrame): Array<String> {
+        val topRow = (0..15).firstOrNull { base[it] != "................" } ?: 0
+        val bottomRow = (15 downTo 0).firstOrNull { base[it] != "................" } ?: 15
+        val waistRow = (bottomRow - 2).coerceAtLeast((topRow + 1).coerceAtMost(bottomRow))
+        val eyeLimitRow = (topRow + ((bottomRow - topRow) * 2) / 3).coerceAtLeast(topRow + 2)
+
         return when (frame) {
             SpriteFrame.IDLE_A -> base.copyOf()
             SpriteFrame.IDLE_B -> {
-                // Classic V-Pet breathing bob: upper torso (rows 1..12) compresses 1px down while feet stay planted
+                // Classic V-Pet breathing bob: upper torso compresses 1px down while feet stay planted
                 Array(16) { r ->
                     when {
-                        r == 0 -> "................"
-                        r in 1..12 -> base[r - 1]
+                        r <= topRow -> "................"
+                        r in (topRow + 1)..waistRow -> base[r - 1]
                         else -> base[r]
                     }
                 }
             }
             SpriteFrame.WALK_A -> {
-                // Left-step stride: shift body 1px left if possible, lift left foot
+                // Left-step stride: shift body 1px left if possible, lift left foot cleanly
                 val canShiftLeft = base.all { it.first() == '.' }
-                Array(16) { r ->
-                    val shifted = if (canShiftLeft) shiftRowLeft(base[r], 1) else {
-                        if (r in 1..12) shiftRowLeft(base[r], 1) else base[r]
+                val shifted = Array(16) { r ->
+                    if (canShiftLeft) shiftRowLeft(base[r], 1)
+                    else if (r in topRow..waistRow) shiftRowLeft(base[r], 1)
+                    else base[r]
+                }
+                val bot = shifted[bottomRow]
+                val hasTwoFeet = bottomRow >= 2 &&
+                    bot.substring(0, 7).any { it != '.' } &&
+                    bot.substring(9, 16).any { it != '.' } &&
+                    (bot[7] == '.' || bot[8] == '.')
+                if (hasTwoFeet) {
+                    Array(16) { r ->
+                        when (r) {
+                            bottomRow - 1 -> shifted[bottomRow].substring(0, 8) + shifted[bottomRow - 1].substring(8)
+                            bottomRow -> "........" + shifted[bottomRow].substring(8)
+                            else -> shifted[r]
+                        }
                     }
-                    if (r == 15) {
-                        ".." + shifted.substring(2)
-                    } else if (r == 14) {
-                        shifted.substring(0, 8) + base[15].substring(8)
-                    } else {
-                        shifted
-                    }
+                } else {
+                    shifted
                 }
             }
             SpriteFrame.WALK_B -> {
-                // Right-step stride: shift body 1px right if possible, lift right foot
+                // Right-step stride: shift body 1px right if possible, lift right foot or bounce
                 val canShiftRight = base.all { it.last() == '.' }
-                Array(16) { r ->
-                    val shifted = if (canShiftRight) shiftRowRight(base[r], 1) else {
-                        if (r in 1..12) shiftRowRight(base[r], 1) else base[r]
+                val shifted = Array(16) { r ->
+                    if (canShiftRight) shiftRowRight(base[r], 1)
+                    else if (r in topRow..waistRow) shiftRowRight(base[r], 1)
+                    else base[r]
+                }
+                val bot = shifted[bottomRow]
+                val hasTwoFeet = bottomRow >= 2 &&
+                    bot.substring(0, 7).any { it != '.' } &&
+                    bot.substring(9, 16).any { it != '.' } &&
+                    (bot[7] == '.' || bot[8] == '.')
+                if (hasTwoFeet) {
+                    Array(16) { r ->
+                        when (r) {
+                            bottomRow - 1 -> shifted[bottomRow - 1].substring(0, 8) + shifted[bottomRow].substring(8)
+                            bottomRow -> shifted[bottomRow].substring(0, 8) + "........"
+                            else -> shifted[r]
+                        }
                     }
-                    if (r == 15) {
-                        shifted.substring(0, 14) + ".."
-                    } else if (r == 13 && r + 1 < 16) {
-                        base[r].substring(0, 8) + shifted.substring(8)
-                    } else {
-                        shifted
-                    }
+                } else if (topRow > 0) {
+                    // Single-base Digimon (Baby/serpent): 1px right + 1px hop up
+                    Array(16) { r -> if (r < 15) shifted[r + 1] else "................" }
+                } else {
+                    shifted
                 }
             }
             SpriteFrame.FEED_START -> {
-                // Lean forward toward food on left with open mouth accent
+                // Lean forward toward food on left
                 Array(16) { r ->
-                    if (r in 0..9) shiftRowLeft(base[r], 1) else base[r]
+                    if (r in topRow..waistRow) shiftRowLeft(base[r], 1) else base[r]
                 }
             }
             SpriteFrame.JOY_EAT -> {
-                // Happy jump: shift entire sprite 1px up (or upper body up)
+                // Happy jump: shift entire sprite 1px up
                 val canJumpUp = base[0] == "................"
                 if (canJumpUp) {
                     Array(16) { r -> if (r < 15) base[r + 1] else "................" }
                 } else {
                     Array(16) { r ->
                         when (r) {
-                            14 -> base[15]
-                            15 -> "................"
+                            bottomRow - 1 -> base[bottomRow]
+                            bottomRow -> "................"
                             else -> base[r]
                         }
                     }
                 }
             }
             SpriteFrame.SLEEP_A -> {
-                // Eyes closed + relaxed posture
-                Array(16) { r ->
-                    if (r in 1..10) closeEyes(base[r]) else base[r]
-                }
+                // Eyes closed + relaxed posture (preserves white body/armor fill)
+                closeEyePixels(base, topRow, eyeLimitRow, 'B')
             }
             SpriteFrame.SLEEP_B -> {
-                // Eyes closed + deep sleep breathing bob
+                // Eyes closed + deep sleep breathing bob (preserves white body/armor fill)
+                val closed = closeEyePixels(base, topRow, eyeLimitRow, 'B')
                 Array(16) { r ->
                     when {
-                        r == 0 -> "................"
-                        r in 1..11 -> closeEyes(base[r - 1])
-                        else -> closeEyes(base[r])
+                        r <= topRow -> "................"
+                        r in (topRow + 1)..waistRow -> closed[r - 1]
+                        else -> closed[r]
                     }
                 }
             }
@@ -4376,22 +4461,23 @@ object SpriteMatrixRegistry {
             SpriteFrame.ATTACK_CHARGE -> {
                 // Draw back 1px right to wind up attack
                 Array(16) { r ->
-                    if (r in 0..13) shiftRowRight(base[r], 1) else base[r]
+                    if (r in topRow..waistRow) shiftRowRight(base[r], 1) else base[r]
                 }
             }
             SpriteFrame.ATTACK_RELEASE -> {
                 // Lunge forward 1px left to fire projectile
                 Array(16) { r ->
-                    if (r in 0..13) shiftRowLeft(base[r], 1) else base[r]
+                    if (r in topRow..waistRow) shiftRowLeft(base[r], 1) else base[r]
                 }
             }
             SpriteFrame.INJURED -> {
-                // Weakened crouch with squinting eyes
+                // Weakened crouch with squinting eyes (preserves white body/armor fill)
+                val squinted = closeEyePixels(base, topRow, eyeLimitRow, 'S')
                 Array(16) { r ->
                     when {
-                        r in 0..1 -> "................"
-                        r in 2..12 -> base[r - 1].replace('W', 'S')
-                        else -> base[r]
+                        r <= topRow -> "................"
+                        r in (topRow + 1)..waistRow -> squinted[r - 1]
+                        else -> squinted[r]
                     }
                 }
             }
@@ -4404,7 +4490,11 @@ object SpriteMatrixRegistry {
      * to prevent OLED burn-in and minimize battery drain.
      */
     fun getAmbientOutlineMatrix(speciesId: Int, frame: SpriteFrame = SpriteFrame.IDLE_A): Array<String> {
-        val full = getMatrix(speciesId, frame)
+        val sid = if (speciesId <= 1) 201 else speciesId
+        val cacheKey = (sid shl 4) or (frame.ordinal and 0x0F)
+        AMBIENT_CACHE[cacheKey]?.let { return it }
+
+        val full = getMatrix(sid, frame)
         val candidates = mutableListOf<Pair<Int, Int>>()
         for (r in 0 until 16) {
             for (c in 0 until 16) {
@@ -4431,7 +4521,7 @@ object SpriteMatrixRegistry {
                 sb.append(if ((r to c) in selected) 'W' else '.')
             }
             sb.toString()
-        }
+        }.also { AMBIENT_CACHE[cacheKey] = it }
     }
 
     /**
@@ -4661,6 +4751,11 @@ object SpriteMatrixRegistry {
      */
     fun getPalette(speciesId: Int): SpritePalette {
         val sid = if (speciesId <= 1) 201 else speciesId
+        PALETTE_CACHE[sid]?.let { return it }
+        return resolvePalette(sid).also { PALETTE_CACHE[sid] = it }
+    }
+
+    private fun resolvePalette(sid: Int): SpritePalette {
         MasterRosterMatrices.getPalette(sid)?.let { return it }
         return when (sid) {
             // ---------------- Baby I & Baby II (101 - 132) ----------------

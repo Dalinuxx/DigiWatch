@@ -30,12 +30,14 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -58,6 +60,7 @@ import com.digiwear.core.battle.SignatureAttackRegistry
 import com.digiwear.companion.datalayer.PhoneWearableManager
 import com.digiwear.companion.render.SpriteCanvasRenderer
 import com.digiwear.companion.widget.DigiWearAppWidgetProvider
+import com.digiwear.core.dex.DigiDexEngine
 import com.digiwear.core.fusion.JogressEngine
 import com.digiwear.core.model.PetSpecies
 import com.digiwear.core.model.PetStage
@@ -102,18 +105,29 @@ fun SpriteStudioScreen(
     var selectedStageFilter by remember { mutableStateOf<PetStage?>(null) }
     var syncMessage by remember { mutableStateOf<String?>(null) }
     var showCutInPortrait by remember { mutableStateOf(false) }
+    var discoveryFilterMode by remember { mutableStateOf("ALL") } // ALL, DISCOVERED, UNDISCOVERED
     val scope = rememberCoroutineScope()
     val scrollState = rememberScrollState()
     val context = LocalContext.current
 
+    val discoveredEntities by db.phoneDao().getAllDiscoveredFlow().collectAsState(initial = emptyList())
+    val discoveredMap = remember(discoveredEntities) { discoveredEntities.associateBy { it.speciesId } }
+    val summary = remember(discoveredMap) { DigiDexEngine.calculateSummary(discoveredMap.keys) }
+
     val selectedSpecies = remember(selectedSpeciesId) { PetSpecies.getById(selectedSpeciesId) }
 
-    val filteredRoster = remember(searchQuery, selectedStageFilter) {
+    val filteredRoster = remember(searchQuery, selectedStageFilter, discoveryFilterMode, discoveredMap) {
         PetSpecies.SPECIES_REGISTRY.values.filter { sp ->
+            val isDiscovered = discoveredMap.containsKey(sp.id)
+            val matchesDiscovery = when (discoveryFilterMode) {
+                "DISCOVERED" -> isDiscovered
+                "UNDISCOVERED" -> !isDiscovered
+                else -> true
+            }
             val matchesSearch = sp.name.contains(searchQuery, ignoreCase = true) ||
                     sp.id.toString().contains(searchQuery.trim())
             val matchesStage = selectedStageFilter == null || sp.stage == selectedStageFilter
-            matchesSearch && matchesStage
+            matchesDiscovery && matchesSearch && matchesStage
         }
     }
 
@@ -185,77 +199,199 @@ fun SpriteStudioScreen(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             DigiSectionHeader(
-            tag = "DIGIDEX // COLOR SPRITE STUDIO",
-            title = "${PetSpecies.SPECIES_REGISTRY.size}-Species Encyclopedia",
-            subtitle = "64x64px Digimon Color / 0nl1ne Matrix (FilterQuality.None)",
-            accentColor = DigiWearPalette.CrestGold
-        )
+                tag = "DIGIDEX // FIELD GUIDE & SPRITE STUDIO",
+                title = "${PetSpecies.SPECIES_REGISTRY.size}-Species Canonical DigiDex",
+                subtitle = "Discovery Progress, Biometrics, Lineage Trees & Reference Book Lore",
+                accentColor = DigiWearPalette.CrestGold
+            )
 
-        Spacer(modifier = Modifier.height(12.dp))
+            Spacer(modifier = Modifier.height(12.dp))
 
-        // Search Bar
-        OutlinedTextField(
-            value = searchQuery,
-            onValueChange = { searchQuery = it },
-            modifier = Modifier.fillMaxWidth(),
-            placeholder = { Text("Search ${PetSpecies.SPECIES_REGISTRY.size} Digimon by name or ID...", color = Color.Gray, fontSize = 12.sp) },
-            leadingIcon = { Icon(Icons.Default.Search, contentDescription = "Search", tint = Color.Gray) },
-            singleLine = true
-        )
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        // Stage Filter Chips
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .horizontalScroll(rememberScrollState()),
-            horizontalArrangement = Arrangement.spacedBy(6.dp)
-        ) {
-            StageFilterChip("All (${PetSpecies.SPECIES_REGISTRY.size})", selectedStageFilter == null) {
-                selectedStageFilter = null
-            }
-            PetStage.entries.forEach { stage ->
-                StageFilterChip(stage.displayName, selectedStageFilter == stage) {
-                    selectedStageFilter = if (selectedStageFilter == stage) null else stage
-                }
-            }
-        }
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        // Filtered Species Selector Row with Miniature Sprites (Virtualized LazyRow for 350 species)
-        LazyRow(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            items(filteredRoster, key = { it.id }) { sp ->
-                val selected = selectedSpeciesId == sp.id
-                Row(
-                    modifier = Modifier
-                        .background(
-                            if (selected) Color(0xFF2E220D) else DigiWearPalette.CardSurface,
-                            RoundedCornerShape(10.dp)
+            // 550-Species DigiDex Discovery Progress Card
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                colors = CardDefaults.cardColors(containerColor = Color(0xFF0F1724)),
+                shape = RoundedCornerShape(12.dp),
+                border = BorderStroke(1.dp, Color(0xFF00E5FF).copy(alpha = 0.5f))
+            ) {
+                Column(modifier = Modifier.padding(12.dp)) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                            DigiVectorIcon(type = DigiIconType.RADAR_SCAN, size = 14.dp, tint = Color(0xFF00E5FF))
+                            Text(
+                                text = "DIGIDEX DISCOVERY PROGRESS",
+                                fontSize = 11.sp,
+                                fontWeight = FontWeight.Black,
+                                color = Color(0xFF00E5FF),
+                                fontFamily = FontFamily.Monospace
+                            )
+                        }
+                        Text(
+                            text = "${summary.completionPercentage.toInt()}%",
+                            fontSize = 14.sp,
+                            fontWeight = FontWeight.Black,
+                            color = Color(0xFFFFD54F),
+                            fontFamily = FontFamily.Monospace
                         )
-                        .border(
-                            1.dp,
-                            if (selected) DigiWearPalette.CrestGold else DigiWearPalette.CardBorder,
-                            RoundedCornerShape(10.dp)
-                        )
-                        .clickable { selectedSpeciesId = sp.id }
-                        .padding(horizontal = 10.dp, vertical = 6.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        text = "#${sp.id} ${sp.name}",
-                        fontSize = 11.sp,
-                        fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal,
-                        color = if (selected) DigiWearPalette.CrestGold else Color.White,
-                        fontFamily = FontFamily.Monospace
+                    }
+
+                    Spacer(modifier = Modifier.height(6.dp))
+                    LinearProgressIndicator(
+                        progress = { (summary.completionPercentage / 100f).coerceIn(0f, 1f) },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(6.dp),
+                        color = Color(0xFF00E5FF),
+                        trackColor = Color(0xFF1E2B3D)
                     )
+
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Text(
+                            text = "${summary.discoveredCount} / ${summary.totalSpecies} Discovered",
+                            fontSize = 10.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color.White,
+                            fontFamily = FontFamily.Monospace
+                        )
+                        Text(
+                            text = "${summary.totalSpecies - summary.discoveredCount} Remaining",
+                            fontSize = 9.sp,
+                            color = Color(0xFF90A4AE),
+                            fontFamily = FontFamily.Monospace
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.height(8.dp))
+                    // Discovery Filter Tabs
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(6.dp)
+                    ) {
+                        listOf(
+                            "ALL" to "All (${summary.totalSpecies})",
+                            "DISCOVERED" to "Discovered (${summary.discoveredCount})",
+                            "UNDISCOVERED" to "Undiscovered (${summary.totalSpecies - summary.discoveredCount})"
+                        ).forEach { (mode, label) ->
+                            val active = discoveryFilterMode == mode
+                            Box(
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .background(
+                                        if (active) Color(0xFF00E5FF) else Color(0xFF16202E),
+                                        RoundedCornerShape(6.dp)
+                                    )
+                                    .clickable { discoveryFilterMode = mode }
+                                    .padding(vertical = 5.dp),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text(
+                                    text = label,
+                                    fontSize = 8.5.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = if (active) Color.Black else Color(0xFFB0BEC5),
+                                    fontFamily = FontFamily.Monospace,
+                                    maxLines = 1
+                                )
+                            }
+                        }
+                    }
                 }
             }
-        }
+
+            Spacer(modifier = Modifier.height(10.dp))
+
+            // Search Bar
+            OutlinedTextField(
+                value = searchQuery,
+                onValueChange = { searchQuery = it },
+                modifier = Modifier.fillMaxWidth(),
+                placeholder = { Text("Search ${PetSpecies.SPECIES_REGISTRY.size} Digimon by name or ID...", color = Color.Gray, fontSize = 12.sp) },
+                leadingIcon = { Icon(Icons.Default.Search, contentDescription = "Search", tint = Color.Gray) },
+                singleLine = true
+            )
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            // Stage Filter Chips
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .horizontalScroll(rememberScrollState()),
+                horizontalArrangement = Arrangement.spacedBy(6.dp)
+            ) {
+                StageFilterChip("All (${PetSpecies.SPECIES_REGISTRY.size})", selectedStageFilter == null) {
+                    selectedStageFilter = null
+                }
+                PetStage.entries.forEach { stage ->
+                    StageFilterChip(stage.displayName, selectedStageFilter == stage) {
+                        selectedStageFilter = if (selectedStageFilter == stage) null else stage
+                    }
+                }
+            }
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            // Filtered Species Selector Row with Miniature Sprites (Virtualized LazyRow for 550 species)
+            LazyRow(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                items(filteredRoster, key = { it.id }) { sp ->
+                    val selected = selectedSpeciesId == sp.id
+                    val isDiscovered = discoveredMap.containsKey(sp.id)
+                    Row(
+                        modifier = Modifier
+                            .background(
+                                when {
+                                    selected -> Color(0xFF2E220D)
+                                    isDiscovered -> DigiWearPalette.CardSurface
+                                    else -> Color(0xFF0B1017)
+                                },
+                                RoundedCornerShape(10.dp)
+                            )
+                            .border(
+                                1.dp,
+                                when {
+                                    selected -> DigiWearPalette.CrestGold
+                                    isDiscovered -> DigiWearPalette.CardBorder
+                                    else -> Color(0xFF1E2836)
+                                },
+                                RoundedCornerShape(10.dp)
+                            )
+                            .clickable { selectedSpeciesId = sp.id }
+                            .padding(horizontal = 10.dp, vertical = 6.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        if (isDiscovered) {
+                            SpriteCanvasRenderer(
+                                speciesId = sp.id,
+                                frame = SpriteFrame.IDLE_A,
+                                size = 18.dp
+                            )
+                            Spacer(modifier = Modifier.width(6.dp))
+                        }
+                        Text(
+                            text = if (isDiscovered) "#${sp.id} ${sp.name}" else "#${sp.id} ???",
+                            fontSize = 11.sp,
+                            fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal,
+                            color = when {
+                                selected -> DigiWearPalette.CrestGold
+                                isDiscovered -> Color.White
+                                else -> Color(0xFF546E7A)
+                            },
+                            fontFamily = FontFamily.Monospace
+                        )
+                    }
+                }
+            }
 
         Spacer(modifier = Modifier.height(14.dp))
 
@@ -270,6 +406,7 @@ fun SpriteStudioScreen(
                 modifier = Modifier.padding(14.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
+                val isCurrentDiscovered = discoveredMap.containsKey(selectedSpeciesId)
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
@@ -277,21 +414,60 @@ fun SpriteStudioScreen(
                 ) {
                     Column {
                         Text(
-                            text = "#${selectedSpecies.id} ${selectedSpecies.name}",
+                            text = if (isCurrentDiscovered) "#${selectedSpecies.id} ${selectedSpecies.name}" else "#${selectedSpecies.id} ???",
                             fontSize = 18.sp,
                             fontWeight = FontWeight.Black,
-                            color = Color.White
+                            color = if (isCurrentDiscovered) Color.White else Color(0xFFFFD54F)
                         )
                         Text(
-                            text = "HP ${selectedSpecies.baseHp} • PWR ${selectedSpecies.basePower} • WT ${selectedSpecies.baselineWeight}G",
+                            text = if (isCurrentDiscovered) {
+                                "HP ${selectedSpecies.baseHp} • PWR ${selectedSpecies.basePower} • WT ${selectedSpecies.baselineWeight}G"
+                            } else {
+                                "UNDISCOVERED SPECIES ENTRY"
+                            },
                             fontSize = 10.sp,
                             color = Color(0xFF80CBC4),
                             fontFamily = FontFamily.Monospace
                         )
+                        if (isCurrentDiscovered) {
+                            val ent = discoveredMap[selectedSpeciesId]
+                            Text(
+                                text = "Times Raised: ${ent?.timesRaised ?: 0} • Defeated: ${ent?.timesDefeated ?: 0}",
+                                fontSize = 8.5.sp,
+                                color = Color(0xFFFFD54F),
+                                fontFamily = FontFamily.Monospace
+                            )
+                        }
                     }
                     Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                         StageBadge(selectedSpecies.stage.displayName)
                         AttributeBadge(selectedSpecies.attribute.displayName)
+                    }
+                }
+
+                if (!isCurrentDiscovered) {
+                    Spacer(modifier = Modifier.height(6.dp))
+                    Surface(
+                        shape = RoundedCornerShape(8.dp),
+                        color = Color(0xFF131D2A),
+                        border = BorderStroke(1.dp, Color(0xFF00E5FF).copy(alpha = 0.4f)),
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Column(modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp)) {
+                            Text(
+                                text = "DISCOVERY HINT:",
+                                fontSize = 9.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = Color(0xFF00E5FF),
+                                fontFamily = FontFamily.Monospace
+                            )
+                            Text(
+                                text = DigiDexEngine.getDiscoveryHint(selectedSpeciesId),
+                                fontSize = 9.5.sp,
+                                color = Color(0xFFCFD8DC),
+                                fontFamily = FontFamily.Monospace
+                            )
+                        }
                     }
                 }
 
@@ -309,7 +485,8 @@ fun SpriteStudioScreen(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                            Text("💥 SPECIAL MOVE:", fontSize = 9.sp, fontWeight = FontWeight.Bold, color = Color(0xFFFFB74D), fontFamily = FontFamily.Monospace)
+                            DigiVectorIcon(type = DigiIconType.LIGHTNING_BOLT, size = 10.dp, tint = Color(0xFFFFB74D))
+                            Text("SPECIAL MOVE:", fontSize = 9.sp, fontWeight = FontWeight.Bold, color = Color(0xFFFFB74D), fontFamily = FontFamily.Monospace)
                             Text(signatureAttack, fontSize = 11.sp, fontWeight = FontWeight.Black, color = Color.White, fontFamily = FontFamily.Monospace)
                         }
                         val attrAdvantage = when (selectedSpecies.attribute.displayName.uppercase()) {
@@ -387,13 +564,16 @@ fun SpriteStudioScreen(
                     shape = RoundedCornerShape(8.dp),
                     border = BorderStroke(1.dp, Color(0xFFFFD54F))
                 ) {
-                    Text(
-                        text = "⚡ VIEW OFFICIAL ALBUM CUT-IN PORTRAIT",
-                        fontSize = 11.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = Color(0xFFFFD54F),
-                        fontFamily = FontFamily.Monospace
-                    )
+                    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                        DigiVectorIcon(type = DigiIconType.LIGHTNING_BOLT, size = 12.dp, tint = Color(0xFFFFD54F))
+                        Text(
+                            text = "VIEW OFFICIAL ALBUM CUT-IN PORTRAIT",
+                            fontSize = 11.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color(0xFFFFD54F),
+                            fontFamily = FontFamily.Monospace
+                        )
+                    }
                 }
             }
         }
@@ -456,8 +636,12 @@ fun SpriteStudioScreen(
                             ) {
                                 SpriteCanvasRenderer(speciesId = stepSp.id, frame = SpriteFrame.IDLE_A, size = 22.dp)
                                 Spacer(modifier = Modifier.width(4.dp))
+                                if (idx == 0) {
+                                    DigiVectorIcon(type = DigiIconType.EGG, size = 11.dp, tint = Color(0xFFFFD54F))
+                                    Spacer(modifier = Modifier.width(3.dp))
+                                }
                                 Text(
-                                    text = "${if (idx > 0) "→ " else "🥚 "}${stepSp.name} (${stepSp.stage.displayName})",
+                                    text = "${if (idx > 0) "-> " else ""}${stepSp.name} (${stepSp.stage.displayName})",
                                     fontSize = 9.5.sp,
                                     fontWeight = if (isCurrent) FontWeight.Bold else FontWeight.Normal,
                                     color = if (isCurrent) Color(0xFF80D8FF) else Color.White,
@@ -574,12 +758,15 @@ fun SpriteStudioScreen(
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Column(modifier = Modifier.weight(1f)) {
-                                Text(
-                                    text = "⚡ ${spA.name} + ${spB.name} = ${target.name}",
-                                    fontSize = 11.sp,
-                                    fontWeight = FontWeight.Bold,
-                                    color = Color(recipe.fusionType.badgeColorHex)
-                                )
+                                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(5.dp)) {
+                                    DigiVectorIcon(type = DigiIconType.DNA_HELIX, size = 11.dp, tint = Color(recipe.fusionType.badgeColorHex))
+                                    Text(
+                                        text = "${spA.name} + ${spB.name} = ${target.name}",
+                                        fontSize = 11.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        color = Color(recipe.fusionType.badgeColorHex)
+                                    )
+                                }
                                 Text(text = recipe.description, fontSize = 9.sp, color = Color.LightGray)
                             }
                             Spacer(modifier = Modifier.width(8.dp))

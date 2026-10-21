@@ -1,12 +1,14 @@
-﻿package com.digiwear.wear.render
+package com.digiwear.wear.render
 
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -28,15 +30,20 @@ fun SpriteCanvasRenderer(
     isSleeping: Boolean = false,
     isInjured: Boolean = false,
     flipHorizontal: Boolean = false,
+    enableIdleRoaming: Boolean = false,
     modifier: Modifier = Modifier,
     size: Dp = 128.dp
 ) {
-    // 2 Hz V-Pet LCD frame toggle in Interactive Mode; paused whenever frame is static
+    // 2 Hz V-Pet LCD frame & roaming cycle in Interactive Mode; paused whenever frame is static
     var currentIdleFrame by remember { mutableStateOf(SpriteFrame.IDLE_A) }
+    var roamStep by remember { mutableIntStateOf(0) }
     val isStaticFrame = isAmbient || isInjured || overrideFrame != null
 
-    LaunchedEffect(isStaticFrame) {
-        if (isStaticFrame) return@LaunchedEffect
+    LaunchedEffect(isStaticFrame, enableIdleRoaming, isSleeping) {
+        if (isStaticFrame) {
+            roamStep = 0
+            return@LaunchedEffect
+        }
 
         while (true) {
             delay(500L)
@@ -45,13 +52,41 @@ fun SpriteCanvasRenderer(
             } else {
                 SpriteFrame.IDLE_A
             }
+            if (enableIdleRoaming && !isSleeping) {
+                roamStep = (roamStep + 1) % 8
+            } else {
+                roamStep = 0
+            }
         }
     }
 
     val activeFrame = overrideFrame ?: when {
         isInjured -> SpriteFrame.INJURED
         isSleeping -> if (currentIdleFrame == SpriteFrame.IDLE_A) SpriteFrame.SLEEP_A else SpriteFrame.SLEEP_B
+        enableIdleRoaming -> when (roamStep) {
+            2, 5 -> SpriteFrame.WALK_A
+            3, 6 -> SpriteFrame.WALK_B
+            0, 4 -> SpriteFrame.IDLE_A
+            else -> SpriteFrame.IDLE_B
+        }
         else -> currentIdleFrame
+    }
+
+    val roamOffsetDp = if (enableIdleRoaming && !isStaticFrame && !isSleeping) {
+        when (roamStep) {
+            2 -> (-3).dp
+            3, 4 -> (-5).dp
+            5 -> (-1).dp
+            6 -> 4.dp
+            7 -> 2.dp
+            else -> 0.dp
+        }
+    } else 0.dp
+
+    val effectiveFlip = if (enableIdleRoaming && !isStaticFrame && !isSleeping && roamStep in 5..6) {
+        !flipHorizontal
+    } else {
+        flipHorizontal
     }
 
     val imageBitmap = remember(speciesId, activeFrame, isAmbient) {
@@ -62,13 +97,15 @@ fun SpriteCanvasRenderer(
     val burnInPadding = if (isAmbient) 10.dp else 0.dp
 
     Box(
-        modifier = modifier.padding(burnInPadding),
+        modifier = modifier
+            .padding(burnInPadding)
+            .offset(x = roamOffsetDp),
         contentAlignment = Alignment.Center
     ) {
         Canvas(modifier = Modifier.size(size)) {
             val dstPx = size.roundToPx()
             withTransform({
-                if (flipHorizontal) {
+                if (effectiveFlip) {
                     scale(scaleX = -1f, scaleY = 1f)
                 }
             }) {

@@ -67,7 +67,7 @@ object DeterministicBattleSolver {
         var hpA = fighterA.currentHp
         var hpB = fighterB.currentHp
         val turns = mutableListOf<BattleTurn>()
-        val env = environmentEffect.lowercase().trim()
+        val env = environmentEffect.lowercase().trim().replace(Regex("[\\s-]+"), "_")
 
         val effPowerA = computeEffectivePower(fighterA)
         val effPowerB = computeEffectivePower(fighterB)
@@ -91,13 +91,14 @@ object DeterministicBattleSolver {
             val multFirst = firstFighter.attribute.damageMultiplierAgainst(secondFighter.attribute)
             val envMultFirst = computeEnvironmentMultiplier(firstFighter, firstIdx, env)
             val isAdvFirst = multFirst > 1.0f || envMultFirst > 1.0f
-            val critThresholdFirst = if (env == "glitch_fog") 25 else 15
+            val critThresholdFirst = if (env == "glitch_fog" || env == "x_program_fog") 25 else 15
             val isNaturalCritFirst = prng.nextInt(100) < critThresholdFirst
             val isBoostedFirst = attackerCritBoost && firstIdx == 0
             val isCritFirst = isNaturalCritFirst || isBoostedFirst
             val varianceFirst = 0.9f + (prng.nextInt(21) / 100f) // 0.90 to 1.10
 
-            var dmgFirst = (firstFighter.basePower * 0.35f + firstFighter.effort * 2f) * multFirst * envMultFirst * varianceFirst
+            val effFirst = if (firstIdx == 0) effPowerA else effPowerB
+            var dmgFirst = (effFirst * 0.35f) * multFirst * envMultFirst * varianceFirst
             if (isNaturalCritFirst) dmgFirst *= 1.5f
             if (isBoostedFirst) dmgFirst *= 1.25f
             val finalDmgFirst = max(5, dmgFirst.roundToInt())
@@ -146,13 +147,14 @@ object DeterministicBattleSolver {
             val multSecond = secondFighter.attribute.damageMultiplierAgainst(firstFighter.attribute)
             val envMultSecond = computeEnvironmentMultiplier(secondFighter, secondIdx, env)
             val isAdvSecond = multSecond > 1.0f || envMultSecond > 1.0f
-            val critThresholdSecond = if (env == "glitch_fog") 25 else 15
+            val critThresholdSecond = if (env == "glitch_fog" || env == "x_program_fog") 25 else 15
             val isNaturalCritSecond = prng.nextInt(100) < critThresholdSecond
             val isBoostedSecond = attackerCritBoost && secondIdx == 0
             val isCritSecond = isNaturalCritSecond || isBoostedSecond
             val varianceSecond = 0.9f + (prng.nextInt(21) / 100f)
 
-            var dmgSecond = (secondFighter.basePower * 0.35f + secondFighter.effort * 2f) * multSecond * envMultSecond * varianceSecond
+            val effSecond = if (secondIdx == 0) effPowerA else effPowerB
+            var dmgSecond = (effSecond * 0.35f) * multSecond * envMultSecond * varianceSecond
             if (isNaturalCritSecond) dmgSecond *= 1.5f
             if (isBoostedSecond) dmgSecond *= 1.25f
             val finalDmgSecond = max(5, dmgSecond.roundToInt())
@@ -217,7 +219,7 @@ object DeterministicBattleSolver {
 
         val attrDesc = when {
             attrMultA > 1.0f -> "${fighterA.attribute.displayName} > ${fighterB.attribute.displayName} (1.20x)"
-            attrMultB > 1.0f -> "${fighterB.attribute.displayName} > ${fighterA.attribute.displayName} (0.83x)"
+            attrMultB > 1.0f -> "${fighterB.attribute.displayName} > ${fighterA.attribute.displayName} (1.20x)"
             else -> "${fighterA.attribute.displayName} = ${fighterB.attribute.displayName} (1.00x)"
         }
         val summary = "EFF PWR $effPowerA vs $effPowerB • $attrDesc • HIT $hitRateA%"
@@ -247,11 +249,11 @@ object DeterministicBattleSolver {
      * - cosmic_nihilism / quantum_erasure / dark_gravity: Apex boss aura (+10% for defender/boss), or +15% heroic surge if challenger has 4 Effort hearts.
      */
     fun computeEnvironmentMultiplier(fighter: BattleFighter, fighterIdx: Int, env: String): Float {
-        return when (env) {
-            "glitch_fog", "x_program_fog", "x_virus_rot", "dark_miasma" -> if (fighter.attribute == ElementalAttribute.VIRUS) 1.15f else 1.0f
-            "subzero_frost", "cocytus_blizzard", "absolute_aurora", "fenrir_frost" -> if (fighter.attribute == ElementalAttribute.DATA) 1.15f else 0.90f
-            "pyroclastic_flow", "heat_wave", "ancient_inferno", "hellfire_storm", "solar_flare", "gehenna_flames" -> if (fighter.attribute == ElementalAttribute.VACCINE) 1.15f else 1.10f
-            "cosmic_nihilism", "quantum_erasure", "dark_gravity", "dark_annihilation", "grb_cataclysm", "seven_sins_maw", "temporal_singularity" -> {
+        return when (env.lowercase().trim().replace(Regex("[\\s-]+"), "_")) {
+            "glitch_fog", "x_program_fog", "x_virus_rot", "dark_miasma", "miasma_fog" -> if (fighter.attribute == ElementalAttribute.VIRUS) 1.15f else 1.0f
+            "subzero_frost", "cocytus_blizzard", "absolute_aurora", "fenrir_frost", "tidal_current", "data_storm" -> if (fighter.attribute == ElementalAttribute.DATA) 1.15f else 0.90f
+            "pyroclastic_flow", "heat_wave", "magma_heat", "ancient_inferno", "hellfire_storm", "solar_flare", "gehenna_flames", "thunderstorm" -> if (fighter.attribute == ElementalAttribute.VACCINE) 1.15f else 1.10f
+            "cosmic_nihilism", "quantum_erasure", "quantum_singularity", "dark_gravity", "zero_gravity", "apocalymon_void", "dark_annihilation", "grb_cataclysm", "grb_wave_cataclysm", "seven_sins_maw", "dark_area_sin_gates", "temporal_singularity" -> {
                 if (fighterIdx == 0 && fighter.effort >= 4) 1.15f
                 else if (fighterIdx == 1) 1.10f
                 else 1.0f

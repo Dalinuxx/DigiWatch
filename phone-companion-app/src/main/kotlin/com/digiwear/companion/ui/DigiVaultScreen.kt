@@ -1,4 +1,4 @@
-﻿package com.digiwear.companion.ui
+package com.digiwear.companion.ui
 
 import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
@@ -184,13 +184,16 @@ fun DigiVaultScreen(
                     containerColor = if (activeTab == 0) Color(0xFF00897B) else Color(0xFF1E2630)
                 )
             ) {
-                Text(
-                    text = "🛡 CRYO-VAULT (${vaultPets.size})",
-                    fontSize = 11.sp,
-                    fontWeight = FontWeight.Bold,
-                    fontFamily = FontFamily.Monospace,
-                    color = if (activeTab == 0) Color.White else Color(0xFF90A4AE)
-                )
+                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(5.dp)) {
+                    DigiVectorIcon(type = DigiIconType.VAULT_SAFE, size = 12.dp, tint = if (activeTab == 0) Color.White else Color(0xFF90A4AE))
+                    Text(
+                        text = "CRYO-VAULT (${vaultPets.size})",
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.Bold,
+                        fontFamily = FontFamily.Monospace,
+                        color = if (activeTab == 0) Color.White else Color(0xFF90A4AE)
+                    )
+                }
             }
             Button(
                 onClick = { activeTab = 1 },
@@ -199,13 +202,16 @@ fun DigiVaultScreen(
                     containerColor = if (activeTab == 1) Color(0xFF455A64) else Color(0xFF1E2630)
                 )
             ) {
-                Text(
-                    text = "🪦 MEMORIAL (${memorials.size})",
-                    fontSize = 11.sp,
-                    fontWeight = FontWeight.Bold,
-                    fontFamily = FontFamily.Monospace,
-                    color = if (activeTab == 1) Color.White else Color(0xFF90A4AE)
-                )
+                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(5.dp)) {
+                    DigiVectorIcon(type = DigiIconType.MEMORIAL_GRAVE, size = 12.dp, tint = if (activeTab == 1) Color.White else Color(0xFF90A4AE))
+                    Text(
+                        text = "MEMORIAL (${memorials.size})",
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.Bold,
+                        fontFamily = FontFamily.Monospace,
+                        color = if (activeTab == 1) Color.White else Color(0xFF90A4AE)
+                    )
+                }
             }
         }
 
@@ -253,13 +259,16 @@ fun DigiVaultScreen(
                 border = BorderStroke(1.dp, Color(0xFFAB47BC))
             ) {
                 Column(modifier = Modifier.padding(10.dp)) {
-                    Text(
-                        text = "⚡ ACTIVE ${activeSp.name.uppercase()} — DNA JOGRESS & DIGIXROS LAB (${vaultCompatibleRecipes.size})",
-                        fontSize = 10.sp,
-                        fontWeight = FontWeight.Black,
-                        color = Color(0xFFEA80FC),
-                        fontFamily = FontFamily.Monospace
-                    )
+                    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(5.dp)) {
+                        DigiVectorIcon(type = DigiIconType.DNA_HELIX, size = 12.dp, tint = Color(0xFFEA80FC))
+                        Text(
+                            text = "ACTIVE ${activeSp.name.uppercase()} — DNA JOGRESS & DIGIXROS LAB (${vaultCompatibleRecipes.size})",
+                            fontSize = 10.sp,
+                            fontWeight = FontWeight.Black,
+                            color = Color(0xFFEA80FC),
+                            fontFamily = FontFamily.Monospace
+                        )
+                    }
                     Spacer(modifier = Modifier.height(6.dp))
                     Row(
                         modifier = Modifier
@@ -349,7 +358,10 @@ fun DigiVaultScreen(
                                             },
                                             colors = ButtonDefaults.buttonColors(containerColor = Color(recipe.fusionType.badgeColorHex))
                                         ) {
-                                            Text("⚡ FUSE", fontSize = 8.5.sp, fontWeight = FontWeight.Black, color = Color.Black, fontFamily = FontFamily.Monospace)
+                                            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(3.dp)) {
+                                                DigiVectorIcon(type = DigiIconType.DNA_HELIX, size = 9.dp, tint = Color.Black)
+                                                Text("FUSE", fontSize = 8.5.sp, fontWeight = FontWeight.Black, color = Color.Black, fontFamily = FontFamily.Monospace)
+                                            }
                                         }
                                     }
                                 }
@@ -481,7 +493,7 @@ fun DigiVaultScreen(
                 contentAlignment = Alignment.Center
             ) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Text(text = "🪦", fontSize = 36.sp)
+                    DigiVectorIcon(type = DigiIconType.MEMORIAL_GRAVE, size = 36.dp, tint = Color(0xFF78909C))
                     Spacer(modifier = Modifier.height(6.dp))
                     Text(
                         text = "NO DEPARTED PARTNERS YET",
@@ -541,12 +553,15 @@ fun DigiVaultScreen(
                                         fontWeight = FontWeight.Bold,
                                         color = Color.White
                                     )
-                                    Text(
-                                        text = "🪦 ${m.causeOfDeath}",
-                                        fontSize = 9.sp,
-                                        fontFamily = FontFamily.Monospace,
-                                        color = Color(0xFFFF8A80)
-                                    )
+                                    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                                        DigiVectorIcon(type = DigiIconType.MEMORIAL_GRAVE, size = 10.dp, tint = Color(0xFFFF8A80))
+                                        Text(
+                                            text = m.causeOfDeath,
+                                            fontSize = 9.sp,
+                                            fontFamily = FontFamily.Monospace,
+                                            color = Color(0xFFFF8A80)
+                                        )
+                                    }
                                 }
                                 Text(
                                     text = "${m.finalStage} • Age: ${m.ageDays}d • Record: ${m.battlesWon}/${m.battlesTotal} (${(m.winRatio * 100).toInt()}%)",
@@ -814,7 +829,7 @@ fun DigiVaultScreen(
                             Spacer(modifier = Modifier.height(4.dp))
                             Text("• Synergy Max HP: ${(targetSp.baseHp * 1.10f).toInt()} (+10% DNA Harmony)", fontSize = 11.sp, color = Color.LightGray)
                             Text("• Combined Victories: ${active.victories + vaultPet.victories} Wins", fontSize = 11.sp, color = Color.LightGray)
-                            Text("• Inherited Effort: ${maxOf(active.effort, vaultPet.effort)}★", fontSize = 11.sp, color = Color.LightGray)
+                            Text("• Inherited Effort: ${maxOf(active.effort, vaultPet.effort)} / 4", fontSize = 11.sp, color = Color.LightGray)
                             Text("• Digimon 0nl1ne / D-Com: 100% Wire Protocol Compatible", fontSize = 10.sp, color = Color(0xFF00E676), fontWeight = FontWeight.Bold)
                         }
                     }
@@ -950,12 +965,25 @@ private fun VaultPetCard(
 
                     Spacer(modifier = Modifier.height(5.dp))
 
-                    Text(
-                        text = "H:${"♥".repeat(pet.hunger.coerceIn(0, 4))}  S:${"★".repeat(pet.strength.coerceIn(0, 4))}  EFF:${pet.effort}★",
-                        fontSize = 11.sp,
-                        color = Color(0xFFFF8A80),
-                        fontFamily = FontFamily.Monospace
-                    )
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(3.dp)) {
+                            Text("H:", fontSize = 10.sp, color = Color(0xFFFF8A80), fontFamily = FontFamily.Monospace)
+                            VPetMeterBar(count = pet.hunger, max = 4, isHearts = true, iconSize = 8.dp, activeColor = Color(0xFFFF8A80))
+                        }
+                        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(3.dp)) {
+                            Text("S:", fontSize = 10.sp, color = Color(0xFFFFD54F), fontFamily = FontFamily.Monospace)
+                            VPetMeterBar(count = pet.strength, max = 4, isHearts = false, iconSize = 8.dp, activeColor = Color(0xFFFFD54F))
+                        }
+                        Text(
+                            text = "EFF:${pet.effort}/4",
+                            fontSize = 10.sp,
+                            color = Color(0xFF80CBC4),
+                            fontFamily = FontFamily.Monospace
+                        )
+                    }
 
                     Text(
                         text = "Wt: ${pet.weight}g • Battles: ${pet.victories}W/${pet.totalBattles} • Stored: $dateStr",
@@ -990,13 +1018,16 @@ private fun VaultPetCard(
                         )
                         Spacer(modifier = Modifier.width(8.dp))
                         Column {
-                            Text(
-                                text = "⚡ ${fusionRecipe.fusionType.displayName.uppercase()} READY!",
-                                fontSize = 9.sp,
-                                fontWeight = FontWeight.Bold,
-                                color = Color(fusionRecipe.fusionType.badgeColorHex),
-                                fontFamily = FontFamily.Monospace
-                            )
+                            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                                DigiVectorIcon(type = DigiIconType.DNA_HELIX, size = 10.dp, tint = Color(fusionRecipe.fusionType.badgeColorHex))
+                                Text(
+                                    text = "${fusionRecipe.fusionType.displayName.uppercase()} READY!",
+                                    fontSize = 9.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = Color(fusionRecipe.fusionType.badgeColorHex),
+                                    fontFamily = FontFamily.Monospace
+                                )
+                            }
                             Text(
                                 text = "Fuses into ${targetSp.name} (${targetSp.stage.displayName})",
                                 fontSize = 11.sp,

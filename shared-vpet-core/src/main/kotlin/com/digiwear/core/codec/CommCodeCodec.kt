@@ -1,4 +1,4 @@
-﻿package com.digiwear.core.codec
+package com.digiwear.core.codec
 
 import com.digiwear.core.model.ElementalAttribute
 import com.digiwear.core.model.PetStage
@@ -34,6 +34,13 @@ object CommCodeCodec {
     const val ALPHABET = "0123456789ABCDEFGHJKMNPQRSTVWXYZ"
     private const val PROTOCOL_VERSION = 0x01
     private const val HMAC_SECRET_KEY = "DIGIWEAR_COMM_V1_SECRET_KEY"
+
+    private val HMAC_KEY_SPEC = SecretKeySpec(HMAC_SECRET_KEY.toByteArray(Charsets.UTF_8), "HmacSHA256")
+    private val THREAD_LOCAL_MAC = object : ThreadLocal<Mac>() {
+        override fun initialValue(): Mac = Mac.getInstance("HmacSHA256").apply {
+            init(HMAC_KEY_SPEC)
+        }
+    }
 
     private val CHAR_TO_INDEX: Map<Char, Int> by lazy {
         val map = mutableMapOf<Char, Int>()
@@ -216,7 +223,7 @@ object CommCodeCodec {
         } else {
             // Classic 2-word 32-bit 2-prong DigiROM packet (V1-XXXX-XXXX)
             val candidateId = (word0 shr 4) and 0x0FFF
-            val allSpecies = com.digiwear.core.model.PetSpecies.SPECIES_REGISTRY.values.toList()
+            val allSpecies = com.digiwear.core.model.PetSpecies.SORTED_SPECIES
             val species = com.digiwear.core.model.PetSpecies.SPECIES_REGISTRY[candidateId]
                 ?: allSpecies[word0 % allSpecies.size]
             CommCodePayload(
@@ -246,9 +253,7 @@ object CommCodeCodec {
             }
             if (hash == 0) 0x1337 else hash
         }
-        val eligibleSpecies = com.digiwear.core.model.PetSpecies.SPECIES_REGISTRY.values
-            .filter { it.stage != PetStage.BABY_I && it.stage != PetStage.BABY_II }
-            .toList()
+        val eligibleSpecies = com.digiwear.core.model.PetSpecies.COMBAT_ELIGIBLE_SPECIES
         val species = eligibleSpecies[seed % eligibleSpecies.size]
         return encodeDigiRom(
             monsterId = species.id,
@@ -375,9 +380,7 @@ object CommCodeCodec {
     }
 
     private fun computeHmac16(data: ByteArray): Int {
-        val key = SecretKeySpec(HMAC_SECRET_KEY.toByteArray(Charsets.UTF_8), "HmacSHA256")
-        val mac = Mac.getInstance("HmacSHA256")
-        mac.init(key)
+        val mac = THREAD_LOCAL_MAC.get()
         val hash = mac.doFinal(data)
         return ((hash[0].toInt() and 0xFF) shl 8) or (hash[1].toInt() and 0xFF)
     }

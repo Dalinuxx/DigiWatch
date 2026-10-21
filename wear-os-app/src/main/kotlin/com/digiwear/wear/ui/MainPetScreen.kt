@@ -83,15 +83,15 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
-enum class VPetMenu(val label: String, val icon: String) {
-    STATUS("STATUS", "⚖️"),
-    FEED("FEED", "🍖"),
-    TRAIN("TRAIN", "🥊"),
-    BATTLE("BATTLE", "⚔"),
-    FLUSH("FLUSH", "💩"),
-    LIGHT("LIGHT", "💡"),
-    MEDS("MEDS", "🩹"),
-    ATTENTION("CALL", "🚨")
+enum class VPetMenu(val label: String, val iconType: DigiIconType) {
+    STATUS("STATUS", DigiIconType.STATUS),
+    FEED("FEED", DigiIconType.FEED),
+    TRAIN("TRAIN", DigiIconType.TRAIN),
+    BATTLE("BATTLE", DigiIconType.BATTLE),
+    FLUSH("FLUSH", DigiIconType.FLUSH),
+    LIGHT("LIGHT", DigiIconType.LIGHT_ON),
+    MEDS("MEDS", DigiIconType.MEDS_PILL),
+    ATTENTION("CALL", DigiIconType.ATTENTION)
 }
 
 @Composable
@@ -114,6 +114,7 @@ fun MainPetScreen(
     val isSoundEnabled by repository.soundEnabledFlow.collectAsState(initial = false)
     val contrastLevel by repository.contrastLevelFlow.collectAsState(initial = "MEDIUM")
     val ambientStyle by repository.ambientStyleFlow.collectAsState(initial = "MINIMAL_DOT")
+    val is24hFormat by repository.clockFormatFlow.collectAsState(initial = false)
     val displayConfig = WatchDisplayConfig.current()
     val scope = rememberCoroutineScope()
 
@@ -161,21 +162,43 @@ fun MainPetScreen(
 
     val executeMenuAction: (Int) -> Unit = { index ->
         val item = VPetMenu.entries[index]
-        when (item) {
+        if (petState.isDeceased && item != VPetMenu.STATUS && item != VPetMenu.ATTENTION) {
+            actionFeedback = "Tap Tombstone to Hatch"
+            buzzerManager.playAttentionBeep()
+            scope.launch {
+                delay(1200L)
+                actionFeedback = null
+            }
+        } else when (item) {
             VPetMenu.FEED -> {
                 scope.launch {
-                    overrideSpriteFrame = SpriteFrame.JOY_EAT
-                    if (petState.hunger < 4) {
-                        repository.feedMeal()
-                        actionFeedback = "Fed Meat (+1g)"
+                    if (petState.isSleeping) {
+                        overrideSpriteFrame = SpriteFrame.REFUSAL
+                        actionFeedback = "Sleeping!"
+                        buzzerManager.playAttentionBeep()
+                        delay(800L)
+                        overrideSpriteFrame = null
+                        actionFeedback = null
                     } else {
-                        repository.feedProtein()
-                        actionFeedback = "Fed Vitamin (+2g)"
+                        if (petState.hunger < 4) {
+                            repository.feedMeal()
+                            actionFeedback = "Fed Meat (+1g)"
+                        } else {
+                            repository.feedProtein()
+                            actionFeedback = "Fed Vitamin (+2g)"
+                        }
+                        hapticManager.playStepMilestone()
+                        overrideSpriteFrame = SpriteFrame.FEED_START
+                        delay(320L)
+                        overrideSpriteFrame = SpriteFrame.JOY_EAT
+                        delay(320L)
+                        overrideSpriteFrame = SpriteFrame.FEED_START
+                        delay(320L)
+                        overrideSpriteFrame = SpriteFrame.JOY_EAT
+                        delay(550L)
+                        overrideSpriteFrame = null
+                        actionFeedback = null
                     }
-                    hapticManager.playStepMilestone()
-                    delay(1200L)
-                    overrideSpriteFrame = null
-                    actionFeedback = null
                 }
             }
             VPetMenu.LIGHT -> {
@@ -257,9 +280,63 @@ fun MainPetScreen(
         }
     }
 
+    androidx.activity.compose.BackHandler(
+        enabled = isTrainingActive || showTrainingPicker || showLightPicker || evolvingFromSpeciesId != null
+    ) {
+        buzzerManager.playButtonBeep()
+        when {
+            evolvingFromSpeciesId != null -> evolvingFromSpeciesId = null
+            showTrainingPicker -> showTrainingPicker = false
+            showLightPicker -> showLightPicker = false
+            isTrainingActive -> isTrainingActive = false
+        }
+    }
+
     // Listen to physical smartwatch hardware button presses & rotary crown input
-    LaunchedEffect(isTrainingActive, selectedMenuIndex) {
+    LaunchedEffect(isTrainingActive, showTrainingPicker, showLightPicker, selectedMenuIndex) {
         HardwareInputManager.buttonEvents.collect { button ->
+            if (showTrainingPicker) {
+                when (button) {
+                    VPetButton.B -> {
+                        showTrainingPicker = false
+                        isTrainingActive = true
+                    }
+                    VPetButton.A -> {
+                        showTrainingPicker = false
+                        onNavigateWorkout(com.digiwear.core.workout.WorkoutType.FREE_TRAINING)
+                    }
+                    VPetButton.C -> showTrainingPicker = false
+                    else -> {}
+                }
+                return@collect
+            }
+            if (showLightPicker) {
+                when (button) {
+                    VPetButton.B -> {
+                        showLightPicker = false
+                        scope.launch {
+                            repository.toggleLights()
+                            hapticManager.playStepMilestone()
+                            actionFeedback = if (petState.lightsOff) "Lights ON" else "Lights OFF"
+                            delay(900L)
+                            actionFeedback = null
+                        }
+                    }
+                    VPetButton.A -> {
+                        showLightPicker = false
+                        scope.launch {
+                            repository.toggleColdSleep()
+                            hapticManager.playStepMilestone()
+                            actionFeedback = if (!petState.isFrozen) "Cold Sleep Active!" else "Awakened!"
+                            delay(1000L)
+                            actionFeedback = null
+                        }
+                    }
+                    VPetButton.C -> showLightPicker = false
+                    else -> {}
+                }
+                return@collect
+            }
             if (isTrainingActive) {
                 // If in training, button C can cancel
                 if (button == VPetButton.C) {
@@ -314,7 +391,12 @@ fun MainPetScreen(
     }
 
     if (ambientState.isAmbient) {
-        AmbientPetScreen(petState = petState, displayConfig = displayConfig)
+        AmbientPetScreen(
+            petState = petState,
+            displayConfig = displayConfig,
+            ambientStyle = ambientStyle,
+            is24hFormat = is24hFormat
+        )
         return
     }
 
@@ -484,7 +566,7 @@ fun MainPetScreen(
             }
         }
 
-        // Medical Syringe & Healing Sparkle Animation
+        // Medical Pill Capsule & Healing Sparkle Animation
         if (medsAnimationProgress in 0f..1f) {
             Box(
                 modifier = Modifier
@@ -493,11 +575,11 @@ fun MainPetScreen(
                 contentAlignment = Alignment.Center
             ) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Text("💉", fontSize = 24.sp)
+                    MedsPillOverlayIcon(size = 30.dp)
                     Spacer(modifier = Modifier.height(4.dp))
                     Text(
-                        text = "✚ ✚ ✚",
-                        fontSize = 16.sp,
+                        text = "+ + + MED-PILL CURED + + +",
+                        fontSize = 11.sp,
                         fontWeight = FontWeight.Black,
                         fontFamily = FontFamily.Monospace,
                         color = Color(0xFF00E676)
@@ -543,7 +625,11 @@ fun MainPetScreen(
                         colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFF2E7D32)),
                         shape = RoundedCornerShape(14.dp)
                     ) {
-                        Text("🥊 MINI-GAME", fontSize = 8.sp, fontWeight = FontWeight.Bold, fontFamily = FontFamily.Monospace)
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            DigiVectorIcon(type = DigiIconType.TRAIN, size = 11.dp)
+                            Spacer(modifier = Modifier.width(4.dp))
+                            Text("MINI-GAME", fontSize = 8.sp, fontWeight = FontWeight.Bold, fontFamily = FontFamily.Monospace)
+                        }
                     }
 
                     Button(
@@ -557,7 +643,11 @@ fun MainPetScreen(
                         colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFFE65100)),
                         shape = RoundedCornerShape(14.dp)
                     ) {
-                        Text("⚡ FREE WORKOUT", fontSize = 8.sp, fontWeight = FontWeight.Bold, fontFamily = FontFamily.Monospace)
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            DigiVectorIcon(type = DigiIconType.BOLT, size = 11.dp)
+                            Spacer(modifier = Modifier.width(4.dp))
+                            Text("FREE WORKOUT", fontSize = 8.sp, fontWeight = FontWeight.Bold, fontFamily = FontFamily.Monospace)
+                        }
                     }
 
                     Button(
@@ -837,9 +927,10 @@ private fun LcdIconCell(
             .clickable { onClick() },
         contentAlignment = Alignment.Center
     ) {
-        Text(
-            text = item.icon,
-            fontSize = if (isSelected || isCallActive) (fontSize.value + 1.5f).sp else fontSize
+        val iconSize = if (isSelected || isCallActive) (height - 3.dp).coerceAtLeast(10.dp) else (height - 5.dp).coerceAtLeast(9.dp)
+        DigiVectorIcon(
+            type = item.iconType,
+            size = iconSize
         )
     }
 }
@@ -995,7 +1086,10 @@ private fun ThreeButtonPetView(
                                     .clickable { onNavigateAdventure() },
                                 contentAlignment = Alignment.Center
                             ) {
-                                Text("🗺", fontSize = (displayConfig.telemetryFontSize.value - 1f).coerceAtLeast(6.5f).sp, color = Color.White)
+                                DigiVectorIcon(
+                                    type = DigiIconType.QUEST,
+                                    size = if (displayConfig.screenWidthDp < 240) 10.dp else 12.dp
+                                )
                             }
                             Spacer(modifier = Modifier.width(2.dp))
                             Box(
@@ -1006,7 +1100,10 @@ private fun ThreeButtonPetView(
                                     .clickable { onNavigateSettings() },
                                 contentAlignment = Alignment.Center
                             ) {
-                                Text("⚙", fontSize = (displayConfig.telemetryFontSize.value - 1f).coerceAtLeast(6.5f).sp, color = Color.White)
+                                DigiVectorIcon(
+                                    type = DigiIconType.SETTINGS,
+                                    size = if (displayConfig.screenWidthDp < 240) 10.dp else 12.dp
+                                )
                             }
                         }
                     }
@@ -1022,34 +1119,48 @@ private fun ThreeButtonPetView(
                         Box(
                             modifier = Modifier
                                 .background(Color(0x55000000), RoundedCornerShape(3.dp))
-                                .padding(horizontal = 3.dp, vertical = 0.5.dp)
+                                .padding(horizontal = 3.dp, vertical = 1.dp)
                         ) {
-                            Text(
-                                text = "H:${"♥".repeat(petState.hunger)}${"♡".repeat(4 - petState.hunger)}",
-                                fontSize = (displayConfig.telemetryFontSize.value - 0.5f).coerceAtLeast(6.5f).sp,
-                                fontWeight = FontWeight.Bold,
-                                color = Color(0xFFFF5252),
-                                fontFamily = FontFamily.Monospace
-                            )
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Text(
+                                    text = "H:",
+                                    fontSize = (displayConfig.telemetryFontSize.value - 0.5f).coerceAtLeast(6.5f).sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = Color(0xFFFF5252),
+                                    fontFamily = FontFamily.Monospace
+                                )
+                                VPetMeterBar(
+                                    count = petState.hunger,
+                                    isHeart = true,
+                                    iconSize = (displayConfig.telemetryFontSize.value).coerceAtLeast(7f).dp
+                                )
+                            }
                         }
                         if (petState.wasteCount > 0) {
-                            Text(
-                                text = "💩".repeat(petState.wasteCount),
-                                fontSize = (displayConfig.telemetryFontSize.value + 1f).sp
+                            VPetWasteRow(
+                                wasteCount = petState.wasteCount,
+                                iconSize = (displayConfig.telemetryFontSize.value + 2f).dp
                             )
                         }
                         Box(
                             modifier = Modifier
                                 .background(Color(0x55000000), RoundedCornerShape(3.dp))
-                                .padding(horizontal = 3.dp, vertical = 0.5.dp)
+                                .padding(horizontal = 3.dp, vertical = 1.dp)
                         ) {
-                            Text(
-                                text = "S:${"★".repeat(petState.strength)}${"☆".repeat(4 - petState.strength)}",
-                                fontSize = (displayConfig.telemetryFontSize.value - 0.5f).coerceAtLeast(6.5f).sp,
-                                fontWeight = FontWeight.Bold,
-                                color = Color(0xFFFFD700),
-                                fontFamily = FontFamily.Monospace
-                            )
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Text(
+                                    text = "S:",
+                                    fontSize = (displayConfig.telemetryFontSize.value - 0.5f).coerceAtLeast(6.5f).sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = Color(0xFFFFD700),
+                                    fontFamily = FontFamily.Monospace
+                                )
+                                VPetMeterBar(
+                                    count = petState.strength,
+                                    isHeart = false,
+                                    iconSize = (displayConfig.telemetryFontSize.value).coerceAtLeast(7f).dp
+                                )
+                            }
                         }
                     }
 
@@ -1059,13 +1170,17 @@ private fun ThreeButtonPetView(
                                 .background(Color(0xCCD50000), RoundedCornerShape(3.dp))
                                 .padding(horizontal = 5.dp, vertical = 0.5.dp)
                         ) {
-                            Text(
-                                text = "⚠ CALL SIGNAL ⚠",
-                                fontSize = (displayConfig.telemetryFontSize.value - 1.5f).coerceAtLeast(6f).sp,
-                                color = Color.White,
-                                fontWeight = FontWeight.Black,
-                                fontFamily = FontFamily.Monospace
-                            )
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                DigiVectorIcon(type = DigiIconType.ATTENTION, size = 8.dp, tint = Color.White)
+                                Spacer(modifier = Modifier.width(3.dp))
+                                Text(
+                                    text = "CALL SIGNAL",
+                                    fontSize = (displayConfig.telemetryFontSize.value - 1.5f).coerceAtLeast(6f).sp,
+                                    color = Color.White,
+                                    fontWeight = FontWeight.Black,
+                                    fontFamily = FontFamily.Monospace
+                                )
+                            }
                         }
                     }
 
@@ -1093,6 +1208,7 @@ private fun ThreeButtonPetView(
                                 overrideFrame = overrideSpriteFrame,
                                 isSleeping = petState.isSleeping,
                                 isInjured = petState.isInjured,
+                                enableIdleRoaming = true,
                                 size = displayConfig.mainSpriteSize
                             )
                         }
@@ -1107,14 +1223,18 @@ private fun ThreeButtonPetView(
                                 .clickable { onHatchTraitedEgg() }
                                 .padding(horizontal = 4.dp, vertical = 1.dp)
                         ) {
-                            Text(
-                                text = "🪦 REST IN PEACE • TAP TO HATCH EGG (GEN ${petState.generation + 1})",
-                                fontSize = 6.5.sp,
-                                fontWeight = FontWeight.Black,
-                                color = Color(0xFFFF8A80),
-                                fontFamily = FontFamily.Monospace,
-                                textAlign = TextAlign.Center
-                            )
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                DigiVectorIcon(type = DigiIconType.TOMBSTONE, size = 9.dp)
+                                Spacer(modifier = Modifier.width(3.dp))
+                                Text(
+                                    text = "REST IN PEACE • TAP TO HATCH EGG (GEN ${petState.generation + 1})",
+                                    fontSize = 6.5.sp,
+                                    fontWeight = FontWeight.Black,
+                                    color = Color(0xFFFF8A80),
+                                    fontFamily = FontFamily.Monospace,
+                                    textAlign = TextAlign.Center
+                                )
+                            }
                         }
                     } else {
                         val promptText = if (selectedMenuIndex != null) {
@@ -1258,7 +1378,7 @@ private fun ModernTouchPetView(
                         modifier = Modifier.size(24.dp),
                         colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFF263238))
                     ) {
-                        Text("⚙", fontSize = 10.sp)
+                        DigiVectorIcon(type = DigiIconType.SETTINGS, size = 12.dp)
                     }
                 }
             }
@@ -1279,19 +1399,23 @@ private fun ModernTouchPetView(
                             .padding(horizontal = 8.dp, vertical = 4.dp),
                         contentAlignment = Alignment.Center
                     ) {
-                        Text(
-                            text = "🪦 REST IN PEACE • TAP TO HATCH EGG (GEN ${petState.generation + 1})",
-                            fontSize = 8.sp,
-                            fontWeight = FontWeight.Black,
-                            color = Color(0xFFFF8A80),
-                            fontFamily = FontFamily.Monospace,
-                            textAlign = TextAlign.Center
-                        )
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            DigiVectorIcon(type = DigiIconType.TOMBSTONE, size = 11.dp)
+                            Spacer(modifier = Modifier.width(4.dp))
+                            Text(
+                                text = "REST IN PEACE • TAP TO HATCH EGG (GEN ${petState.generation + 1})",
+                                fontSize = 8.sp,
+                                fontWeight = FontWeight.Black,
+                                color = Color(0xFFFF8A80),
+                                fontFamily = FontFamily.Monospace,
+                                textAlign = TextAlign.Center
+                            )
+                        }
                     }
                 }
             }
 
-            // Segmented Hearts & Stars Bar (Hunger ♥ & Strength ★)
+            // Segmented Vector Hearts & Stars Bar (Hunger & Strength)
             item {
                 Row(
                     modifier = Modifier
@@ -1303,29 +1427,35 @@ private fun ModernTouchPetView(
                         modifier = Modifier
                             .background(Color(0x660B1219), RoundedCornerShape(6.dp))
                             .border(0.5.dp, Color(0x66FF5252), RoundedCornerShape(6.dp))
-                            .padding(horizontal = 6.dp, vertical = 2.dp)
+                            .padding(horizontal = 6.dp, vertical = 3.dp)
                     ) {
-                        Text(
-                            text = "H ${"♥".repeat(petState.hunger)}${"♡".repeat(4 - petState.hunger)}",
-                            fontSize = 10.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = if (petState.hunger == 0) Color.Red else Color(0xFFFF5252),
-                            fontFamily = FontFamily.Monospace
-                        )
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Text(
+                                text = "H ",
+                                fontSize = 9.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = if (petState.hunger == 0) Color.Red else Color(0xFFFF5252),
+                                fontFamily = FontFamily.Monospace
+                            )
+                            VPetMeterBar(count = petState.hunger, isHeart = true, iconSize = 9.dp)
+                        }
                     }
                     Box(
                         modifier = Modifier
                             .background(Color(0x660B1219), RoundedCornerShape(6.dp))
                             .border(0.5.dp, Color(0x66FFD700), RoundedCornerShape(6.dp))
-                            .padding(horizontal = 6.dp, vertical = 2.dp)
+                            .padding(horizontal = 6.dp, vertical = 3.dp)
                     ) {
-                        Text(
-                            text = "S ${"★".repeat(petState.strength)}${"☆".repeat(4 - petState.strength)}",
-                            fontSize = 10.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = if (petState.strength == 0) Color.Red else Color(0xFFFFD700),
-                            fontFamily = FontFamily.Monospace
-                        )
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Text(
+                                text = "S ",
+                                fontSize = 9.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = if (petState.strength == 0) Color.Red else Color(0xFFFFD700),
+                                fontFamily = FontFamily.Monospace
+                            )
+                            VPetMeterBar(count = petState.strength, isHeart = false, iconSize = 9.dp)
+                        }
                     }
                 }
             }
@@ -1340,13 +1470,17 @@ private fun ModernTouchPetView(
                             .border(1.dp, Color(0xFFFFD54F), RoundedCornerShape(6.dp))
                             .padding(horizontal = 8.dp, vertical = 2.dp)
                     ) {
-                        Text(
-                            text = "🚨 CALL SIGNAL ACTIVE 🚨",
-                            fontSize = 9.sp,
-                            fontWeight = FontWeight.Black,
-                            color = Color.White,
-                            fontFamily = FontFamily.Monospace
-                        )
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            DigiVectorIcon(type = DigiIconType.ATTENTION, size = 10.dp, tint = Color.White)
+                            Spacer(modifier = Modifier.width(4.dp))
+                            Text(
+                                text = "CALL SIGNAL ACTIVE",
+                                fontSize = 9.sp,
+                                fontWeight = FontWeight.Black,
+                                color = Color.White,
+                                fontFamily = FontFamily.Monospace
+                            )
+                        }
                     }
                 }
             }
@@ -1354,9 +1488,9 @@ private fun ModernTouchPetView(
             // Waste indicator
             if (petState.wasteCount > 0) {
                 item {
-                    Text(
-                        text = "💩 ".repeat(petState.wasteCount),
-                        fontSize = 12.sp,
+                    VPetWasteRow(
+                        wasteCount = petState.wasteCount,
+                        iconSize = 13.dp,
                         modifier = Modifier.padding(2.dp)
                     )
                 }
@@ -1379,6 +1513,7 @@ private fun ModernTouchPetView(
                         overrideFrame = overrideSpriteFrame,
                         isSleeping = petState.isSleeping,
                         isInjured = petState.isInjured,
+                        enableIdleRoaming = true,
                         size = displayConfig.mainSpriteSize
                     )
                     Text(
@@ -1424,13 +1559,27 @@ private fun ModernTouchPetView(
                     Button(
                         onClick = {
                             scope.launch {
-                                onSetOverrideFrame(SpriteFrame.JOY_EAT)
-                                repository.feedMeal()
-                                hapticManager.playStepMilestone()
-                                onSetFeedback("Fed Meat (+1g)")
-                                delay(1200L)
-                                onSetOverrideFrame(null)
-                                onSetFeedback(null)
+                                if (petState.isSleeping) {
+                                    onSetOverrideFrame(SpriteFrame.REFUSAL)
+                                    onSetFeedback("Sleeping!")
+                                    delay(800L)
+                                    onSetOverrideFrame(null)
+                                    onSetFeedback(null)
+                                } else {
+                                    repository.feedMeal()
+                                    hapticManager.playStepMilestone()
+                                    onSetFeedback("Fed Meat (+1g)")
+                                    onSetOverrideFrame(SpriteFrame.FEED_START)
+                                    delay(320L)
+                                    onSetOverrideFrame(SpriteFrame.JOY_EAT)
+                                    delay(320L)
+                                    onSetOverrideFrame(SpriteFrame.FEED_START)
+                                    delay(320L)
+                                    onSetOverrideFrame(SpriteFrame.JOY_EAT)
+                                    delay(550L)
+                                    onSetOverrideFrame(null)
+                                    onSetFeedback(null)
+                                }
                             }
                         },
                         modifier = Modifier
@@ -1439,7 +1588,7 @@ private fun ModernTouchPetView(
                         colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFFC62828))
                     ) {
                         Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                            Text("🍖", fontSize = 11.sp)
+                            DigiVectorIcon(type = DigiIconType.FEED, size = 12.dp)
                             Text("MEAT", fontSize = 6.sp, fontWeight = FontWeight.Bold, fontFamily = FontFamily.Monospace)
                         }
                     }
@@ -1448,13 +1597,27 @@ private fun ModernTouchPetView(
                     Button(
                         onClick = {
                             scope.launch {
-                                onSetOverrideFrame(SpriteFrame.JOY_EAT)
-                                repository.feedProtein()
-                                hapticManager.playStepMilestone()
-                                onSetFeedback("Fed Vitamin (+2g)")
-                                delay(1200L)
-                                onSetOverrideFrame(null)
-                                onSetFeedback(null)
+                                if (petState.isSleeping) {
+                                    onSetOverrideFrame(SpriteFrame.REFUSAL)
+                                    onSetFeedback("Sleeping!")
+                                    delay(800L)
+                                    onSetOverrideFrame(null)
+                                    onSetFeedback(null)
+                                } else {
+                                    repository.feedProtein()
+                                    hapticManager.playStepMilestone()
+                                    onSetFeedback("Fed Vitamin (+2g)")
+                                    onSetOverrideFrame(SpriteFrame.FEED_START)
+                                    delay(320L)
+                                    onSetOverrideFrame(SpriteFrame.JOY_EAT)
+                                    delay(320L)
+                                    onSetOverrideFrame(SpriteFrame.FEED_START)
+                                    delay(320L)
+                                    onSetOverrideFrame(SpriteFrame.JOY_EAT)
+                                    delay(550L)
+                                    onSetOverrideFrame(null)
+                                    onSetFeedback(null)
+                                }
                             }
                         },
                         modifier = Modifier
@@ -1463,7 +1626,7 @@ private fun ModernTouchPetView(
                         colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFFEF6C00))
                     ) {
                         Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                            Text("💊", fontSize = 11.sp)
+                            DigiVectorIcon(type = DigiIconType.VITAMIN, size = 12.dp)
                             Text("VIT", fontSize = 6.sp, fontWeight = FontWeight.Bold, fontFamily = FontFamily.Monospace)
                         }
                     }
@@ -1485,7 +1648,7 @@ private fun ModernTouchPetView(
                         colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFF0277BD))
                     ) {
                         Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                            Text("🧹", fontSize = 11.sp)
+                            DigiVectorIcon(type = DigiIconType.FLUSH, size = 12.dp)
                             Text("FLUSH", fontSize = 6.sp, fontWeight = FontWeight.Bold, fontFamily = FontFamily.Monospace)
                         }
                     }
@@ -1509,7 +1672,10 @@ private fun ModernTouchPetView(
                         )
                     ) {
                         Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                            Text(if (petState.lightsOff) "💡" else "☀", fontSize = 11.sp)
+                            DigiVectorIcon(
+                                type = if (petState.lightsOff) DigiIconType.LIGHT_OFF else DigiIconType.LIGHT_ON,
+                                size = 12.dp
+                            )
                             Text("LIGHT", fontSize = 6.sp, fontWeight = FontWeight.Bold, fontFamily = FontFamily.Monospace)
                         }
                     }
@@ -1533,7 +1699,7 @@ private fun ModernTouchPetView(
                         colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFF6A1B9A))
                     ) {
                         Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                            Text("🥊", fontSize = 11.sp)
+                            DigiVectorIcon(type = DigiIconType.TRAIN, size = 12.dp)
                             Text("TRAIN", fontSize = 6.sp, fontWeight = FontWeight.Bold, fontFamily = FontFamily.Monospace)
                         }
                     }
@@ -1547,19 +1713,19 @@ private fun ModernTouchPetView(
                         colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFF00695C))
                     ) {
                         Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                            Text("📊", fontSize = 11.sp)
+                            DigiVectorIcon(type = DigiIconType.STATUS, size = 12.dp)
                             Text("STATS", fontSize = 6.sp, fontWeight = FontWeight.Bold, fontFamily = FontFamily.Monospace)
                         }
                     }
 
-                    // Cure Injury / Sickness
+                    // Cure Injury / Sickness (Medical Pill Capsule)
                     if (petState.isInjured) {
                         Button(
                             onClick = {
                                 scope.launch {
                                     repository.cureInjury()
                                     hapticManager.playStepMilestone()
-                                    onSetFeedback("Cured!")
+                                    onSetFeedback("Cured with Med-Pill!")
                                     delay(1000L)
                                     onSetFeedback(null)
                                 }
@@ -1570,7 +1736,7 @@ private fun ModernTouchPetView(
                             colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFF2E7D32))
                         ) {
                             Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                                Text("💉", fontSize = 11.sp)
+                                DigiVectorIcon(type = DigiIconType.MEDS_PILL, size = 12.dp)
                                 Text("MEDS", fontSize = 6.sp, fontWeight = FontWeight.Bold, fontFamily = FontFamily.Monospace)
                             }
                         }
@@ -1595,7 +1761,11 @@ private fun ModernTouchPetView(
                             .padding(horizontal = 2.dp),
                         colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFFD84315))
                     ) {
-                        Text("⚔ BATTLE", fontSize = 8.sp, fontWeight = FontWeight.Black, fontFamily = FontFamily.Monospace)
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            DigiVectorIcon(type = DigiIconType.BATTLE, size = 10.dp)
+                            Spacer(modifier = Modifier.width(3.dp))
+                            Text("BATTLE", fontSize = 8.sp, fontWeight = FontWeight.Black, fontFamily = FontFamily.Monospace)
+                        }
                     }
                     Button(
                         onClick = onNavigateAdventure,
@@ -1605,7 +1775,11 @@ private fun ModernTouchPetView(
                             .padding(horizontal = 2.dp),
                         colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFF00796B))
                     ) {
-                        Text("🗺 QUEST", fontSize = 8.sp, fontWeight = FontWeight.Black, fontFamily = FontFamily.Monospace)
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            DigiVectorIcon(type = DigiIconType.QUEST, size = 10.dp)
+                            Spacer(modifier = Modifier.width(3.dp))
+                            Text("QUEST", fontSize = 8.sp, fontWeight = FontWeight.Black, fontFamily = FontFamily.Monospace)
+                        }
                     }
                 }
             }
@@ -1796,7 +1970,7 @@ private fun TrainingQteView(
                 }
                 "RESOLVED" -> {
                     Text(
-                        text = if (punchGauge >= 0.75f) "★ SUPER PUNCH! ★" else "FINISHED",
+                        text = if (punchGauge >= 0.75f) "[ SUPER PUNCH! ]" else "FINISHED",
                         fontSize = 12.sp,
                         fontWeight = FontWeight.Bold,
                         color = Color(0xFF69F0AE)
@@ -1809,7 +1983,11 @@ private fun TrainingQteView(
             SpriteCanvasRenderer(
                 speciesId = petState.speciesId,
                 isAmbient = false,
-                overrideFrame = if (phase == "PUNCH") SpriteFrame.ATTACK_RELEASE else SpriteFrame.IDLE_A,
+                overrideFrame = when (phase) {
+                    "PUNCH" -> SpriteFrame.ATTACK_CHARGE
+                    "RESOLVED" -> SpriteFrame.ATTACK_RELEASE
+                    else -> SpriteFrame.IDLE_A
+                },
                 size = 54.dp
             )
 
@@ -2015,7 +2193,7 @@ private fun TrainingShakeView(
                                 .fillMaxWidth(progress)
                                 .fillMaxHeight()
                                 .background(
-                                    if (shakeCount in 5..8) Color(0xFF00E676) else Color(0xFFFFD54F),
+                                    if (shakeCount in optimalRange) Color(0xFF00E676) else Color(0xFFFFD54F),
                                     RoundedCornerShape(4.dp)
                                 )
                         )
@@ -2029,11 +2207,14 @@ private fun TrainingShakeView(
                     )
                 }
                 "RESOLVED" -> {
+                    val evalRes = remember(species.attribute, shakeCount) {
+                        TrainingEngine.evaluateShakeTraining(species.attribute, shakeCount)
+                    }
                     Text(
-                        text = if (shakeCount in 5..8) "★ SUPER HIT! ★" else if (shakeCount in 3..4 || shakeCount in 9..10) "GOOD HIT!" else "MISS!",
+                        text = if (evalRes.isMegaHit) "[ SUPER HIT! ]" else if (evalRes.won) "GOOD HIT!" else "MISS!",
                         fontSize = 13.sp,
                         fontWeight = FontWeight.Bold,
-                        color = if (shakeCount in 5..8) Color(0xFF69F0AE) else if (shakeCount in 3..4 || shakeCount in 9..10) Color(0xFFFFD54F) else Color(0xFFFF5252)
+                        color = if (evalRes.isMegaHit) Color(0xFF69F0AE) else if (evalRes.won) Color(0xFFFFD54F) else Color(0xFFFF5252)
                     )
                 }
             }
@@ -2044,7 +2225,7 @@ private fun TrainingShakeView(
                 speciesId = petState.speciesId,
                 isAmbient = false,
                 overrideFrame = if (phase == "SHAKE") {
-                    if (shakeCount % 2 == 0) SpriteFrame.WALK_A else SpriteFrame.ATTACK_RELEASE
+                    if (shakeCount % 2 == 0) SpriteFrame.ATTACK_CHARGE else SpriteFrame.ATTACK_RELEASE
                 } else SpriteFrame.IDLE_A,
                 size = 54.dp
             )
@@ -2066,12 +2247,16 @@ private fun TrainingShakeView(
 @Composable
 fun AmbientPetScreen(
     petState: PetState,
-    displayConfig: WatchDisplayConfig = WatchDisplayConfig.current()
+    displayConfig: WatchDisplayConfig = WatchDisplayConfig.current(),
+    ambientStyle: String = "MINIMAL_DOT",
+    is24hFormat: Boolean = false
 ) {
     val ambientState = LocalAmbientState.current
-    val sdf = remember { SimpleDateFormat("HH:mm", Locale.getDefault()) }
+    val sdf = remember(is24hFormat) {
+        SimpleDateFormat(if (is24hFormat) "HH:mm" else "hh:mm a", Locale.getDefault())
+    }
     // Driven purely by the 1-minute hardware/ambient tick — zero background coroutine wakeups
-    val currentTime = remember(ambientState.ambientTick) { sdf.format(Date()) }
+    val currentTime = remember(ambientState.ambientTick, is24hFormat) { sdf.format(Date()) }
 
     // 4-quadrant ±2.dp pixel-shift cycle when OLED burn-in protection is active
     val shiftStep = (ambientState.ambientTick % 4L).toInt()
@@ -2081,6 +2266,12 @@ fun AmbientPetScreen(
     val shiftY = if (ambientState.burnInProtection) {
         if (shiftStep < 2) (-2).dp else 2.dp
     } else 0.dp
+
+    val tintColor = when (ambientStyle) {
+        "DIMMED_LCD" -> Color(0xFF80CBC4)
+        "OUTLINE" -> Color(0xFFE0E0E0)
+        else -> Color.White
+    }
 
     Box(
         modifier = Modifier
@@ -2099,7 +2290,7 @@ fun AmbientPetScreen(
                 text = currentTime,
                 fontSize = 18.sp,
                 fontWeight = FontWeight.Light,
-                color = Color.White,
+                color = tintColor,
                 fontFamily = FontFamily.Monospace
             )
 
@@ -2111,15 +2302,26 @@ fun AmbientPetScreen(
                 isAmbient = true,
                 isSleeping = petState.isSleeping,
                 isInjured = petState.isInjured,
-                size = if (displayConfig.isRound) 76.dp else 88.dp
+                size = when (ambientStyle) {
+                    "MINIMAL_DOT" -> if (displayConfig.isRound) 64.dp else 72.dp
+                    else -> if (displayConfig.isRound) 76.dp else 88.dp
+                }
             )
 
             Spacer(modifier = Modifier.height(4.dp))
 
+            val statusLabel = when {
+                petState.isDeceased -> "[RIP]"
+                petState.attentionCallActive -> "[CALL]"
+                petState.isSleeping -> "ZZZ"
+                ambientStyle == "DIMMED_LCD" -> "H:${petState.hunger}/4 S:${petState.strength}/4"
+                else -> "OK"
+            }
+
             Text(
-                text = if (petState.attentionCallActive) "⚠ CALL" else if (petState.isSleeping) "ZZZ" else "OK",
+                text = statusLabel,
                 fontSize = 10.sp,
-                color = Color.White,
+                color = tintColor,
                 fontFamily = FontFamily.Monospace
             )
         }

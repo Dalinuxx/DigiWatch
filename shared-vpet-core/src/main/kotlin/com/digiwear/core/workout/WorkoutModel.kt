@@ -83,7 +83,7 @@ object WorkoutEngine {
      */
     fun computeEffectiveSteps(rawSteps: Int, avgBpm: Int): Int {
         val zone = HeartRateZone.fromBpm(avgBpm)
-        return (rawSteps * zone.stepMultiplier).toInt()
+        return (rawSteps.coerceAtLeast(0) * zone.stepMultiplier).toInt()
     }
 
     /**
@@ -101,46 +101,54 @@ object WorkoutEngine {
         bpmSamples: List<Int>,
         currentTimestampUtc: Long = System.currentTimeMillis() / 1000L
     ): Pair<PetState, WorkoutSummary> {
+        val safeDuration = durationSeconds.coerceAtLeast(0L)
+        val safeRawSteps = rawSteps.coerceAtLeast(0)
         val validSamples = bpmSamples.filter { it > 40 }
         val avgBpm = if (validSamples.isNotEmpty()) validSamples.average().toInt() else 85
         val peakBpm = if (validSamples.isNotEmpty()) validSamples.maxOrNull() ?: avgBpm else avgBpm
 
-        val calories = computeEstimatedCalories(avgBpm, durationSeconds)
-        val effectiveSteps = computeEffectiveSteps(rawSteps, avgBpm)
+        val calories = computeEstimatedCalories(avgBpm, safeDuration)
+        val effectiveSteps = computeEffectiveSteps(safeRawSteps, avgBpm)
 
         val species = PetSpecies.getById(currentState.speciesId)
         val baseline = species.baselineWeight
 
         // 1g burned per 3 minutes of workout or 20+ calories, capped so weight never drops below baseline
-        val weightBurnUnits = max(1, (durationSeconds / 180L).toInt() + (calories / 25))
+        val weightBurnUnits = max(1, (safeDuration / 180L).toInt() + (calories / 25))
         val newWeight = max(baseline, currentState.weight - weightBurnUnits)
         val weightBurned = currentState.weight - newWeight
 
-        // Full workout awards max training effort
+        // Full workout awards max training effort and +1 strength heart
         val newEffort = 4
+        val newStrength = min(4, currentState.strength + 1)
         val effortGained = max(0, newEffort - currentState.effort)
 
         // Sessions of 3+ minutes grant an energized buff for battles
-        val energized = durationSeconds >= 180L || avgBpm >= 120
+        val energized = safeDuration >= 180L || avgBpm >= 120
 
         // Vital Points calculation: 10 VP per minute + 1 VP per 10 effective steps (optional Vital Bracelet mechanic)
-        val vpGained = max(10, ((durationSeconds / 60L) * 10 + (effectiveSteps / 10)).toInt())
+        val vpGained = max(10, ((safeDuration / 60L) * 10 + (effectiveSteps / 10)).toInt())
         val newVitalPoints = currentState.vitalPoints + vpGained
 
+        val needsAttentionStill = currentState.hunger == 0 || (currentState.isSleeping && !currentState.lightsOff)
+
         val updatedState = currentState.copy(
+            strength = newStrength,
             weight = newWeight,
             effort = newEffort,
             vitalPoints = newVitalPoints,
+            attentionCallActive = if (!needsAttentionStill) false else currentState.attentionCallActive,
+            attentionCallTimestampUtc = if (!needsAttentionStill) null else currentState.attentionCallTimestampUtc,
             lastProcessedTimestampUtc = currentTimestampUtc
         )
 
         val summary = WorkoutSummary(
             type = type,
-            durationSeconds = durationSeconds,
+            durationSeconds = safeDuration,
             averageBpm = avgBpm,
             peakBpm = peakBpm,
             estimatedCalories = calories,
-            rawSteps = rawSteps,
+            rawSteps = safeRawSteps,
             effectiveAdventureSteps = effectiveSteps,
             weightGramsBurned = weightBurned,
             effortGained = effortGained,

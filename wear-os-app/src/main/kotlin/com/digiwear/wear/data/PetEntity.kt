@@ -69,8 +69,8 @@ data class PetEntity(
     )
 
     companion object {
-        fun fromDomain(domain: PetState): PetEntity = PetEntity(
-            id = 1,
+        fun fromDomain(domain: PetState, id: Int = 1): PetEntity = PetEntity(
+            id = id,
             speciesId = domain.speciesId,
             currentHp = domain.currentHp,
             maxHp = domain.maxHp,

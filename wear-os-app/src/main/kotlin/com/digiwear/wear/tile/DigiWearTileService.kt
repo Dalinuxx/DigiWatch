@@ -20,6 +20,8 @@ import com.digiwear.wear.data.PetRepository
 import com.google.common.util.concurrent.ListenableFuture
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 
 /**
@@ -28,7 +30,12 @@ import kotlinx.coroutines.launch
  */
 class DigiWearTileService : TileService() {
 
-    private val scope = CoroutineScope(Dispatchers.IO)
+    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+
+    override fun onDestroy() {
+        scope.cancel()
+        super.onDestroy()
+    }
 
     override fun onTileRequest(requestParams: RequestBuilders.TileRequest): ListenableFuture<TileBuilders.Tile> {
         val future = ResolvableFuture.create<TileBuilders.Tile>()
@@ -147,16 +154,18 @@ class DigiWearTileService : TileService() {
                 .build()
         )
 
-        // Physiological Hearts
-        val hungerHearts = "♥".repeat(hunger.coerceIn(0, 4)) + "♡".repeat(4 - hunger.coerceIn(0, 4))
-        val strengthStars = "★".repeat(strength.coerceIn(0, 4)) + "☆".repeat(4 - strength.coerceIn(0, 4))
+        // Physiological Meters (LCD Block Bar Style)
+        val hVal = hunger.coerceIn(0, 4)
+        val sVal = strength.coerceIn(0, 4)
+        val hungerBar = "HGR [" + "#".repeat(hVal) + "-".repeat(4 - hVal) + "]"
+        val strengthBar = "STR [" + "#".repeat(sVal) + "-".repeat(4 - sVal) + "]"
 
         column.addContent(
             LayoutElementBuilders.Text.Builder()
-                .setText("$hungerHearts   $strengthStars")
+                .setText("$hungerBar  $strengthBar")
                 .setFontStyle(
                     LayoutElementBuilders.FontStyle.Builder()
-                        .setSize(sp(13f))
+                        .setSize(sp(11f))
                         .setColor(argb(0xFFFFD54F.toInt()))
                         .build()
                 )

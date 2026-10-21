@@ -140,8 +140,18 @@ enum class DigiviceShellStyle(
     }
 }
 
-private val TOP_VPET_ICONS = listOf(("⚖️" to "STAT"), ("🍖" to "FEED"), ("🥊" to "TRN"), ("⚔" to "BTL"))
-private val BOTTOM_VPET_ICONS = listOf(("💩" to "FLSH"), ("💡" to "LGT"), ("🩹" to "MED"), ("🚨" to "CALL"))
+private val TOP_VPET_ICONS = listOf(
+    (DigiIconType.STATUS_SCALE to "STAT"),
+    (DigiIconType.FEED_MEAT to "FEED"),
+    (DigiIconType.TRAIN_GLOVE to "TRN"),
+    (DigiIconType.BATTLE_SWORDS to "BTL")
+)
+private val BOTTOM_VPET_ICONS = listOf(
+    (DigiIconType.CLEAN_FLUSH to "FLSH"),
+    (DigiIconType.SLEEP_LIGHT to "LGT"),
+    (DigiIconType.MEDS_PILL to "MED"),
+    (DigiIconType.CALL_ALERT to "CALL")
+)
 
 /**
  * Authentic Bandai V-Pet & Digivice Shell Viewport.
@@ -228,7 +238,7 @@ fun VPetBrickShellFrame(
             ) {
                 RivetDot(color = shellStyle.accentRivetColor)
                 Text(
-                    text = "◈ ${shellStyle.shortName} • $statusLabel ◈",
+                    text = "[ ${shellStyle.shortName} // $statusLabel ]",
                     fontSize = 10.sp,
                     fontWeight = FontWeight.Black,
                     color = DigiWearPalette.CrestGold,
@@ -263,9 +273,9 @@ fun VPetBrickShellFrame(
                         horizontalArrangement = Arrangement.SpaceEvenly,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        TOP_VPET_ICONS.forEachIndexed { idx, (emoji, lbl) ->
+                        TOP_VPET_ICONS.forEachIndexed { idx, (iconType, lbl) ->
                             val isSel = selectedIconIndex == idx
-                            LcdIconCell(emoji = emoji, label = lbl, isSelected = isSel)
+                            LcdIconCell(iconType = iconType, label = lbl, isSelected = isSel)
                         }
                     }
 
@@ -318,9 +328,9 @@ fun VPetBrickShellFrame(
                         horizontalArrangement = Arrangement.SpaceEvenly,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        BOTTOM_VPET_ICONS.forEachIndexed { idx, (emoji, lbl) ->
+                        BOTTOM_VPET_ICONS.forEachIndexed { idx, (iconType, lbl) ->
                             val isSel = selectedIconIndex == (idx + 4)
-                            LcdIconCell(emoji = emoji, label = lbl, isSelected = isSel)
+                            LcdIconCell(iconType = iconType, label = lbl, isSelected = isSel)
                         }
                     }
                 }
@@ -371,7 +381,7 @@ private fun RivetDot(color: Color = Color(0xFF546E7A)) {
 }
 
 @Composable
-private fun LcdIconCell(emoji: String, label: String, isSelected: Boolean) {
+private fun LcdIconCell(iconType: DigiIconType, label: String, isSelected: Boolean) {
     Row(
         modifier = Modifier
             .background(
@@ -386,7 +396,11 @@ private fun LcdIconCell(emoji: String, label: String, isSelected: Boolean) {
             .padding(horizontal = 5.dp, vertical = 2.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Text(text = emoji, fontSize = 10.sp)
+        DigiVectorIcon(
+            type = iconType,
+            size = 11.dp,
+            tint = if (isSelected) Color(0xFFFFD54F) else Color(0xFF90A4AE)
+        )
         Spacer(modifier = Modifier.width(3.dp))
         Text(
             text = label,
@@ -551,10 +565,11 @@ fun SegmentedGaugeRow(
     filled: Int,
     max: Int = 4,
     activeColor: Color,
-    symbolFilled: String = "♥",
-    symbolEmpty: String = "♡"
+    symbolFilled: String = "HEART",
+    symbolEmpty: String = "EMPTY"
 ) {
     val safeFilled = filled.coerceIn(0, max)
+    val isHearts = !symbolFilled.contains("STAR", ignoreCase = true)
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -595,14 +610,12 @@ fun SegmentedGaugeRow(
 
         Spacer(modifier = Modifier.width(8.dp))
 
-        Text(
-            text = symbolFilled.repeat(safeFilled) + symbolEmpty.repeat(max - safeFilled),
-            fontSize = 11.sp,
-            fontWeight = FontWeight.Bold,
-            color = activeColor,
-            fontFamily = FontFamily.Monospace,
-            textAlign = TextAlign.End,
-            modifier = Modifier.width(42.dp)
+        VPetMeterBar(
+            count = safeFilled,
+            max = max,
+            isHearts = isHearts,
+            iconSize = 10.dp,
+            activeColor = activeColor
         )
     }
 }

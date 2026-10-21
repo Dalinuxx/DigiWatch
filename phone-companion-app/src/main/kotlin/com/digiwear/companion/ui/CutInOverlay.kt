@@ -25,6 +25,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -100,6 +101,11 @@ fun PhoneCutInOverlay(
     )
 
     val buzzerManager = remember { com.digiwear.companion.sound.BuzzerManager(context) }
+    val reticlePath = remember { Path() }
+
+    DisposableEffect(Unit) {
+        onDispose { buzzerManager.release() }
+    }
 
     LaunchedEffect(speciesId, autoDismissMs) {
         buzzerManager.playCriticalCutInTone()
@@ -135,7 +141,7 @@ fun PhoneCutInOverlay(
                 drawMagnifiedHeadshot(cutIn, center, boxPx)
             }
             drawEyeGlints(cutIn, center, boxPx, eyeGlintPulse, attrColor)
-            drawCyberReticle(center, 220.dp.toPx(), attrColor)
+            drawCyberReticle(center, 220.dp.toPx(), attrColor, reticlePath)
         }
 
         // 2. HUD Overlay Layer
@@ -153,14 +159,21 @@ fun PhoneCutInOverlay(
                     .border(1.5.dp, Color(0xFFFFD54F), RoundedCornerShape(8.dp))
                     .padding(horizontal = 16.dp, vertical = 6.dp)
             ) {
-                Text(
-                    text = "⚡ $title ⚡",
-                    fontSize = 14.sp,
-                    fontWeight = FontWeight.Black,
-                    color = Color(0xFFFFD54F),
-                    fontFamily = FontFamily.Monospace,
-                    letterSpacing = 2.sp
-                )
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(6.dp)
+                ) {
+                    DigiVectorIcon(type = DigiIconType.LIGHTNING_BOLT, size = 14.dp, tint = Color(0xFFFFD54F))
+                    Text(
+                        text = title,
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.Black,
+                        color = Color(0xFFFFD54F),
+                        fontFamily = FontFamily.Monospace,
+                        letterSpacing = 2.sp
+                    )
+                    DigiVectorIcon(type = DigiIconType.LIGHTNING_BOLT, size = 14.dp, tint = Color(0xFFFFD54F))
+                }
             }
 
             Spacer(modifier = Modifier.weight(1f))
@@ -356,7 +369,8 @@ private fun DrawScope.drawEyeGlints(
 private fun DrawScope.drawCyberReticle(
     center: Offset,
     boxSize: Float,
-    reticleColor: Color
+    reticleColor: Color,
+    path: Path
 ) {
     val half = boxSize / 2f
     val cornerLen = 22.dp.toPx()
@@ -367,7 +381,8 @@ private fun DrawScope.drawCyberReticle(
     val top = center.y - half
     val bottom = center.y + half
 
-    val path = Path().apply {
+    path.reset()
+    path.apply {
         // Top-Left [
         moveTo(left, top + cornerLen)
         lineTo(left, top)
@@ -450,14 +465,29 @@ fun PhoneEncounterFlashOverlay(
                             .border(1.5.dp, if (isBoss) Color(0xFFFF5252) else Color(0xFF40C4FF), RoundedCornerShape(8.dp))
                             .padding(horizontal = 16.dp, vertical = 6.dp)
                     ) {
-                        Text(
-                            text = if (isBoss) "🚨 APEX BOSS DETECTED! 🚨" else "⚔ WILD ENCOUNTER DETECTED! ⚔",
-                            fontSize = 12.sp,
-                            fontWeight = FontWeight.Black,
-                            color = if (isBoss) Color(0xFFFF8A80) else Color(0xFF80D8FF),
-                            fontFamily = FontFamily.Monospace,
-                            letterSpacing = 1.sp
-                        )
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(6.dp)
+                        ) {
+                            DigiVectorIcon(
+                                type = if (isBoss) DigiIconType.CALL_ALERT else DigiIconType.BATTLE_SWORDS,
+                                size = 13.dp,
+                                tint = if (isBoss) Color(0xFFFF8A80) else Color(0xFF80D8FF)
+                            )
+                            Text(
+                                text = if (isBoss) "APEX BOSS DETECTED!" else "WILD ENCOUNTER DETECTED!",
+                                fontSize = 12.sp,
+                                fontWeight = FontWeight.Black,
+                                color = if (isBoss) Color(0xFFFF8A80) else Color(0xFF80D8FF),
+                                fontFamily = FontFamily.Monospace,
+                                letterSpacing = 1.sp
+                            )
+                            DigiVectorIcon(
+                                type = if (isBoss) DigiIconType.CALL_ALERT else DigiIconType.BATTLE_SWORDS,
+                                size = 13.dp,
+                                tint = if (isBoss) Color(0xFFFF8A80) else Color(0xFF80D8FF)
+                            )
+                        }
                     }
 
                     Spacer(modifier = Modifier.height(16.dp))

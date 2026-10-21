@@ -25,7 +25,46 @@ data class CutInPortraitData(
     val cropHeight: Int,
     val eyePoints: List<Pair<Int, Int>>, // Coordinates relative to headCropMatrix
     val battleCry: String
-)
+) {
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other !is CutInPortraitData) return false
+        return speciesId == other.speciesId &&
+            name == other.name &&
+            stage == other.stage &&
+            attribute == other.attribute &&
+            attributeColorArgb == other.attributeColorArgb &&
+            secondaryAuraArgb == other.secondaryAuraArgb &&
+            palette == other.palette &&
+            fullMatrix.contentEquals(other.fullMatrix) &&
+            headCropMatrix.contentEquals(other.headCropMatrix) &&
+            cropStartX == other.cropStartX &&
+            cropStartY == other.cropStartY &&
+            cropWidth == other.cropWidth &&
+            cropHeight == other.cropHeight &&
+            eyePoints == other.eyePoints &&
+            battleCry == other.battleCry
+    }
+
+    override fun hashCode(): Int {
+        var result = speciesId
+        result = 31 * result + name.hashCode()
+        result = 31 * result + stage.hashCode()
+        result = 31 * result + attribute.hashCode()
+        result = 31 * result + attributeColorArgb
+        result = 31 * result + secondaryAuraArgb
+        result = 31 * result + palette.hashCode()
+        result = 31 * result + fullMatrix.contentHashCode()
+        result = 31 * result + headCropMatrix.contentHashCode()
+        result = 31 * result + cropStartX
+        result = 31 * result + cropStartY
+        result = 31 * result + cropWidth
+        result = 31 * result + cropHeight
+        result = 31 * result + eyePoints.hashCode()
+        result = 31 * result + battleCry.hashCode()
+        return result
+    }
+}
 
 /**
  * Single source of truth for generating authentic, mathematically framed,
@@ -36,10 +75,14 @@ data class CutInPortraitData(
  */
 object CutInPortraitEngine {
 
+    private val PORTRAIT_CACHE = java.util.concurrent.ConcurrentHashMap<Int, CutInPortraitData>()
+
     /**
      * Generates a calibrated CutInPortraitData for any valid species ID (1..2000).
      */
     fun getCutInPortrait(speciesId: Int): CutInPortraitData {
+        PORTRAIT_CACHE[speciesId]?.let { return it }
+
         val species = PetSpecies.getById(speciesId)
         val palette = SpriteMatrixRegistry.getPalette(speciesId)
         val fullMatrix = SpriteMatrixRegistry.getMatrix(speciesId, SpriteFrame.IDLE_A)
@@ -187,6 +230,6 @@ object CutInPortraitEngine {
             cropHeight = cropSize,
             eyePoints = relativeEyes,
             battleCry = battleCry
-        )
+        ).also { PORTRAIT_CACHE[speciesId] = it }
     }
 }

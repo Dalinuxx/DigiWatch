@@ -67,6 +67,7 @@ fun AdventureScreen(
 ) {
     val progress by repository.adventureStateFlow.collectAsState(initial = AdventureProgress())
     val petState by repository.petStateFlow.collectAsState(initial = PetState())
+    val hazardAlertsEnabled by repository.hazardAlertsFlow.collectAsState(initial = true)
     val campaignJson by repository.campaignJsonFlow.collectAsState()
     val story = remember(campaignJson) { repository.getActiveCampaign() }
     val playerSpecies = remember(petState.speciesId) { PetSpecies.getById(petState.speciesId) }
@@ -111,9 +112,17 @@ fun AdventureScreen(
     }
     val stepRatio = (progress.accumulatedStepsCurrentNode.toFloat() / currentNode.requiredSteps.coerceAtLeast(1).toFloat()).coerceIn(0f, 1f)
 
+    androidx.activity.compose.BackHandler(enabled = showSagaPicker) {
+        buzzerManager.playButtonBeep()
+        showSagaPicker = false
+    }
+
     val executeAdventureCombat: suspend (Int, Int?, Int?, BossEncounter?) -> Unit = { enemySpeciesId, hpOverride, powerOverride, bossToClear ->
-        if (petState.isInjured) {
-            eventMessage = "💀 Partner is injured! Cure with [MEDS] first."
+        if (petState.isDeceased) {
+            eventMessage = "[RIP] Partner has passed away."
+            buzzerManager.playAttentionBeep()
+        } else if (petState.isInjured) {
+            eventMessage = "[INJURED] Partner is injured! Cure with [MEDS] first."
             buzzerManager.playAttentionBeep()
             hapticManager.playAttentionAlert()
         } else {
@@ -134,6 +143,8 @@ fun AdventureScreen(
             basePower = playerSpecies.basePower,
             victories = petState.victories,
             effort = petState.effort,
+            strength = petState.strength,
+            weight = petState.weight,
             battleSeed = seedA
         )
 
@@ -183,9 +194,9 @@ fun AdventureScreen(
         var idx = 0
         while (idx < chosenResult.turns.size) {
             currentTurnIndex = idx
-            val turn = chosenResult.turns[idx]
+            val initialTurn = chosenResult.turns[idx]
             criticalBoostActive = false
-            if (turn.attackerIndex == 0) {
+            if (initialTurn.attackerIndex == 0) {
                 qteActive = true
                 HardwareInputManager.activeQteListener = { btn ->
                     if (btn == VPetButton.B || btn == VPetButton.A) {
@@ -206,6 +217,7 @@ fun AdventureScreen(
                 }
             }
 
+            val turn = chosenResult.turns[idx.coerceAtMost(chosenResult.turns.lastIndex)]
             // Authentic Color V-Pet Battle Cut-In on Critical Hit / Mega Hit
             val isCrit = turn.attackType == "MEGA_HIT" || (turn.attackerIndex == 0 && criticalBoostActive)
             if (isCrit) {
@@ -220,7 +232,10 @@ fun AdventureScreen(
 
             buzzerManager.playAttackImpactTone()
             hapticManager.playAttackImpact()
-            delay(560L)
+            for (step in 1..8) {
+                turnFxProgress = step / 8f
+                delay(70L)
+            }
             idx++
         }
 
@@ -236,30 +251,30 @@ fun AdventureScreen(
                 repository.recordBossVictory(bossToClear)
                 val eggRewardMsg = bossToClear.rewardEggId?.let { eggId ->
                     val eggSp = PetSpecies.getById(eggId)
-                    " 🥚 Unlocked ${eggSp.name} Starter Egg!"
+                    " [EGG] Unlocked ${eggSp.name} Starter Egg!"
                 } ?: ""
                 val itemRewardMsg = if (bossToClear.rewardItem.isNotBlank()) {
-                    " 🏆 Obtained ${bossToClear.rewardItem}!"
+                    " [REWARD] Obtained ${bossToClear.rewardItem}!"
                 } else ""
                 val defeatLine = if (bossToClear.defeatDialogue.isNotBlank()) "\n\"${bossToClear.defeatDialogue}\"" else ""
-                eventMessage = "🏆 Boss ${enemySpecies.name} Defeated!$defeatLine$eggRewardMsg$itemRewardMsg"
+                eventMessage = "[VICTORY] Boss ${enemySpecies.name} Defeated!$defeatLine$eggRewardMsg$itemRewardMsg"
             } else {
                 buzzerManager.playDefeatJingle()
                 hapticManager.playAttentionAlert()
                 val introLine = if (bossToClear.introDialogue.isNotBlank()) "\n\"${bossToClear.introDialogue}\"" else ""
-                val injuryNotice = if (wasInjured) "\n💀 INJURED IN COMBAT! Needs Medicine!" else ""
-                eventMessage = "💀 Boss ${enemySpecies.name} held the gate (HP: ${chosenResult.fighterBFinalHp}).$introLine$injuryNotice"
+                val injuryNotice = if (wasInjured) "\n[INJURED] INJURED IN COMBAT! Needs Medicine!" else ""
+                eventMessage = "[DEFEAT] Boss ${enemySpecies.name} held the gate (HP: ${chosenResult.fighterBFinalHp}).$introLine$injuryNotice"
             }
         } else {
             wildEncounterMonsterId = null
             if (won) {
                 buzzerManager.playVictoryFanfare()
                 hapticManager.playVictoryFanfare()
-                eventMessage = "⚔ Defeated Wild ${enemySpecies.name} (${chosenResult.turns.size} turns)! +1 Win"
+                eventMessage = "[VICTORY] Defeated Wild ${enemySpecies.name} (${chosenResult.turns.size} turns)! +1 Win"
             } else {
                 buzzerManager.playDefeatJingle()
                 hapticManager.playAttackImpact()
-                val injuryNotice = if (wasInjured) " 💀 INJURED! Needs Medicine!" else ""
+                val injuryNotice = if (wasInjured) " [INJURED] Needs Medicine!" else ""
                 eventMessage = "Wild ${enemySpecies.name} overwhelmed your partner!$injuryNotice"
             }
         }
@@ -294,7 +309,9 @@ fun AdventureScreen(
                         } else if (monsterId != null) {
                             wildEncounterMonsterId = monsterId
                             val encSpecies = PetSpecies.getById(monsterId)
-                            hapticManager.playAttackImpact()
+                            if (hazardAlertsEnabled) {
+                                hapticManager.playAttackImpact()
+                            }
                             eventMessage = "Wild ${encSpecies.name} appeared!"
                         }
                     }
@@ -331,6 +348,18 @@ fun AdventureScreen(
             contentAlignment = Alignment.Center
         ) {
             EnvironmentParticleCanvas(environmentEffect = currentNode.environmentEffect)
+            if (currentTurn != null) {
+                val attackerSp = if (currentTurn.attackerIndex == 0) playerSpecies else PetSpecies.getById(activeBattleResult!!.fighterB.speciesId)
+                BattleClashFxCanvas(
+                    attackerIndex = currentTurn.attackerIndex,
+                    attribute = attackerSp.attribute,
+                    attackType = currentTurn.attackType,
+                    isCritical = currentTurn.isCritical,
+                    moveName = currentTurn.moveName,
+                    damage = currentTurn.damage,
+                    progress = turnFxProgress
+                )
+            }
             Column(
                 modifier = Modifier
                     .fillMaxSize()
@@ -338,13 +367,20 @@ fun AdventureScreen(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center
             ) {
-                Text(
-                    text = "⚔ ADVENTURE ARENA ⚔",
-                    fontSize = 8.sp,
-                    fontWeight = FontWeight.Black,
-                    color = Color(0xFF64FFDA),
-                    fontFamily = FontFamily.Monospace
-                )
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    DigiVectorIcon(type = DigiIconType.BATTLE, size = 10.dp, tint = Color(0xFF64FFDA))
+                    Text(
+                        text = "ADVENTURE ARENA",
+                        fontSize = 8.sp,
+                        fontWeight = FontWeight.Black,
+                        color = Color(0xFF64FFDA),
+                        fontFamily = FontFamily.Monospace
+                    )
+                    DigiVectorIcon(type = DigiIconType.BATTLE, size = 10.dp, tint = Color(0xFF64FFDA))
+                }
                 Text(
                     text = "TURN ${currentTurnIndex + 1}/${activeBattleResult!!.turns.size} • ${currentNode.environmentEffect.uppercase()}",
                     fontSize = 6.5.sp,
@@ -361,10 +397,20 @@ fun AdventureScreen(
                     // Left Fighter (Player)
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         Text(activeBattleResult!!.fighterA.name.take(8), fontSize = 7.5.sp, color = Color(0xFF80D8FF), fontWeight = FontWeight.Bold, fontFamily = FontFamily.Monospace)
+                        val advPlayerFrame = when {
+                            currentTurn == null -> SpriteFrame.IDLE_A
+                            currentTurn.attackerIndex == 0 -> when {
+                                qteActive || turnFxProgress < 0.25f -> SpriteFrame.ATTACK_CHARGE
+                                turnFxProgress < 0.65f -> SpriteFrame.ATTACK_RELEASE
+                                else -> SpriteFrame.IDLE_B
+                            }
+                            turnFxProgress >= 0.65f -> SpriteFrame.INJURED
+                            else -> SpriteFrame.IDLE_A
+                        }
                         SpriteCanvasRenderer(
                             speciesId = activeBattleResult!!.fighterA.speciesId,
                             isAmbient = false,
-                            overrideFrame = if (currentTurn?.attackerIndex == 0) SpriteFrame.ATTACK_RELEASE else SpriteFrame.IDLE_A,
+                            overrideFrame = advPlayerFrame,
                             size = displayConfig.battleSpriteSize,
                             flipHorizontal = true
                         )
@@ -377,24 +423,40 @@ fun AdventureScreen(
                     // Clash Animation Symbol
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         Text(
-                            text = if (currentTurn?.attackerIndex == 0) "●━━▶" else "◀━━●",
+                            text = if (currentTurn?.attackerIndex == 0) ">>>" else "<<<",
                             fontSize = 11.sp,
                             fontWeight = FontWeight.Black,
                             color = if (criticalBoostActive) Color(0xFFFFD54F) else Color.White,
                             fontFamily = FontFamily.Monospace
                         )
                         if (criticalBoostActive) {
-                            Text("⚡CRIT⚡", fontSize = 7.sp, fontWeight = FontWeight.Black, color = Color(0xFFFF5252), fontFamily = FontFamily.Monospace)
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(1.dp)
+                            ) {
+                                DigiVectorIcon(type = DigiIconType.BOLT, size = 8.dp, tint = Color(0xFFFF5252))
+                                Text("CRIT", fontSize = 7.sp, fontWeight = FontWeight.Black, color = Color(0xFFFF5252), fontFamily = FontFamily.Monospace)
+                            }
                         }
                     }
 
                     // Right Fighter (Enemy / Boss)
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         Text(activeBattleResult!!.fighterB.name.take(8), fontSize = 7.5.sp, color = Color(0xFFFF8A80), fontWeight = FontWeight.Bold, fontFamily = FontFamily.Monospace)
+                        val advOppFrame = when {
+                            currentTurn == null -> SpriteFrame.IDLE_A
+                            currentTurn.attackerIndex == 1 -> when {
+                                turnFxProgress < 0.25f -> SpriteFrame.ATTACK_CHARGE
+                                turnFxProgress < 0.65f -> SpriteFrame.ATTACK_RELEASE
+                                else -> SpriteFrame.IDLE_B
+                            }
+                            turnFxProgress >= 0.65f -> SpriteFrame.INJURED
+                            else -> SpriteFrame.IDLE_A
+                        }
                         SpriteCanvasRenderer(
                             speciesId = activeBattleResult!!.fighterB.speciesId,
                             isAmbient = false,
-                            overrideFrame = if (currentTurn?.attackerIndex == 1) SpriteFrame.ATTACK_RELEASE else SpriteFrame.IDLE_A,
+                            overrideFrame = advOppFrame,
                             size = displayConfig.battleSpriteSize,
                             flipHorizontal = false
                         )
@@ -415,22 +477,45 @@ fun AdventureScreen(
                         fontFamily = FontFamily.Monospace
                     )
                     if (qteActive) {
-                        Box(
+                        Row(
                             modifier = Modifier
                                 .padding(top = 2.dp)
                                 .background(Color(0xFFFF1744), RoundedCornerShape(4.dp))
                                 .border(0.75.dp, Color.White, RoundedCornerShape(4.dp))
                                 .clickable {
                                     criticalBoostActive = true
+                                    buzzerManager.playQteClickTone()
                                     hapticManager.playAttackImpact()
                                     qteActive = false
                                 }
-                                .padding(horizontal = 8.dp, vertical = 2.dp)
+                                .padding(horizontal = 8.dp, vertical = 2.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(3.dp)
                         ) {
-                            Text("⚡ STRIKE [B] / TAP! ⚡", fontSize = 7.5.sp, fontWeight = FontWeight.Black, color = Color.White, fontFamily = FontFamily.Monospace)
+                            DigiVectorIcon(type = DigiIconType.BOLT, size = 8.dp, tint = Color.White)
+                            Text("STRIKE [B] / TAP!", fontSize = 7.5.sp, fontWeight = FontWeight.Black, color = Color.White, fontFamily = FontFamily.Monospace)
+                            DigiVectorIcon(type = DigiIconType.BOLT, size = 8.dp, tint = Color.White)
                         }
                     }
                 }
+            }
+
+            activeCutInSpeciesId?.let { cutInId ->
+                CutInOverlay(
+                    speciesId = cutInId,
+                    title = activeCutInTitle,
+                    autoDismissMs = null,
+                    onDismiss = { activeCutInSpeciesId = null }
+                )
+            }
+
+            encounterFlashEnemyId?.let { enemyId ->
+                EncounterFlashOverlay(
+                    enemySpeciesId = enemyId,
+                    isBoss = encounterFlashIsBoss,
+                    bossTitle = encounterFlashBossTitle,
+                    onFinished = { encounterFlashEnemyId = null }
+                )
             }
         }
         return
@@ -598,13 +683,19 @@ fun AdventureScreen(
         // Environmental condition indicator
         item {
             Spacer(modifier = Modifier.height(2.dp))
-            Text(
-                text = "⚡ ENV: ${currentNode.environmentEffect.uppercase()}",
-                fontSize = 7.sp,
-                fontWeight = FontWeight.Bold,
-                color = Color(0xFFFFB74D),
-                fontFamily = FontFamily.Monospace
-            )
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(3.dp)
+            ) {
+                DigiVectorIcon(type = DigiIconType.BOLT, size = 8.dp, tint = Color(0xFFFFB74D))
+                Text(
+                    text = "ENV: ${currentNode.environmentEffect.uppercase()}",
+                    fontSize = 7.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color(0xFFFFB74D),
+                    fontFamily = FontFamily.Monospace
+                )
+            }
         }
 
         // Steps Progress Card with Visual Progress Bar
@@ -649,6 +740,17 @@ fun AdventureScreen(
             }
         }
 
+        // Holographic Sector Radar Scanner
+        item {
+            AdventureRadarView(
+                currentSteps = progress.accumulatedStepsCurrentNode,
+                requiredSteps = currentNode.requiredSteps,
+                bossName = currentNode.bossEncounter?.bossName,
+                environmentEffect = currentNode.environmentEffect,
+                modifier = Modifier.padding(horizontal = displayConfig.horizontalPadding, vertical = 2.dp)
+            )
+        }
+
         // Start Expedition Workout Action
         item {
             Button(
@@ -663,13 +765,19 @@ fun AdventureScreen(
                 colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFF00B0FF)),
                 shape = RoundedCornerShape(14.dp)
             ) {
-                Text(
-                    text = "⚡ START EXPEDITION WORKOUT",
-                    fontSize = 8.sp,
-                    fontWeight = FontWeight.Bold,
-                    fontFamily = FontFamily.Monospace,
-                    color = Color.Black
-                )
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(3.dp)
+                ) {
+                    DigiVectorIcon(type = DigiIconType.BOLT, size = 9.dp, tint = Color.Black)
+                    Text(
+                        text = "START EXPEDITION WORKOUT",
+                        fontSize = 8.sp,
+                        fontWeight = FontWeight.Bold,
+                        fontFamily = FontFamily.Monospace,
+                        color = Color.Black
+                    )
+                }
             }
         }
 
@@ -686,13 +794,20 @@ fun AdventureScreen(
                         .border(1.dp, Color(0xFFFFD54F), RoundedCornerShape(8.dp))
                         .padding(6.dp)
                 ) {
-                    Text(
-                        text = "⚡ WILD ${wildSpecies.name.uppercase()}! ⚡",
-                        fontSize = 9.sp,
-                        fontWeight = FontWeight.Black,
-                        color = Color(0xFFFFD54F),
-                        fontFamily = FontFamily.Monospace
-                    )
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(3.dp)
+                    ) {
+                        DigiVectorIcon(type = DigiIconType.BOLT, size = 9.dp, tint = Color(0xFFFFD54F))
+                        Text(
+                            text = "WILD ${wildSpecies.name.uppercase()}!",
+                            fontSize = 9.sp,
+                            fontWeight = FontWeight.Black,
+                            color = Color(0xFFFFD54F),
+                            fontFamily = FontFamily.Monospace
+                        )
+                        DigiVectorIcon(type = DigiIconType.BOLT, size = 9.dp, tint = Color(0xFFFFD54F))
+                    }
                     Text(
                         text = "${wildSpecies.stage.displayName} • ${wildSpecies.attribute.displayName} • HP ${wildSpecies.baseHp}",
                         fontSize = 7.sp,
@@ -714,7 +829,13 @@ fun AdventureScreen(
                         modifier = Modifier.fillMaxWidth().height(28.dp).padding(horizontal = 4.dp),
                         colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFFEF6C00))
                     ) {
-                        Text("⚔ ENGAGE WILD [B]", fontSize = 8.sp, fontWeight = FontWeight.Black, fontFamily = FontFamily.Monospace)
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(3.dp)
+                        ) {
+                            DigiVectorIcon(type = DigiIconType.BATTLE, size = 9.dp, tint = Color.White)
+                            Text("ENGAGE WILD [B]", fontSize = 8.sp, fontWeight = FontWeight.Black, fontFamily = FontFamily.Monospace)
+                        }
                     }
                 }
             }
@@ -735,13 +856,19 @@ fun AdventureScreen(
                         .border(1.dp, Color(0xFFFF5252), RoundedCornerShape(8.dp))
                         .padding(6.dp)
                 ) {
-                    Text(
-                        text = "☠ BOSS: ${bossDisplayName.uppercase()}",
-                        fontSize = 9.sp,
-                        fontWeight = FontWeight.Black,
-                        color = Color(0xFFFF5252),
-                        fontFamily = FontFamily.Monospace
-                    )
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(3.dp)
+                    ) {
+                        DigiVectorIcon(type = DigiIconType.SKULL, size = 10.dp, tint = Color(0xFFFF5252))
+                        Text(
+                            text = "BOSS: ${bossDisplayName.uppercase()}",
+                            fontSize = 9.sp,
+                            fontWeight = FontWeight.Black,
+                            color = Color(0xFFFF5252),
+                            fontFamily = FontFamily.Monospace
+                        )
+                    }
                     if (boss.introDialogue.isNotBlank()) {
                         Text(
                             text = "\"${boss.introDialogue}\"",
@@ -765,15 +892,21 @@ fun AdventureScreen(
                     if (boss.rewardItem.isNotBlank() || boss.rewardEggId != null) {
                         Spacer(modifier = Modifier.height(2.dp))
                         val rewardLabel = buildString {
-                            if (boss.rewardEggId != null) append("🥚 Egg ")
-                            if (boss.rewardItem.isNotBlank()) append("🏆 ${boss.rewardItem}")
+                            if (boss.rewardEggId != null) append("[EGG] ")
+                            if (boss.rewardItem.isNotBlank()) append(boss.rewardItem)
                         }
-                        Text(
-                            text = "🎁 REWARD: $rewardLabel",
-                            fontSize = 6.5.sp,
-                            color = Color(0xFFFFD54F),
-                            fontFamily = FontFamily.Monospace
-                        )
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(3.dp)
+                        ) {
+                            DigiVectorIcon(type = DigiIconType.REWARD, size = 8.dp, tint = Color(0xFFFFD54F))
+                            Text(
+                                text = "REWARD: $rewardLabel",
+                                fontSize = 6.5.sp,
+                                color = Color(0xFFFFD54F),
+                                fontFamily = FontFamily.Monospace
+                            )
+                        }
                     }
                     Spacer(modifier = Modifier.height(2.dp))
                     Button(
@@ -785,7 +918,13 @@ fun AdventureScreen(
                         modifier = Modifier.fillMaxWidth().height(28.dp).padding(horizontal = 4.dp),
                         colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFFC62828))
                     ) {
-                        Text("⚔ CHALLENGE BOSS [B]", fontSize = 8.sp, fontWeight = FontWeight.Black, fontFamily = FontFamily.Monospace)
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(3.dp)
+                        ) {
+                            DigiVectorIcon(type = DigiIconType.BATTLE, size = 9.dp, tint = Color.White)
+                            Text("CHALLENGE BOSS [B]", fontSize = 8.sp, fontWeight = FontWeight.Black, fontFamily = FontFamily.Monospace)
+                        }
                     }
                 }
             }
@@ -803,13 +942,20 @@ fun AdventureScreen(
                         .border(1.dp, Color(0xFFFFD54F), RoundedCornerShape(8.dp))
                         .padding(6.dp)
                 ) {
-                    Text(
-                        text = "🎉 SAGA CONQUERED! 🎉",
-                        fontSize = 9.sp,
-                        fontWeight = FontWeight.Black,
-                        color = Color(0xFFFFD54F),
-                        fontFamily = FontFamily.Monospace
-                    )
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(4.dp)
+                    ) {
+                        DigiVectorIcon(type = DigiIconType.TROPHY, size = 10.dp, tint = Color(0xFFFFD54F))
+                        Text(
+                            text = "SAGA CONQUERED!",
+                            fontSize = 9.sp,
+                            fontWeight = FontWeight.Black,
+                            color = Color(0xFFFFD54F),
+                            fontFamily = FontFamily.Monospace
+                        )
+                        DigiVectorIcon(type = DigiIconType.TROPHY, size = 10.dp, tint = Color(0xFFFFD54F))
+                    }
                     Text(
                         text = "All sectors of '${story.title}' restored!",
                         fontSize = 7.sp,
@@ -861,7 +1007,9 @@ fun AdventureScreen(
                             } else if (monsterId != null) {
                                 wildEncounterMonsterId = monsterId
                                 val encSpecies = PetSpecies.getById(monsterId)
-                                hapticManager.playAttackImpact()
+                                if (hazardAlertsEnabled) {
+                                    hapticManager.playAttackImpact()
+                                }
                                 eventMessage = "Wild ${encSpecies.name} Encountered!"
                             }
                         }
@@ -882,7 +1030,9 @@ fun AdventureScreen(
                             } else if (monsterId != null) {
                                 wildEncounterMonsterId = monsterId
                                 val encSpecies = PetSpecies.getById(monsterId)
-                                hapticManager.playAttackImpact()
+                                if (hazardAlertsEnabled) {
+                                    hapticManager.playAttackImpact()
+                                }
                                 eventMessage = "Wild ${encSpecies.name} Encountered!"
                             }
                         }

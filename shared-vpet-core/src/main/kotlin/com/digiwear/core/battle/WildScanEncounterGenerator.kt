@@ -1,4 +1,4 @@
-﻿package com.digiwear.core.battle
+package com.digiwear.core.battle
 
 import com.digiwear.core.codec.CommCodeCodec
 import com.digiwear.core.model.BattleFighter
@@ -119,10 +119,9 @@ object WildScanEncounterGenerator {
             }
         }
 
-        val candidates = PetSpecies.SPECIES_REGISTRY.values
-            .filter { it.stage == targetStage }
-            .sortedBy { it.id }
-            .ifEmpty { PetSpecies.SPECIES_REGISTRY.values.sortedBy { it.id } }
+        val candidates = PetSpecies.SPECIES_BY_STAGE[targetStage]
+            ?.ifEmpty { null }
+            ?: PetSpecies.SORTED_SPECIES
 
         val chosenSpecies = candidates[(positiveHash % candidates.size).toInt()]
         val zonePair = HABITAT_ZONES[((positiveHash shr 8) % HABITAT_ZONES.size).toInt()]

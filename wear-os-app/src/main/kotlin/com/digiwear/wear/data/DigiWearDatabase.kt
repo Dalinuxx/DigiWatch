@@ -17,6 +17,15 @@ interface PetDao {
     @Query("SELECT * FROM pet_state WHERE id = 1 LIMIT 1")
     suspend fun getPetState(): PetEntity?
 
+    @Query("SELECT * FROM pet_state WHERE id = 2 LIMIT 1")
+    fun getBackupPetStateFlow(): Flow<PetEntity?>
+
+    @Query("SELECT * FROM pet_state WHERE id = 2 LIMIT 1")
+    suspend fun getBackupPetState(): PetEntity?
+
+    @Query("DELETE FROM pet_state WHERE id = 2")
+    suspend fun deleteBackupPet()
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertOrUpdatePet(pet: PetEntity)
 

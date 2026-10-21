@@ -77,6 +77,7 @@ fun CutInOverlay(
     val highResBitmap = remember(speciesId) {
         com.digiwear.wear.render.PortraitAssetCache.getPortrait(context, speciesId)
     }
+    val reticlePath = remember { Path() }
 
     val infiniteTransition = rememberInfiniteTransition(label = "CutInAnim")
     val speedlinePhase by infiniteTransition.animateFloat(
@@ -132,7 +133,7 @@ fun CutInOverlay(
                 drawMagnifiedHeadshot(cutIn, center, boxPx)
             }
             drawEyeGlints(cutIn, center, boxPx, eyeGlintPulse, attrColor)
-            drawCyberReticle(center, 150.dp.toPx(), attrColor)
+            drawCyberReticle(center, 150.dp.toPx(), attrColor, reticlePath)
         }
 
         // 2. HUD Overlay Layer: Title, Name, Attribute & Battle Cry
@@ -144,20 +145,24 @@ fun CutInOverlay(
             verticalArrangement = Arrangement.SpaceBetween
         ) {
             // Top Critical Hit Banner
-            Box(
+            Row(
                 modifier = Modifier
                     .background(Color(0xFF140808), RoundedCornerShape(4.dp))
                     .border(1.dp, Color(0xFFFFD54F), RoundedCornerShape(4.dp))
-                    .padding(horizontal = 8.dp, vertical = 2.dp)
+                    .padding(horizontal = 8.dp, vertical = 2.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(4.dp)
             ) {
+                DigiVectorIcon(type = DigiIconType.BOLT, size = 10.dp, tint = Color(0xFFFFD54F))
                 Text(
-                    text = "⚡ $title ⚡",
+                    text = title,
                     fontSize = 9.sp,
                     fontWeight = FontWeight.Black,
                     color = Color(0xFFFFD54F),
                     fontFamily = FontFamily.Monospace,
                     letterSpacing = 1.sp
                 )
+                DigiVectorIcon(type = DigiIconType.BOLT, size = 10.dp, tint = Color(0xFFFFD54F))
             }
 
             Spacer(modifier = Modifier.weight(1f))
@@ -368,7 +373,8 @@ private fun DrawScope.drawEyeGlints(
 private fun DrawScope.drawCyberReticle(
     center: Offset,
     boxSize: Float,
-    reticleColor: Color
+    reticleColor: Color,
+    path: Path
 ) {
     val half = boxSize / 2f
     val cornerLen = 14.dp.toPx()
@@ -379,7 +385,8 @@ private fun DrawScope.drawCyberReticle(
     val top = center.y - half
     val bottom = center.y + half
 
-    val path = Path().apply {
+    path.reset()
+    path.apply {
         // Top-Left [
         moveTo(left, top + cornerLen)
         lineTo(left, top)
@@ -465,18 +472,30 @@ fun EncounterFlashOverlay(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.Center
                 ) {
-                    Box(
+                    Row(
                         modifier = Modifier
                             .background(if (isBoss) Color(0xFF4A0E17) else Color(0xFF0D253A), RoundedCornerShape(4.dp))
                             .border(1.dp, if (isBoss) Color(0xFFFF5252) else Color(0xFF40C4FF), RoundedCornerShape(4.dp))
-                            .padding(horizontal = 8.dp, vertical = 2.dp)
+                            .padding(horizontal = 8.dp, vertical = 2.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(4.dp)
                     ) {
+                        DigiVectorIcon(
+                            type = if (isBoss) DigiIconType.ATTENTION else DigiIconType.BATTLE,
+                            size = 10.dp,
+                            tint = if (isBoss) Color(0xFFFF8A80) else Color(0xFF80D8FF)
+                        )
                         Text(
-                            text = if (isBoss) "🚨 APEX BOSS DETECTED! 🚨" else "⚔ WILD ENCOUNTER! ⚔",
+                            text = if (isBoss) "APEX BOSS DETECTED!" else "WILD ENCOUNTER!",
                             fontSize = 8.5.sp,
                             fontWeight = FontWeight.Black,
                             color = if (isBoss) Color(0xFFFF8A80) else Color(0xFF80D8FF),
                             fontFamily = FontFamily.Monospace
+                        )
+                        DigiVectorIcon(
+                            type = if (isBoss) DigiIconType.ATTENTION else DigiIconType.BATTLE,
+                            size = 10.dp,
+                            tint = if (isBoss) Color(0xFFFF8A80) else Color(0xFF80D8FF)
                         )
                     }
 

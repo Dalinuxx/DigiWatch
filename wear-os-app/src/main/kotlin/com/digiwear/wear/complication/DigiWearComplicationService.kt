@@ -25,7 +25,7 @@ class DigiWearComplicationService : SuspendingComplicationDataSourceService() {
     override fun getPreviewData(type: ComplicationType): ComplicationData? {
         return when (type) {
             ComplicationType.SHORT_TEXT -> ShortTextComplicationData.Builder(
-                plainText("♥ 4/4"),
+                plainText("HGR 4/4"),
                 plainText("DigiWear Hunger")
             ).setTitle(plainText("Agumon")).build()
 
@@ -57,7 +57,7 @@ class DigiWearComplicationService : SuspendingComplicationDataSourceService() {
         return when (request.complicationType) {
             ComplicationType.SHORT_TEXT -> {
                 ShortTextComplicationData.Builder(
-                    plainText("♥${pet.hunger}/4"),
+                    plainText("HGR ${pet.hunger}/4"),
                     plainText("Hunger")
                 )
                     .setTitle(plainText(species.name))
@@ -66,15 +66,20 @@ class DigiWearComplicationService : SuspendingComplicationDataSourceService() {
             }
 
             ComplicationType.RANGED_VALUE -> {
-                val target = 5000f
+                val target = repo.dailyStepGoalFlow.value.toFloat().coerceAtLeast(1000f)
                 val current = progress.totalAdventureSteps.toFloat().coerceIn(0f, target)
+                val stepLabel = if (current < 1000f) {
+                    "${current.toInt()}"
+                } else {
+                    String.format(java.util.Locale.US, "%.1fk", current / 1000f)
+                }
                 RangedValueComplicationData.Builder(
                     value = current,
                     min = 0f,
                     max = target,
                     contentDescription = plainText("Adventure Steps")
                 )
-                    .setText(plainText("${(current / 1000).toInt()}k"))
+                    .setText(plainText(stepLabel))
                     .setTitle(plainText("STEPS"))
                     .setTapAction(pendingIntent)
                     .build()

@@ -43,7 +43,8 @@ enum class WearScreen {
     ADVENTURE,
     STATUS,
     SETTINGS,
-    WORKOUT
+    WORKOUT,
+    DIGIDEX
 }
 
 
@@ -67,7 +68,7 @@ class MainActivity : ComponentActivity() {
         // Start AOSP Wi-Fi / Hotspot LAN Sync Bridge & UDP Discovery Responder
         com.digiwear.wear.datalayer.AospLanSyncServer.start(applicationContext)
 
-        // Request ACTIVITY_RECOGNITION / POST_NOTIFICATIONS on AOSP & Android 10+ watches
+        // Request ACTIVITY_RECOGNITION / BODY_SENSORS / POST_NOTIFICATIONS on AOSP & Android 10+ watches
         requestWatchRuntimePermissionsIfNeeded()
 
         setContent {
@@ -97,6 +98,11 @@ class MainActivity : ComponentActivity() {
                 android.content.pm.PackageManager.PERMISSION_GRANTED
             ) {
                 perms.add(android.Manifest.permission.ACTIVITY_RECOGNITION)
+            }
+            if (checkSelfPermission(android.Manifest.permission.BODY_SENSORS) !=
+                android.content.pm.PackageManager.PERMISSION_GRANTED
+            ) {
+                perms.add(android.Manifest.permission.BODY_SENSORS)
             }
             if (android.os.Build.VERSION.SDK_INT >= 33 &&
                 checkSelfPermission(android.Manifest.permission.POST_NOTIFICATIONS) !=
@@ -244,7 +250,13 @@ fun WearNavigationHost(
     // Guarantee low-power monochrome display (OPR <= 15%) in Ambient Mode regardless of active sub-screen
     if (ambientState.isAmbient && currentScreen != WearScreen.MAIN) {
         val petState by repository.petStateFlow.collectAsState(initial = PetState())
-        AmbientPetScreen(petState = petState)
+        val ambientStyle by repository.ambientStyleFlow.collectAsState(initial = "MINIMAL_DOT")
+        val is24hFormat by repository.clockFormatFlow.collectAsState(initial = false)
+        AmbientPetScreen(
+            petState = petState,
+            ambientStyle = ambientStyle,
+            is24hFormat = is24hFormat
+        )
         return
     }
 
@@ -282,7 +294,11 @@ fun WearNavigationHost(
         )
         WearScreen.STATUS -> StatusScreen(
             repository = repository,
+            onNavigateDigiDex = { currentScreen = WearScreen.DIGIDEX },
             onBack = { currentScreen = WearScreen.MAIN }
+        )
+        WearScreen.DIGIDEX -> com.digiwear.wear.ui.WatchDigiDexScreen(
+            onBack = { currentScreen = WearScreen.STATUS }
         )
         WearScreen.SETTINGS -> SettingsScreen(
             repository = repository,

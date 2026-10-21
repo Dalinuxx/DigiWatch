@@ -79,7 +79,7 @@ class PetDecayWorker(
                 if (prefs.getBoolean("sound_enabled", false)) {
                     val buzzer = BuzzerManager().apply { isEnabled = true }
                     try {
-                        buzzer.playAttentionBeep()
+                        buzzer.playAttentionBeepSuspend()
                     } catch (_: Exception) {
                     } finally {
                         buzzer.release()
@@ -211,7 +211,7 @@ class PetDecayWorker(
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
 
-        // 2. Action: [ 🍖 FEED MEAT ]
+        // 2. Action: [ FEED MEAT ]
         val feedIntent = Intent(context, NotificationQuickCareReceiver::class.java).apply {
             action = ACTION_QUICK_FEED
         }
@@ -222,12 +222,12 @@ class PetDecayWorker(
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
         val feedAction = NotificationCompat.Action.Builder(
-            android.R.drawable.ic_menu_send,
-            "[ 🍖 FEED MEAT ]",
+            com.digiwear.wear.R.drawable.ic_vector_meat,
+            "[ FEED MEAT ]",
             feedPendingIntent
         ).build()
 
-        // 3. Action: [ 🧹 FLUSH POOP ]
+        // 3. Action: [ FLUSH WASTE ]
         val cleanIntent = Intent(context, NotificationQuickCareReceiver::class.java).apply {
             action = ACTION_QUICK_CLEAN
         }
@@ -238,8 +238,8 @@ class PetDecayWorker(
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
         val cleanAction = NotificationCompat.Action.Builder(
-            android.R.drawable.ic_menu_delete,
-            "[ 🧹 FLUSH POOP ]",
+            com.digiwear.wear.R.drawable.ic_vector_flush,
+            "[ FLUSH WASTE ]",
             cleanPendingIntent
         ).build()
 
@@ -312,6 +312,7 @@ class PetDecayWorker(
          * Evaluates whether the pet state requires an attention call distress signal.
          */
         fun evaluateDistress(state: PetState): Boolean {
+            if (state.isDeceased || state.isFrozen) return false
             return state.attentionCallActive ||
                     state.hunger == 0 ||
                     state.wasteCount >= 4 ||

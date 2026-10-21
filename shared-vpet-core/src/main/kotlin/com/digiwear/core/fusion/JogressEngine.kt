@@ -1,4 +1,4 @@
-﻿package com.digiwear.core.fusion
+package com.digiwear.core.fusion
 
 import com.digiwear.core.model.PetSpecies
 import com.digiwear.core.model.PetState
@@ -257,11 +257,23 @@ object JogressEngine {
     /** Base catalog plus the expanded-roster recipes. */
     val RECIPES: List<JogressRecipe> by lazy { BASE_RECIPES + com.digiwear.core.model.ExpandedRoster.RECIPES }
 
+    private val RECIPES_BY_SPECIES: Map<Int, List<JogressRecipe>> by lazy {
+        val map = mutableMapOf<Int, MutableList<JogressRecipe>>()
+        for (recipe in RECIPES) {
+            map.getOrPut(recipe.primarySpeciesId) { mutableListOf() }.add(recipe)
+            if (recipe.secondarySpeciesId != recipe.primarySpeciesId) {
+                map.getOrPut(recipe.secondarySpeciesId) { mutableListOf() }.add(recipe)
+            }
+        }
+        map
+    }
+
     /**
      * Looks up any valid fusion recipe between two species (commutative: order independent).
      */
     fun findFusionRecipe(speciesAId: Int, speciesBId: Int): JogressRecipe? {
-        return RECIPES.firstOrNull { recipe ->
+        val candidates = RECIPES_BY_SPECIES[speciesAId] ?: return null
+        return candidates.firstOrNull { recipe ->
             (recipe.primarySpeciesId == speciesAId && recipe.secondarySpeciesId == speciesBId) ||
             (recipe.primarySpeciesId == speciesBId && recipe.secondarySpeciesId == speciesAId)
         }
@@ -271,7 +283,7 @@ object JogressEngine {
      * Returns all compatible partner species that can fuse with [speciesId].
      */
     fun getCompatibleRecipesFor(speciesId: Int): List<JogressRecipe> {
-        return RECIPES.filter { it.primarySpeciesId == speciesId || it.secondarySpeciesId == speciesId }
+        return RECIPES_BY_SPECIES[speciesId] ?: emptyList()
     }
 
     /**
@@ -291,17 +303,18 @@ object JogressEngine {
         secondaryEffort: Int = 0,
         currentTimestampUtc: Long = System.currentTimeMillis() / 1000L
     ): PetState {
+        require(!primary.isDeceased) { "Cannot execute Jogress fusion on a deceased partner" }
         val recipe = findFusionRecipe(primary.speciesId, secondarySpeciesId)
             ?: throw IllegalArgumentException("No valid Jogress/Xros recipe exists between species ${primary.speciesId} and $secondarySpeciesId")
 
         val targetSpecies = PetSpecies.getById(recipe.targetSpeciesId)
 
         // Fusion synergy calculations:
-        // Max HP adapts to target species base HP + 10% bonus for DNA harmony
-        val synergyHp = (targetSpecies.baseHp * 1.10f).toInt()
-        val combinedWins = primary.victories + secondaryVictories
+        // Max HP adapts to target species base HP + 10% bonus for DNA harmony + traited egg bonus
+        val synergyHp = (targetSpecies.baseHp * 1.10f).toInt() + (primary.traitedEggBonus.coerceAtLeast(0) * 5)
+        val combinedWins = primary.victories + secondaryVictories.coerceAtLeast(0)
         val combinedBattles = max(primary.totalBattles, combinedWins)
-        val combinedEffort = max(primary.effort, secondaryEffort)
+        val combinedEffort = max(primary.effort, secondaryEffort).coerceIn(0, 4)
         val targetWeight = max(primary.weight, targetSpecies.baselineWeight)
 
         return primary.copy(

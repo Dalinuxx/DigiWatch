@@ -33,7 +33,7 @@ class RosterAuditTest {
             assertTrue("Species ${sp.name} basePower must be > 0", sp.basePower > 0)
             assertTrue("Species ${sp.name} baselineWeight must be > 0", sp.baselineWeight > 0)
 
-            // Verify strict ID-to-stage range mapping across all 500 species
+            // Verify strict ID-to-stage range mapping across all 550 species
             when (sp.id) {
                 in 100..199, in 1100..1199 -> assertTrue("${sp.name} (${sp.id}) must be Baby", sp.stage == PetStage.BABY_I || sp.stage == PetStage.BABY_II)
                 in 200..299, in 1200..1299 -> assertEquals("${sp.name} (${sp.id}) must be Child", PetStage.CHILD, sp.stage)
@@ -118,7 +118,7 @@ class RosterAuditTest {
     @Test
     fun auditDigimon0nl1neCompatibilityForAllSpecies() {
         val registry = PetSpecies.SPECIES_REGISTRY
-        assertEquals(500, registry.size)
+        assertEquals(550, registry.size)
 
         for (sp in registry.values) {
             // Guarantee 12-bit monster ID for Digimon 0nl1ne / D-Com wire packets (0x001..0xFFF)
@@ -169,7 +169,7 @@ class RosterAuditTest {
     }
 
     @Test
-    fun auditPerfectToUltimateRequirementsAndAll85JogressRecipes() {
+    fun auditPerfectToUltimateRequirementsAndAll92JogressRecipes() {
         val registry = PetSpecies.SPECIES_REGISTRY
         val perfectSpecies = registry.values.filter { it.stage == PetStage.PERFECT && it.evolutionRules.isNotEmpty() }
         assertTrue("Must have Perfect species with evolution rules", perfectSpecies.isNotEmpty())
@@ -189,8 +189,8 @@ class RosterAuditTest {
             }
         }
 
-        // Verify all 86 Jogress / DigiXros / Mode Change recipes reference valid species
-        assertEquals(85, JogressEngine.RECIPES.size)
+        // Verify all 92 Jogress / DigiXros / Mode Change recipes reference valid species
+        assertEquals(92, JogressEngine.RECIPES.size)
         for (recipe in JogressEngine.RECIPES) {
             assertTrue("Missing primary species ${recipe.primarySpeciesId}", registry.containsKey(recipe.primarySpeciesId))
             assertTrue("Missing secondary species ${recipe.secondarySpeciesId}", registry.containsKey(recipe.secondarySpeciesId))
@@ -213,7 +213,7 @@ class RosterAuditTest {
             }
         }
         assertTrue(
-            "All 500 species must be reachable from the 16 starter eggs! Unreachable: $unreachableSpecies",
+            "All 550 species must be reachable from the 16 starter eggs! Unreachable: $unreachableSpecies",
             unreachableSpecies.isEmpty()
         )
 
@@ -283,20 +283,20 @@ class RosterAuditTest {
 
         val sb = StringBuilder()
 
-        sb.appendLine("# 🧬 DigiWear Official Visual Sprite Sheet Digivolution & DNA Jogress Guide (500 Species)")
+        sb.appendLine("# DigiWear Official Visual Sprite Sheet Digivolution & DNA Jogress Guide (550 Species)")
         sb.appendLine()
         sb.appendLine("> **100% Complete & Mathematically Verified Lineage Chart + Full Pixel-Art Sprite Sheets**")
-        sb.appendLine("> Every single one of the **500 Digimon** in DigiWear is naturally reachable from the **16 Starter Digi-Eggs** via canonical Bandai 1997 V-Pet, Digimon Pendulum, and Digimon Color evolution rules, or via **86 DNA Jogress / DigiXros / Mode Change** combinations.")
+        sb.appendLine("> Every single one of the **550 Digimon** in DigiWear is naturally reachable from the **16 Starter Digi-Eggs** via canonical Bandai 1997 V-Pet, Digimon Pendulum, and Digimon Color evolution rules, or via **${JogressEngine.RECIPES.size} DNA Jogress / DigiXros / Mode Change** combinations.")
         sb.appendLine()
-        sb.appendLine("## 🖼️ Visual Sprite Sheet Evolution Chart & Master 500-Species Roster")
+        sb.appendLine("## Visual Sprite Sheet Evolution Chart & Master 550-Species Roster")
         sb.appendLine()
         sb.appendLine("### 1. Full Visual Sprite Sheet Evolution & DNA Jogress Guide Poster")
         sb.appendLine("![DigiWear Full Sprite Sheet Evolution Guide](docs/digiwear_evolution_guide_chart.png)")
         sb.appendLine()
-        sb.appendLine("### 2. Complete 500-Species Master Pixel-Art Sprite Sheet")
-        sb.appendLine("![DigiWear 500-Species Master Roster Sprite Sheet](docs/digiwear_roster_spritesheet.png)")
+        sb.appendLine("### 2. Complete 550-Species Master Pixel-Art Sprite Sheet")
+        sb.appendLine("![DigiWear 550-Species Master Roster Sprite Sheet](docs/digiwear_roster_spritesheet.png)")
         sb.appendLine()
-        sb.appendLine("## 📊 Roster & Evolution Summary")
+        sb.appendLine("## Roster & Evolution Summary")
         sb.appendLine()
         sb.appendLine("| Stage | Species Count | Canonical Evolution Window | Key Branching Factors |")
         sb.appendLine("| :--- | :---: | :--- | :--- |")
@@ -312,10 +312,10 @@ class RosterAuditTest {
             }
             val factors = when (stage) {
                 PetStage.BABY_I -> "Starter Digi-Egg Selection (10 Lineages)"
-                PetStage.BABY_II -> "Care Mistakes (`CM`), Training Effort (`♥`), Weight (`G`)"
-                PetStage.CHILD -> "Care Mistakes (`CM`), Training Effort (`♥`), Overfeed Count, Weight (`G`)"
-                PetStage.ADULT -> "Battles (`≥ 10–15`), Win Ratio (`≥ 60%–80%`), Care Mistakes (`CM`), Effort (`♥`)"
-                PetStage.PERFECT -> "Battles (`≥ 20–35`), Win Ratio (`≥ 60%–85%`), Care Mistakes (`CM`), Effort (`♥`)"
+                PetStage.BABY_II -> "Care Mistakes (`CM`), Training Effort (`EFF`), Weight (`G`)"
+                PetStage.CHILD -> "Care Mistakes (`CM`), Training Effort (`EFF`), Overfeed Count, Weight (`G`)"
+                PetStage.ADULT -> "Battles (`≥ 10–15`), Win Ratio (`≥ 60%–80%`), Care Mistakes (`CM`), Effort (`EFF`)"
+                PetStage.PERFECT -> "Battles (`≥ 20–35`), Win Ratio (`≥ 60%–85%`), Care Mistakes (`CM`), Effort (`EFF`)"
                 PetStage.ULTIMATE -> "DNA Jogress, Mode Change, or Super-Ultimate Fusion"
             }
             sb.appendLine("| **${stage.displayName}** | **$count** | $window | $factors |")
@@ -323,7 +323,7 @@ class RosterAuditTest {
         sb.appendLine()
         sb.appendLine("---")
         sb.appendLine()
-        sb.appendLine("## 🥚 1. The 10 Starter Digi-Eggs (Baby I → Baby II)")
+        sb.appendLine("## 1. The 10 Starter Digi-Eggs (Baby I → Baby II)")
         sb.appendLine()
         sb.appendLine("You can hatch any of these **10 Starter Digi-Eggs** at any time from **Watch Settings → Hatch New Digi-Egg** or **Phone Companion → Remote Care Deck**:")
         sb.appendLine()
@@ -354,7 +354,7 @@ class RosterAuditTest {
             sb.appendLine()
             sb.appendLine("---")
             sb.appendLine()
-            sb.appendLine("## 🐾 ${stage.displayName} Stage Digimon (${registry.count { it.stage == stage }} Species)")
+            sb.appendLine("## ${stage.displayName} Stage Digimon (${registry.count { it.stage == stage }} Species)")
             sb.appendLine()
             sb.appendLine("| ID | Digimon | Attr | HP / PWR | Starter Egg Lineage Path | Evolves Into (Target & Exact Requirements) |")
             sb.appendLine("| :---: | :--- | :---: | :---: | :--- | :--- |")
@@ -370,7 +370,7 @@ class RosterAuditTest {
                             val otherId = if (r.primarySpeciesId == sp.id) r.secondarySpeciesId else r.primarySpeciesId
                             val other = PetSpecies.getById(otherId)
                             val target = PetSpecies.getById(r.targetSpeciesId)
-                            "⚡ **+#${other.id} ${other.name} → #${target.id} ${target.name}** (${r.fusionType.displayName})"
+                            "+#${other.id} ${other.name} → #${target.id} ${target.name} (${r.fusionType.displayName})"
                         }
                     }
                 } else {
@@ -387,7 +387,7 @@ class RosterAuditTest {
         sb.appendLine()
         sb.appendLine("---")
         sb.appendLine()
-        sb.appendLine("## ⚡ DNA Digivolution, Mode Change & DigiXros Recipes (All $totalJogress Combinations)")
+        sb.appendLine("## DNA Digivolution, Mode Change & DigiXros Recipes (All $totalJogress Combinations)")
         sb.appendLine()
         sb.appendLine("Combine any two compatible Digimon via **Watch D-Com Battle Link**, **Phone Battle Command Center**, or **Phone DigiVault** to awaken these $totalJogress special forms:")
         sb.appendLine()
@@ -472,7 +472,7 @@ class RosterAuditTest {
         g.fillRoundRect(10, 8, width - 20, 54, 12, 12)
         g.color = java.awt.Color(0x00, 0xE5, 0xFF)
         g.font = java.awt.Font(java.awt.Font.MONOSPACED, java.awt.Font.BOLD, 20)
-        g.drawString("DIGIWEAR v2.0 — COMPLETE 500-SPECIES FULL-COLOR PIXEL ART ROSTER", 24, 34)
+        g.drawString("DIGIWEAR v2.0 — COMPLETE 550-SPECIES FULL-COLOR PIXEL ART ROSTER", 24, 34)
         g.color = java.awt.Color(0xB0, 0xBE, 0xC5)
         g.font = java.awt.Font(java.awt.Font.MONOSPACED, java.awt.Font.PLAIN, 12)
         g.drawString("16x16 Multi-Tone Bandai Color Palettes • Cyan = Vaccine • Gold = Data • Crimson = Virus • Emerald = Free", 24, 53)
@@ -552,10 +552,10 @@ class RosterAuditTest {
         g.color = java.awt.Color(0x00, 0xE5, 0xFF)
         g.drawRoundRect(16, 12, width - 32, 68, 14, 14)
         g.font = java.awt.Font(java.awt.Font.MONOSPACED, java.awt.Font.BOLD, 24)
-        g.drawString("DIGIWEAR v2.0 — VISUAL SPRITE SHEET DIGIVOLUTION & DNA JOGRESS GUIDE (ALL 500 SPECIES)", 32, 42)
+        g.drawString("DIGIWEAR v2.0 — VISUAL SPRITE SHEET DIGIVOLUTION & DNA JOGRESS GUIDE (ALL 550 SPECIES)", 32, 42)
         g.color = java.awt.Color(0xCF, 0xD8, 0xDC)
         g.font = java.awt.Font(java.awt.Font.MONOSPACED, java.awt.Font.PLAIN, 13)
-        g.drawString("100% Reachable from 16 Starter Eggs • Key: Age = Min Time in Stage | CM = Care Mistakes | ♥ = Effort Hearts (0-4) | W = Min Battles & Win% | G = Weight", 32, 66)
+        g.drawString("100% Reachable from 16 Starter Eggs • Key: Age = Min Time in Stage | CM = Care Mistakes | EFF = Effort (0-4) | W = Min Battles & Win% | G = Weight", 32, 66)
 
         // =========================================================================
         // SECTION 1: THE 16 STARTER DIGI-EGGS (BABY I ──▶ BABY II ──▶ CHILD ROOKIES)
@@ -564,7 +564,7 @@ class RosterAuditTest {
         g.fillRoundRect(16, section1Y, width - 32, 36, 10, 10)
         g.color = java.awt.Color(0xFF, 0xD5, 0x4F)
         g.font = java.awt.Font(java.awt.Font.MONOSPACED, java.awt.Font.BOLD, 16)
-        g.drawString("🥚 PART 1: THE 16 STARTER DIGI-EGG FAMILIES (BABY I ──10m──▶ BABY II ──6h──▶ CHILD ROOKIE BRANCHES)", 30, section1Y + 24)
+        g.drawString("PART 1: THE 16 STARTER DIGI-EGG FAMILIES (BABY I ──10m──▶ BABY II ──6h──▶ CHILD ROOKIE BRANCHES)", 30, section1Y + 24)
 
         starterEggs.forEachIndexed { idx, eggId ->
             val rowY = section1Y + 44 + idx * 72
@@ -635,7 +635,7 @@ class RosterAuditTest {
         g.fillRoundRect(16, section2Y, width - 32, 36, 10, 10)
         g.color = java.awt.Color(0x00, 0xE5, 0xFF)
         g.font = java.awt.Font(java.awt.Font.MONOSPACED, java.awt.Font.BOLD, 16)
-        g.drawString("🐾 PART 2: COMPLETE SPECIES-BY-SPECIES VISUAL DIGIVOLUTION TREE (WITH TARGET SPRITES & EXACT CONDITIONS)", 30, section2Y + 24)
+        g.drawString("PART 2: COMPLETE SPECIES-BY-SPECIES VISUAL DIGIVOLUTION TREE (WITH TARGET SPRITES & EXACT CONDITIONS)", 30, section2Y + 24)
 
         nonBabyISpecies.forEachIndexed { idx, sp ->
             val col = idx % cols
@@ -726,7 +726,7 @@ class RosterAuditTest {
                 } else {
                     g.color = java.awt.Color(0x69, 0xF0, 0xAE)
                     g.font = java.awt.Font(java.awt.Font.MONOSPACED, java.awt.Font.BOLD, 11)
-                    g.drawString("★ APEX ULTIMATE FORM (FINAL STAGE)", targetX + 12, cy + 56)
+                    g.drawString("[ APEX ULTIMATE FORM (FINAL STAGE) ]", targetX + 12, cy + 56)
                 }
             }
         }
@@ -738,7 +738,7 @@ class RosterAuditTest {
         g.fillRoundRect(16, section3Y, width - 32, 36, 10, 10)
         g.color = java.awt.Color(0xEA, 0x80, 0xFC)
         g.font = java.awt.Font(java.awt.Font.MONOSPACED, java.awt.Font.BOLD, 16)
-        g.drawString("⚡ PART 3: ALL 65 DNA DIGIVOLUTION (JOGRESS), DIGIXROS & MODE CHANGE VISUAL RECIPES", 30, section3Y + 24)
+        g.drawString("PART 3: ALL 65 DNA DIGIVOLUTION (JOGRESS), DIGIXROS & MODE CHANGE VISUAL RECIPES", 30, section3Y + 24)
 
         JogressEngine.RECIPES.forEachIndexed { idx, recipe ->
             val col = idx % jogressCols
@@ -795,7 +795,7 @@ class RosterAuditTest {
             val maxStr = if (rule.maxCareMistakes >= 99) "+" else "-${rule.maxCareMistakes}"
             parts.add("CM:${rule.minCareMistakes}$maxStr")
         }
-        if (rule.minEffort > 0) parts.add("♥≥${rule.minEffort}")
+        if (rule.minEffort > 0) parts.add("EFF≥${rule.minEffort}")
         if (rule.minBattles > 0) parts.add("B≥${rule.minBattles}")
         if (rule.minWinRatio > 0f) parts.add("W≥${(rule.minWinRatio * 100).toInt()}%")
         if (rule.minOverfeed > 0) parts.add("OF≥${rule.minOverfeed}")

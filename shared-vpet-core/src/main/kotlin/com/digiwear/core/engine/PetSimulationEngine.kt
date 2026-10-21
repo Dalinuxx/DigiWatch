@@ -23,7 +23,8 @@ object PetSimulationEngine {
         currentState: PetState,
         currentTimestampUtc: Long,
         timeZoneOffset: ZoneOffset = ZoneOffset.UTC,
-        isCanonicalLifespanEnabled: Boolean = false
+        isCanonicalLifespanEnabled: Boolean = false,
+        sleepScheduleMode: String = "CANONICAL"
     ): PetState {
         if (currentState.isDeceased) return currentState
 
@@ -58,16 +59,22 @@ object PetSimulationEngine {
             )
         }
 
-        // Calculate sleep window status based on wall clock time
+        // Calculate sleep window status based on wall clock time and user schedule preference
         val zonedDateTime = Instant.ofEpochSecond(currentTimestampUtc).atZone(timeZoneOffset)
         val hour = zonedDateTime.hour
         val minute = zonedDateTime.minute
-        val inSleepWindow = stage.isSleepWindow(hour, minute)
+        val inSleepWindow = isSleepWindowWithSchedule(stage, hour, minute, sleepScheduleMode)
 
-        // Accumulate decay seconds
-        var accHungerSec = currentState.hungerAccumulatedSeconds + deltaSeconds
-        var accStrengthSec = currentState.strengthAccumulatedSeconds + deltaSeconds
-        var accWasteSec = currentState.wasteAccumulatedSeconds + deltaSeconds
+        // Compute awake seconds across [lastTime, currentTimestampUtc] so sleep windows pause metabolic decay
+        val awakeSeconds = computeAwakeSeconds(lastTime, currentTimestampUtc, stage, timeZoneOffset, sleepScheduleMode)
+
+        // Automatically turn room lights back on when waking up in the morning (including multi-hour overnight jumps)
+        val effectiveLightsOff = if (!inSleepWindow && (currentState.isSleeping || awakeSeconds < deltaSeconds)) false else currentState.lightsOff
+
+        // Accumulate decay seconds strictly for awake time
+        var accHungerSec = currentState.hungerAccumulatedSeconds + awakeSeconds
+        var accStrengthSec = currentState.strengthAccumulatedSeconds + awakeSeconds
+        var accWasteSec = currentState.wasteAccumulatedSeconds + awakeSeconds
 
         val hungerIntervalSec = stage.hungerLossMinutes * 60L
         val strengthIntervalSec = stage.strengthLossMinutes * 60L
@@ -77,8 +84,8 @@ object PetSimulationEngine {
         var currentStrength = currentState.strength
         var currentWaste = currentState.wasteCount
 
-        // Process hunger decay (if sleeping, metabolic decay is typically frozen or half, but follows stage spec)
-        if (!inSleepWindow) {
+        // Process hunger decay when awake (or for awake portion of multi-hour delta)
+        if (awakeSeconds > 0L) {
             val hungerDecayUnits = (accHungerSec / hungerIntervalSec).toInt()
             if (hungerDecayUnits > 0) {
                 currentHunger = max(0, currentHunger - hungerDecayUnits)
@@ -91,13 +98,13 @@ object PetSimulationEngine {
                 currentStrength = max(0, currentStrength - strengthDecayUnits)
                 accStrengthSec %= strengthIntervalSec
             }
-        }
 
-        // Process waste generation (up to 4 uncleaned units)
-        val wasteUnits = (accWasteSec / wasteIntervalSec).toInt()
-        if (wasteUnits > 0) {
-            currentWaste = min(4, currentWaste + wasteUnits)
-            accWasteSec %= wasteIntervalSec
+            // Process waste generation (up to 4 uncleaned units)
+            val wasteUnits = (accWasteSec / wasteIntervalSec).toInt()
+            if (wasteUnits > 0) {
+                currentWaste = min(4, currentWaste + wasteUnits)
+                accWasteSec %= wasteIntervalSec
+            }
         }
 
         // Check for injury due to uncleaned waste accumulation (4 waste units triggers injury)
@@ -108,7 +115,7 @@ object PetSimulationEngine {
 
         // Attention Call logic:
         // Triggered by: empty hunger meter, empty strength meter, or unextinguished lights during sleep window
-        val needsAttention = (currentHunger == 0 || currentStrength == 0 || (inSleepWindow && !currentState.lightsOff))
+        val needsAttention = (currentHunger == 0 || currentStrength == 0 || (inSleepWindow && !effectiveLightsOff))
 
         var callActive = currentState.attentionCallActive
         var callTimestamp = currentState.attentionCallTimestampUtc
@@ -144,6 +151,8 @@ object PetSimulationEngine {
             callTimestamp = null
         }
 
+        val perishedFromNeglect = isCanonicalLifespanEnabled && (careMistakes >= 20 && isInjured)
+
         return currentState.copy(
             hunger = currentHunger,
             strength = currentStrength,
@@ -151,7 +160,9 @@ object PetSimulationEngine {
             ageSeconds = updatedAge,
             careMistakes = careMistakes,
             isSleeping = inSleepWindow,
+            lightsOff = effectiveLightsOff,
             isInjured = isInjured,
+            isDeceased = perishedFromNeglect,
             lastProcessedTimestampUtc = currentTimestampUtc,
             attentionCallActive = callActive,
             attentionCallTimestampUtc = callTimestamp,
@@ -159,6 +170,59 @@ object PetSimulationEngine {
             strengthAccumulatedSeconds = accStrengthSec,
             wasteAccumulatedSeconds = accWasteSec
         )
+    }
+
+    fun isSleepWindowWithSchedule(
+        stage: PetStage,
+        hour: Int,
+        minute: Int,
+        sleepScheduleMode: String = "CANONICAL"
+    ): Boolean {
+        val baseStart = stage.sleepStartHour ?: return false
+        val baseEnd = stage.sleepEndHour ?: return false
+        val (start, end) = when (sleepScheduleMode.uppercase()) {
+            "NIGHT_OWL" -> 0 to 8
+            "EARLY_BIRD" -> 21 to 6
+            else -> baseStart to baseEnd
+        }
+        return if (start > end) {
+            hour >= start || hour < end
+        } else {
+            hour in start until end
+        }
+    }
+
+    private fun computeAwakeSeconds(
+        startUtc: Long,
+        endUtc: Long,
+        stage: PetStage,
+        timeZoneOffset: ZoneOffset,
+        sleepScheduleMode: String
+    ): Long {
+        if (endUtc <= startUtc) return 0L
+        if (stage.sleepStartHour == null || stage.sleepEndHour == null) {
+            return endUtc - startUtc
+        }
+        val totalDelta = endUtc - startUtc
+        if (totalDelta <= 1800L) {
+            val endZdt = Instant.ofEpochSecond(endUtc).atZone(timeZoneOffset)
+            return if (isSleepWindowWithSchedule(stage, endZdt.hour, endZdt.minute, sleepScheduleMode)) 0L else totalDelta
+        }
+        var awake = 0L
+        var cursor = startUtc
+        while (cursor < endUtc) {
+            val zdt = Instant.ofEpochSecond(cursor).atZone(timeZoneOffset)
+            val secsIntoHour = zdt.minute * 60L + zdt.second
+            val nextHourBoundary = cursor + (3600L - secsIntoHour).coerceAtLeast(60L)
+            val stepEnd = min(endUtc, nextHourBoundary)
+            val mid = (cursor + stepEnd) / 2L
+            val midZdt = Instant.ofEpochSecond(mid).atZone(timeZoneOffset)
+            if (!isSleepWindowWithSchedule(stage, midZdt.hour, midZdt.minute, sleepScheduleMode)) {
+                awake += (stepEnd - cursor)
+            }
+            cursor = stepEnd
+        }
+        return awake
     }
 
     /**
@@ -280,15 +344,18 @@ object PetSimulationEngine {
         starterSpeciesId: Int = 101,
         nowUtc: Long = System.currentTimeMillis() / 1000L
     ): PetState {
+        val validEggId = if (starterSpeciesId in EvolutionEngine.STARTER_EGG_IDS) starterSpeciesId else 101
+        val species = PetSpecies.getById(validEggId)
         val nextGen = departedState.generation + 1
         val bonus = (departedState.traitedEggBonus + 1).coerceAtMost(5)
+        val startHp = species.baseHp + (bonus * 5)
         return PetState(
-            speciesId = starterSpeciesId,
-            currentHp = 50 + (bonus * 5),
-            maxHp = 50 + (bonus * 5),
+            speciesId = validEggId,
+            currentHp = startHp,
+            maxHp = startHp,
             hunger = 4,
             strength = 4,
-            weight = 5,
+            weight = species.baselineWeight,
             ageSeconds = 0L,
             careMistakes = 0,
             effort = 0,
@@ -327,7 +394,7 @@ object PetSimulationEngine {
             causeOfDeath = causeOfDeath,
             epitaph = epitaph,
             timestampUtc = System.currentTimeMillis() / 1000L,
-            traitedEggBonusGiven = state.traitedEggBonus + 1
+            traitedEggBonusGiven = (state.traitedEggBonus + 1).coerceAtMost(5)
         )
     }
 

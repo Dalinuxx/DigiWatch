@@ -13,6 +13,9 @@ import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel
  */
 object QrMatrixGenerator {
 
+    private val WRITER = QRCodeWriter()
+    private val CACHE = java.util.concurrent.ConcurrentHashMap<String, Array<BooleanArray>>()
+
     /**
      * Generates a 2D BooleanArray matrix representing a QR code.
      * `true` indicates a black (dark) module; `false` indicates a white (light) module.
@@ -35,6 +38,9 @@ object QrMatrixGenerator {
         val version = (size - 17) / 4
         require(version in 1..40) { "QR version must be between 1 and 40 (size $size)" }
 
+        val cacheKey = "$size:$content"
+        CACHE[cacheKey]?.let { return it }
+
         val hints = mapOf(
             EncodeHintType.ERROR_CORRECTION to ErrorCorrectionLevel.M,
             EncodeHintType.MARGIN to 0,
@@ -42,9 +48,8 @@ object QrMatrixGenerator {
             EncodeHintType.QR_VERSION to version
         )
 
-        val writer = QRCodeWriter()
         val bitMatrix = try {
-            writer.encode(content, BarcodeFormat.QR_CODE, size, size, hints)
+            WRITER.encode(content, BarcodeFormat.QR_CODE, size, size, hints)
         } catch (e: WriterException) {
             throw IllegalArgumentException(
                 "Data too large for QR matrix size $size (Version $version): ${e.message}",
@@ -52,8 +57,11 @@ object QrMatrixGenerator {
             )
         }
 
-        return Array(bitMatrix.height) { y ->
+        val matrix = Array(bitMatrix.height) { y ->
             BooleanArray(bitMatrix.width) { x -> bitMatrix.get(x, y) }
         }
+        if (CACHE.size > 128) CACHE.clear()
+        CACHE[cacheKey] = matrix
+        return matrix
     }
 }

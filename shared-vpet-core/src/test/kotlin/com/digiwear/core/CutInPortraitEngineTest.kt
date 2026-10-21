@@ -8,9 +8,9 @@ import org.junit.Test
 class CutInPortraitEngineTest {
 
     @Test
-    fun testAll500SpeciesGenerateValidHeadshotPortraits() {
+    fun testAll550SpeciesGenerateValidHeadshotPortraits() {
         val allSpecies = PetSpecies.SPECIES_REGISTRY.values
-        assertEquals("Must test all 500 canonical species", 500, allSpecies.size)
+        assertEquals("Must test all 550 canonical species", 550, allSpecies.size)
 
         for (sp in allSpecies) {
             val cutIn = CutInPortraitEngine.getCutInPortrait(sp.id)

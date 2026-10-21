@@ -453,22 +453,22 @@ fun PetDashboardScreen(
                     label = "HUNGER",
                     filled = petState.hunger,
                     activeColor = Color(0xFFFF5252),
-                    symbolFilled = "♥",
-                    symbolEmpty = "♡"
+                    symbolFilled = "HEART",
+                    symbolEmpty = "EMPTY"
                 )
                 SegmentedGaugeRow(
                     label = "STRENGTH",
                     filled = petState.strength,
                     activeColor = Color(0xFFFFCA28),
-                    symbolFilled = "★",
-                    symbolEmpty = "☆"
+                    symbolFilled = "STAR",
+                    symbolEmpty = "EMPTY"
                 )
                 SegmentedGaugeRow(
                     label = "EFFORT",
                     filled = petState.effort,
                     activeColor = Color(0xFFAB47BC),
-                    symbolFilled = "★",
-                    symbolEmpty = "☆"
+                    symbolFilled = "STAR",
+                    symbolEmpty = "EMPTY"
                 )
 
                 Spacer(modifier = Modifier.height(10.dp))
@@ -535,7 +535,7 @@ fun PetDashboardScreen(
                         }
                         syncStatus = if (evolved != null) {
                             buzzerManager.playVictoryFanfare()
-                            "✨ DIGIVOLUTION! Partner evolved into ${evolved.name}!"
+                            "[DIGIVOLUTION] Partner evolved into ${evolved.name}!"
                         } else {
                             "$label applied (${if (watchUpdated != null) "Watch + Phone" else "Phone Local"})"
                         }
@@ -549,32 +549,41 @@ fun PetDashboardScreen(
                     OutlinedButton(
                         onClick = {
                             buzzerManager.playButtonBeep()
-                            executeCareAction("FEED_MEAL", { PetSimulationEngine.feedMeal(it, System.currentTimeMillis() / 1000L) }, "🍖 Fed Ration Meat")
+                            executeCareAction("FEED_MEAL", { PetSimulationEngine.feedMeal(it, System.currentTimeMillis() / 1000L) }, "Fed Ration Meat")
                             shellPreviewStance = 2
                         },
                         modifier = Modifier.weight(1f)
                     ) {
-                        Text("🍖 MEAT", fontSize = 10.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
+                        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                            DigiVectorIcon(type = DigiIconType.FEED_MEAT, size = 12.dp, tint = Color(0xFFFFB74D))
+                            Text("MEAT", fontSize = 10.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
+                        }
                     }
                     OutlinedButton(
                         onClick = {
                             buzzerManager.playButtonBeep()
-                            executeCareAction("FEED_PROTEIN", { PetSimulationEngine.feedProtein(it, System.currentTimeMillis() / 1000L) }, "💊 Fed Protein Vitamin")
+                            executeCareAction("FEED_PROTEIN", { PetSimulationEngine.feedProtein(it, System.currentTimeMillis() / 1000L) }, "Fed Protein Vitamin")
                             shellPreviewStance = 2
                         },
                         modifier = Modifier.weight(1f)
                     ) {
-                        Text("💊 VITAMIN", fontSize = 10.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
+                        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                            DigiVectorIcon(type = DigiIconType.PROTEIN_TABLET, size = 12.dp, tint = Color(0xFF4FC3F7))
+                            Text("VITAMIN", fontSize = 10.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
+                        }
                     }
                     OutlinedButton(
                         onClick = {
                             buzzerManager.playAttackImpactTone()
-                            executeCareAction("TRAIN_WIN", { PetSimulationEngine.train(it, true, System.currentTimeMillis() / 1000L) }, "🥊 Mega Hit Training")
+                            executeCareAction("TRAIN_WIN", { PetSimulationEngine.train(it, true, System.currentTimeMillis() / 1000L) }, "Mega Hit Training")
                             shellPreviewStance = 3
                         },
                         modifier = Modifier.weight(1f)
                     ) {
-                        Text("🥊 TRAIN", fontSize = 10.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
+                        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                            DigiVectorIcon(type = DigiIconType.TRAIN_GLOVE, size = 12.dp, tint = Color(0xFFFF8A80))
+                            Text("TRAIN", fontSize = 10.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
+                        }
                     }
                 }
 
@@ -587,28 +596,37 @@ fun PetDashboardScreen(
                     OutlinedButton(
                         onClick = {
                             buzzerManager.playFlushTone()
-                            executeCareAction("CLEAN_WASTE", { PetSimulationEngine.cleanWaste(it) }, "🧹 Flushed Bio-Waste")
+                            executeCareAction("CLEAN_WASTE", { PetSimulationEngine.cleanWaste(it) }, "Flushed Bio-Waste")
                         },
                         modifier = Modifier.weight(1f)
                     ) {
-                        Text("🧹 CLEAN", fontSize = 10.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
+                        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                            DigiVectorIcon(type = DigiIconType.CLEAN_FLUSH, size = 12.dp, tint = Color(0xFF80DEEA))
+                            Text("CLEAN", fontSize = 10.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
+                        }
                     }
                     OutlinedButton(
                         onClick = {
-                            executeCareAction("TOGGLE_LIGHTS", { PetSimulationEngine.toggleLights(it, System.currentTimeMillis() / 1000L) }, "💡 Toggled Sleep Lights")
+                            executeCareAction("TOGGLE_LIGHTS", { PetSimulationEngine.toggleLights(it, System.currentTimeMillis() / 1000L) }, "Toggled Sleep Lights")
                         },
                         modifier = Modifier.weight(1f)
                     ) {
-                        Text("💡 LIGHTS", fontSize = 10.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
+                        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                            DigiVectorIcon(type = DigiIconType.SLEEP_LIGHT, size = 12.dp, tint = Color(0xFFFFE082))
+                            Text("LIGHTS", fontSize = 10.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
+                        }
                     }
                     OutlinedButton(
                         onClick = {
                             buzzerManager.playHealTone()
-                            executeCareAction("CURE_INJURY", { PetSimulationEngine.cureInjury(it) }, "💉 Administered Med-Shot")
+                            executeCareAction("CURE_INJURY", { PetSimulationEngine.cureInjury(it) }, "Administered Med-Pill")
                         },
                         modifier = Modifier.weight(1f)
                     ) {
-                        Text("💉 HEAL", fontSize = 10.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
+                        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                            DigiVectorIcon(type = DigiIconType.MEDS_PILL, size = 12.dp, tint = Color(0xFFEF5350))
+                            Text("MED-PILL", fontSize = 10.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
+                        }
                     }
                 }
                 Spacer(modifier = Modifier.height(6.dp))
@@ -644,13 +662,16 @@ fun PetDashboardScreen(
                     modifier = Modifier.fillMaxWidth(),
                     border = BorderStroke(1.dp, DigiWearPalette.CrestGold)
                 ) {
-                    Text(
-                        text = if (showStarterEggPicker) "HIDE DIGI-EGG INCUBATOR" else "🥚 HATCH NEW STARTER DIGI-EGG (16 CANONICAL LINEAGES)",
-                        fontSize = 10.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = DigiWearPalette.CrestGold,
-                        fontFamily = FontFamily.Monospace
-                    )
+                    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                        DigiVectorIcon(type = DigiIconType.EGG, size = 12.dp, tint = DigiWearPalette.CrestGold)
+                        Text(
+                            text = if (showStarterEggPicker) "HIDE DIGI-EGG INCUBATOR" else "HATCH NEW STARTER DIGI-EGG (16 CANONICAL LINEAGES)",
+                            fontSize = 10.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = DigiWearPalette.CrestGold,
+                            fontFamily = FontFamily.Monospace
+                        )
+                    }
                 }
 
                 if (showStarterEggPicker) {
@@ -681,7 +702,7 @@ fun PetDashboardScreen(
                                                     weight = eggSp.baselineWeight
                                                 )
                                             },
-                                            "🥚 Hatched ${eggSp.name}!"
+                                            "Hatched ${eggSp.name}!"
                                         )
                                         showStarterEggPicker = false
                                     }
@@ -716,13 +737,16 @@ fun PetDashboardScreen(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text(
-                        text = "▸ ⚡ DNA JOGRESS, DIGIXROS & MODE CHANGE CHAMBER",
-                        fontSize = 11.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = Color(0xFFEA80FC),
-                        fontFamily = FontFamily.Monospace
-                    )
+                    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(5.dp)) {
+                        DigiVectorIcon(type = DigiIconType.DNA_HELIX, size = 12.dp, tint = Color(0xFFEA80FC))
+                        Text(
+                            text = "DNA JOGRESS, DIGIXROS & MODE CHANGE CHAMBER",
+                            fontSize = 11.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color(0xFFEA80FC),
+                            fontFamily = FontFamily.Monospace
+                        )
+                    }
                     Text(
                         text = if (activeJogressRecipes.isNotEmpty()) "${activeJogressRecipes.size} READY" else "${com.digiwear.core.fusion.JogressEngine.RECIPES.size} RECIPES",
                         fontSize = 10.sp,
@@ -804,19 +828,22 @@ fun PetDashboardScreen(
                                         petState = fused
                                         persistPhoneSnapshot(fused)
                                         val beamed = wearableManager.sendPetStateToWatch(fused)
-                                        syncStatus = "⚡ ${recipe.fusionType.displayName}: Awakened ${targetSp.name}! (${if (beamed) "Synced to Watch" else "Saved on Phone"})"
+                                        syncStatus = "[JOGRESS] ${recipe.fusionType.displayName}: Awakened ${targetSp.name}! (${if (beamed) "Synced to Watch" else "Saved on Phone"})"
                                     }
                                 },
                                 modifier = Modifier.fillMaxWidth(),
                                 colors = ButtonDefaults.buttonColors(containerColor = Color(recipe.fusionType.badgeColorHex))
                             ) {
-                                Text(
-                                    text = "⚡ AWAKEN ${targetSp.name.uppercase()} (${recipe.fusionType.displayName.uppercase()}) & BEAM TO WATCH",
-                                    fontSize = 10.sp,
-                                    fontWeight = FontWeight.Black,
-                                    color = Color.Black,
-                                    fontFamily = FontFamily.Monospace
-                                )
+                                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(5.dp)) {
+                                    DigiVectorIcon(type = DigiIconType.DNA_HELIX, size = 11.dp, tint = Color.Black)
+                                    Text(
+                                        text = "AWAKEN ${targetSp.name.uppercase()} (${recipe.fusionType.displayName.uppercase()}) & BEAM TO WATCH",
+                                        fontSize = 10.sp,
+                                        fontWeight = FontWeight.Black,
+                                        color = Color.Black,
+                                        fontFamily = FontFamily.Monospace
+                                    )
+                                }
                             }
                         }
                     }
@@ -835,13 +862,16 @@ fun PetDashboardScreen(
                     modifier = Modifier.fillMaxWidth(),
                     border = BorderStroke(1.dp, Color(0xFFCE93D8))
                 ) {
-                    Text(
-                        text = if (showAllJogressCatalog) "HIDE ${com.digiwear.core.fusion.JogressEngine.RECIPES.size}-RECIPE JOGRESS / DIGIXROS MATRIX" else "⚡ BROWSE ALL ${com.digiwear.core.fusion.JogressEngine.RECIPES.size} DNA JOGRESS, DIGIXROS & MODE CHANGE RECIPES",
-                        fontSize = 10.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = Color(0xFFEA80FC),
-                        fontFamily = FontFamily.Monospace
-                    )
+                    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(5.dp)) {
+                        DigiVectorIcon(type = DigiIconType.DNA_HELIX, size = 11.dp, tint = Color(0xFFEA80FC))
+                        Text(
+                            text = if (showAllJogressCatalog) "HIDE ${com.digiwear.core.fusion.JogressEngine.RECIPES.size}-RECIPE JOGRESS / DIGIXROS MATRIX" else "BROWSE ALL ${com.digiwear.core.fusion.JogressEngine.RECIPES.size} DNA JOGRESS, DIGIXROS & MODE CHANGE RECIPES",
+                            fontSize = 10.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color(0xFFEA80FC),
+                            fontFamily = FontFamily.Monospace
+                        )
+                    }
                 }
 
                 if (showAllJogressCatalog) {
@@ -903,12 +933,15 @@ fun PetDashboardScreen(
                                         petState = fused
                                         persistPhoneSnapshot(fused)
                                         val beamed = wearableManager.sendPetStateToWatch(fused)
-                                        syncStatus = "⚡ Awakened ${targetSp.name} (${recipe.fusionType.displayName})! (${if (beamed) "Synced to Watch" else "Phone Local"})"
+                                        syncStatus = "[JOGRESS] Awakened ${targetSp.name} (${recipe.fusionType.displayName})! (${if (beamed) "Synced to Watch" else "Phone Local"})"
                                     }
                                 },
                                 colors = ButtonDefaults.buttonColors(containerColor = Color(recipe.fusionType.badgeColorHex))
                             ) {
-                                Text("⚡ FUSE", fontSize = 9.5.sp, fontWeight = FontWeight.Black, color = Color.Black, fontFamily = FontFamily.Monospace)
+                                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(3.dp)) {
+                                    DigiVectorIcon(type = DigiIconType.DNA_HELIX, size = 10.dp, tint = Color.Black)
+                                    Text("FUSE", fontSize = 9.5.sp, fontWeight = FontWeight.Black, color = Color.Black, fontFamily = FontFamily.Monospace)
+                                }
                             }
                         }
                     }
@@ -1239,11 +1272,14 @@ fun PetDashboardScreen(
                     horizontalArrangement = Arrangement.spacedBy(6.dp)
                 ) {
                     val nfcOptions = listOf(
-                        "NFC_DUEL" to "📶 Tap-to-Duel",
-                        "WILD_SCAN" to "📡 Wild Scan",
-                        "ACOM_RELAY" to "🌐 Phone A-Com"
+                        Triple("NFC_DUEL", DigiIconType.NFC_WAVE, "Tap-to-Duel"),
+                        Triple("WILD_SCAN", DigiIconType.RADAR_SCAN, "Wild Scan"),
+                        Triple("ACOM_RELAY", DigiIconType.GLOBE_NET, "Phone A-Com")
                     )
-                    nfcOptions.forEach { (modeId, label) ->
+                    nfcOptions.forEach { opt ->
+                        val modeId = opt.first
+                        val iconType = opt.second
+                        val label = opt.third
                         val active = nfcBridgeMode == modeId
                         Box(
                             modifier = Modifier
@@ -1261,13 +1297,16 @@ fun PetDashboardScreen(
                                 .padding(vertical = 8.dp),
                             contentAlignment = Alignment.Center
                         ) {
-                            Text(
-                                text = label,
-                                fontSize = 9.5.sp,
-                                fontWeight = FontWeight.Bold,
-                                color = if (active) Color.White else Color.LightGray,
-                                fontFamily = FontFamily.Monospace
-                            )
+                            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                                DigiVectorIcon(type = iconType, size = 10.dp, tint = if (active) Color(0xFF00E676) else Color.LightGray)
+                                Text(
+                                    text = label,
+                                    fontSize = 9.5.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = if (active) Color.White else Color.LightGray,
+                                    fontFamily = FontFamily.Monospace
+                                )
+                            }
                         }
                     }
                 }
@@ -1288,11 +1327,14 @@ fun PetDashboardScreen(
                     horizontalArrangement = Arrangement.spacedBy(6.dp)
                 ) {
                     val shapeOptions = listOf(
-                        "AUTO" to "⚙ Auto-Detect",
-                        "ROUND" to "⭕ Round Bezel",
-                        "SQUARE" to "⬜ Square LCD"
+                        Triple("AUTO", DigiIconType.SETTINGS_GEAR, "Auto-Detect"),
+                        Triple("ROUND", DigiIconType.WATCH_DEVICE, "Round Bezel"),
+                        Triple("SQUARE", DigiIconType.VAULT_SAFE, "Square LCD")
                     )
-                    shapeOptions.forEach { (shapeId, label) ->
+                    shapeOptions.forEach { opt ->
+                        val shapeId = opt.first
+                        val iconType = opt.second
+                        val label = opt.third
                         val active = displayShapeOverride == shapeId
                         Box(
                             modifier = Modifier
@@ -1310,13 +1352,16 @@ fun PetDashboardScreen(
                                 .padding(vertical = 8.dp),
                             contentAlignment = Alignment.Center
                         ) {
-                            Text(
-                                text = label,
-                                fontSize = 9.5.sp,
-                                fontWeight = FontWeight.Bold,
-                                color = if (active) Color.White else Color.LightGray,
-                                fontFamily = FontFamily.Monospace
-                            )
+                            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                                DigiVectorIcon(type = iconType, size = 10.dp, tint = if (active) Color(0xFF82B1FF) else Color.LightGray)
+                                Text(
+                                    text = label,
+                                    fontSize = 9.5.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = if (active) Color.White else Color.LightGray,
+                                    fontFamily = FontFamily.Monospace
+                                )
+                            }
                         }
                     }
                 }
@@ -1331,13 +1376,16 @@ fun PetDashboardScreen(
                         .border(1.dp, Color(0xFF00B0FF), RoundedCornerShape(10.dp))
                         .padding(10.dp)
                 ) {
-                    Text(
-                        text = "⌚ AOSP / ANDROID WATCH WI-FI & HOTSPOT BRIDGE",
-                        fontSize = 10.sp,
-                        fontWeight = FontWeight.Black,
-                        color = Color(0xFF80D8FF),
-                        fontFamily = FontFamily.Monospace
-                    )
+                    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                        DigiVectorIcon(type = DigiIconType.WATCH_DEVICE, size = 12.dp, tint = Color(0xFF80D8FF))
+                        Text(
+                            text = "AOSP / ANDROID WATCH WI-FI & HOTSPOT BRIDGE",
+                            fontSize = 10.sp,
+                            fontWeight = FontWeight.Black,
+                            color = Color(0xFF80D8FF),
+                            fontFamily = FontFamily.Monospace
+                        )
+                    }
                     Text(
                         text = "Pairs standalone AOSP Android watches (Kospet, Zeblaze, Lokmat, Lemfo, etc.) without Google Wear OS services over local Wi-Fi or Phone Hotspot (TCP 45820 / UDP 45821).",
                         fontSize = 9.5.sp,
@@ -1371,14 +1419,14 @@ fun PetDashboardScreen(
                                             petState = state
                                             persistPhoneSnapshot(state)
                                         }
-                                        syncStatus = "✅ Linked to AOSP Watch at $foundIp:45820!"
+                                        syncStatus = "[OK] Linked to AOSP Watch at $foundIp:45820!"
                                     } else if (aospWatchIp.isNotBlank()) {
                                         wearableManager.setConfiguredAospWatchIp(aospWatchIp)
                                         val state = wearableManager.requestPetStateFromWatch()
                                         if (state != null) {
                                             petState = state
                                             persistPhoneSnapshot(state)
-                                            syncStatus = "✅ Linked to AOSP Watch at $aospWatchIp:45820!"
+                                            syncStatus = "[OK] Linked to AOSP Watch at $aospWatchIp:45820!"
                                         } else {
                                             syncStatus = "Saved IP $aospWatchIp (ensure Watch app is open on same Wi-Fi/Hotspot)"
                                         }
@@ -1389,7 +1437,10 @@ fun PetDashboardScreen(
                             },
                             colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF0277BD))
                         ) {
-                            Text("🔍 LINK AOSP", fontSize = 9.5.sp, fontWeight = FontWeight.Black, fontFamily = FontFamily.Monospace)
+                            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                                DigiVectorIcon(type = DigiIconType.SEARCH_LENS, size = 10.dp, tint = Color.White)
+                                Text("LINK AOSP", fontSize = 9.5.sp, fontWeight = FontWeight.Black, fontFamily = FontFamily.Monospace)
+                            }
                         }
                     }
                 }
@@ -1423,6 +1474,7 @@ fun PetDashboardScreen(
                 ) {
                     Icon(Icons.Default.Tune, contentDescription = "Apply", modifier = Modifier.size(16.dp))
                     Spacer(modifier = Modifier.width(6.dp))
+                    Text("APPLY SETTINGS TO SMARTWATCH", fontSize = 11.sp, fontWeight = FontWeight.Bold, fontFamily = FontFamily.Monospace)
                 }
             }
         }
@@ -1528,8 +1580,8 @@ fun PetDashboardScreen(
                                     }
                                     Spacer(modifier = Modifier.height(3.dp))
                                     Text(
-                                        text = readiness.conditions.joinToString(" â€¢ ") { cond ->
-                                            val sym = if (cond.isMet) "âœ“" else "âœ—"
+                                        text = readiness.conditions.joinToString(" | ") { cond ->
+                                            val sym = if (cond.isMet) "[OK]" else "[--]"
                                             "$sym ${cond.label}: ${cond.current}/${cond.target}"
                                         },
                                         fontSize = 9.sp,

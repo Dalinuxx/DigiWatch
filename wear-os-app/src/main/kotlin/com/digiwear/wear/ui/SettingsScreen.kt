@@ -54,14 +54,6 @@ fun SettingsScreen(
     val scope = rememberCoroutineScope()
     val listState = rememberScalingLazyListState()
 
-    LaunchedEffect(Unit) {
-        HardwareInputManager.buttonEvents.collect { button ->
-            if (button == VPetButton.C) {
-                onBack()
-            }
-        }
-    }
-
     val currentTheme by repository.themeFlow.collectAsState(initial = BackgroundTheme.CLASSIC_VPET_LCD)
     val isVibrationEnabled by repository.vibrationFlow.collectAsState(initial = true)
     val isThreeButtonMode by repository.threeButtonModeFlow.collectAsState(initial = true)
@@ -81,6 +73,22 @@ fun SettingsScreen(
 
     var feedbackMessage by remember { mutableStateOf<String?>(null) }
     var showEggSelector by remember { mutableStateOf(false) }
+
+    androidx.activity.compose.BackHandler(enabled = showEggSelector) {
+        showEggSelector = false
+    }
+
+    LaunchedEffect(Unit) {
+        HardwareInputManager.buttonEvents.collect { button ->
+            if (button == VPetButton.C) {
+                if (showEggSelector) {
+                    showEggSelector = false
+                } else {
+                    onBack()
+                }
+            }
+        }
+    }
 
     val themes = BackgroundTheme.entries
     val contrastOptions = listOf(
@@ -804,7 +812,13 @@ fun SettingsScreen(
                         .padding(horizontal = displayConfig.horizontalPadding),
                     colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFF5E35B1))
                 ) {
-                    Text("🥚 HATCH STARTER DIGI-EGG (16)", fontSize = 8.sp, fontWeight = FontWeight.Black, fontFamily = FontFamily.Monospace)
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(4.dp)
+                    ) {
+                        DigiVectorIcon(type = DigiIconType.EGG, size = 10.dp, tint = Color.White)
+                        Text("HATCH STARTER DIGI-EGG (16)", fontSize = 8.sp, fontWeight = FontWeight.Black, fontFamily = FontFamily.Monospace)
+                    }
                 }
             } else {
                 val starterEggs = listOf(
@@ -868,14 +882,20 @@ fun SettingsScreen(
                         }
                     }
                     Spacer(modifier = Modifier.height(4.dp))
-                    Text(
-                        text = "✕ CANCEL",
-                        fontSize = 8.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = Color.LightGray,
-                        fontFamily = FontFamily.Monospace,
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(3.dp),
                         modifier = Modifier.clickable { showEggSelector = false }
-                    )
+                    ) {
+                        DigiVectorIcon(type = DigiIconType.CLOSE, size = 9.dp, tint = Color.LightGray)
+                        Text(
+                            text = "CANCEL",
+                            fontSize = 8.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color.LightGray,
+                            fontFamily = FontFamily.Monospace
+                        )
+                    }
                 }
             }
         }
@@ -911,13 +931,19 @@ fun SettingsScreen(
                     .padding(6.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Text(
-                    text = "⌚ PLATFORM & HARDWARE STATUS",
-                    fontSize = 7.5.sp,
-                    fontWeight = FontWeight.Black,
-                    color = Color(0xFF80D8FF),
-                    fontFamily = FontFamily.Monospace
-                )
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    DigiVectorIcon(type = DigiIconType.WATCH, size = 9.dp, tint = Color(0xFF80D8FF))
+                    Text(
+                        text = "PLATFORM & HARDWARE STATUS",
+                        fontSize = 7.5.sp,
+                        fontWeight = FontWeight.Black,
+                        color = Color(0xFF80D8FF),
+                        fontFamily = FontFamily.Monospace
+                    )
+                }
                 Spacer(modifier = Modifier.height(2.dp))
                 Text(
                     text = "${displayConfig.runtimePlatformLabel} (${displayConfig.screenWidthDp}x${displayConfig.screenHeightDp}dp)",
@@ -977,7 +1003,13 @@ fun SettingsScreen(
                         modifier = Modifier.weight(1f).height(24.dp),
                         colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFF00695C))
                     ) {
-                        Text("👟 +100 STEPS", fontSize = 6.5.sp, fontWeight = FontWeight.Black, fontFamily = FontFamily.Monospace)
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(3.dp)
+                        ) {
+                            DigiVectorIcon(type = DigiIconType.STEP, size = 8.dp, tint = Color.White)
+                            Text("+100 STEPS", fontSize = 6.5.sp, fontWeight = FontWeight.Black, fontFamily = FontFamily.Monospace)
+                        }
                     }
                 }
             }

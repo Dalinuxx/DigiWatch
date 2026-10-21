@@ -85,6 +85,49 @@ fun WorkoutScreen(
     var isRunning by remember { mutableStateOf(true) }
     var summary by remember { mutableStateOf<WorkoutSummary?>(null) }
 
+    fun finishWorkoutSession() {
+        if (!isRunning && summary != null) {
+            hapticManager.playStepMilestone()
+            onFinish()
+            return
+        }
+        isRunning = false
+        tracker.stopListening()
+        hapticManager.playStepMilestone()
+        buzzerManager.playVictoryFanfare()
+
+        val samples = tracker.getSamples()
+        val (updatedState, resSummary) = WorkoutEngine.finishSession(
+            currentState = petState,
+            type = workoutType,
+            durationSeconds = elapsedSeconds,
+            rawSteps = sessionSteps,
+            bpmSamples = samples
+        )
+        val evolvedSpecies = com.digiwear.core.engine.EvolutionEngine.evaluateEvolution(updatedState)
+        val finalState = if (evolvedSpecies != null) {
+            com.digiwear.core.engine.EvolutionEngine.evolve(updatedState, evolvedSpecies, System.currentTimeMillis() / 1000L)
+        } else {
+            updatedState
+        }
+
+        scope.launch {
+            repository.savePetState(finalState)
+            if (workoutType == WorkoutType.EXPEDITION_TREK && resSummary.effectiveAdventureSteps > 0) {
+                repository.addAdventureSteps(resSummary.effectiveAdventureSteps)
+            }
+        }
+        summary = resSummary
+    }
+
+    LaunchedEffect(Unit) {
+        com.digiwear.wear.input.HardwareInputManager.buttonEvents.collect { button ->
+            if (button == com.digiwear.wear.input.VPetButton.B || button == com.digiwear.wear.input.VPetButton.C) {
+                finishWorkoutSession()
+            }
+        }
+    }
+
     // Heartbeat pulse animation
     val pulseTransition = rememberInfiniteTransition(label = "HeartPulse")
     val heartScale by pulseTransition.animateFloat(
@@ -197,9 +240,10 @@ fun WorkoutScreen(
 
                             size = 72.dp
                         )
-                        Text(
-                            text = "💦",
-                            fontSize = 11.sp,
+                        DigiVectorIcon(
+                            type = DigiIconType.SWEAT,
+                            size = 13.dp,
+                            tint = Color(0xFF40C4FF),
                             modifier = Modifier.padding(top = 2.dp)
                         )
                     }
@@ -208,10 +252,10 @@ fun WorkoutScreen(
 
                     // BPM Gauge
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Text(
-                            text = "♥",
-                            color = zoneColor,
-                            fontSize = 20.sp,
+                        DigiVectorIcon(
+                            type = DigiIconType.HEART_FULL,
+                            size = 18.dp,
+                            tint = zoneColor,
                             modifier = Modifier.scale(heartScale)
                         )
                         Text(
@@ -298,29 +342,7 @@ fun WorkoutScreen(
 
                 // Bottom: Finish Workout Button
                 Button(
-                    onClick = {
-                        isRunning = false
-                        tracker.stopListening()
-                        hapticManager.playStepMilestone()
-                        buzzerManager.playVictoryFanfare()
-
-                        val samples = tracker.getSamples()
-                        val (updatedState, resSummary) = WorkoutEngine.finishSession(
-                            currentState = petState,
-                            type = workoutType,
-                            durationSeconds = elapsedSeconds,
-                            rawSteps = sessionSteps,
-                            bpmSamples = samples
-                        )
-
-                        scope.launch {
-                            repository.savePetState(updatedState)
-                            if (workoutType == WorkoutType.EXPEDITION_TREK && resSummary.effectiveAdventureSteps > 0) {
-                                repository.addAdventureSteps(resSummary.effectiveAdventureSteps)
-                            }
-                        }
-                        summary = resSummary
-                    },
+                    onClick = { finishWorkoutSession() },
                     modifier = Modifier
                         .fillMaxWidth(0.85f)
                         .height(28.dp),
@@ -328,7 +350,7 @@ fun WorkoutScreen(
                     shape = RoundedCornerShape(14.dp)
                 ) {
                     Text(
-                        text = "⏹ FINISH WORKOUT",
+                        text = "[STOP] FINISH WORKOUT",
                         fontSize = 9.sp,
                         fontWeight = FontWeight.Bold,
                         fontFamily = FontFamily.Monospace,
@@ -388,10 +410,27 @@ fun WorkoutScreen(
                             Text("CALORIES", fontSize = 8.sp, color = Color.Gray, fontFamily = FontFamily.Monospace)
                             Text("${res.estimatedCalories} kcal", fontSize = 8.sp, color = Color(0xFFFFB300), fontWeight = FontWeight.Bold, fontFamily = FontFamily.Monospace)
                         }
-                        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                            Text("EFFORT", fontSize = 8.sp, color = Color.Gray, fontFamily = FontFamily.Monospace)
-                            Text("★★★★ (MAX)", fontSize = 8.sp, color = Color(0xFFFFD54F), fontWeight = FontWeight.Bold, fontFamily = FontFamily.Monospace)
-                        }
+                         Row(
+                             modifier = Modifier.fillMaxWidth(),
+                             horizontalArrangement = Arrangement.SpaceBetween,
+                             verticalAlignment = Alignment.CenterVertically
+                         ) {
+                             Text("EFFORT", fontSize = 8.sp, color = Color.Gray, fontFamily = FontFamily.Monospace)
+                             Row(
+                                 verticalAlignment = Alignment.CenterVertically,
+                                 horizontalArrangement = Arrangement.spacedBy(3.dp)
+                             ) {
+                                 VPetMeterBar(
+                                     filledCount = petState.effort.coerceIn(0, 4),
+                                     maxCount = 4,
+                                     isHearts = false,
+                                     activeColor = Color(0xFFFFD54F),
+                                     emptyColor = Color(0x55FFD54F),
+                                     iconSize = 8.dp
+                                 )
+                                 Text("(+${res.effortGained})", fontSize = 8.sp, color = Color(0xFFFFD54F), fontWeight = FontWeight.Bold, fontFamily = FontFamily.Monospace)
+                             }
+                         }
                         if (res.weightGramsBurned > 0) {
                             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                                 Text("WEIGHT BURN", fontSize = 8.sp, color = Color.Gray, fontFamily = FontFamily.Monospace)

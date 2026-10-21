@@ -13,12 +13,58 @@ import kotlin.math.max
 object EvolutionEngine {
 
     /**
-     * All 10 hatchable Baby I starter Digi-Eggs across the 205-species roster.
+     * All 16 hatchable Baby I starter Digi-Eggs across the 500-species roster.
      */
     val STARTER_EGG_IDS: List<Int> = listOf(
         101, 103, 105, 107, 109, 111, 113, 130, 131, 132,
         1101, 1104, 1106, 1108, 1111, 1113
     )
+
+    private val PRE_EVOLUTION_INDEX: Map<Int, List<Pair<PetSpecies, EvolutionRule>>> by lazy {
+        val map = mutableMapOf<Int, MutableList<Pair<PetSpecies, EvolutionRule>>>()
+        for (species in PetSpecies.SORTED_SPECIES) {
+            for (rule in species.evolutionRules) {
+                map.getOrPut(rule.targetSpeciesId) { mutableListOf() }.add(species to rule)
+            }
+        }
+        map
+    }
+
+    private val EGG_LINEAGE_PATH_INDEX: Map<Int, List<Int>> by lazy {
+        val paths = mutableMapOf<Int, List<Int>>()
+        val visited = mutableSetOf<Int>()
+        val parentMap = mutableMapOf<Int, Int>()
+        val queue = ArrayDeque<Int>()
+
+        for (eggId in STARTER_EGG_IDS) {
+            if (PetSpecies.SPECIES_REGISTRY.containsKey(eggId)) {
+                visited.add(eggId)
+                paths[eggId] = listOf(eggId)
+                queue.addLast(eggId)
+            }
+        }
+
+        while (queue.isNotEmpty()) {
+            val currentId = queue.removeFirst()
+            val species = PetSpecies.SPECIES_REGISTRY[currentId] ?: continue
+            for (rule in species.evolutionRules) {
+                val nextId = rule.targetSpeciesId
+                if (nextId !in visited && PetSpecies.SPECIES_REGISTRY.containsKey(nextId)) {
+                    visited.add(nextId)
+                    parentMap[nextId] = currentId
+                    val path = mutableListOf<Int>()
+                    var cursor: Int? = nextId
+                    while (cursor != null) {
+                        path.add(0, cursor)
+                        cursor = parentMap[cursor]
+                    }
+                    paths[nextId] = path
+                    queue.addLast(nextId)
+                }
+            }
+        }
+        paths
+    }
 
     /**
      * Evaluates whether the current [state] qualifies for an evolutionary mutation.
@@ -40,7 +86,7 @@ object EvolutionEngine {
      * Applies the evolutionary mutation to [state], adapting HP, baseline weight, and resetting stage counters.
      */
     fun evolve(state: PetState, targetSpecies: PetSpecies, currentTimestampUtc: Long): PetState {
-        val newMaxHp = targetSpecies.baseHp
+        val newMaxHp = targetSpecies.baseHp + (state.traitedEggBonus.coerceAtLeast(0) * 5)
         val newWeight = max(state.weight, targetSpecies.baselineWeight)
 
         return state.copy(
@@ -62,57 +108,15 @@ object EvolutionEngine {
      * Returns all species and the specific [EvolutionRule] that can directly evolve into [targetSpeciesId].
      */
     fun getPreEvolutions(targetSpeciesId: Int): List<Pair<PetSpecies, EvolutionRule>> {
-        val results = mutableListOf<Pair<PetSpecies, EvolutionRule>>()
-        for (species in PetSpecies.SPECIES_REGISTRY.values.sortedBy { it.id }) {
-            for (rule in species.evolutionRules) {
-                if (rule.targetSpeciesId == targetSpeciesId) {
-                    results.add(species to rule)
-                }
-            }
-        }
-        return results
+        return PRE_EVOLUTION_INDEX[targetSpeciesId] ?: emptyList()
     }
 
     /**
-     * Finds the shortest canonical natural evolution path from one of the 10 Baby I starter eggs
+     * Finds the shortest canonical natural evolution path from one of the 16 Baby I starter eggs
      * to [targetSpeciesId]. Returns the list of species IDs from Baby I to [targetSpeciesId].
      */
     fun findEggLineagePath(targetSpeciesId: Int): List<Int> {
-        if (targetSpeciesId in STARTER_EGG_IDS) return listOf(targetSpeciesId)
-
-        val visited = mutableSetOf<Int>()
-        val parentMap = mutableMapOf<Int, Int>()
-        val queue = ArrayDeque<Int>()
-
-        for (eggId in STARTER_EGG_IDS) {
-            if (PetSpecies.SPECIES_REGISTRY.containsKey(eggId)) {
-                visited.add(eggId)
-                queue.addLast(eggId)
-            }
-        }
-
-        while (queue.isNotEmpty()) {
-            val currentId = queue.removeFirst()
-            if (currentId == targetSpeciesId) {
-                val path = mutableListOf<Int>()
-                var cursor: Int? = targetSpeciesId
-                while (cursor != null) {
-                    path.add(0, cursor)
-                    cursor = parentMap[cursor]
-                }
-                return path
-            }
-            val species = PetSpecies.SPECIES_REGISTRY[currentId] ?: continue
-            for (rule in species.evolutionRules) {
-                val nextId = rule.targetSpeciesId
-                if (nextId !in visited && PetSpecies.SPECIES_REGISTRY.containsKey(nextId)) {
-                    visited.add(nextId)
-                    parentMap[nextId] = currentId
-                    queue.addLast(nextId)
-                }
-            }
-        }
-        return emptyList()
+        return EGG_LINEAGE_PATH_INDEX[targetSpeciesId] ?: emptyList()
     }
 
     /**
@@ -132,7 +136,7 @@ object EvolutionEngine {
             }
             parts.add(cmText)
         }
-        if (rule.minEffort > 0) parts.add("Effort ≥ ${rule.minEffort}♥")
+        if (rule.minEffort > 0) parts.add("Effort ≥ ${rule.minEffort}/4")
         if (rule.minBattles > 0) parts.add("Battles ≥ ${rule.minBattles}")
         if (rule.minWinRatio > 0f) parts.add("Win ≥ ${(rule.minWinRatio * 100).toInt()}%")
         if (rule.minWeight > 0) parts.add("Weight ≥ ${rule.minWeight}G")
@@ -186,7 +190,7 @@ object EvolutionEngine {
             totalCount++
             val met = state.effort >= rule.minEffort
             if (met) metCount++
-            items.add(ConditionItem("Effort", "${state.effort}★", "≥${rule.minEffort}★", met))
+            items.add(ConditionItem("Effort", "${state.effort}/4", "≥${rule.minEffort}/4", met))
         }
 
         if (rule.minBattles > 0) {

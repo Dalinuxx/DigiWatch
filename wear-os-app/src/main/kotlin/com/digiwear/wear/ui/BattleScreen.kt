@@ -156,10 +156,10 @@ fun BattleScreen(
                 )
                 wildEncounter = enc
                 opponentCodeInput = enc.commCode128
-                battleStatusText = "📡 Wild ${enc.species.name} (${enc.habitatZone}) Scanned!"
+                battleStatusText = "[SCAN] Wild ${enc.species.name} (${enc.habitatZone}) Scanned!"
             } else {
                 opponentCodeInput = incoming
-                battleStatusText = if (incoming.startsWith("V1-")) "📶 NFC / Beamed: DigiROM Loaded!" else "📶 NFC / Beamed: Comm Code Loaded!"
+                battleStatusText = if (incoming.startsWith("V1-")) "[NFC] Beamed: DigiROM Loaded!" else "[NFC] Beamed: Comm Code Loaded!"
             }
             hapticManager.playStepMilestone()
             repository.setBeamedCommCode(null)
@@ -172,14 +172,26 @@ fun BattleScreen(
         }
     }
 
+    androidx.activity.compose.BackHandler(
+        enabled = showQrMatrix || showManualKeypad || (battleResult != null && !isBattling)
+    ) {
+        buzzerManager.playButtonBeep()
+        when {
+            showQrMatrix -> showQrMatrix = false
+            showManualKeypad -> showManualKeypad = false
+            battleResult != null && !isBattling -> battleResult = null
+        }
+    }
+
     LaunchedEffect(Unit) {
         HardwareInputManager.buttonEvents.collect { button ->
             when (button) {
                 VPetButton.C -> {
-                    if (battleResult != null && !isBattling) {
-                        battleResult = null
-                    } else if (!isBattling) {
-                        onBack()
+                    when {
+                        showQrMatrix -> showQrMatrix = false
+                        showManualKeypad -> showManualKeypad = false
+                        battleResult != null && !isBattling -> battleResult = null
+                        !isBattling -> onBack()
                     }
                 }
                 VPetButton.B -> {
@@ -193,8 +205,13 @@ fun BattleScreen(
     }
 
     fun startBattleWithCode(code: String, mode: BattleMode, envEffect: String) {
+        if (petState.isDeceased) {
+            battleStatusText = "[RIP] Partner has passed away."
+            buzzerManager.playAttentionBeep()
+            return
+        }
         if (petState.isInjured) {
-            battleStatusText = "💀 INJURED! Cure with [MEDS] first!"
+            battleStatusText = "[INJURED] Cure with [MEDS] first!"
             buzzerManager.playAttentionBeep()
             hapticManager.playAttentionAlert()
             return
@@ -215,6 +232,8 @@ fun BattleScreen(
                 basePower = species.basePower,
                 victories = petState.victories,
                 effort = petState.effort,
+                strength = petState.strength,
+                weight = petState.weight,
                 battleSeed = ownSeed
             )
 
@@ -262,10 +281,10 @@ fun BattleScreen(
                 var i = 0
                 while (i < activeResult.turns.size) {
                     currentTurnIndex = i
-                    val turn = activeResult.turns[i]
+                    val initialTurn = activeResult.turns[i]
                     criticalBoostActive = false
 
-                    if (turn.attackerIndex == 0) {
+                    if (initialTurn.attackerIndex == 0) {
                         // Player attack turn: launch Quick Time Event!
                         qteActive = true
                         HardwareInputManager.activeQteListener = { button ->
@@ -287,6 +306,7 @@ fun BattleScreen(
                         }
                     }
 
+                    val turn = activeResult.turns[i.coerceAtMost(activeResult.turns.lastIndex)]
                     // Authentic Color V-Pet Cut-In on Critical Hit / Mega Hit
                     val isCrit = turn.attackType == "MEGA_HIT" || (turn.attackerIndex == 0 && criticalBoostActive)
                     if (isCrit) {
@@ -317,7 +337,7 @@ fun BattleScreen(
                     buzzerManager.playDefeatJingle()
                     if (wasInjured) {
                         hapticManager.playAttentionAlert()
-                        battleStatusText = "💀 INJURED IN BATTLE! Treat with medicine!"
+                        battleStatusText = "[INJURED] INJURED IN BATTLE! Treat with medicine!"
                     }
                 }
                 isBattling = false
@@ -405,10 +425,20 @@ fun BattleScreen(
                             fontWeight = FontWeight.Bold,
                             fontFamily = FontFamily.Monospace
                         )
+                        val playerFrame = when {
+                            currentTurn == null -> SpriteFrame.IDLE_A
+                            currentTurn.attackerIndex == 0 -> when {
+                                qteActive || turnFxProgress < 0.25f -> SpriteFrame.ATTACK_CHARGE
+                                turnFxProgress < 0.65f -> SpriteFrame.ATTACK_RELEASE
+                                else -> SpriteFrame.IDLE_B
+                            }
+                            turnFxProgress >= 0.65f -> SpriteFrame.INJURED
+                            else -> SpriteFrame.IDLE_A
+                        }
                         SpriteCanvasRenderer(
                             speciesId = petState.speciesId,
                             isAmbient = false,
-                            overrideFrame = if (currentTurn?.attackerIndex == 0) SpriteFrame.ATTACK_RELEASE else SpriteFrame.IDLE_A,
+                            overrideFrame = playerFrame,
                             size = displayConfig.battleSpriteSize,
                             flipHorizontal = true
                         )
@@ -433,9 +463,9 @@ fun BattleScreen(
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         Text(
                             text = when {
-                                currentTurn?.attackType == "MEGA_HIT" -> "⚡MEGA⚡"
-                                currentTurn?.attackerIndex == 0 -> "●━━▶"
-                                currentTurn?.attackerIndex == 1 -> "◀━━●"
+                                currentTurn?.attackType == "MEGA_HIT" -> "[MEGA]"
+                                currentTurn?.attackerIndex == 0 -> ">>>"
+                                currentTurn?.attackerIndex == 1 -> "<<<"
                                 else -> "VS"
                             },
                             fontSize = 8.5.sp,
@@ -462,10 +492,20 @@ fun BattleScreen(
                             fontWeight = FontWeight.Bold,
                             fontFamily = FontFamily.Monospace
                         )
+                        val oppFrame = when {
+                            currentTurn == null -> SpriteFrame.IDLE_A
+                            currentTurn.attackerIndex == 1 -> when {
+                                turnFxProgress < 0.25f -> SpriteFrame.ATTACK_CHARGE
+                                turnFxProgress < 0.65f -> SpriteFrame.ATTACK_RELEASE
+                                else -> SpriteFrame.IDLE_B
+                            }
+                            turnFxProgress >= 0.65f -> SpriteFrame.INJURED
+                            else -> SpriteFrame.IDLE_A
+                        }
                         SpriteCanvasRenderer(
                             speciesId = battleResult!!.fighterB.speciesId,
                             isAmbient = false,
-                            overrideFrame = if (currentTurn?.attackerIndex == 1) SpriteFrame.ATTACK_RELEASE else SpriteFrame.IDLE_A,
+                            overrideFrame = oppFrame,
                             size = displayConfig.battleSpriteSize,
                             flipHorizontal = false
                         )
@@ -503,24 +543,53 @@ fun BattleScreen(
 
                     if (qteActive) {
                         Spacer(modifier = Modifier.height(2.dp))
-                        Box(
+                        Row(
                             modifier = Modifier
                                 .background(Color(0xFFFF1744), RoundedCornerShape(4.dp))
                                 .border(0.75.dp, Color.White, RoundedCornerShape(4.dp))
                                 .clickable {
                                     criticalBoostActive = true
+                                    buzzerManager.playQteClickTone()
                                     hapticManager.playAttackImpact()
                                     qteActive = false
                                 }
-                                .padding(horizontal = 8.dp, vertical = 2.dp)
+                                .padding(horizontal = 8.dp, vertical = 2.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(3.dp)
                         ) {
-                            Text("⚡ STRIKE! [B] / TAP! ⚡", fontSize = 8.sp, fontWeight = FontWeight.Black, color = Color.White, fontFamily = FontFamily.Monospace)
+                            DigiVectorIcon(type = DigiIconType.BOLT, size = 8.dp, tint = Color.White)
+                            Text("STRIKE! [B] / TAP!", fontSize = 8.sp, fontWeight = FontWeight.Black, color = Color.White, fontFamily = FontFamily.Monospace)
+                            DigiVectorIcon(type = DigiIconType.BOLT, size = 8.dp, tint = Color.White)
                         }
                     } else if (criticalBoostActive) {
                         Spacer(modifier = Modifier.height(2.dp))
-                        Text("★ MEGA HIT BOOST! ★", fontSize = 8.sp, fontWeight = FontWeight.ExtraBold, color = Color(0xFFFFD54F), fontFamily = FontFamily.Monospace)
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(3.dp)
+                        ) {
+                            DigiVectorIcon(type = DigiIconType.STAR_FULL, size = 8.dp, tint = Color(0xFFFFD54F))
+                            Text("MEGA HIT BOOST!", fontSize = 8.sp, fontWeight = FontWeight.ExtraBold, color = Color(0xFFFFD54F), fontFamily = FontFamily.Monospace)
+                            DigiVectorIcon(type = DigiIconType.STAR_FULL, size = 8.dp, tint = Color(0xFFFFD54F))
+                        }
                     }
                 }
+            }
+
+            activeCutInSpeciesId?.let { cutInId ->
+                CutInOverlay(
+                    speciesId = cutInId,
+                    title = activeCutInTitle,
+                    autoDismissMs = null,
+                    onDismiss = { activeCutInSpeciesId = null }
+                )
+            }
+
+            encounterFlashEnemyId?.let { enemyId ->
+                EncounterFlashOverlay(
+                    enemySpeciesId = enemyId,
+                    isBoss = false,
+                    onFinished = { encounterFlashEnemyId = null }
+                )
             }
         }
         return
@@ -541,13 +610,26 @@ fun BattleScreen(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             item {
-                Text(
-                    text = if (won) "🏆 VICTORY! 🏆" else if (isDraw) "⚔ DRAW ⚔" else "💀 DEFEAT...",
-                    fontSize = 13.sp,
-                    fontWeight = FontWeight.Black,
-                    color = if (won) Color(0xFF00E676) else Color(0xFFFF5252),
-                    fontFamily = FontFamily.Monospace
-                )
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    val resultIcon = when {
+                        won -> DigiIconType.TROPHY
+                        isDraw -> DigiIconType.BATTLE
+                        else -> DigiIconType.SKULL
+                    }
+                    val resultColor = if (won) Color(0xFF00E676) else Color(0xFFFF5252)
+                    DigiVectorIcon(type = resultIcon, size = 12.dp, tint = resultColor)
+                    Text(
+                        text = if (won) "VICTORY!" else if (isDraw) "DRAW" else "DEFEAT...",
+                        fontSize = 13.sp,
+                        fontWeight = FontWeight.Black,
+                        color = resultColor,
+                        fontFamily = FontFamily.Monospace
+                    )
+                    DigiVectorIcon(type = resultIcon, size = 12.dp, tint = resultColor)
+                }
             }
             item {
                 Text(
@@ -623,16 +705,18 @@ fun BattleScreen(
                         .background(Color(0xFF381216), RoundedCornerShape(8.dp))
                         .border(1.dp, Color(0xFFFF5252), RoundedCornerShape(8.dp))
                         .padding(6.dp),
-                    verticalAlignment = Alignment.CenterVertically
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Center
                 ) {
+                    DigiVectorIcon(type = DigiIconType.SKULL, size = 10.dp, tint = Color(0xFFFF5252))
+                    Spacer(modifier = Modifier.width(4.dp))
                     Text(
-                        text = "💀 PARTNER IS INJURED!\nCannot battle until cured with [MEDS].",
+                        text = "PARTNER IS INJURED!\nCannot battle until cured with [MEDS].",
                         fontSize = 7.5.sp,
                         fontWeight = FontWeight.Black,
                         color = Color(0xFFFF5252),
                         fontFamily = FontFamily.Monospace,
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier.fillMaxWidth()
+                        textAlign = TextAlign.Center
                     )
                 }
             }
@@ -649,10 +733,10 @@ fun BattleScreen(
                 Spacer(modifier = Modifier.height(2.dp))
                 // 4-Mode Selector Pills (2x2 compact grid for Round/Rect watch)
                 val modes = listOf(
-                    BattleMode.NFC_TAP_DUEL to "📶 NFC DUEL",
-                    BattleMode.WILD_SCAN to "📡 WILD SCAN",
-                    BattleMode.ACOM_DCOM_WIFICOM to "🌐 A-COM/WIFI",
-                    BattleMode.ADVENTURE to "🏟 COLOSSEUM"
+                    Triple(BattleMode.NFC_TAP_DUEL, "NFC DUEL", DigiIconType.NFC),
+                    Triple(BattleMode.WILD_SCAN, "WILD SCAN", DigiIconType.SCAN),
+                    Triple(BattleMode.ACOM_DCOM_WIFICOM, "A-COM/WIFI", DigiIconType.GLOBE),
+                    Triple(BattleMode.ADVENTURE, "COLOSSEUM", DigiIconType.COLOSSEUM)
                 )
                 modes.chunked(2).forEach { pair ->
                     Row(
@@ -661,9 +745,9 @@ fun BattleScreen(
                             .padding(horizontal = displayConfig.horizontalPadding, vertical = 1.dp),
                         horizontalArrangement = Arrangement.spacedBy(3.dp)
                     ) {
-                        pair.forEach { (mode, label) ->
+                        pair.forEach { (mode, label, iconType) ->
                             val active = selectedBattleMode == mode
-                            Box(
+                            Row(
                                 modifier = Modifier
                                     .weight(1f)
                                     .background(
@@ -679,9 +763,16 @@ fun BattleScreen(
                                         selectedBattleMode = mode
                                         hapticManager.playStepMilestone()
                                     }
-                                    .padding(vertical = 3.dp),
-                                contentAlignment = Alignment.Center
+                                    .padding(vertical = 3.dp, horizontal = 3.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.Center
                             ) {
+                                DigiVectorIcon(
+                                    type = iconType,
+                                    size = 8.dp,
+                                    tint = if (active) Color.White else Color(0xFF90A4AE)
+                                )
+                                Spacer(modifier = Modifier.width(3.dp))
                                 Text(
                                     text = label,
                                     fontSize = 7.sp,
@@ -748,7 +839,7 @@ fun BattleScreen(
                     wildEncounter?.let { enc ->
                         Spacer(modifier = Modifier.height(3.dp))
                         Text(
-                            text = "${if (enc.isRareAnomaly) "★ BOSS " else ""}${enc.species.name} (${enc.habitatZone})",
+                            text = "${if (enc.isRareAnomaly) "[BOSS] " else ""}${enc.species.name} (${enc.habitatZone})",
                             fontSize = 8.sp,
                             fontWeight = FontWeight.Bold,
                             color = Color(0xFFFFD54F),
@@ -761,7 +852,13 @@ fun BattleScreen(
                             modifier = Modifier.fillMaxWidth().height(26.dp).padding(top = 2.dp),
                             colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFFE65100))
                         ) {
-                            Text("⚔ BATTLE WILD ${enc.species.name.take(7)} ⚔", fontSize = 7.5.sp, fontWeight = FontWeight.Black, fontFamily = FontFamily.Monospace)
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(3.dp)
+                            ) {
+                                DigiVectorIcon(type = DigiIconType.BATTLE, size = 8.dp, tint = Color.White)
+                                Text("BATTLE WILD ${enc.species.name.take(7)}", fontSize = 7.5.sp, fontWeight = FontWeight.Black, fontFamily = FontFamily.Monospace)
+                            }
                         }
                     }
                 }
@@ -814,14 +911,20 @@ fun BattleScreen(
                                     }
                                 }
                                 clipboardManager.setText(AnnotatedString(ownDigiRom))
-                                battleStatusText = if (sent) "🌐 Beamed $ownDigiRom to Phone A-Com!" else "📋 Copied $ownDigiRom (Tap Phone NFC)"
+                                battleStatusText = if (sent) "[RELAY] Beamed $ownDigiRom to Phone A-Com!" else "[COPY] Copied $ownDigiRom (Tap Phone NFC)"
                                 hapticManager.playStepMilestone()
                             }
                         },
                         modifier = Modifier.fillMaxWidth().height(26.dp),
                         colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFF1565C0))
                     ) {
-                        Text("📲 RELAY DIGIROM TO PHONE", fontSize = 7.5.sp, fontWeight = FontWeight.Bold, fontFamily = FontFamily.Monospace)
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(3.dp)
+                        ) {
+                            DigiVectorIcon(type = DigiIconType.GLOBE, size = 8.dp, tint = Color.White)
+                            Text("RELAY DIGIROM TO PHONE", fontSize = 7.5.sp, fontWeight = FontWeight.Bold, fontFamily = FontFamily.Monospace)
+                        }
                     }
                 }
             }
@@ -877,7 +980,7 @@ fun BattleScreen(
                             .height(24.dp),
                         colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFF37474F))
                     ) {
-                        Text("📄 SHOW TEXT CODE", fontSize = 7.sp, fontWeight = FontWeight.Bold, fontFamily = FontFamily.Monospace)
+                        Text("SHOW TEXT CODE", fontSize = 7.sp, fontWeight = FontWeight.Bold, fontFamily = FontFamily.Monospace)
                     }
                 } else {
                     Text("YOUR 128-BIT / DIGIROM:", fontSize = 7.sp, color = Color(0xFF90A4AE), fontFamily = FontFamily.Monospace)
@@ -913,7 +1016,13 @@ fun BattleScreen(
                                 .height(24.dp),
                             colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFF00838F))
                         ) {
-                            Text("📋 COPY", fontSize = 7.sp, fontWeight = FontWeight.Bold, fontFamily = FontFamily.Monospace)
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(3.dp)
+                            ) {
+                                DigiVectorIcon(type = DigiIconType.COPY, size = 8.dp, tint = Color.White)
+                                Text("COPY", fontSize = 7.sp, fontWeight = FontWeight.Bold, fontFamily = FontFamily.Monospace)
+                            }
                         }
                         Button(
                             onClick = {
@@ -925,7 +1034,13 @@ fun BattleScreen(
                                 .height(24.dp),
                             colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFF2E7D32))
                         ) {
-                            Text("🏁 SHOW QR MATRIX", fontSize = 7.sp, fontWeight = FontWeight.Bold, fontFamily = FontFamily.Monospace)
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(3.dp)
+                            ) {
+                                DigiVectorIcon(type = DigiIconType.QR, size = 8.dp, tint = Color.White)
+                                Text("SHOW QR MATRIX", fontSize = 7.sp, fontWeight = FontWeight.Bold, fontFamily = FontFamily.Monospace)
+                            }
                         }
                     }
                 }
@@ -969,7 +1084,13 @@ fun BattleScreen(
                         modifier = Modifier.height(26.dp),
                         colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFF37474F))
                     ) {
-                        Text("📋 PASTE", fontSize = 8.sp)
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(2.dp)
+                        ) {
+                            DigiVectorIcon(type = DigiIconType.COPY, size = 8.dp, tint = Color.White)
+                            Text("PASTE", fontSize = 8.sp)
+                        }
                     }
 
                     // Keypad toggle
@@ -980,7 +1101,17 @@ fun BattleScreen(
                             backgroundColor = if (showManualKeypad) Color(0xFFE65100) else Color(0xFF00695C)
                         )
                     ) {
-                        Text(if (showManualKeypad) "HIDE" else "⌨ KEYPAD", fontSize = 8.sp)
+                        if (showManualKeypad) {
+                            Text("HIDE", fontSize = 8.sp)
+                        } else {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(2.dp)
+                            ) {
+                                DigiVectorIcon(type = DigiIconType.KEYPAD, size = 8.dp, tint = Color.White)
+                                Text("KEYPAD", fontSize = 8.sp)
+                            }
+                        }
                     }
 
                     // Backspace
@@ -993,7 +1124,7 @@ fun BattleScreen(
                         modifier = Modifier.height(26.dp),
                         colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFFC62828))
                     ) {
-                        Text("⌫", fontSize = 8.sp)
+                        DigiVectorIcon(type = DigiIconType.BACKSPACE, size = 10.dp, tint = Color.White)
                     }
                 }
             }
@@ -1116,7 +1247,14 @@ fun BattleScreen(
                             .padding(horizontal = displayConfig.horizontalPadding),
                         colors = ButtonDefaults.buttonColors(backgroundColor = Color(fusionRecipe.fusionType.badgeColorHex))
                     ) {
-                        Text("⚡ DNA DIGIVOLVE -> ${targetSp.name} ⚡", fontSize = 8.sp, fontWeight = FontWeight.Black, color = Color.Black)
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(3.dp)
+                        ) {
+                            DigiVectorIcon(type = DigiIconType.BOLT, size = 8.dp, tint = Color.Black)
+                            Text("DNA DIGIVOLVE -> ${targetSp.name}", fontSize = 8.sp, fontWeight = FontWeight.Black, color = Color.Black)
+                            DigiVectorIcon(type = DigiIconType.BOLT, size = 8.dp, tint = Color.Black)
+                        }
                     }
                 }
             }
@@ -1135,7 +1273,14 @@ fun BattleScreen(
                         .padding(horizontal = displayConfig.horizontalPadding),
                     colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFFE53935))
                 ) {
-                    Text("⚔ START BATTLE ⚔", fontSize = 10.sp, fontWeight = FontWeight.Bold)
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(4.dp)
+                    ) {
+                        DigiVectorIcon(type = DigiIconType.BATTLE, size = 10.dp, tint = Color.White)
+                        Text("START BATTLE", fontSize = 10.sp, fontWeight = FontWeight.Bold)
+                        DigiVectorIcon(type = DigiIconType.BATTLE, size = 10.dp, tint = Color.White)
+                    }
                 }
             }
         }
@@ -1154,13 +1299,19 @@ fun BattleScreen(
                         .padding(6.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    Text(
-                        text = "⚡ DNA JOGRESS / DIGIXROS (${compatibleFusions.size})",
-                        fontSize = 8.sp,
-                        fontWeight = FontWeight.Black,
-                        color = Color(0xFFEA80FC),
-                        fontFamily = FontFamily.Monospace
-                    )
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(3.dp)
+                    ) {
+                        DigiVectorIcon(type = DigiIconType.BOLT, size = 8.dp, tint = Color(0xFFEA80FC))
+                        Text(
+                            text = "DNA JOGRESS / DIGIXROS (${compatibleFusions.size})",
+                            fontSize = 8.sp,
+                            fontWeight = FontWeight.Black,
+                            color = Color(0xFFEA80FC),
+                            fontFamily = FontFamily.Monospace
+                        )
+                    }
                     Spacer(modifier = Modifier.height(3.dp))
                     compatibleFusions.forEach { recipe ->
                         val partnerId = if (recipe.primarySpeciesId == petState.speciesId) recipe.secondarySpeciesId else recipe.primarySpeciesId
@@ -1177,7 +1328,7 @@ fun BattleScreen(
                         ) {
                             Column(modifier = Modifier.weight(1f)) {
                                 Text(
-                                    text = "+${partnerSp.name.take(8)} → ${targetSp.name.take(9)}",
+                                    text = "+${partnerSp.name.take(8)} -> ${targetSp.name.take(9)}",
                                     fontSize = 7.sp,
                                     fontWeight = FontWeight.Bold,
                                     color = Color.White,
@@ -1222,13 +1373,19 @@ fun BattleScreen(
                                             )
                                             repository.savePetState(fusedState)
                                             hapticManager.playVictoryFanfare()
-                                            battleStatusText = "⚡ Awakened ${targetSp.name}!"
+                                            battleStatusText = "Awakened ${targetSp.name}!"
                                         }
                                     },
                                     modifier = Modifier.height(22.dp),
                                     colors = ButtonDefaults.buttonColors(backgroundColor = Color(recipe.fusionType.badgeColorHex))
                                 ) {
-                                    Text("⚡FUSE", fontSize = 6.sp, fontWeight = FontWeight.Black, color = Color.Black, fontFamily = FontFamily.Monospace)
+                                    Row(
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.spacedBy(2.dp)
+                                    ) {
+                                        DigiVectorIcon(type = DigiIconType.BOLT, size = 7.dp, tint = Color.Black)
+                                        Text("FUSE", fontSize = 6.sp, fontWeight = FontWeight.Black, color = Color.Black, fontFamily = FontFamily.Monospace)
+                                    }
                                 }
                             }
                         }

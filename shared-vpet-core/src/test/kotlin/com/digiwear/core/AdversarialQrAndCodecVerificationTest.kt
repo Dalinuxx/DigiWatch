@@ -260,7 +260,7 @@ class AdversarialQrAndCodecVerificationTest {
             "0123456789ABCDEFGHJKMNPQRS",
             "DIGIMON_BATTLE_2026!@#$%^&*()_+",
             "日本語デジモンバトル",
-            "🦖💥⚡🛡️⚔️",
+            "\uD83E\uDD96\uD83D\uDCA5\u26A1\uD83D\uDEE1\uFE0F\u2694\uFE0F",
             "{\"player\":\"Taichi\",\"id\":401}",
             "SELECT * FROM digimon WHERE id = 1; --",
             "<battle fighter=\"greymon\" power=\"240\"/>",
@@ -541,7 +541,7 @@ class AdversarialQrAndCodecVerificationTest {
         }
 
         // Non-ASCII and Unicode characters
-        val unicodeStrings = listOf("デジモン", "0123456789ABCDEFGHJKMNPQR💥", "0123456789\u0000BCDEFGHJKMNPQRS")
+        val unicodeStrings = listOf("デジモン", "0123456789ABCDEFGHJKMNPQR\uD83D\uDCA5", "0123456789\u0000BCDEFGHJKMNPQRS")
         for (uStr in unicodeStrings) {
             try {
                 CommCodeCodec.decodeAuto(uStr)

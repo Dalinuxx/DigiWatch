@@ -13,8 +13,8 @@ class SpriteMatrixRegistryTest {
     private val validChars = setOf('.', '#', 'B', 'K', 'E', 'W', 'T', 'S', 'R', 'G', 'C')
 
     @Test
-    fun testAll500SpeciesHaveValidNonHollow16x16Matrices() {
-        assertEquals(500, PetSpecies.SPECIES_REGISTRY.size)
+    fun testAll550SpeciesHaveValidNonHollow16x16Matrices() {
+        assertEquals(550, PetSpecies.SPECIES_REGISTRY.size)
         for ((speciesId, species) in PetSpecies.SPECIES_REGISTRY) {
             val matrix = SpriteMatrixRegistry.getMatrix(speciesId, SpriteFrame.IDLE_A)
             assertEquals("Matrix row count for species $speciesId (${species.name}) must be 16", 16, matrix.size)
@@ -43,7 +43,7 @@ class SpriteMatrixRegistryTest {
     }
 
     @Test
-    fun testZeroDuplicateMatricesAcrossAll500Species() {
+    fun testZeroDuplicateMatricesAcrossAll550Species() {
         val seen = mutableMapOf<String, Int>()
         val duplicates = mutableListOf<String>()
         for ((speciesId, species) in PetSpecies.SPECIES_REGISTRY) {
@@ -58,11 +58,11 @@ class SpriteMatrixRegistryTest {
             println("DUPLICATES FOUND (${duplicates.size}):\n" + duplicates.joinToString("\n"))
         }
         assertTrue("Found ${duplicates.size} duplicate matrices:\n" + duplicates.joinToString("\n"), duplicates.isEmpty())
-        assertEquals(500, seen.size)
+        assertEquals(550, seen.size)
     }
 
     @Test
-    fun testZeroDuplicatePalettesAcrossAll500Species() {
+    fun testZeroDuplicatePalettesAcrossAll550Species() {
         val seen = mutableMapOf<SpritePalette, Int>()
         for ((speciesId, species) in PetSpecies.SPECIES_REGISTRY) {
             val palette = SpriteMatrixRegistry.getPalette(speciesId)
@@ -77,7 +77,7 @@ class SpriteMatrixRegistryTest {
             )
             seen[palette] = speciesId
         }
-        assertEquals(500, seen.size)
+        assertEquals(550, seen.size)
     }
 
     @Test
@@ -91,12 +91,36 @@ class SpriteMatrixRegistryTest {
             }
             assertNotEquals("IDLE_A and IDLE_B must differ for ${species.name}", frames[0], frames[1])
             assertNotEquals("WALK_A and WALK_B must differ for ${species.name}", frames[2], frames[3])
-            assertNotEquals("ATTACK_CHARGE and ATTACK_RELEASE must differ for ${species.name}", frames[8], frames[9])
+            assertNotEquals("SLEEP_A and SLEEP_B must differ for ${species.name}", frames[6], frames[7])
+            assertNotEquals("ATTACK_CHARGE and ATTACK_RELEASE must differ for ${species.name}", frames[9], frames[10])
         }
     }
 
     @Test
-    fun testAmbientModeOprUnder15PercentForAll500Species() {
+    fun testSleepAndInjuredFramesPreserveWhiteBodyFill() {
+        val whiteBodiedIds = listOf(102, 105, 106, 232, 307, 338, 427, 510)
+        for (speciesId in whiteBodiedIds) {
+            val idleW = SpriteMatrixRegistry.getMatrix(speciesId, SpriteFrame.IDLE_A)
+                .sumOf { row -> row.count { it == 'W' } }
+            if (idleW >= 6) {
+                val sleepW = SpriteMatrixRegistry.getMatrix(speciesId, SpriteFrame.SLEEP_A)
+                    .sumOf { row -> row.count { it == 'W' } }
+                val injuredW = SpriteMatrixRegistry.getMatrix(speciesId, SpriteFrame.INJURED)
+                    .sumOf { row -> row.count { it == 'W' } }
+                assertTrue(
+                    "Species $speciesId should preserve white body fill during SLEEP_A (idleW=$idleW, sleepW=$sleepW)",
+                    sleepW >= idleW / 2
+                )
+                assertTrue(
+                    "Species $speciesId should preserve white body fill during INJURED (idleW=$idleW, injuredW=$injuredW)",
+                    injuredW >= idleW / 2
+                )
+            }
+        }
+    }
+
+    @Test
+    fun testAmbientModeOprUnder15PercentForAll550Species() {
         for ((speciesId, species) in PetSpecies.SPECIES_REGISTRY) {
             for (frame in SpriteFrame.entries) {
                 val opr = SpriteMatrixRegistry.calculateAmbientOpr(speciesId, frame)

@@ -169,7 +169,7 @@ class CompanionQuickCareTest {
             "CURE_INJURY",
             "TRAIN_WIN",
             "HATCH_EGG:101",
-            "🍖",
+            "INVALID_RAW_MEAT",
             "123",
             "ACTION_QUICK_FEED",
             "ACTION_QUICK_CLEAN"

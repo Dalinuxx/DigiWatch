@@ -53,6 +53,7 @@ object AospLanSyncServer {
     @Volatile
     private var udpSocket: DatagramSocket? = null
 
+    @Synchronized
     fun start(context: Context) {
         val appContext = context.applicationContext
         if (tcpJob?.isActive != true) {
@@ -163,9 +164,18 @@ object AospLanSyncServer {
                         map["ambient_display_style"]?.let { repo.setAmbientStyle(it) }
                         map["hazard_alerts_enabled"]?.let { repo.setHazardAlertsEnabled(it.toBoolean()) }
                         map["clock_format_24h"]?.let { repo.setClockFormat24h(it.toBoolean()) }
+                        map["lifespan_canonical_enabled"]?.let { repo.setLifespanCanonicalEnabled(it.toBoolean()) }
+                        map["combat_injuries_enabled"]?.let { repo.setCombatInjuriesEnabled(it.toBoolean()) }
                         "OK"
                     } catch (_: Exception) {
                         "ERR"
+                    }
+                }
+                "/sync/request_memorials" -> {
+                    try {
+                        json.encodeToString(repo.getMemorials())
+                    } catch (_: Exception) {
+                        "[]"
                     }
                 }
                 "/sync/remote_care_action" -> {

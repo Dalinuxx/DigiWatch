@@ -45,12 +45,12 @@ fun EnvironmentParticleCanvas(
     modifier: Modifier = Modifier
 ) {
     val theme = remember(environmentEffect) {
-        val env = environmentEffect.lowercase().trim()
+        val env = environmentEffect.lowercase().trim().replace(' ', '_').replace('-', '_')
         when {
-            env in listOf("glitch_fog", "x_program_fog", "x_virus_rot", "dark_miasma") -> EnvTheme.GLITCH_FOG
-            env in listOf("subzero_frost", "cocytus_blizzard", "absolute_aurora", "fenrir_frost") -> EnvTheme.FROST_BLIZZARD
-            env in listOf("pyroclastic_flow", "heat_wave", "ancient_inferno", "hellfire_storm", "solar_flare", "gehenna_flames") -> EnvTheme.INFERNO_EMBERS
-            env in listOf("cosmic_nihilism", "quantum_erasure", "dark_gravity", "dark_annihilation", "grb_cataclysm", "seven_sins_maw", "temporal_singularity") -> EnvTheme.COSMIC_VOID
+            env in listOf("glitch_fog", "x_program_fog", "x_virus_rot", "dark_miasma", "miasma_fog") -> EnvTheme.GLITCH_FOG
+            env in listOf("subzero_frost", "cocytus_blizzard", "absolute_aurora", "fenrir_frost", "tidal_current") -> EnvTheme.FROST_BLIZZARD
+            env in listOf("pyroclastic_flow", "heat_wave", "magma_heat", "ancient_inferno", "hellfire_storm", "solar_flare", "gehenna_flames", "thunderstorm") -> EnvTheme.INFERNO_EMBERS
+            env in listOf("cosmic_nihilism", "quantum_erasure", "quantum_singularity", "zero_gravity", "apocalymon_void", "dark_area_sin_gates", "grb_wave_cataclysm", "dark_gravity", "dark_annihilation", "grb_cataclysm", "seven_sins_maw", "temporal_singularity") -> EnvTheme.COSMIC_VOID
             env in listOf("seraphic_grace", "holy_shield_aura", "divine_seals", "merciful_aurora", "aurora_blessing") -> EnvTheme.HOLY_BLESSING
             else -> EnvTheme.NONE
         }
