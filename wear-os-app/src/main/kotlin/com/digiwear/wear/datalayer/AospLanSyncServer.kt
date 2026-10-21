@@ -147,6 +147,10 @@ object AospLanSyncServer {
                 "/sync/request_settings" -> {
                     json.encodeToString(repo.getSettingsMap())
                 }
+                "/sync/request_memorials" -> {
+                    val list = repo.getMemorials()
+                    json.encodeToString(list)
+                }
                 "/sync/update_settings" -> {
                     try {
                         val map = json.decodeFromString<Map<String, String>>(payload)
@@ -169,13 +173,6 @@ object AospLanSyncServer {
                         "OK"
                     } catch (_: Exception) {
                         "ERR"
-                    }
-                }
-                "/sync/request_memorials" -> {
-                    try {
-                        json.encodeToString(repo.getMemorials())
-                    } catch (_: Exception) {
-                        "[]"
                     }
                 }
                 "/sync/remote_care_action" -> {

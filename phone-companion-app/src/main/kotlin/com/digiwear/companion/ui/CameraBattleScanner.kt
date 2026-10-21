@@ -56,6 +56,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -81,6 +82,7 @@ import com.google.mlkit.vision.barcode.BarcodeScanning
 import com.google.mlkit.vision.barcode.common.Barcode
 import com.google.mlkit.vision.common.InputImage
 import java.util.concurrent.Executors
+import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicLong
 import java.util.concurrent.atomic.AtomicReference
 
@@ -170,8 +172,12 @@ private fun CameraPreviewAndScanner(
     val lastScanTimestamp = remember { AtomicLong(0L) }
     val cameraProviderRef = remember { AtomicReference<ProcessCameraProvider?>(null) }
 
+    val currentOnCodeScanned by rememberUpdatedState(onCodeScanned)
+    val isDisposed = remember { AtomicBoolean(false) }
+
     DisposableEffect(Unit) {
         onDispose {
+            isDisposed.set(true)
             try {
                 cameraProviderRef.get()?.unbindAll()
                 cameraExecutor.shutdown()
@@ -210,6 +216,7 @@ private fun CameraPreviewAndScanner(
 
                 val cameraProviderFuture = ProcessCameraProvider.getInstance(ctx)
                 cameraProviderFuture.addListener({
+                    if (isDisposed.get()) return@addListener
                     try {
                         val cameraProvider = cameraProviderFuture.get()
                         cameraProviderRef.set(cameraProvider)
@@ -230,7 +237,7 @@ private fun CameraPreviewAndScanner(
                                     lastScannedCode.set(scannedRaw)
                                     lastScanTimestamp.set(now)
                                     ContextCompat.getMainExecutor(ctx).execute {
-                                        onCodeScanned(scannedRaw)
+                                        currentOnCodeScanned(scannedRaw)
                                     }
                                 }
                             }
@@ -407,22 +414,27 @@ private fun processImageProxy(
     val mediaImage = imageProxy.image
     if (mediaImage != null) {
         val inputImage = InputImage.fromMediaImage(mediaImage, imageProxy.imageInfo.rotationDegrees)
-        barcodeScanner.process(inputImage)
-            .addOnSuccessListener { barcodes ->
-                for (barcode in barcodes) {
-                    val rawValue = barcode.rawValue
-                    if (!rawValue.isNullOrBlank()) {
-                        onCodeDetected(rawValue)
-                        break
+        try {
+            barcodeScanner.process(inputImage)
+                .addOnSuccessListener { barcodes ->
+                    for (barcode in barcodes) {
+                        val rawValue = barcode.rawValue
+                        if (!rawValue.isNullOrBlank()) {
+                            onCodeDetected(rawValue)
+                            break
+                        }
                     }
                 }
-            }
-            .addOnFailureListener { e ->
-                Log.w("CameraBattleScanner", "Barcode analysis failure", e)
-            }
-            .addOnCompleteListener {
-                imageProxy.close()
-            }
+                .addOnFailureListener { e ->
+                    Log.w("CameraBattleScanner", "Barcode analysis failure", e)
+                }
+                .addOnCompleteListener {
+                    imageProxy.close()
+                }
+        } catch (e: Exception) {
+            Log.w("CameraBattleScanner", "Barcode scanner submission failure", e)
+            imageProxy.close()
+        }
     } else {
         imageProxy.close()
     }

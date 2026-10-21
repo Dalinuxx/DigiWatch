@@ -1,4 +1,4 @@
-﻿package com.digiwear.core
+package com.digiwear.core
 
 import com.digiwear.core.engine.EvolutionEngine
 import com.digiwear.core.model.PetSpecies

@@ -1,4 +1,4 @@
-﻿package com.digiwear.wear.nfc
+package com.digiwear.wear.nfc
 
 import android.app.Activity
 import android.content.Context

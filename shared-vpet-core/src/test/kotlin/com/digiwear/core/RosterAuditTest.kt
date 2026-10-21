@@ -273,6 +273,10 @@ class RosterAuditTest {
 
     @Test
     fun generateAuthoritativeDigivolutionGuideMarkdown() {
+        if (System.getProperty("generateDocs") != "true") {
+            // Fast CI path: skip heavy 160MB poster rendering during standard test passes
+            return
+        }
         val registry = PetSpecies.SPECIES_REGISTRY.values.sortedBy { it.id }
         val docsDir = java.io.File("../docs").apply { mkdirs() }
         val rosterSheetFile = java.io.File(docsDir, "digiwear_roster_spritesheet.png")

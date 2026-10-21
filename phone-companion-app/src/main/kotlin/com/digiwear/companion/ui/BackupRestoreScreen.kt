@@ -1,4 +1,4 @@
-﻿package com.digiwear.companion.ui
+package com.digiwear.companion.ui
 
 import android.widget.Toast
 import androidx.compose.foundation.BorderStroke

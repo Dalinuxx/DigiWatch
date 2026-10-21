@@ -1,4 +1,4 @@
-﻿package com.digiwear.companion
+package com.digiwear.companion
 
 import android.content.Intent
 import android.nfc.NfcAdapter
@@ -83,6 +83,7 @@ class MainActivity : ComponentActivity() {
 
         db = PhoneDatabase.getInstance(this)
         wearableManager = PhoneWearableManager(this)
+        handleNfcIntent(intent)
 
         setContent {
             MaterialTheme(
@@ -117,10 +118,17 @@ class MainActivity : ComponentActivity() {
             com.google.android.gms.wearable.Wearable.getMessageClient(this).removeListener(relayListener)
         } catch (_: Exception) {}
         NfcDuelManager.disableReaderMode(this)
+        NfcBattleBridge.pendingTagToWrite = null
     }
 
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
+        setIntent(intent)
+        handleNfcIntent(intent)
+    }
+
+    private fun handleNfcIntent(intent: Intent?) {
+        if (intent == null) return
         val tag = androidx.core.content.IntentCompat.getParcelableExtra(intent, NfcAdapter.EXTRA_TAG, Tag::class.java)
         if (tag != null) {
             NfcBattleBridge.pendingTagToWrite = tag

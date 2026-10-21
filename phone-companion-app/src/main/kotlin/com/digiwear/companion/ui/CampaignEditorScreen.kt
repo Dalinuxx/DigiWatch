@@ -30,6 +30,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -65,6 +66,7 @@ fun CampaignEditorScreen(
     val scope = rememberCoroutineScope()
     val scrollState = rememberScrollState()
     val builtInSagas = remember { AdventureEngine.getBuiltInCampaigns() }
+    val customCampaigns by db.phoneDao().getAllCampaignsFlow().collectAsState(initial = emptyList())
 
     // Parse on start
     LaunchedEffect(rawJson) {
@@ -174,6 +176,99 @@ fun CampaignEditorScreen(
                                         fontWeight = FontWeight.Bold,
                                         fontFamily = FontFamily.Monospace
                                     )
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        if (customCampaigns.isNotEmpty()) {
+            Spacer(modifier = Modifier.height(16.dp))
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                colors = CardDefaults.cardColors(containerColor = DigiWearPalette.CardSurface),
+                shape = RoundedCornerShape(16.dp),
+                border = BorderStroke(1.dp, DigiWearPalette.CardBorder)
+            ) {
+                Column(modifier = Modifier.padding(14.dp)) {
+                    Text(
+                        text = "▸ SAVED CUSTOM CAMPAIGNS (${customCampaigns.size})",
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color(0xFFFFD54F),
+                        fontFamily = FontFamily.Monospace
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .horizontalScroll(rememberScrollState()),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        customCampaigns.forEach { c ->
+                            val isCurrent = parsedStory?.campaignId.equals(c.campaignId, ignoreCase = true)
+                            Card(
+                                modifier = Modifier.width(220.dp),
+                                colors = CardDefaults.cardColors(
+                                    containerColor = if (isCurrent) Color(0xFF332A15) else DigiWearPalette.CardInner
+                                ),
+                                shape = RoundedCornerShape(10.dp),
+                                border = BorderStroke(
+                                    1.dp,
+                                    if (isCurrent) Color(0xFFFFD54F) else Color(0xFF263238)
+                                )
+                            ) {
+                                Column(modifier = Modifier.padding(10.dp)) {
+                                    Text(
+                                        text = c.title,
+                                        fontSize = 11.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        color = if (isCurrent) Color(0xFFFFE082) else Color.White,
+                                        maxLines = 1
+                                    )
+                                    Spacer(modifier = Modifier.height(2.dp))
+                                    Text(
+                                        text = "ID: ${c.campaignId}",
+                                        fontSize = 9.sp,
+                                        color = Color(0xFFB0BEC5),
+                                        fontFamily = FontFamily.Monospace
+                                    )
+                                    Spacer(modifier = Modifier.height(8.dp))
+                                    Row(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        horizontalArrangement = Arrangement.spacedBy(6.dp)
+                                    ) {
+                                        Button(
+                                            onClick = {
+                                                rawJson = c.jsonContent
+                                            },
+                                            modifier = Modifier.weight(1f).height(28.dp),
+                                            colors = ButtonDefaults.buttonColors(
+                                                containerColor = if (isCurrent) Color(0xFFFFA000) else Color(0xFF37474F)
+                                            )
+                                        ) {
+                                            Text(
+                                                text = if (isCurrent) "LOADED" else "LOAD",
+                                                fontSize = 9.sp,
+                                                fontWeight = FontWeight.Bold,
+                                                fontFamily = FontFamily.Monospace
+                                            )
+                                        }
+                                        OutlinedButton(
+                                            onClick = {
+                                                scope.launch {
+                                                    db.phoneDao().deleteCampaign(c.campaignId)
+                                                }
+                                            },
+                                            modifier = Modifier.height(28.dp),
+                                            colors = ButtonDefaults.outlinedButtonColors(contentColor = Color(0xFFFF5252)),
+                                            border = BorderStroke(1.dp, Color(0x66FF5252))
+                                        ) {
+                                            Text("DEL", fontSize = 8.5.sp, fontFamily = FontFamily.Monospace)
+                                        }
+                                    }
                                 }
                             }
                         }

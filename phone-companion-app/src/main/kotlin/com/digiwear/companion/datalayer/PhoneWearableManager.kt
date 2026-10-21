@@ -285,6 +285,55 @@ class PhoneWearableManager(private val context: Context) {
         }
     }
 
+    suspend fun requestMemorialsFromWatch(): List<com.digiwear.core.model.MemorialRecord>? = withContext(Dispatchers.IO) {
+        val nodes = getConnectedWatchNodes()
+        if (nodes.isEmpty()) return@withContext null
+
+        val aospNode = nodes.firstOrNull { it.startsWith(AOSP_NODE_PREFIX) }
+        if (aospNode != null) {
+            val ip = aospNode.removePrefix(AOSP_NODE_PREFIX)
+            val resp = sendTcpCommandToAospWatch(ip, "/sync/request_memorials", "")
+            if (!resp.isNullOrBlank()) {
+                runCatching { return@withContext json.decodeFromString<List<com.digiwear.core.model.MemorialRecord>>(resp) }
+            }
+        }
+
+        val wearNodes = nodes.filterNot { it.startsWith(AOSP_NODE_PREFIX) }
+        val mc = messageClient ?: return@withContext null
+        if (wearNodes.isEmpty()) return@withContext null
+
+        val deferred = CompletableDeferred<List<com.digiwear.core.model.MemorialRecord>?>()
+        val listener = MessageClient.OnMessageReceivedListener { event ->
+            if (event.path == "/sync/response_memorials") {
+                try {
+                    val str = String(event.data, Charsets.UTF_8)
+                    val list = json.decodeFromString<List<com.digiwear.core.model.MemorialRecord>>(str)
+                    deferred.complete(list)
+                } catch (_: Exception) {
+                    deferred.complete(null)
+                }
+            }
+        }
+
+        try {
+            Tasks.await(mc.addListener(listener))
+            for (node in wearNodes) {
+                try {
+                    mc.sendMessage(node, "/sync/request_memorials", ByteArray(0))
+                } catch (_: Exception) {}
+            }
+            withTimeoutOrNull(2500L) {
+                deferred.await()
+            }
+        } catch (_: Exception) {
+            null
+        } finally {
+            try {
+                Tasks.await(mc.removeListener(listener))
+            } catch (_: Exception) {}
+        }
+    }
+
     suspend fun sendSettingsToWatch(
         themeId: String,
         vibrationEnabled: Boolean,

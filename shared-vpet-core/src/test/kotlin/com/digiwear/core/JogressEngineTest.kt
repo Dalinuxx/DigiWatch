@@ -1,4 +1,4 @@
-﻿package com.digiwear.core
+package com.digiwear.core
 
 import com.digiwear.core.codec.CommCodeCodec
 import com.digiwear.core.fusion.FusionType

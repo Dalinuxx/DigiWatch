@@ -64,27 +64,47 @@ object DeterministicBattleSolver {
 
         val prng = Random(unifiedSeed)
 
-        var hpA = fighterA.currentHp
-        var hpB = fighterB.currentHp
+        // Canonicalize fighter order so resolution order and initiative are 100% symmetric
+        // regardless of which peer device passes its local pet as fighterA vs fighterB.
+        val aIsPrimary = when {
+            seed1 != seed2 -> seed1 < seed2
+            fighterA.speciesId != fighterB.speciesId -> fighterA.speciesId < fighterB.speciesId
+            else -> fighterA.id <= fighterB.id
+        }
+
+        val primaryFighter = if (aIsPrimary) fighterA else fighterB
+        val secondaryFighter = if (aIsPrimary) fighterB else fighterA
+        val primaryCritBoost = if (aIsPrimary) attackerCritBoost else false
+        val secondaryCritBoost = if (!aIsPrimary) attackerCritBoost else false
+
+        var canonHp0 = primaryFighter.currentHp
+        var canonHp1 = secondaryFighter.currentHp
         val turns = mutableListOf<BattleTurn>()
         val env = environmentEffect.lowercase().trim().replace(Regex("[\\s-]+"), "_")
 
-        val effPowerA = computeEffectivePower(fighterA)
-        val effPowerB = computeEffectivePower(fighterB)
-        val attrMultA = fighterA.attribute.damageMultiplierAgainst(fighterB.attribute)
-        val attrMultB = fighterB.attribute.damageMultiplierAgainst(fighterA.attribute)
-        val hitRateA = computeHitRatePercent(fighterA, fighterB, attackerCritBoost)
-        val hitRateB = computeHitRatePercent(fighterB, fighterA, false)
+        val effPower0 = computeEffectivePower(primaryFighter)
+        val effPower1 = computeEffectivePower(secondaryFighter)
+        val attrMult0 = primaryFighter.attribute.damageMultiplierAgainst(secondaryFighter.attribute)
+        val attrMult1 = secondaryFighter.attribute.damageMultiplierAgainst(primaryFighter.attribute)
+        val hitRate0 = computeHitRatePercent(primaryFighter, secondaryFighter, primaryCritBoost)
+        val hitRate1 = computeHitRatePercent(secondaryFighter, primaryFighter, secondaryCritBoost)
+
+        val effPowerA = if (aIsPrimary) effPower0 else effPower1
+        val effPowerB = if (aIsPrimary) effPower1 else effPower0
+        val attrMultA = if (aIsPrimary) attrMult0 else attrMult1
+        val attrMultB = if (aIsPrimary) attrMult1 else attrMult0
+        val hitRateA = if (aIsPrimary) hitRate0 else hitRate1
+        val hitRateB = if (aIsPrimary) hitRate1 else hitRate0
 
         for (round in 1..MAX_ROUNDS) {
             // Determine turn order for this round
             val initiativeRoll = prng.nextInt(100)
-            val aFirst = initiativeRoll < 50
+            val primaryFirst = initiativeRoll < 50
 
-            val (firstFighter, firstIdx, firstHp, secondFighter, secondIdx, secondHp) = if (aFirst) {
-                Order(fighterA, 0, hpA, fighterB, 1, hpB)
+            val (firstFighter, firstIdx, firstHp, secondFighter, secondIdx, secondHp) = if (primaryFirst) {
+                Order(primaryFighter, 0, canonHp0, secondaryFighter, 1, canonHp1)
             } else {
-                Order(fighterB, 1, hpB, fighterA, 0, hpA)
+                Order(secondaryFighter, 1, canonHp1, primaryFighter, 0, canonHp0)
             }
 
             // First attacker strikes
@@ -93,11 +113,11 @@ object DeterministicBattleSolver {
             val isAdvFirst = multFirst > 1.0f || envMultFirst > 1.0f
             val critThresholdFirst = if (env == "glitch_fog" || env == "x_program_fog") 25 else 15
             val isNaturalCritFirst = prng.nextInt(100) < critThresholdFirst
-            val isBoostedFirst = attackerCritBoost && firstIdx == 0
+            val isBoostedFirst = if (firstIdx == 0) primaryCritBoost else secondaryCritBoost
             val isCritFirst = isNaturalCritFirst || isBoostedFirst
             val varianceFirst = 0.9f + (prng.nextInt(21) / 100f) // 0.90 to 1.10
 
-            val effFirst = if (firstIdx == 0) effPowerA else effPowerB
+            val effFirst = if (firstIdx == 0) effPower0 else effPower1
             var dmgFirst = (effFirst * 0.35f) * multFirst * envMultFirst * varianceFirst
             if (isNaturalCritFirst) dmgFirst *= 1.5f
             if (isBoostedFirst) dmgFirst *= 1.25f
@@ -115,28 +135,31 @@ object DeterministicBattleSolver {
                 attackType = attackTypeFirst
             )
 
+            val callerAttackerIdxFirst = if (aIsPrimary) firstIdx else (1 - firstIdx)
+            val callerDefenderIdxFirst = if (aIsPrimary) secondIdx else (1 - secondIdx)
+
             turns.add(
                 BattleTurn(
                     round = round,
-                    attackerIndex = firstIdx,
+                    attackerIndex = callerAttackerIdxFirst,
                     attackerName = firstFighter.name,
-                    defenderIndex = secondIdx,
+                    defenderIndex = callerDefenderIdxFirst,
                     defenderName = secondFighter.name,
                     damage = finalDmgFirst,
                     defenderRemainingHp = remainingSecondHp,
                     isAdvantage = isAdvFirst,
                     isCritical = isCritFirst,
                     attackType = attackTypeFirst,
-                    hitRatePercent = if (firstIdx == 0) hitRateA else hitRateB,
-                    effectivePower = if (firstIdx == 0) effPowerA else effPowerB,
+                    hitRatePercent = if (firstIdx == 0) hitRate0 else hitRate1,
+                    effectivePower = if (firstIdx == 0) effPower0 else effPower1,
                     moveName = moveNameFirst
                 )
             )
 
             if (firstIdx == 0) {
-                hpB = remainingSecondHp
+                canonHp1 = remainingSecondHp
             } else {
-                hpA = remainingSecondHp
+                canonHp0 = remainingSecondHp
             }
 
             if (remainingSecondHp <= 0) {
@@ -149,11 +172,11 @@ object DeterministicBattleSolver {
             val isAdvSecond = multSecond > 1.0f || envMultSecond > 1.0f
             val critThresholdSecond = if (env == "glitch_fog" || env == "x_program_fog") 25 else 15
             val isNaturalCritSecond = prng.nextInt(100) < critThresholdSecond
-            val isBoostedSecond = attackerCritBoost && secondIdx == 0
+            val isBoostedSecond = if (secondIdx == 0) primaryCritBoost else secondaryCritBoost
             val isCritSecond = isNaturalCritSecond || isBoostedSecond
             val varianceSecond = 0.9f + (prng.nextInt(21) / 100f)
 
-            val effSecond = if (secondIdx == 0) effPowerA else effPowerB
+            val effSecond = if (secondIdx == 0) effPower0 else effPower1
             var dmgSecond = (effSecond * 0.35f) * multSecond * envMultSecond * varianceSecond
             if (isNaturalCritSecond) dmgSecond *= 1.5f
             if (isBoostedSecond) dmgSecond *= 1.25f
@@ -164,7 +187,7 @@ object DeterministicBattleSolver {
                 else -> "SINGLE"
             }
 
-            val currentFirstHp = if (firstIdx == 0) hpA else hpB
+            val currentFirstHp = if (firstIdx == 0) canonHp0 else canonHp1
             val remainingFirstHp = max(0, currentFirstHp - finalDmgSecond)
 
             val moveNameSecond = SignatureAttackRegistry.getAttackName(
@@ -173,28 +196,31 @@ object DeterministicBattleSolver {
                 attackType = attackTypeSecond
             )
 
+            val callerAttackerIdxSecond = if (aIsPrimary) secondIdx else (1 - secondIdx)
+            val callerDefenderIdxSecond = if (aIsPrimary) firstIdx else (1 - firstIdx)
+
             turns.add(
                 BattleTurn(
                     round = round,
-                    attackerIndex = secondIdx,
+                    attackerIndex = callerAttackerIdxSecond,
                     attackerName = secondFighter.name,
-                    defenderIndex = firstIdx,
+                    defenderIndex = callerDefenderIdxSecond,
                     defenderName = firstFighter.name,
                     damage = finalDmgSecond,
                     defenderRemainingHp = remainingFirstHp,
                     isAdvantage = isAdvSecond,
                     isCritical = isCritSecond,
                     attackType = attackTypeSecond,
-                    hitRatePercent = if (secondIdx == 0) hitRateA else hitRateB,
-                    effectivePower = if (secondIdx == 0) effPowerA else effPowerB,
+                    hitRatePercent = if (secondIdx == 0) hitRate0 else hitRate1,
+                    effectivePower = if (secondIdx == 0) effPower0 else effPower1,
                     moveName = moveNameSecond
                 )
             )
 
             if (firstIdx == 0) {
-                hpA = remainingFirstHp
+                canonHp0 = remainingFirstHp
             } else {
-                hpB = remainingFirstHp
+                canonHp1 = remainingFirstHp
             }
 
             if (remainingFirstHp <= 0) {
@@ -202,19 +228,28 @@ object DeterministicBattleSolver {
             }
         }
 
-        val winnerIndex = when {
-            hpA <= 0 && hpB > 0 -> 1
-            hpB <= 0 && hpA > 0 -> 0
-            hpA <= 0 && hpB <= 0 -> -1
+        val hpA = if (aIsPrimary) canonHp0 else canonHp1
+        val hpB = if (aIsPrimary) canonHp1 else canonHp0
+
+        val canonWinnerIndex = when {
+            canonHp0 <= 0 && canonHp1 > 0 -> 1
+            canonHp1 <= 0 && canonHp0 > 0 -> 0
+            canonHp0 <= 0 && canonHp1 <= 0 -> -1
             else -> {
-                val ratioA = hpA.toFloat() / fighterA.maxHp
-                val ratioB = hpB.toFloat() / fighterB.maxHp
+                val ratio0 = canonHp0.toFloat() / primaryFighter.maxHp
+                val ratio1 = canonHp1.toFloat() / secondaryFighter.maxHp
                 when {
-                    ratioA > ratioB -> 0
-                    ratioB > ratioA -> 1
+                    ratio0 > ratio1 -> 0
+                    ratio1 > ratio0 -> 1
                     else -> -1
                 }
             }
+        }
+
+        val winnerIndex = when (canonWinnerIndex) {
+            0 -> if (aIsPrimary) 0 else 1
+            1 -> if (aIsPrimary) 1 else 0
+            else -> -1
         }
 
         val attrDesc = when {

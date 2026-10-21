@@ -1,4 +1,4 @@
-﻿package com.digiwear.core.model
+package com.digiwear.core.model
 
 import kotlinx.serialization.Serializable
 

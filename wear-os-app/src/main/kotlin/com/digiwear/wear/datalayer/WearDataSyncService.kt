@@ -49,6 +49,14 @@ class WearDataSyncService : WearableListenerService() {
                         .sendMessage(messageEvent.sourceNodeId, "/sync/response_settings", settingsPayload)
                 }
             }
+            "/sync/request_memorials" -> {
+                scope.launch {
+                    val list = repo.getMemorials()
+                    val payload = json.encodeToString(list).toByteArray(Charsets.UTF_8)
+                    Wearable.getMessageClient(applicationContext)
+                        .sendMessage(messageEvent.sourceNodeId, "/sync/response_memorials", payload)
+                }
+            }
             "/sync/update_settings" -> {
                 scope.launch {
                     try {
@@ -102,16 +110,6 @@ class WearDataSyncService : WearableListenerService() {
                         map["combat_injuries_enabled"]?.let { injStr ->
                             repo.setCombatInjuriesEnabled(injStr.toBoolean())
                         }
-                    } catch (_: Exception) {}
-                }
-            }
-            "/sync/request_memorials" -> {
-                scope.launch {
-                    try {
-                        val memorials = repo.getMemorials()
-                        val payload = json.encodeToString(memorials).toByteArray(Charsets.UTF_8)
-                        Wearable.getMessageClient(applicationContext)
-                            .sendMessage(messageEvent.sourceNodeId, "/sync/response_memorials", payload)
                     } catch (_: Exception) {}
                 }
             }

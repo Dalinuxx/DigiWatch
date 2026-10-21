@@ -1,4 +1,4 @@
-﻿package com.digiwear.core.render
+package com.digiwear.core.render
 
 /**
  * Dot-matrix pixel art matrices and palettes for all master expansion species.

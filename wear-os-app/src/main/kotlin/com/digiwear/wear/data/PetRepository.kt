@@ -476,6 +476,51 @@ class PetRepository private constructor(context: Context) {
         }
     }
 
+    private suspend fun processDecayLocked(currentUtc: Long): PetState {
+        val current = getPetState()
+        val isCanonical = _lifespanCanonicalEnabledFlow.value
+        val localOffset = ZoneId.systemDefault().rules.getOffset(Instant.ofEpochSecond(currentUtc))
+        val sleepMode = _sleepScheduleFlow.value
+        val updated = PetSimulationEngine.processDelta(
+            currentState = current,
+            currentTimestampUtc = currentUtc,
+            timeZoneOffset = localOffset,
+            sleepScheduleMode = sleepMode,
+            isCanonicalLifespanEnabled = isCanonical
+        )
+        if (updated.isDeceased && !current.isDeceased) {
+            val memorial = PetSimulationEngine.createMemorialRecord(updated)
+            dao.insertMemorial(MemorialEntity.fromDomain(memorial))
+        }
+        val evolved = if (!updated.isDeceased) EvolutionEngine.evaluateEvolution(updated) else null
+        val finalState = if (evolved != null) {
+            EvolutionEngine.evolve(updated, evolved, currentUtc)
+        } else {
+            updated
+        }
+
+        val biologicalStateChanged =
+            finalState.speciesId != current.speciesId ||
+            finalState.hunger != current.hunger ||
+            finalState.strength != current.strength ||
+            finalState.wasteCount != current.wasteCount ||
+            finalState.careMistakes != current.careMistakes ||
+            finalState.isSleeping != current.isSleeping ||
+            finalState.lightsOff != current.lightsOff ||
+            finalState.isInjured != current.isInjured ||
+            finalState.isDeceased != current.isDeceased ||
+            finalState.attentionCallActive != current.attentionCallActive ||
+            finalState.attentionCallTimestampUtc != current.attentionCallTimestampUtc
+
+        val checkpointDue = current.lastProcessedTimestampUtc <= 0L ||
+            (currentUtc - current.lastProcessedTimestampUtc) >= 60L
+
+        if (biologicalStateChanged || checkpointDue) {
+            savePetState(finalState)
+        }
+        return finalState
+    }
+
     /**
      * Processes time-delta decay based on UTC timestamps.
      * Coalesces SQLite writes so flash storage is only written when physiological metrics change
@@ -483,54 +528,13 @@ class PetRepository private constructor(context: Context) {
      */
     suspend fun processDecay(currentUtc: Long = System.currentTimeMillis() / 1000L): PetState = withContext(Dispatchers.IO) {
         stateMutex.withLock {
-            val current = getPetState()
-            val isCanonical = _lifespanCanonicalEnabledFlow.value
-            val localOffset = ZoneId.systemDefault().rules.getOffset(Instant.ofEpochSecond(currentUtc))
-            val sleepMode = _sleepScheduleFlow.value
-            val updated = PetSimulationEngine.processDelta(
-                currentState = current,
-                currentTimestampUtc = currentUtc,
-                timeZoneOffset = localOffset,
-                sleepScheduleMode = sleepMode,
-                isCanonicalLifespanEnabled = isCanonical
-            )
-            if (updated.isDeceased && !current.isDeceased) {
-                val memorial = PetSimulationEngine.createMemorialRecord(updated)
-                dao.insertMemorial(MemorialEntity.fromDomain(memorial))
-            }
-            val evolved = if (!updated.isDeceased) EvolutionEngine.evaluateEvolution(updated) else null
-            val finalState = if (evolved != null) {
-                EvolutionEngine.evolve(updated, evolved, currentUtc)
-            } else {
-                updated
-            }
-
-            val biologicalStateChanged =
-                finalState.speciesId != current.speciesId ||
-                finalState.hunger != current.hunger ||
-                finalState.strength != current.strength ||
-                finalState.wasteCount != current.wasteCount ||
-                finalState.careMistakes != current.careMistakes ||
-                finalState.isSleeping != current.isSleeping ||
-                finalState.lightsOff != current.lightsOff ||
-                finalState.isInjured != current.isInjured ||
-                finalState.isDeceased != current.isDeceased ||
-                finalState.attentionCallActive != current.attentionCallActive ||
-                finalState.attentionCallTimestampUtc != current.attentionCallTimestampUtc
-
-            val checkpointDue = current.lastProcessedTimestampUtc <= 0L ||
-                (currentUtc - current.lastProcessedTimestampUtc) >= 60L
-
-            if (biologicalStateChanged || checkpointDue) {
-                savePetState(finalState)
-            }
-            finalState
+            processDecayLocked(currentUtc)
         }
     }
 
     suspend fun feedMeal(currentUtc: Long = System.currentTimeMillis() / 1000L): PetState = withContext(Dispatchers.IO) {
         stateMutex.withLock {
-            val current = getPetState()
+            val current = processDecayLocked(currentUtc)
             val updated = PetSimulationEngine.feedMeal(current, currentUtc)
             savePetState(updated)
             updated
@@ -539,16 +543,16 @@ class PetRepository private constructor(context: Context) {
 
     suspend fun feedProtein(currentUtc: Long = System.currentTimeMillis() / 1000L): PetState = withContext(Dispatchers.IO) {
         stateMutex.withLock {
-            val current = getPetState()
+            val current = processDecayLocked(currentUtc)
             val updated = PetSimulationEngine.feedProtein(current, currentUtc)
             savePetState(updated)
             updated
         }
     }
 
-    suspend fun cleanWaste(): PetState = withContext(Dispatchers.IO) {
+    suspend fun cleanWaste(currentUtc: Long = System.currentTimeMillis() / 1000L): PetState = withContext(Dispatchers.IO) {
         stateMutex.withLock {
-            val current = getPetState()
+            val current = processDecayLocked(currentUtc)
             val updated = PetSimulationEngine.cleanWaste(current)
             savePetState(updated)
             updated
@@ -557,7 +561,7 @@ class PetRepository private constructor(context: Context) {
 
     suspend fun toggleColdSleep(currentUtc: Long = System.currentTimeMillis() / 1000L): PetState = withContext(Dispatchers.IO) {
         stateMutex.withLock {
-            val current = getPetState()
+            val current = processDecayLocked(currentUtc)
             val updated = PetSimulationEngine.toggleColdSleep(current, currentUtc)
             savePetState(updated)
             updated
@@ -566,7 +570,7 @@ class PetRepository private constructor(context: Context) {
 
     suspend fun toggleLights(currentUtc: Long = System.currentTimeMillis() / 1000L): PetState = withContext(Dispatchers.IO) {
         stateMutex.withLock {
-            val current = getPetState()
+            val current = processDecayLocked(currentUtc)
             val updated = PetSimulationEngine.toggleLights(current, currentUtc)
             savePetState(updated)
             updated
@@ -575,25 +579,25 @@ class PetRepository private constructor(context: Context) {
 
     suspend fun train(won: Boolean, currentUtc: Long = System.currentTimeMillis() / 1000L): PetState = withContext(Dispatchers.IO) {
         stateMutex.withLock {
-            val current = getPetState()
+            val current = processDecayLocked(currentUtc)
             val updated = PetSimulationEngine.train(current, won, currentUtc)
             savePetState(updated)
             updated
         }
     }
 
-    suspend fun cureInjury(): PetState = withContext(Dispatchers.IO) {
+    suspend fun cureInjury(currentUtc: Long = System.currentTimeMillis() / 1000L): PetState = withContext(Dispatchers.IO) {
         stateMutex.withLock {
-            val current = getPetState()
+            val current = processDecayLocked(currentUtc)
             val updated = PetSimulationEngine.cureInjury(current)
             savePetState(updated)
             updated
         }
     }
 
-    suspend fun recordBattleResult(won: Boolean): Pair<PetState, Boolean> = withContext(Dispatchers.IO) {
+    suspend fun recordBattleResult(won: Boolean, currentUtc: Long = System.currentTimeMillis() / 1000L): Pair<PetState, Boolean> = withContext(Dispatchers.IO) {
         stateMutex.withLock {
-            val current = getPetState()
+            val current = processDecayLocked(currentUtc)
             val (updated, wasInjured) = PetSimulationEngine.processBattleOutcome(
                 state = current,
                 won = won,
@@ -601,7 +605,7 @@ class PetRepository private constructor(context: Context) {
             )
             val evolved = EvolutionEngine.evaluateEvolution(updated)
             val finalState = if (evolved != null) {
-                EvolutionEngine.evolve(updated, evolved, System.currentTimeMillis() / 1000L)
+                EvolutionEngine.evolve(updated, evolved, currentUtc)
             } else {
                 updated
             }

@@ -9,6 +9,7 @@ import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -29,6 +30,7 @@ import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.FlashOn
 import androidx.compose.material.icons.filled.Search
+import com.digiwear.companion.data.CompanionMemorialEntity
 import com.digiwear.companion.data.SyncedPetEntity
 import com.digiwear.core.fusion.JogressEngine
 import com.digiwear.core.fusion.JogressRecipe
@@ -459,7 +461,7 @@ fun DigiVaultScreen(
                                 monsterId = storedPet.speciesId,
                                 stage = species.stage,
                                 attribute = species.attribute,
-                                basePowerHp = species.baseHp + species.basePower,
+                                basePowerHp = species.basePower,
                                 historicalVictories = storedPet.victories,
                                 trainingEffort = storedPet.effort,
                                 battleRngSeed = seed
@@ -485,6 +487,40 @@ fun DigiVaultScreen(
         }
     } else {
         // Memorial Graveyard View
+        Row(
+            modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = "HALL OF FAME // MEMORIAL GRAVEYARD",
+                fontSize = 11.sp,
+                fontWeight = FontWeight.Bold,
+                color = Color(0xFF80CBC4),
+                fontFamily = FontFamily.Monospace
+            )
+            Button(
+                onClick = {
+                    scope.launch {
+                        val records = wearableManager.requestMemorialsFromWatch()
+                        if (!records.isNullOrEmpty()) {
+                            for (r in records) {
+                                db.phoneDao().insertMemorial(CompanionMemorialEntity.fromDomain(r))
+                            }
+                            actionStatusMessage = "Synced ${records.size} memorial record(s) from Smartwatch!"
+                        } else {
+                            actionStatusMessage = "No new memorial records on Smartwatch (or watch offline)"
+                        }
+                    }
+                },
+                modifier = Modifier.height(28.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF00695C)),
+                contentPadding = PaddingValues(horizontal = 8.dp)
+            ) {
+                Text("SYNC FROM WATCH", fontSize = 9.sp, fontWeight = FontWeight.Bold, fontFamily = FontFamily.Monospace)
+            }
+        }
+
         if (memorials.isEmpty()) {
             Box(
                 modifier = Modifier

@@ -1,4 +1,4 @@
-﻿package com.digiwear.wear.input
+package com.digiwear.wear.input
 
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.MutableSharedFlow

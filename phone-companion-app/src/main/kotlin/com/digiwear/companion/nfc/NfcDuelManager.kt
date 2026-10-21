@@ -1,4 +1,4 @@
-﻿package com.digiwear.companion.nfc
+package com.digiwear.companion.nfc
 
 import android.app.Activity
 import android.content.Context

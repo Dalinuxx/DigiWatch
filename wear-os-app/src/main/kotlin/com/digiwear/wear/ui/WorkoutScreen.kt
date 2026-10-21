@@ -181,19 +181,22 @@ fun WorkoutScreen(
         contentAlignment = Alignment.Center
     ) {
         if (summary == null) {
+            val displayConfig = WatchDisplayConfig.current()
+            val horizInset = if (displayConfig.isRound) 18.dp else 8.dp
+            val topInset = if (displayConfig.isRound) 14.dp else 6.dp
+
             // Active Workout HUD
             Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(horizontal = 8.dp, vertical = 6.dp),
+                    .padding(horizontal = horizInset, vertical = topInset),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.SpaceBetween
             ) {
                 // Top Header: Type & Zone Pill
                 Row(
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(top = 4.dp),
+                        .fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {

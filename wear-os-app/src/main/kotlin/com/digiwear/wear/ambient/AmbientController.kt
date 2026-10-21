@@ -1,4 +1,4 @@
-﻿package com.digiwear.wear.ambient
+package com.digiwear.wear.ambient
 
 import androidx.activity.ComponentActivity
 import androidx.compose.runtime.Composable
