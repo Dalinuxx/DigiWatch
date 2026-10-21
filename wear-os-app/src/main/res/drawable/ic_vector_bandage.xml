@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+    <!-- Authentic Bandai Crossed Adhesive Bandages (First Aid Plasters / Band-Aids) -->
+    <!-- Bandage 1: Diagonal -45 deg -->
+    <group
+        android:pivotX="12"
+        android:pivotY="12"
+        android:rotation="-45">
+        <!-- Plaster Tape Strip -->
+        <path
+            android:fillColor="#FFA726"
+            android:strokeColor="#4E342E"
+            android:strokeWidth="1"
+            android:pathData="M3,8.5 C3,6.57 4.57,5 6.5,5 L17.5,5 C19.43,5 21,6.57 21,8.5 L21,15.5 C21,17.43 19.43,19 17.5,19 L6.5,19 C4.57,19 3,17.43 3,15.5 Z" />
+        <!-- Gauze Pad -->
+        <path
+            android:fillColor="#FFF9C4"
+            android:strokeColor="#6D4C41"
+            android:strokeWidth="0.5"
+            android:pathData="M9,6.5 L15,6.5 L15,17.5 L9,17.5 Z" />
+        <!-- Perforation Dots -->
+        <path
+            android:fillColor="#6D4C41"
+            android:pathData="M5.5,9.5 A0.8,0.8 0 1,1 5.5,11.1 A0.8,0.8 0 1,1 5.5,9.5 Z M5.5,13.5 A0.8,0.8 0 1,1 5.5,15.1 A0.8,0.8 0 1,1 5.5,13.5 Z M7.5,11.5 A0.8,0.8 0 1,1 7.5,13.1 A0.8,0.8 0 1,1 7.5,11.5 Z M18.5,9.5 A0.8,0.8 0 1,1 18.5,11.1 A0.8,0.8 0 1,1 18.5,9.5 Z M18.5,13.5 A0.8,0.8 0 1,1 18.5,15.1 A0.8,0.8 0 1,1 18.5,13.5 Z M16.5,11.5 A0.8,0.8 0 1,1 16.5,13.1 A0.8,0.8 0 1,1 16.5,11.5 Z" />
+    </group>
+    <!-- Bandage 2: Diagonal +45 deg -->
+    <group
+        android:pivotX="12"
+        android:pivotY="12"
+        android:rotation="45">
+        <!-- Plaster Tape Strip -->
+        <path
+            android:fillColor="#FFB74D"
+            android:strokeColor="#4E342E"
+            android:strokeWidth="1"
+            android:pathData="M3,8.5 C3,6.57 4.57,5 6.5,5 L17.5,5 C19.43,5 21,6.57 21,8.5 L21,15.5 C21,17.43 19.43,19 17.5,19 L6.5,19 C4.57,19 3,17.43 3,15.5 Z" />
+        <!-- Gauze Pad -->
+        <path
+            android:fillColor="#FFF9C4"
+            android:strokeColor="#6D4C41"
+            android:strokeWidth="0.5"
+            android:pathData="M9,6.5 L15,6.5 L15,17.5 L9,17.5 Z" />
+        <!-- Perforation Dots -->
+        <path
+            android:fillColor="#6D4C41"
+            android:pathData="M5.5,9.5 A0.8,0.8 0 1,1 5.5,11.1 A0.8,0.8 0 1,1 5.5,9.5 Z M5.5,13.5 A0.8,0.8 0 1,1 5.5,15.1 A0.8,0.8 0 1,1 5.5,13.5 Z M7.5,11.5 A0.8,0.8 0 1,1 7.5,13.1 A0.8,0.8 0 1,1 7.5,11.5 Z M18.5,9.5 A0.8,0.8 0 1,1 18.5,11.1 A0.8,0.8 0 1,1 18.5,9.5 Z M18.5,13.5 A0.8,0.8 0 1,1 18.5,15.1 A0.8,0.8 0 1,1 18.5,13.5 Z M16.5,11.5 A0.8,0.8 0 1,1 16.5,13.1 A0.8,0.8 0 1,1 16.5,11.5 Z" />
+    </group>
+    <!-- Center Gauze Pad Overlap Junction & Cross Accent -->
+    <path
+        android:fillColor="#FFF9C4"
+        android:strokeColor="#6D4C41"
+        android:strokeWidth="0.6"
+        android:pathData="M9.5,9.5 L14.5,9.5 L14.5,14.5 L9.5,14.5 Z" />
+    <path
+        android:fillColor="#E65100"
+        android:pathData="M11.3,10.2 L12.7,10.2 L12.7,13.8 L11.3,13.8 Z" />
+    <path
+        android:fillColor="#E65100"
+        android:pathData="M10.2,11.3 L13.8,11.3 L13.8,12.7 L10.2,12.7 Z" />
+</vector>

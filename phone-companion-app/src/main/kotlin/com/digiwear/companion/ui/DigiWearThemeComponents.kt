@@ -149,7 +149,7 @@ private val TOP_VPET_ICONS = listOf(
 private val BOTTOM_VPET_ICONS = listOf(
     (DigiIconType.CLEAN_FLUSH to "FLSH"),
     (DigiIconType.SLEEP_LIGHT to "LGT"),
-    (DigiIconType.MEDS_PILL to "MED"),
+    (DigiIconType.BANDAGE_CROSS to "MED"),
     (DigiIconType.CALL_ALERT to "CALL")
 )
 

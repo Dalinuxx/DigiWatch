@@ -90,7 +90,7 @@ enum class VPetMenu(val label: String, val iconType: DigiIconType) {
     BATTLE("BATTLE", DigiIconType.BATTLE),
     FLUSH("FLUSH", DigiIconType.FLUSH),
     LIGHT("LIGHT", DigiIconType.LIGHT_ON),
-    MEDS("MEDS", DigiIconType.MEDS_PILL),
+    MEDS("MEDS", DigiIconType.BANDAGE_CROSS),
     ATTENTION("CALL", DigiIconType.ATTENTION)
 }
 
@@ -1736,7 +1736,7 @@ private fun ModernTouchPetView(
                             colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFF2E7D32))
                         ) {
                             Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                                DigiVectorIcon(type = DigiIconType.MEDS_PILL, size = 12.dp)
+                                DigiVectorIcon(type = DigiIconType.BANDAGE_CROSS, size = 12.dp)
                                 Text("MEDS", fontSize = 6.sp, fontWeight = FontWeight.Bold, fontFamily = FontFamily.Monospace)
                             }
                         }

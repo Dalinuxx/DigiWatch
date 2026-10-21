@@ -619,13 +619,13 @@ fun PetDashboardScreen(
                     OutlinedButton(
                         onClick = {
                             buzzerManager.playHealTone()
-                            executeCareAction("CURE_INJURY", { PetSimulationEngine.cureInjury(it) }, "Administered Med-Pill")
+                            executeCareAction("CURE_INJURY", { PetSimulationEngine.cureInjury(it) }, "Applied First Aid Bandage")
                         },
                         modifier = Modifier.weight(1f)
                     ) {
                         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                            DigiVectorIcon(type = DigiIconType.MEDS_PILL, size = 12.dp, tint = Color(0xFFEF5350))
-                            Text("MED-PILL", fontSize = 10.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
+                            DigiVectorIcon(type = DigiIconType.BANDAGE_CROSS, size = 12.dp, tint = Color(0xFFFFB74D))
+                            Text("BANDAGE", fontSize = 10.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
                         }
                     }
                 }

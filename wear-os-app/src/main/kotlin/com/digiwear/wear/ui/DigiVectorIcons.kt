@@ -36,7 +36,7 @@ enum class DigiIconType {
     FLUSH, CLEAN_FLUSH,
     LIGHT_ON, SLEEP_LIGHT,
     LIGHT_OFF,
-    MEDS_PILL,
+    MEDS_BANDAGE, BANDAGE_CROSS, BANDAGE, MEDS_PILL,
     ATTENTION, CALL_ALERT,
     WASTE,
     HEART_FULL,
@@ -93,7 +93,7 @@ fun DigiVectorIcon(
             DigiIconType.FLUSH, DigiIconType.CLEAN_FLUSH -> drawFlushWaveIcon(w, h, s, if (hasCustomTint) tint else Color(0xFF00E5FF))
             DigiIconType.LIGHT_ON, DigiIconType.SLEEP_LIGHT -> drawLightOnIcon(w, h, s, if (hasCustomTint) tint else Color(0xFFFFEE58))
             DigiIconType.LIGHT_OFF -> drawLightOffMoonIcon(w, h, s, if (hasCustomTint) tint else Color(0xFF90CAF9))
-            DigiIconType.MEDS_PILL -> drawMedicalPillIcon(w, h, s, hasCustomTint, tint)
+            DigiIconType.MEDS_BANDAGE, DigiIconType.BANDAGE_CROSS, DigiIconType.BANDAGE, DigiIconType.MEDS_PILL -> drawBandageCrossIcon(w, h, s, hasCustomTint, tint)
             DigiIconType.ATTENTION, DigiIconType.CALL_ALERT -> drawAttentionBeaconIcon(w, h, s, if (hasCustomTint) tint else Color(0xFFFF5252))
             DigiIconType.WASTE -> drawCoiledWasteIcon(w, h, s, hasCustomTint, tint)
             DigiIconType.HEART_FULL -> drawHeartIcon(w, h, s, filled = true, if (hasCustomTint) tint else Color(0xFFFF5252))
@@ -201,76 +201,129 @@ fun MedsPillOverlayIcon(
         verticalAlignment = Alignment.CenterVertically
     ) {
         DigiVectorIcon(type = DigiIconType.SPARKLE, size = size * 0.45f, tint = Color(0xFF69F0AE))
-        DigiVectorIcon(type = DigiIconType.MEDS_PILL, size = size)
+        DigiVectorIcon(type = DigiIconType.BANDAGE_CROSS, size = size)
         DigiVectorIcon(type = DigiIconType.SPARKLE, size = size * 0.45f, tint = Color(0xFF69F0AE))
     }
 }
+
+@Composable
+fun BandageOverlayIcon(
+    size: Dp = 28.dp,
+    modifier: Modifier = Modifier
+) = MedsPillOverlayIcon(size, modifier)
 
 // ============================================================================
 // Vector Drawing Implementations (Canonical Bandai V-Pet & DMC Styling)
 // ============================================================================
 
-private fun DrawScope.drawMedicalPillIcon(w: Float, h: Float, s: Float, hasTint: Boolean, tint: Color) {
-    // Authentic Bandai Two-Tone Crossed Pill Capsules First Aid Icon (NEVER a syringe!)
-    val capColor = if (hasTint) tint else Color(0xFFFF5252)
-    val bodyColor = if (hasTint) tint.copy(alpha = 0.45f) else Color(0xFFF5F7FA)
-    val borderColor = if (hasTint) tint else Color(0xFF1A1E26)
+private fun DrawScope.drawBandageCrossIcon(w: Float, h: Float, s: Float, hasTint: Boolean, tint: Color) {
+    // Authentic Bandai Crossed Adhesive Bandages (First Aid Plasters / Band-Aids - NEVER syringe or pill!)
+    val tapeColor = if (hasTint) tint.copy(alpha = 0.85f) else Color(0xFFFFB74D) // Warm plaster tan
+    val tapeDarkColor = if (hasTint) tint.copy(alpha = 0.70f) else Color(0xFFFFA726)
+    val padColor = if (hasTint) Color.White.copy(alpha = 0.85f) else Color(0xFFFFF9C4) // Soft ivory gauze pad
+    val borderColor = if (hasTint) tint else Color(0xFF4E342E) // Crisp dark brown outline
+    val dotColor = if (hasTint) borderColor.copy(alpha = 0.75f) else Color(0xFF6D4C41) // Perforation holes
     val strokeWidth = (s * 0.075f).coerceAtLeast(1.1f)
 
-    val pillLen = s * 0.78f
-    val pillThickness = s * 0.28f
-    val radius = pillThickness * 0.5f
+    val bandageLen = s * 0.86f
+    val bandageThickness = s * 0.28f
+    val radius = bandageThickness * 0.5f
 
-    // Helper to draw a single 2-tone pill capsule
-    fun drawCapsule(angleDeg: Float) {
+    // Helper to draw a single adhesive bandage strip with gauze pad and ventilation holes
+    fun drawBandageStrip(angleDeg: Float, isTopLayer: Boolean) {
         withTransform({
             rotate(degrees = angleDeg, pivot = Offset(w * 0.5f, h * 0.5f))
         }) {
-            val left = (w - pillLen) * 0.5f
-            val top = (h - pillThickness) * 0.5f
+            val left = (w - bandageLen) * 0.5f
+            val top = (h - bandageThickness) * 0.5f
 
-            // Full capsule body (white base)
+            // 1. Adhesive tape base strip (with rounded ends)
             drawRoundRect(
-                color = bodyColor,
+                color = if (isTopLayer) tapeColor else tapeDarkColor,
                 topLeft = Offset(left, top),
-                size = Size(pillLen, pillThickness),
+                size = Size(bandageLen, bandageThickness),
                 cornerRadius = CornerRadius(radius, radius)
             )
-            // Left half colored cap (crimson red)
+
+            // 2. Center gauze pad (cushion)
+            val padWidth = bandageThickness * 0.95f
+            val padLeft = (w - padWidth) * 0.5f
+            val padTop = top + bandageThickness * 0.08f
+            val padHeight = bandageThickness * 0.84f
             drawRoundRect(
-                color = capColor,
-                topLeft = Offset(left, top),
-                size = Size(pillLen * 0.52f, pillThickness),
-                cornerRadius = CornerRadius(radius, radius)
+                color = padColor,
+                topLeft = Offset(padLeft, padTop),
+                size = Size(padWidth, padHeight),
+                cornerRadius = CornerRadius(s * 0.03f, s * 0.03f)
             )
-            drawRect(
-                color = capColor,
-                topLeft = Offset(left + pillLen * 0.25f, top),
-                size = Size(pillLen * 0.25f, pillThickness)
+            // Gauze pad outline
+            drawRoundRect(
+                color = borderColor.copy(alpha = 0.6f),
+                topLeft = Offset(padLeft, padTop),
+                size = Size(padWidth, padHeight),
+                cornerRadius = CornerRadius(s * 0.03f, s * 0.03f),
+                style = Stroke(width = strokeWidth * 0.65f)
             )
-            // Center seam divider
-            drawLine(
-                color = borderColor,
-                start = Offset(w * 0.5f, top),
-                end = Offset(w * 0.5f, top + pillThickness),
-                strokeWidth = strokeWidth
-            )
-            // Capsule outline
+
+            // 3. Ventilation perforation dots on left and right wings
+            val dotRadius = (s * 0.024f).coerceAtLeast(0.8f)
+            // Left wing dots
+            val leftWingCenter = (left + padLeft) * 0.5f
+            drawCircle(dotColor, radius = dotRadius, center = Offset(leftWingCenter - s * 0.07f, top + bandageThickness * 0.32f))
+            drawCircle(dotColor, radius = dotRadius, center = Offset(leftWingCenter - s * 0.07f, top + bandageThickness * 0.68f))
+            drawCircle(dotColor, radius = dotRadius, center = Offset(leftWingCenter + s * 0.03f, top + bandageThickness * 0.50f))
+
+            // Right wing dots
+            val rightPad = padLeft + padWidth
+            val rightEnd = left + bandageLen
+            val rightWingCenter = (rightPad + rightEnd) * 0.5f
+            drawCircle(dotColor, radius = dotRadius, center = Offset(rightWingCenter + s * 0.07f, top + bandageThickness * 0.32f))
+            drawCircle(dotColor, radius = dotRadius, center = Offset(rightWingCenter + s * 0.07f, top + bandageThickness * 0.68f))
+            drawCircle(dotColor, radius = dotRadius, center = Offset(rightWingCenter - s * 0.03f, top + bandageThickness * 0.50f))
+
+            // 4. Bandage outline border
             drawRoundRect(
                 color = borderColor,
                 topLeft = Offset(left, top),
-                size = Size(pillLen, pillThickness),
+                size = Size(bandageLen, bandageThickness),
                 cornerRadius = CornerRadius(radius, radius),
                 style = Stroke(width = strokeWidth)
             )
         }
     }
 
-    // Pill 1 (diagonal -40 degrees)
-    drawCapsule(-40f)
-    // Pill 2 (diagonal +40 degrees) crossing Pill 1 to form the authentic first aid cross
-    drawCapsule(40f)
+    // Bandage 1: Bottom diagonal strip (-45 degrees)
+    drawBandageStrip(-45f, isTopLayer = false)
+    // Bandage 2: Top diagonal strip (+45 degrees) crossing Bandage 1
+    drawBandageStrip(45f, isTopLayer = true)
+
+    // Center cross gauze junction accent
+    val centerPadSize = bandageThickness * 0.72f
+    val centerPadLeft = (w - centerPadSize) * 0.5f
+    val centerPadTop = (h - centerPadSize) * 0.5f
+    drawRoundRect(
+        color = padColor,
+        topLeft = Offset(centerPadLeft, centerPadTop),
+        size = Size(centerPadSize, centerPadSize),
+        cornerRadius = CornerRadius(s * 0.03f, s * 0.03f)
+    )
+    drawRoundRect(
+        color = borderColor.copy(alpha = 0.55f),
+        topLeft = Offset(centerPadLeft, centerPadTop),
+        size = Size(centerPadSize, centerPadSize),
+        cornerRadius = CornerRadius(s * 0.03f, s * 0.03f),
+        style = Stroke(width = strokeWidth * 0.7f)
+    )
+    // Subtle medical cross stitch on center pad
+    val crossArm = centerPadSize * 0.28f
+    val crossWidth = strokeWidth * 0.85f
+    val crossColor = if (hasTint) borderColor else Color(0xFFE65100)
+    drawLine(crossColor, Offset(w * 0.5f, h * 0.5f - crossArm), Offset(w * 0.5f, h * 0.5f + crossArm), strokeWidth = crossWidth, cap = StrokeCap.Round)
+    drawLine(crossColor, Offset(w * 0.5f - crossArm, h * 0.5f), Offset(w * 0.5f + crossArm, h * 0.5f), strokeWidth = crossWidth, cap = StrokeCap.Round)
 }
+
+private fun DrawScope.drawMedicalPillIcon(w: Float, h: Float, s: Float, hasTint: Boolean, tint: Color) =
+    drawBandageCrossIcon(w, h, s, hasTint, tint)
 
 private fun DrawScope.drawMeatIcon(w: Float, h: Float, s: Float, hasTint: Boolean, tint: Color) {
     // Authentic Bandai Food Icon: Roasted Meat Roast on Bone + Protein Tablet
