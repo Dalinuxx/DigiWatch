@@ -5,32 +5,24 @@ import android.nfc.NfcAdapter
 import android.nfc.Tag
 import android.os.Bundle
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AutoAwesome
-import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material3.Icon
+import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.runtime.Composable
@@ -45,9 +37,6 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.foundation.layout.statusBarsPadding
-import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material3.IconButton
 import com.digiwear.companion.ui.ExpeditionScreen
 import com.digiwear.companion.ui.SettingsScreen
 import com.digiwear.companion.ui.DigiIconType
@@ -157,6 +146,10 @@ fun MainPhoneApp(
         unselectedTextColor = Color(0xFF78909C)
     )
 
+    BackHandler(enabled = selectedTab != 0) {
+        selectedTab = 0
+    }
+
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         containerColor = DigiWearPalette.CyberBg,
@@ -171,59 +164,24 @@ fun MainPhoneApp(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Box(
-                        modifier = Modifier
-                            .size(9.dp)
-                            .background(Color(0xFF00E676), CircleShape)
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Column {
-                        Text(
-                            text = "DIGIWEAR // D-TERMINAL",
-                            fontSize = 12.sp,
-                            fontWeight = FontWeight.Black,
-                            color = Color.White,
-                            fontFamily = FontFamily.Monospace
-                        )
-                        Text(
-                            text = "BANDAI 1997 V-PET & DIGIMON COLOR",
-                            fontSize = 8.sp,
-                            color = Color(0xFF80CBC4),
-                            fontFamily = FontFamily.Monospace
-                        )
-                    }
-                }
+                Text(
+                    text = "DigiWear",
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Black,
+                    color = Color.White,
+                    fontFamily = FontFamily.Monospace,
+                    letterSpacing = 0.5.sp
+                )
 
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                IconButton(
+                    onClick = { selectedTab = if (selectedTab == 4) 0 else 4 },
+                    modifier = Modifier.size(32.dp)
                 ) {
-                    Surface(
-                        color = Color(0xFF142622),
-                        shape = RoundedCornerShape(6.dp),
-                        border = BorderStroke(1.dp, Color(0xFF00E676))
-                    ) {
-                        Text(
-                            text = "0NL1NE • D-COM",
-                            fontSize = 9.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = Color(0xFF00E676),
-                            fontFamily = FontFamily.Monospace,
-                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp)
-                        )
-                    }
-
-                    IconButton(
-                        onClick = { selectedTab = 4 },
-                        modifier = Modifier.size(28.dp)
-                    ) {
-                        DigiVectorIcon(
-                            type = DigiIconType.SETTINGS_GEAR,
-                            size = 18.dp,
-                            tint = if (selectedTab == 4) Color(0xFF00E5FF) else Color(0xFF90A4AE)
-                        )
-                    }
+                    DigiVectorIcon(
+                        type = DigiIconType.SETTINGS_GEAR,
+                        size = 20.dp,
+                        tint = if (selectedTab == 4) Color(0xFF00E5FF) else Color(0xFF90A4AE)
+                    )
                 }
             }
         },
@@ -281,19 +239,6 @@ fun MainPhoneApp(
                         )
                     },
                     label = { Text("EXPEDITION", fontSize = 8.5.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold) },
-                    colors = navItemColors
-                )
-                NavigationBarItem(
-                    selected = selectedTab == 4,
-                    onClick = { selectedTab = 4 },
-                    icon = {
-                        DigiVectorIcon(
-                            type = DigiIconType.SETTINGS_GEAR,
-                            size = 20.dp,
-                            tint = if (selectedTab == 4) Color(0xFF00E5FF) else Color(0xFF78909C)
-                        )
-                    },
-                    label = { Text("SETTINGS", fontSize = 8.5.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold) },
                     colors = navItemColors
                 )
             }
