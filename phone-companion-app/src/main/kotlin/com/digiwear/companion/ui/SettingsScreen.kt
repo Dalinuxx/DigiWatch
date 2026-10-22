@@ -468,24 +468,33 @@ fun SettingsScreen(
                         Box(
                             modifier = Modifier
                                 .background(
-                                    if (isSelected) Color(theme.primaryColorHex).copy(alpha = 0.35f) else DigiWearPalette.CardInner,
+                                    if (isSelected) Color(0xFF004D40) else DigiWearPalette.CardInner,
                                     RoundedCornerShape(8.dp)
                                 )
                                 .border(
-                                    1.dp,
-                                    if (isSelected) Color(theme.primaryColorHex) else Color(0xFF263238),
+                                    if (isSelected) 1.5.dp else 1.dp,
+                                    if (isSelected) Color(0xFF64FFDA) else Color(0xFF263238),
                                     RoundedCornerShape(8.dp)
                                 )
                                 .clickable { selectedTheme = theme }
-                                .padding(horizontal = 8.dp, vertical = 6.dp)
+                                .padding(horizontal = 9.dp, vertical = 7.dp)
                         ) {
-                            Text(
-                                text = theme.displayName,
-                                fontSize = 9.sp,
-                                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
-                                color = if (isSelected) Color(theme.primaryColorHex) else Color.LightGray,
-                                fontFamily = FontFamily.Monospace
-                            )
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Box(
+                                    modifier = Modifier
+                                        .size(10.dp)
+                                        .background(Color(theme.primaryColorHex), CircleShape)
+                                        .border(0.75.dp, if (isSelected) Color(0xFF64FFDA) else Color(0xFF546E7A), CircleShape)
+                                )
+                                Spacer(modifier = Modifier.width(6.dp))
+                                Text(
+                                    text = theme.displayName,
+                                    fontSize = 9.5.sp,
+                                    fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
+                                    color = if (isSelected) Color.White else Color(0xFFB0BEC5),
+                                    fontFamily = FontFamily.Monospace
+                                )
+                            }
                         }
                     }
                 }
@@ -554,12 +563,12 @@ fun SettingsScreen(
                             modifier = Modifier
                                 .weight(1f)
                                 .background(
-                                    if (!pendulumShakeMode) Color(0xFF00695C) else DigiWearPalette.CardInner,
+                                    if (!pendulumShakeMode) Color(0xFF004D40) else DigiWearPalette.CardInner,
                                     RoundedCornerShape(8.dp)
                                 )
                                 .border(
-                                    1.dp,
-                                    if (!pendulumShakeMode) Color(0xFF64FFDA) else Color(0xFF263238),
+                                    if (!pendulumShakeMode) 1.5.dp else 1.dp,
+                                    if (!pendulumShakeMode) Color(0xFF64FFDA) else Color(0xFF37474F),
                                     RoundedCornerShape(8.dp)
                                 )
                                 .clickable { pendulumShakeMode = false }
@@ -569,8 +578,8 @@ fun SettingsScreen(
                             Text(
                                 text = "TIMING QTE",
                                 fontSize = 9.5.sp,
-                                fontWeight = FontWeight.Bold,
-                                color = if (!pendulumShakeMode) Color.White else Color.Gray,
+                                fontWeight = if (!pendulumShakeMode) FontWeight.Bold else FontWeight.Medium,
+                                color = if (!pendulumShakeMode) Color.White else Color(0xFFB0BEC5),
                                 fontFamily = FontFamily.Monospace
                             )
                         }
@@ -579,12 +588,12 @@ fun SettingsScreen(
                             modifier = Modifier
                                 .weight(1f)
                                 .background(
-                                    if (pendulumShakeMode) Color(0xFF4A148C) else DigiWearPalette.CardInner,
+                                    if (pendulumShakeMode) Color(0xFF6A1B9A) else DigiWearPalette.CardInner,
                                     RoundedCornerShape(8.dp)
                                 )
                                 .border(
-                                    1.dp,
-                                    if (pendulumShakeMode) Color(0xFFE040FB) else Color(0xFF263238),
+                                    if (pendulumShakeMode) 1.5.dp else 1.dp,
+                                    if (pendulumShakeMode) Color(0xFFE040FB) else Color(0xFF37474F),
                                     RoundedCornerShape(8.dp)
                                 )
                                 .clickable { pendulumShakeMode = true }
@@ -594,8 +603,8 @@ fun SettingsScreen(
                             Text(
                                 text = "PENDULUM SHAKE",
                                 fontSize = 9.5.sp,
-                                fontWeight = FontWeight.Bold,
-                                color = if (pendulumShakeMode) Color.White else Color.Gray,
+                                fontWeight = if (pendulumShakeMode) FontWeight.Bold else FontWeight.Medium,
+                                color = if (pendulumShakeMode) Color.White else Color(0xFFB0BEC5),
                                 fontFamily = FontFamily.Monospace
                             )
                         }
@@ -628,12 +637,18 @@ fun SettingsScreen(
                             modifier = Modifier
                                 .weight(1f)
                                 .background(if (active) Color(0xFFE65100) else DigiWearPalette.CardInner, RoundedCornerShape(8.dp))
-                                .border(1.dp, if (active) Color(0xFFFFB74D) else Color(0xFF263238), RoundedCornerShape(8.dp))
-                            .clickable { contrastLevel = levelId }
-                            .padding(vertical = 8.dp),
+                                .border(if (active) 1.5.dp else 1.dp, if (active) Color(0xFFFFB74D) else Color(0xFF37474F), RoundedCornerShape(8.dp))
+                                .clickable { contrastLevel = levelId }
+                                .padding(vertical = 8.dp),
                             contentAlignment = Alignment.Center
                         ) {
-                            Text(text = label, fontSize = 9.sp, fontWeight = FontWeight.Bold, color = if (active) Color.White else Color.LightGray, fontFamily = FontFamily.Monospace)
+                            Text(
+                                text = label,
+                                fontSize = 9.sp,
+                                fontWeight = if (active) FontWeight.Bold else FontWeight.Medium,
+                                color = if (active) Color.White else Color(0xFFB0BEC5),
+                                fontFamily = FontFamily.Monospace
+                            )
                         }
                     }
                 }
@@ -650,12 +665,18 @@ fun SettingsScreen(
                             modifier = Modifier
                                 .weight(1f)
                                 .background(if (active) Color(0xFF00838F) else DigiWearPalette.CardInner, RoundedCornerShape(8.dp))
-                                .border(1.dp, if (active) Color(0xFF4DD0E1) else Color(0xFF263238), RoundedCornerShape(8.dp))
+                                .border(if (active) 1.5.dp else 1.dp, if (active) Color(0xFF4DD0E1) else Color(0xFF37474F), RoundedCornerShape(8.dp))
                                 .clickable { dailyStepGoal = goal }
                                 .padding(vertical = 8.dp),
                             contentAlignment = Alignment.Center
                         ) {
-                            Text(text = "${goal / 1000}K", fontSize = 9.5.sp, fontWeight = FontWeight.Bold, color = if (active) Color.White else Color.LightGray, fontFamily = FontFamily.Monospace)
+                            Text(
+                                text = "${goal / 1000}K",
+                                fontSize = 9.5.sp,
+                                fontWeight = if (active) FontWeight.Bold else FontWeight.Medium,
+                                color = if (active) Color.White else Color(0xFFB0BEC5),
+                                fontFamily = FontFamily.Monospace
+                            )
                         }
                     }
                 }
@@ -876,8 +897,12 @@ private fun SettingSwitchRow(
             checked = checked,
             onCheckedChange = onCheckedChange,
             colors = SwitchDefaults.colors(
-                checkedThumbColor = DigiWearPalette.DigiviceCyan,
-                checkedTrackColor = Color(0xFF142D38)
+                checkedThumbColor = Color.White,
+                checkedTrackColor = Color(0xFF00897B),
+                checkedBorderColor = Color(0xFF64FFDA),
+                uncheckedThumbColor = Color(0xFF90A4AE),
+                uncheckedTrackColor = Color(0xFF1B222D),
+                uncheckedBorderColor = Color(0xFF37474F)
             )
         )
     }

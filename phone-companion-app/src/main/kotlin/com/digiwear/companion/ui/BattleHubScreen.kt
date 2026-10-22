@@ -495,12 +495,12 @@ fun BattleHubScreen(
                         modifier = Modifier
                             .weight(1f)
                             .background(
-                                if (active) Color(0xFF281C24) else DigiWearPalette.CardSurface,
+                                if (active) Color(0xFF3E1F29) else DigiWearPalette.CardSurface,
                                 RoundedCornerShape(10.dp)
                             )
                             .border(
-                                1.dp,
-                                if (active) Color(0xFFEF5350) else DigiWearPalette.CardBorder,
+                                if (active) 1.5.dp else 1.dp,
+                                if (active) Color(0xFFFF5252) else DigiWearPalette.CardBorder,
                                 RoundedCornerShape(10.dp)
                             )
                             .clickable { selectedBattleMode = mode }
@@ -626,12 +626,12 @@ fun BattleHubScreen(
                             Row(
                                 modifier = Modifier
                                     .background(
-                                        if (isSelected) Color(0xFF281C24) else DigiWearPalette.CardSurface,
+                                        if (isSelected) Color(0xFF3E1F29) else DigiWearPalette.CardSurface,
                                         RoundedCornerShape(10.dp)
                                     )
                                     .border(
-                                        1.dp,
-                                        if (isSelected) Color(0xFFEF5350) else DigiWearPalette.CardBorder,
+                                        if (isSelected) 1.5.dp else 1.dp,
+                                        if (isSelected) Color(0xFFFF5252) else DigiWearPalette.CardBorder,
                                         RoundedCornerShape(10.dp)
                                     )
                                     .clickable {
@@ -653,12 +653,12 @@ fun BattleHubScreen(
                                         text = "${sp.name} [${fighter.label}]",
                                         fontSize = 10.sp,
                                         fontWeight = FontWeight.Bold,
-                                        color = if (isSelected) Color(0xFFFF8A80) else Color.White
+                                        color = if (isSelected) Color.White else Color(0xFFCFD8DC)
                                     )
                                     Text(
                                         text = "${sp.stage.displayName} • ${sp.basePower}P • ${fighter.victories}W",
                                         fontSize = 8.sp,
-                                        color = Color(0xFF90A4AE),
+                                        color = if (isSelected) Color(0xFFFF8A80) else Color(0xFF90A4AE),
                                         fontFamily = FontFamily.Monospace
                                     )
                                 }
