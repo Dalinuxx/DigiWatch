@@ -157,36 +157,21 @@ fun WatchSideloadScreen(
             shape = RoundedCornerShape(10.dp)
         ) {
             Column(modifier = Modifier.padding(14.dp)) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Column {
-                        Text(
-                            text = "WIRELESS ADB // SIDELOAD",
-                            color = DigiWearPalette.DigiviceCyan,
-                            fontSize = 15.sp,
-                            fontWeight = FontWeight.Black,
-                            fontFamily = FontFamily.Monospace
-                        )
-                        Text(
-                            text = "Install & Update DigiWear on Watch (No PC Required)",
-                            color = Color(0xFF90A4AE),
-                            fontSize = 10.sp,
-                            fontFamily = FontFamily.Monospace
-                        )
-                    }
-
-                    OutlinedButton(
-                        onClick = { showGuideDialog = true },
-                        border = BorderStroke(1.dp, DigiWearPalette.CrestGold),
-                        colors = ButtonDefaults.outlinedButtonColors(contentColor = DigiWearPalette.CrestGold)
-                    ) {
-                        DigiVectorIcon(type = DigiIconType.ATTENTION, size = 14.dp, tint = DigiWearPalette.CrestGold)
-                        Spacer(modifier = Modifier.width(4.dp))
-                        Text("GUIDE", fontSize = 10.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
-                    }
+                Column(modifier = Modifier.fillMaxWidth()) {
+                    Text(
+                        text = "WIRELESS ADB // SIDELOAD",
+                        color = DigiWearPalette.DigiviceCyan,
+                        fontSize = 15.sp,
+                        fontWeight = FontWeight.Black,
+                        fontFamily = FontFamily.Monospace
+                    )
+                    Spacer(modifier = Modifier.height(2.dp))
+                    Text(
+                        text = "Install & Update DigiWear on Watch (No PC Required)",
+                        color = Color(0xFF90A4AE),
+                        fontSize = 10.sp,
+                        fontFamily = FontFamily.Monospace
+                    )
                 }
 
                 Spacer(modifier = Modifier.height(10.dp))
@@ -213,6 +198,27 @@ fun WatchSideloadScreen(
                             fontWeight = FontWeight.Bold
                         )
                     }
+                }
+
+                Spacer(modifier = Modifier.height(10.dp))
+
+                // Help & Setup Guide Button at bottom of card
+                OutlinedButton(
+                    onClick = { showGuideDialog = true },
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(8.dp),
+                    border = BorderStroke(1.dp, DigiWearPalette.CrestGold),
+                    colors = ButtonDefaults.outlinedButtonColors(contentColor = DigiWearPalette.CrestGold)
+                ) {
+                    DigiVectorIcon(type = DigiIconType.HELP, size = 14.dp, tint = DigiWearPalette.CrestGold)
+                    Spacer(modifier = Modifier.width(6.dp))
+                    Text(
+                        text = "HOW TO CONNECT (HELP ?)",
+                        fontSize = 10.sp,
+                        fontFamily = FontFamily.Monospace,
+                        fontWeight = FontWeight.Bold,
+                        color = DigiWearPalette.CrestGold
+                    )
                 }
             }
         }

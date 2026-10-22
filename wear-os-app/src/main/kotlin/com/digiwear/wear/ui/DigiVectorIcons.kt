@@ -77,7 +77,8 @@ enum class DigiIconType {
     ARROW_RIGHT,
     ARROW_DOWN,
     VPET_DEVICE,
-    COMM_ANTENNA
+    COMM_ANTENNA,
+    HELP, HELP_QUESTION
 }
 
 @Composable
@@ -144,6 +145,7 @@ fun DigiVectorIcon(
             DigiIconType.ARROW_DOWN -> drawArrowDownIcon(w, h, s, if (hasCustomTint) tint else Color.White)
             DigiIconType.VPET_DEVICE -> drawVpetDeviceIcon(w, h, s, if (hasCustomTint) tint else Color(0xFF00E5FF))
             DigiIconType.COMM_ANTENNA -> drawCommAntennaIcon(w, h, s, if (hasCustomTint) tint else Color(0xFFFFD54F))
+            DigiIconType.HELP, DigiIconType.HELP_QUESTION -> drawHelpQuestionIcon(w, h, s, if (hasCustomTint) tint else Color(0xFFFFCA28))
         }
     }
 }
@@ -1353,4 +1355,26 @@ private fun DrawScope.drawCommAntennaIcon(w: Float, h: Float, s: Float, color: C
         size = Size(s * 0.60f, s * 0.40f),
         style = Stroke(width = stroke, cap = StrokeCap.Round)
     )
+}
+
+private fun DrawScope.drawHelpQuestionIcon(w: Float, h: Float, s: Float, color: Color) {
+    val stroke = (s * 0.11f).coerceAtLeast(1.5f)
+    drawCircle(
+        color = color.copy(alpha = 0.20f),
+        radius = s * 0.44f,
+        center = Offset(w * 0.5f, h * 0.5f)
+    )
+    drawCircle(
+        color = color,
+        radius = s * 0.44f,
+        center = Offset(w * 0.5f, h * 0.5f),
+        style = Stroke(width = stroke * 0.75f)
+    )
+    val qPath = Path().apply {
+        moveTo(w * 0.36f, h * 0.36f)
+        cubicTo(w * 0.36f, h * 0.22f, w * 0.64f, h * 0.22f, w * 0.64f, h * 0.38f)
+        cubicTo(w * 0.64f, h * 0.48f, w * 0.50f, h * 0.52f, w * 0.50f, h * 0.62f)
+    }
+    drawPath(qPath, color = color, style = Stroke(width = stroke, cap = StrokeCap.Round, join = StrokeJoin.Round))
+    drawCircle(color = color, radius = stroke * 0.65f, center = Offset(w * 0.50f, h * 0.74f))
 }
