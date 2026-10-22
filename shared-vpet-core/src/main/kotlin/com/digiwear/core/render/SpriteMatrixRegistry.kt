@@ -1265,19 +1265,19 @@ object SpriteMatrixRegistry {
     // [ID 301] Greymon
     val GREYMON_ROM = arrayOf(
         ".....BBBBB..BBB.",
-        "BB..BTTTSSBBTSB.",
-        "BTBBBTSWBSTTTB..",
-        "BBBTTSBRTSBBB...",
-        "BTSSBSSSSTTB....",
-        "BBBBBBTS##TB....",
-        ".BGCGCGGGCT#B...",
-        "..BBBBBT#GG#B...",
-        "....BTT#GGBCTB..",
-        "..BBTGGGBBCG#B..",
-        ".BWBGGCBWGG##BBB",
-        ".BTBCGGBTW#BTBGB",
-        "..BBGGCTBBBT#BTB",
-        ".BBGB###TTBGG#B.",
+        "BB..BSSSSSBBSSB.",
+        "BSBBBSSWBSSSSB..",
+        "BBBSSSBESSBBB...",
+        "BSSSBSSSSSSB....",
+        "BBBBBBSS##TB....",
+        ".B#T#T###TT#B...",
+        "..BBBBBT####B...",
+        "....BTT###BTTB..",
+        "..BBT###BBT##B..",
+        ".BWB##TBW####BBB",
+        ".BTBTT#BTW#BTB#B",
+        "..BB##TTBBBT#BTB",
+        ".BB#B###TTB###B.",
         "BWB##BBBBBWBWBWB",
         "BBBBBBB...BBBBBB"
     )
@@ -4507,7 +4507,7 @@ object SpriteMatrixRegistry {
                 }
             }
         }
-        val maxLitCells = 36 // 36 / 256 = 14.06% <= 15.0% OPR
+        val maxLitCells = 15 // 15 / 256 = 5.86% <= 6.0% OPR (Strict Ultra-Low-Power Wear OS AMOLED wireframe)
         val selected = if (candidates.size <= maxLitCells) {
             candidates.toSet()
         } else {

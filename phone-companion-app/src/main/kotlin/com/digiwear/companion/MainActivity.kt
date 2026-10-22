@@ -48,6 +48,11 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material3.IconButton
+import com.digiwear.companion.ui.ExpeditionScreen
+import com.digiwear.companion.ui.SettingsScreen
 import com.digiwear.companion.data.PhoneDatabase
 import com.digiwear.companion.datalayer.PhoneWearableManager
 import com.digiwear.companion.nfc.NfcDuelManager
@@ -161,6 +166,7 @@ fun MainPhoneApp(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
+                    .statusBarsPadding()
                     .background(Color(0xFF101722))
                     .border(width = 1.dp, color = Color(0xFF1E2C3D))
                     .padding(horizontal = 14.dp, vertical = 10.dp),
@@ -191,19 +197,36 @@ fun MainPhoneApp(
                     }
                 }
 
-                Surface(
-                    color = Color(0xFF142622),
-                    shape = RoundedCornerShape(6.dp),
-                    border = BorderStroke(1.dp, Color(0xFF00E676))
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    Text(
-                        text = "0NL1NE • D-COM",
-                        fontSize = 9.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = Color(0xFF00E676),
-                        fontFamily = FontFamily.Monospace,
-                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp)
-                    )
+                    Surface(
+                        color = Color(0xFF142622),
+                        shape = RoundedCornerShape(6.dp),
+                        border = BorderStroke(1.dp, Color(0xFF00E676))
+                    ) {
+                        Text(
+                            text = "0NL1NE • D-COM",
+                            fontSize = 9.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color(0xFF00E676),
+                            fontFamily = FontFamily.Monospace,
+                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp)
+                        )
+                    }
+
+                    IconButton(
+                        onClick = { selectedTab = 4 },
+                        modifier = Modifier.size(28.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Settings,
+                            contentDescription = "Settings",
+                            tint = if (selectedTab == 4) Color(0xFF00E5FF) else Color(0xFF90A4AE),
+                            modifier = Modifier.size(18.dp)
+                        )
+                    }
                 }
             }
         },
@@ -235,15 +258,15 @@ fun MainPhoneApp(
                 NavigationBarItem(
                     selected = selectedTab == 3,
                     onClick = { selectedTab = 3 },
-                    icon = { Icon(Icons.Default.AutoAwesome, contentDescription = "DigiDex") },
-                    label = { Text("DIGIDEX", fontSize = 9.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold) },
+                    icon = { Icon(Icons.Default.Explore, contentDescription = "Expedition") },
+                    label = { Text("EXPEDITION", fontSize = 8.5.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold) },
                     colors = navItemColors
                 )
                 NavigationBarItem(
                     selected = selectedTab == 4,
                     onClick = { selectedTab = 4 },
-                    icon = { Icon(Icons.Default.Explore, contentDescription = "Quest") },
-                    label = { Text("QUEST", fontSize = 9.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold) },
+                    icon = { Icon(Icons.Default.Settings, contentDescription = "Settings") },
+                    label = { Text("SETTINGS", fontSize = 8.5.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold) },
                     colors = navItemColors
                 )
             }
@@ -251,11 +274,11 @@ fun MainPhoneApp(
     ) { innerPadding ->
         Box(modifier = Modifier.padding(innerPadding)) {
             when (selectedTab) {
-                0 -> PetDashboardScreen(db, wearableManager)
+                0 -> PetDashboardScreen(db, wearableManager, onNavigateToSettings = { selectedTab = 4 })
                 1 -> DigiVaultScreen(db, wearableManager)
                 2 -> BattleHubScreen(db, wearableManager)
-                3 -> SpriteStudioScreen(db, wearableManager)
-                4 -> StoryAndBackupScreen(db, wearableManager)
+                3 -> ExpeditionScreen(db, wearableManager)
+                4 -> SettingsScreen(db, wearableManager)
             }
         }
     }

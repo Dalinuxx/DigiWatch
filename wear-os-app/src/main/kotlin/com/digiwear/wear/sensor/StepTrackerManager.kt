@@ -22,6 +22,8 @@ class StepTrackerManager(
     private val stepCounterSensor = sensorManager.getDefaultSensor(Sensor.TYPE_STEP_COUNTER)
     private val stepDetectorSensor = sensorManager.getDefaultSensor(Sensor.TYPE_STEP_DETECTOR)
     private val accelerometerSensor = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
+    private val offBodySensor = sensorManager.getDefaultSensor(Sensor.TYPE_LOW_LATENCY_OFFBODY_DETECT)
+    private val stationarySensor = sensorManager.getDefaultSensor(Sensor.TYPE_STATIONARY_DETECT)
     private val prefs = context.getSharedPreferences("digiwear_step_prefs", Context.MODE_PRIVATE)
 
     @Volatile
@@ -29,15 +31,33 @@ class StepTrackerManager(
     private var lastFlushTimestampMs: Long = 0L
     private var lastAccelStepTimestampMs: Long = 0L
 
+    @Volatile
+    private var isAmbient: Boolean = false
+
+    @Volatile
+    private var isOffBody: Boolean = false
+
     fun startListening() {
+        registerStepSensors(isAmbientMode = false)
+
+        // Off-body & Stationary sensors to prevent false steps on nightstands / chargers
+        offBodySensor?.let {
+            sensorManager.registerListener(this, it, SensorManager.SENSOR_DELAY_NORMAL)
+        }
+        stationarySensor?.let {
+            sensorManager.registerListener(this, it, SensorManager.SENSOR_DELAY_NORMAL)
+        }
+    }
+
+    private fun registerStepSensors(isAmbientMode: Boolean) {
+        val maxReportLatencyUs = if (isAmbientMode) 60_000_000 else 10_000_000 // 60s FIFO batching in ambient
         when {
             stepCounterSensor != null -> {
-                // Batch up to 10s in hardware sensor hub to allow AP to sleep
                 sensorManager.registerListener(
                     this,
                     stepCounterSensor,
                     SensorManager.SENSOR_DELAY_NORMAL,
-                    10_000_000
+                    maxReportLatencyUs
                 )
             }
             stepDetectorSensor != null -> {
@@ -45,12 +65,14 @@ class StepTrackerManager(
                     this,
                     stepDetectorSensor,
                     SensorManager.SENSOR_DELAY_NORMAL,
-                    10_000_000
+                    maxReportLatencyUs
                 )
             }
             accelerometerSensor != null -> {
-                // AOSP Standard Watch fallback: SENSOR_DELAY_UI (~16Hz) is optimal for gait cadence while saving >60% CPU interrupts
-                sensorManager.registerListener(this, accelerometerSensor, SensorManager.SENSOR_DELAY_UI)
+                // Only poll accelerometer when NOT in ambient and NOT off-body
+                if (!isAmbientMode && !isOffBody) {
+                    sensorManager.registerListener(this, accelerometerSensor, SensorManager.SENSOR_DELAY_UI)
+                }
             }
         }
     }
@@ -61,21 +83,43 @@ class StepTrackerManager(
     }
 
     /**
-     * Pauses high-frequency CPU accelerometer polling when entering Ambient Mode
-     * on hardware lacking a dedicated hardware step counter sensor, allowing the AP to Doze.
+     * Reconfigures hardware sensor hub to batch up to 60s in FIFO when entering Ambient Mode,
+     * and suspends high-frequency CPU accelerometer polling so the Application Processor can Doze.
      */
     fun onEnterAmbient() {
+        isAmbient = true
         flushPendingSteps()
-        if (stepCounterSensor == null && accelerometerSensor != null) {
+
+        // Switch hardware step counter / detector to 60s FIFO batch latency
+        if (stepCounterSensor != null) {
+            sensorManager.unregisterListener(this, stepCounterSensor)
+            sensorManager.registerListener(this, stepCounterSensor, SensorManager.SENSOR_DELAY_NORMAL, 60_000_000)
+        } else if (stepDetectorSensor != null) {
+            sensorManager.unregisterListener(this, stepDetectorSensor)
+            sensorManager.registerListener(this, stepDetectorSensor, SensorManager.SENSOR_DELAY_NORMAL, 60_000_000)
+        }
+
+        // Always pause accelerometer in ambient mode
+        if (accelerometerSensor != null) {
             sensorManager.unregisterListener(this, accelerometerSensor)
         }
     }
 
     /**
-     * Resumes accelerometer polling upon exiting Ambient Mode.
+     * Restores low-latency reporting (10s batching) upon exiting Ambient Mode for responsive UI.
      */
     fun onExitAmbient() {
-        if (stepCounterSensor == null && accelerometerSensor != null) {
+        isAmbient = false
+
+        if (stepCounterSensor != null) {
+            sensorManager.unregisterListener(this, stepCounterSensor)
+            sensorManager.registerListener(this, stepCounterSensor, SensorManager.SENSOR_DELAY_NORMAL, 10_000_000)
+        } else if (stepDetectorSensor != null) {
+            sensorManager.unregisterListener(this, stepDetectorSensor)
+            sensorManager.registerListener(this, stepDetectorSensor, SensorManager.SENSOR_DELAY_NORMAL, 10_000_000)
+        }
+
+        if (stepCounterSensor == null && accelerometerSensor != null && !isOffBody) {
             sensorManager.registerListener(this, accelerometerSensor, SensorManager.SENSOR_DELAY_UI)
         }
     }
@@ -98,11 +142,14 @@ class StepTrackerManager(
     }
 
     private fun recordStepsDelta(deltaSteps: Int) {
-        if (deltaSteps <= 0) return
+        if (deltaSteps <= 0 || isOffBody) return
         val now = System.currentTimeMillis()
+        val stepThreshold = if (isAmbient) 50 else 10
+        val maxWaitMs = if (isAmbient) 60_000L else 5_000L
+
         val shouldFlush = synchronized(this) {
             pendingSteps += deltaSteps
-            pendingSteps >= 10 || (now - lastFlushTimestampMs >= 5_000L)
+            pendingSteps >= stepThreshold || (now - lastFlushTimestampMs >= maxWaitMs)
         }
         if (shouldFlush) {
             flushPendingSteps()
@@ -113,7 +160,27 @@ class StepTrackerManager(
         if (event == null) return
 
         when (event.sensor.type) {
+            Sensor.TYPE_LOW_LATENCY_OFFBODY_DETECT -> {
+                // 0.0 = off body, 1.0 = on body
+                val onBodyState = event.values[0] == 1.0f
+                isOffBody = !onBodyState
+                if (isOffBody) {
+                    flushPendingSteps()
+                    if (accelerometerSensor != null) {
+                        sensorManager.unregisterListener(this, accelerometerSensor)
+                    }
+                } else if (!isAmbient && accelerometerSensor != null && stepCounterSensor == null) {
+                    sensorManager.registerListener(this, accelerometerSensor, SensorManager.SENSOR_DELAY_UI)
+                }
+            }
+            Sensor.TYPE_STATIONARY_DETECT -> {
+                // Device placed stationary on surface
+                if (event.values[0] == 1.0f) {
+                    flushPendingSteps()
+                }
+            }
             Sensor.TYPE_STEP_COUNTER -> {
+                if (isOffBody) return
                 val rawSteps = event.values[0].toInt()
                 val lastSavedSteps = prefs.getInt("last_hardware_step_count", -1)
 
@@ -130,10 +197,12 @@ class StepTrackerManager(
                 }
             }
             Sensor.TYPE_STEP_DETECTOR -> {
+                if (isOffBody) return
                 val steps = event.values.firstOrNull()?.toInt()?.coerceAtLeast(1) ?: 1
                 recordStepsDelta(steps)
             }
             Sensor.TYPE_ACCELEROMETER -> {
+                if (isOffBody || isAmbient) return
                 // Lightweight gait peak detector (~1.24g threshold with 330ms step cadence debounce)
                 val ax = event.values[0]
                 val ay = event.values[1]

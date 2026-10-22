@@ -31,6 +31,7 @@
 | 14 | Phone Companion Quick-Care & Sync | Companion notification actions, fixing "FEED_MEAL"/"CLEAN_WASTE" protocol bug in widget | M3 | R3 Survey |
 | 15 | Multi-Module Test Infrastructure | testOptions.unitTests.isReturnDefaultValues = true and test suites in :wear-os-app and :phone-companion-app | M4 | R3 Survey |
 | 16 | Full Test Suite 100% Green | Verification of all unit and integration tests across :shared-vpet-core, :wear-os-app, :phone-companion-app | M4 | Acceptance Criteria |
+| 17 | Wireless ADB Watch Sideloading | Direct phone-to-watch installation over Wi-Fi without PC, RSA key generation, live terminal logs | M5 | User Request |
 
 ## Milestones
 | # | Name | Scope | Dependencies | Status |
@@ -39,6 +40,7 @@
 | M2 | Background Evolution Alerts | PetDecayWorker evolution detection, evolution notification with pixel sprite, BuzzerManager piezo alert sequence, HapticManager pattern | none | DONE |
 | M3 | Notification Quick-Care Actions | PetDecayWorker distress triggers, Wear OS NotificationQuickCareReceiver, 1-tap feed/flush actions, complication/tile refresh, companion widget fix | M2 | DONE |
 | M4 | E2E Testing, Adversarial Hardening & Audit | JVM unit test config across all modules, unit/integration test suites for M1-M3, full ./gradlew test verification, Challenger verification, Forensic Audit | M1, M2, M3 | DONE |
+| M5 | Wireless ADB Watch Sideloading | Direct socket ADB client engine (dadb 2.0.0), AdbKeyManager, WatchApkSourceManager, WatchSideloadScreen, real-time logs | M1, M4 | DONE |
 
 ## Interface Contracts
 

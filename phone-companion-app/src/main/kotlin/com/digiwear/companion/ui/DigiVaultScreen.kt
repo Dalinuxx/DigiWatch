@@ -25,13 +25,13 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material.icons.filled.Archive
-import androidx.compose.material.icons.filled.Bolt
 import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.FlashOn
 import androidx.compose.material.icons.filled.Search
 import com.digiwear.companion.data.CompanionMemorialEntity
 import com.digiwear.companion.data.SyncedPetEntity
+import com.digiwear.core.fusion.FusionType
 import com.digiwear.core.fusion.JogressEngine
 import com.digiwear.core.fusion.JogressRecipe
 import androidx.compose.material3.AlertDialog
@@ -94,7 +94,7 @@ fun DigiVaultScreen(
     var activeCelebrationSpeciesId by remember { mutableStateOf<Int?>(null) }
     var activeCelebrationTitle by remember { mutableStateOf<String?>(null) }
 
-    var activeTab by remember { mutableIntStateOf(0) } // 0: CRYO-VAULT, 1: MEMORIAL GRAVEYARD
+    var activeTab by remember { mutableIntStateOf(0) } // 0: CRYO-VAULT, 1: FUSION LAB, 2: MEMORIAL GRAVEYARD
     var searchQuery by remember { mutableStateOf("") }
     var selectedStageFilter by remember { mutableStateOf<PetStage?>(null) }
     var activePetForDeposit by remember { mutableStateOf<PetState?>(null) }
@@ -103,12 +103,16 @@ fun DigiVaultScreen(
     var commCodeDialogData by remember { mutableStateOf<Pair<String, String>?>(null) }
     var deleteConfirmPet by remember { mutableStateOf<StoredDigimonEntity?>(null) }
     var actionStatusMessage by remember { mutableStateOf<String?>(null) }
-    var pendingFusionPair by remember { mutableStateOf<Pair<StoredDigimonEntity, JogressRecipe>?>(null) }
+    var pendingFusionExecution by remember { mutableStateOf<FusionExecutionCandidate?>(null) }
+
+    // Fusion Lab Filter State
+    var fusionSearchQuery by remember { mutableStateOf("") }
+    var fusionTypeFilter by remember { mutableStateOf<FusionType?>(null) }
+    var onlyShowCanFuseNow by remember { mutableStateOf(false) }
 
     // Sprite animation ticker
     var frameToggle by remember { mutableStateOf(false) }
     LaunchedEffect(Unit) {
-        // Fetch latest snapshot to populate quick deposit
         val latest = db.phoneDao().getLatestSnapshot()
         if (latest != null) {
             activePetForDeposit = PetState(
@@ -147,17 +151,23 @@ fun DigiVaultScreen(
     ) {
         // Header
         DigiSectionHeader(
-            tag = "DIGIVAULT // CRYO-STASIS ARCHIVE",
-            title = "Preserved Partners (${vaultPets.size})",
+            tag = "DIGIVAULT // CRYO-STASIS & FUSION CENTER",
+            title = when (activeTab) {
+                0 -> "Preserved Partners (${vaultPets.size})"
+                1 -> "DNA Jogress & DigiXros Lab (${JogressEngine.BASE_RECIPES.size})"
+                else -> "Hall of Fame Memorial (${memorials.size})"
+            },
             accentColor = Color(0xFF26A69A),
             trailingContent = {
-                Button(
-                    onClick = { showDepositDialog = true },
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF00897B))
-                ) {
-                    Icon(Icons.Default.Archive, contentDescription = "Deposit", modifier = Modifier.size(16.dp))
-                    Spacer(modifier = Modifier.width(6.dp))
-                    Text("DEPOSIT ACTIVE", fontSize = 10.sp, fontWeight = FontWeight.Bold, fontFamily = FontFamily.Monospace)
+                if (activePetForDeposit != null) {
+                    Button(
+                        onClick = { showDepositDialog = true },
+                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF00897B))
+                    ) {
+                        Icon(Icons.Default.Archive, contentDescription = "Deposit", modifier = Modifier.size(16.dp))
+                        Spacer(modifier = Modifier.width(6.dp))
+                        Text("DEPOSIT ACTIVE", fontSize = 10.sp, fontWeight = FontWeight.Bold, fontFamily = FontFamily.Monospace)
+                    }
                 }
             }
         )
@@ -172,445 +182,643 @@ fun DigiVaultScreen(
             )
         }
 
-        Spacer(modifier = Modifier.height(12.dp))
+        Spacer(modifier = Modifier.height(10.dp))
 
-        // Tab selector: CRYO-VAULT vs MEMORIAL GRAVEYARD
+        // 3 Dedicated Sub-Tabs: CRYO-VAULT, FUSION LAB, MEMORIAL
         Row(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
+            horizontalArrangement = Arrangement.spacedBy(6.dp)
         ) {
+            // Tab 0: CRYO-VAULT
             Button(
                 onClick = { activeTab = 0 },
                 modifier = Modifier.weight(1f),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = if (activeTab == 0) Color(0xFF00897B) else Color(0xFF1E2630)
-                )
+                ),
+                contentPadding = PaddingValues(horizontal = 4.dp, vertical = 8.dp)
             ) {
-                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(5.dp)) {
-                    DigiVectorIcon(type = DigiIconType.VAULT_SAFE, size = 12.dp, tint = if (activeTab == 0) Color.White else Color(0xFF90A4AE))
+                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                    DigiVectorIcon(type = DigiIconType.VAULT_SAFE, size = 11.dp, tint = if (activeTab == 0) Color.White else Color(0xFF90A4AE))
                     Text(
-                        text = "CRYO-VAULT (${vaultPets.size})",
-                        fontSize = 11.sp,
+                        text = "VAULT (${vaultPets.size})",
+                        fontSize = 10.sp,
                         fontWeight = FontWeight.Bold,
                         fontFamily = FontFamily.Monospace,
                         color = if (activeTab == 0) Color.White else Color(0xFF90A4AE)
                     )
                 }
             }
+            // Tab 1: FUSION LAB
             Button(
                 onClick = { activeTab = 1 },
-                modifier = Modifier.weight(1f),
+                modifier = Modifier.weight(1.1f),
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = if (activeTab == 1) Color(0xFF455A64) else Color(0xFF1E2630)
-                )
+                    containerColor = if (activeTab == 1) Color(0xFF6A1B9A) else Color(0xFF1E2630)
+                ),
+                contentPadding = PaddingValues(horizontal = 4.dp, vertical = 8.dp)
             ) {
-                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(5.dp)) {
-                    DigiVectorIcon(type = DigiIconType.MEMORIAL_GRAVE, size = 12.dp, tint = if (activeTab == 1) Color.White else Color(0xFF90A4AE))
+                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                    DigiVectorIcon(type = DigiIconType.DNA_HELIX, size = 11.dp, tint = if (activeTab == 1) Color.White else Color(0xFFEA80FC))
                     Text(
-                        text = "MEMORIAL (${memorials.size})",
-                        fontSize = 11.sp,
+                        text = "FUSION LAB",
+                        fontSize = 10.sp,
                         fontWeight = FontWeight.Bold,
                         fontFamily = FontFamily.Monospace,
-                        color = if (activeTab == 1) Color.White else Color(0xFF90A4AE)
+                        color = if (activeTab == 1) Color.White else Color(0xFFEA80FC)
                     )
                 }
             }
-        }
-
-        Spacer(modifier = Modifier.height(10.dp))
-
-        if (activeTab == 0) {
-            // Search Bar & Stage Filter Chips
-            OutlinedTextField(
-            value = searchQuery,
-            onValueChange = { searchQuery = it },
-            modifier = Modifier.fillMaxWidth(),
-            placeholder = { Text("Search by species or nickname...", color = Color.Gray, fontSize = 12.sp) },
-            leadingIcon = { Icon(Icons.Default.Search, contentDescription = "Search", tint = Color.Gray) },
-            singleLine = true
-        )
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .horizontalScroll(rememberScrollState()),
-            horizontalArrangement = Arrangement.spacedBy(6.dp)
-        ) {
-            FilterChip("All", selectedStageFilter == null) { selectedStageFilter = null }
-            PetStage.entries.forEach { stage ->
-                FilterChip(stage.displayName, selectedStageFilter == stage) {
-                    selectedStageFilter = if (selectedStageFilter == stage) null else stage
-                }
-            }
-        }
-
-        Spacer(modifier = Modifier.height(10.dp))
-
-        // Active Partner DNA Jogress & DigiXros Quick-Fusion / Partner Spawner Banner
-        val activePet = activePetForDeposit ?: PetState(speciesId = 201)
-        val activeSp = remember(activePet.speciesId) { PetSpecies.getById(activePet.speciesId) }
-        val vaultCompatibleRecipes = remember(activeSp.id) { JogressEngine.getCompatibleRecipesFor(activeSp.id) }
-
-        if (vaultCompatibleRecipes.isNotEmpty()) {
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                colors = CardDefaults.cardColors(containerColor = Color(0xFF1A1426)),
-                shape = RoundedCornerShape(12.dp),
-                border = BorderStroke(1.dp, Color(0xFFAB47BC))
-            ) {
-                Column(modifier = Modifier.padding(10.dp)) {
-                    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(5.dp)) {
-                        DigiVectorIcon(type = DigiIconType.DNA_HELIX, size = 12.dp, tint = Color(0xFFEA80FC))
-                        Text(
-                            text = "ACTIVE ${activeSp.name.uppercase()} — DNA JOGRESS & DIGIXROS LAB (${vaultCompatibleRecipes.size})",
-                            fontSize = 10.sp,
-                            fontWeight = FontWeight.Black,
-                            color = Color(0xFFEA80FC),
-                            fontFamily = FontFamily.Monospace
-                        )
-                    }
-                    Spacer(modifier = Modifier.height(6.dp))
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .horizontalScroll(rememberScrollState()),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        vaultCompatibleRecipes.forEach { recipe ->
-                            val partnerId = if (recipe.primarySpeciesId == activeSp.id) recipe.secondarySpeciesId else recipe.primarySpeciesId
-                            val partnerSp = PetSpecies.getById(partnerId)
-                            val targetSp = PetSpecies.getById(recipe.targetSpeciesId)
-                            Row(
-                                modifier = Modifier
-                                    .background(Color(0xFF120E1C), RoundedCornerShape(8.dp))
-                                    .border(0.75.dp, Color(recipe.fusionType.badgeColorHex), RoundedCornerShape(8.dp))
-                                    .padding(8.dp),
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(6.dp)
-                            ) {
-                                SpriteCanvasRenderer(speciesId = partnerSp.id, frame = SpriteFrame.IDLE_A, size = 28.dp)
-                                Text("→", fontSize = 11.sp, color = DigiWearPalette.CrestGold, fontWeight = FontWeight.Bold)
-                                SpriteCanvasRenderer(speciesId = targetSp.id, frame = SpriteFrame.IDLE_A, size = 32.dp)
-                                Column {
-                                    Text(
-                                        text = "+${partnerSp.name} → ${targetSp.name}",
-                                        fontSize = 10.sp,
-                                        fontWeight = FontWeight.Bold,
-                                        color = Color.White
-                                    )
-                                    Text(
-                                        text = recipe.fusionType.displayName,
-                                        fontSize = 8.5.sp,
-                                        color = Color(recipe.fusionType.badgeColorHex),
-                                        fontFamily = FontFamily.Monospace
-                                    )
-                                    Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                                        OutlinedButton(
-                                            onClick = {
-                                                scope.launch {
-                                                    db.phoneDao().insertVaultPet(
-                                                        StoredDigimonEntity(
-                                                            speciesId = partnerSp.id,
-                                                            speciesName = partnerSp.name,
-                                                            customNickname = "${recipe.fusionType.displayName} Partner",
-                                                            stageName = partnerSp.stage.displayName,
-                                                            attributeName = partnerSp.attribute.displayName,
-                                                            currentHp = partnerSp.baseHp,
-                                                            maxHp = partnerSp.baseHp,
-                                                            hunger = 4,
-                                                            strength = 4,
-                                                            weight = partnerSp.baselineWeight,
-                                                            ageSeconds = 259200L,
-                                                            careMistakes = 0,
-                                                            effort = 4,
-                                                            overfeedCount = 0,
-                                                            totalBattles = 20,
-                                                            victories = 16
-                                                        )
-                                                    )
-                                                    actionStatusMessage = "Added ${partnerSp.name} to DigiVault — tap 'DNA / XROS FUSE' on its card below!"
-                                                }
-                                            }
-                                        ) {
-                                            Text("+VAULT", fontSize = 8.5.sp, fontFamily = FontFamily.Monospace)
-                                        }
-                                        Button(
-                                            onClick = {
-                                                val tempEntity = StoredDigimonEntity(
-                                                    speciesId = partnerSp.id,
-                                                    speciesName = partnerSp.name,
-                                                    customNickname = partnerSp.name,
-                                                    stageName = partnerSp.stage.displayName,
-                                                    attributeName = partnerSp.attribute.displayName,
-                                                    currentHp = partnerSp.baseHp,
-                                                    maxHp = partnerSp.baseHp,
-                                                    hunger = 4,
-                                                    strength = 4,
-                                                    weight = partnerSp.baselineWeight,
-                                                    ageSeconds = 259200L,
-                                                    careMistakes = 0,
-                                                    effort = 4,
-                                                    overfeedCount = 0,
-                                                    totalBattles = 20,
-                                                    victories = 16
-                                                )
-                                                pendingFusionPair = tempEntity to recipe
-                                            },
-                                            colors = ButtonDefaults.buttonColors(containerColor = Color(recipe.fusionType.badgeColorHex))
-                                        ) {
-                                            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(3.dp)) {
-                                                DigiVectorIcon(type = DigiIconType.DNA_HELIX, size = 9.dp, tint = Color.Black)
-                                                Text("FUSE", fontSize = 8.5.sp, fontWeight = FontWeight.Black, color = Color.Black, fontFamily = FontFamily.Monospace)
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-            Spacer(modifier = Modifier.height(10.dp))
-        }
-
-        // Stored Pets List
-        if (filteredPets.isEmpty()) {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .weight(1f),
-                contentAlignment = Alignment.Center
-            ) {
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Text(
-                        text = "NO DIGIMON IN DIGIVAULT",
-                        fontSize = 14.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = Color.Gray,
-                        fontFamily = FontFamily.Monospace
-                    )
-                    Spacer(modifier = Modifier.height(4.dp))
-                    Text(
-                        text = "Deposit your raised partner to store them in cryo-stasis,\nor clear active filters.",
-                        fontSize = 11.sp,
-                        color = Color.DarkGray,
-                        textAlign = TextAlign.Center
-                    )
-                }
-            }
-        } else {
-            LazyColumn(
-                modifier = Modifier.weight(1f),
-                verticalArrangement = Arrangement.spacedBy(10.dp)
-            ) {
-                items(filteredPets, key = { it.id }) { storedPet ->
-                    VaultPetCard(
-                        pet = storedPet,
-                        activePet = activePetForDeposit,
-                        frameToggle = frameToggle,
-                        onDeployToWatch = {
-                            scope.launch {
-                                val state = PetState(
-                                    speciesId = storedPet.speciesId,
-                                    currentHp = storedPet.currentHp,
-                                    maxHp = storedPet.maxHp,
-                                    hunger = storedPet.hunger,
-                                    strength = storedPet.strength,
-                                    weight = storedPet.weight,
-                                    ageSeconds = storedPet.ageSeconds,
-                                    careMistakes = storedPet.careMistakes,
-                                    effort = storedPet.effort,
-                                    overfeedCount = storedPet.overfeedCount,
-                                    totalBattles = storedPet.totalBattles,
-                                    victories = storedPet.victories
-                                )
-                                activePetForDeposit = state
-                                db.phoneDao().insertSnapshot(
-                                    SyncedPetEntity(
-                                        syncedTimestampUtc = System.currentTimeMillis() / 1000L,
-                                        speciesId = state.speciesId,
-                                        speciesName = storedPet.speciesName,
-                                        currentHp = state.currentHp,
-                                        maxHp = state.maxHp,
-                                        hunger = state.hunger,
-                                        strength = state.strength,
-                                        weight = state.weight,
-                                        ageSeconds = state.ageSeconds,
-                                        careMistakes = state.careMistakes,
-                                        effort = state.effort,
-                                        overfeedCount = state.overfeedCount,
-                                        totalBattles = state.totalBattles,
-                                        victories = state.victories
-                                    )
-                                )
-                                val ok = wearableManager.sendPetStateToWatch(state)
-                                DigiWearAppWidgetProvider.updateAllWidgets(context)
-                                actionStatusMessage = if (ok) {
-                                    "${storedPet.speciesName} deployed to Smartwatch & Dashboard!"
-                                } else {
-                                    "${storedPet.speciesName} deployed to Phone Dashboard & Widget (Watch offline)"
-                                }
-                            }
-                        },
-                        onGenerateCommCode = {
-                            val species = PetSpecies.getById(storedPet.speciesId)
-                            val seed = (System.currentTimeMillis() and 0xFFFF).toInt()
-                            val code = CommCodeCodec.encode128(
-                                monsterId = storedPet.speciesId,
-                                stage = species.stage,
-                                attribute = species.attribute,
-                                basePowerHp = species.basePower,
-                                historicalVictories = storedPet.victories,
-                                trainingEffort = storedPet.effort,
-                                battleRngSeed = seed
-                            )
-                            val digiRom = CommCodeCodec.encodeDigiRom(
-                                monsterId = storedPet.speciesId,
-                                stage = species.stage,
-                                attribute = species.attribute,
-                                basePowerHp = species.basePower,
-                                battleRngSeed = seed
-                            )
-                            commCodeDialogData = code to digiRom
-                        },
-                        onDelete = {
-                            deleteConfirmPet = storedPet
-                        },
-                        onFuseWithActive = { pet, recipe ->
-                            pendingFusionPair = pet to recipe
-                        }
-                    )
-                }
-            }
-        }
-    } else {
-        // Memorial Graveyard View
-        Row(
-            modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(
-                text = "HALL OF FAME // MEMORIAL GRAVEYARD",
-                fontSize = 11.sp,
-                fontWeight = FontWeight.Bold,
-                color = Color(0xFF80CBC4),
-                fontFamily = FontFamily.Monospace
-            )
+            // Tab 2: MEMORIAL
             Button(
-                onClick = {
-                    scope.launch {
-                        val records = wearableManager.requestMemorialsFromWatch()
-                        if (!records.isNullOrEmpty()) {
-                            for (r in records) {
-                                db.phoneDao().insertMemorial(CompanionMemorialEntity.fromDomain(r))
-                            }
-                            actionStatusMessage = "Synced ${records.size} memorial record(s) from Smartwatch!"
-                        } else {
-                            actionStatusMessage = "No new memorial records on Smartwatch (or watch offline)"
-                        }
-                    }
-                },
-                modifier = Modifier.height(28.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF00695C)),
-                contentPadding = PaddingValues(horizontal = 8.dp)
+                onClick = { activeTab = 2 },
+                modifier = Modifier.weight(1f),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = if (activeTab == 2) Color(0xFF455A64) else Color(0xFF1E2630)
+                ),
+                contentPadding = PaddingValues(horizontal = 4.dp, vertical = 8.dp)
             ) {
-                Text("SYNC FROM WATCH", fontSize = 9.sp, fontWeight = FontWeight.Bold, fontFamily = FontFamily.Monospace)
-            }
-        }
-
-        if (memorials.isEmpty()) {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .weight(1f),
-                contentAlignment = Alignment.Center
-            ) {
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    DigiVectorIcon(type = DigiIconType.MEMORIAL_GRAVE, size = 36.dp, tint = Color(0xFF78909C))
-                    Spacer(modifier = Modifier.height(6.dp))
+                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                    DigiVectorIcon(type = DigiIconType.MEMORIAL_GRAVE, size = 11.dp, tint = if (activeTab == 2) Color.White else Color(0xFF90A4AE))
                     Text(
-                        text = "NO DEPARTED PARTNERS YET",
-                        fontSize = 14.sp,
+                        text = "MEMORIAL (${memorials.size})",
+                        fontSize = 10.sp,
                         fontWeight = FontWeight.Bold,
-                        color = Color.Gray,
-                        fontFamily = FontFamily.Monospace
-                    )
-                    Spacer(modifier = Modifier.height(4.dp))
-                    Text(
-                        text = "Departed partners that complete their canonical lifecycle\nwill be respectfully commemorated in this Hall of Fame.",
-                        fontSize = 11.sp,
-                        color = Color.DarkGray,
-                        textAlign = TextAlign.Center
+                        fontFamily = FontFamily.Monospace,
+                        color = if (activeTab == 2) Color.White else Color(0xFF90A4AE)
                     )
                 }
             }
-        } else {
-            LazyColumn(
-                modifier = Modifier.weight(1f),
-                verticalArrangement = Arrangement.spacedBy(10.dp)
-            ) {
-                items(memorials, key = { it.id }) { m ->
+        }
+
+        Spacer(modifier = Modifier.height(10.dp))
+
+        when (activeTab) {
+            0 -> {
+                // =========================================================================
+                // SUB-TAB 0: CRYO-VAULT
+                // =========================================================================
+                OutlinedTextField(
+                    value = searchQuery,
+                    onValueChange = { searchQuery = it },
+                    modifier = Modifier.fillMaxWidth(),
+                    placeholder = { Text("Search vault by species or nickname...", color = Color.Gray, fontSize = 12.sp) },
+                    leadingIcon = { Icon(Icons.Default.Search, contentDescription = "Search", tint = Color.Gray) },
+                    singleLine = true
+                )
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .horizontalScroll(rememberScrollState()),
+                    horizontalArrangement = Arrangement.spacedBy(6.dp)
+                ) {
+                    FilterChip("All", selectedStageFilter == null) { selectedStageFilter = null }
+                    PetStage.entries.forEach { stage ->
+                        FilterChip(stage.displayName, selectedStageFilter == stage) {
+                            selectedStageFilter = if (selectedStageFilter == stage) null else stage
+                        }
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(10.dp))
+
+                // Active partner status preview
+                if (activePetForDeposit != null) {
+                    val activeSp = PetSpecies.getById(activePetForDeposit!!.speciesId)
                     Card(
                         modifier = Modifier.fillMaxWidth(),
-                        colors = CardDefaults.cardColors(containerColor = Color(0xFF131B24)),
-                        shape = RoundedCornerShape(12.dp),
-                        border = BorderStroke(1.dp, Color(0x5580CBC4))
+                        colors = CardDefaults.cardColors(containerColor = Color(0xFF121B18)),
+                        border = BorderStroke(1.dp, Color(0xFF26A69A))
                     ) {
                         Row(
-                            modifier = Modifier.padding(12.dp),
-                            verticalAlignment = Alignment.CenterVertically
+                            modifier = Modifier.padding(10.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.SpaceBetween
                         ) {
-                            Box(
-                                modifier = Modifier
-                                    .size(48.dp)
-                                    .background(Color(0xFF0A1016), RoundedCornerShape(8.dp))
-                                    .border(1.dp, Color(0x3380CBC4), RoundedCornerShape(8.dp)),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                SpriteCanvasRenderer(
-                                    speciesId = m.speciesId,
-                                    frame = SpriteFrame.IDLE_A,
-                                    size = 36.dp
-                                )
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                SpriteCanvasRenderer(speciesId = activeSp.id, frame = SpriteFrame.IDLE_A, size = 36.dp)
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Column {
+                                    Text("ACTIVE PARTNER: ${activeSp.name.uppercase()}", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = Color(0xFF80CBC4), fontFamily = FontFamily.Monospace)
+                                    Text("${activeSp.stage.displayName} • ${activePetForDeposit!!.victories}W/${activePetForDeposit!!.totalBattles}B • Effort ${activePetForDeposit!!.effort}/4", fontSize = 9.sp, color = Color.LightGray, fontFamily = FontFamily.Monospace)
+                                }
                             }
-                            Spacer(modifier = Modifier.width(12.dp))
-                            Column(modifier = Modifier.weight(1f)) {
-                                Row(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    horizontalArrangement = Arrangement.SpaceBetween,
-                                    verticalAlignment = Alignment.CenterVertically
-                                ) {
-                                    Text(
-                                        text = "${m.speciesName} • GEN ${m.generation}",
-                                        fontSize = 13.sp,
-                                        fontWeight = FontWeight.Bold,
-                                        color = Color.White
+                            OutlinedButton(
+                                onClick = { showDepositDialog = true },
+                                contentPadding = PaddingValues(horizontal = 8.dp, vertical = 2.dp)
+                            ) {
+                                Text("DEPOSIT", fontSize = 9.5.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
+                            }
+                        }
+                    }
+                    Spacer(modifier = Modifier.height(10.dp))
+                }
+
+                // Stored Pets List
+                if (filteredPets.isEmpty()) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .weight(1f),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            Text(
+                                text = "NO DIGIMON IN DIGIVAULT",
+                                fontSize = 13.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = Color.Gray,
+                                fontFamily = FontFamily.Monospace
+                            )
+                            Spacer(modifier = Modifier.height(4.dp))
+                            Text(
+                                text = if (activePetForDeposit != null)
+                                    "Tap 'DEPOSIT ACTIVE' above to store your raised partner in cryo-stasis."
+                                else
+                                    "Raise a partner on your smartwatch or hatch an egg in the V-Pet dashboard first.",
+                                fontSize = 11.sp,
+                                color = Color.DarkGray,
+                                textAlign = TextAlign.Center
+                            )
+                        }
+                    }
+                } else {
+                    LazyColumn(
+                        modifier = Modifier.weight(1f),
+                        verticalArrangement = Arrangement.spacedBy(10.dp)
+                    ) {
+                        items(filteredPets, key = { it.id }) { storedPet ->
+                            VaultPetCard(
+                                pet = storedPet,
+                                activePet = activePetForDeposit,
+                                frameToggle = frameToggle,
+                                onDeployToWatch = {
+                                    scope.launch {
+                                        val state = PetState(
+                                            speciesId = storedPet.speciesId,
+                                            currentHp = storedPet.currentHp,
+                                            maxHp = storedPet.maxHp,
+                                            hunger = storedPet.hunger,
+                                            strength = storedPet.strength,
+                                            weight = storedPet.weight,
+                                            ageSeconds = storedPet.ageSeconds,
+                                            careMistakes = storedPet.careMistakes,
+                                            effort = storedPet.effort,
+                                            overfeedCount = storedPet.overfeedCount,
+                                            totalBattles = storedPet.totalBattles,
+                                            victories = storedPet.victories
+                                        )
+                                        activePetForDeposit = state
+                                        db.phoneDao().insertSnapshot(
+                                            SyncedPetEntity(
+                                                syncedTimestampUtc = System.currentTimeMillis() / 1000L,
+                                                speciesId = state.speciesId,
+                                                speciesName = storedPet.speciesName,
+                                                currentHp = state.currentHp,
+                                                maxHp = state.maxHp,
+                                                hunger = state.hunger,
+                                                strength = state.strength,
+                                                weight = state.weight,
+                                                ageSeconds = state.ageSeconds,
+                                                careMistakes = state.careMistakes,
+                                                effort = state.effort,
+                                                overfeedCount = state.overfeedCount,
+                                                totalBattles = state.totalBattles,
+                                                victories = state.victories
+                                            )
+                                        )
+                                        val ok = wearableManager.sendPetStateToWatch(state)
+                                        DigiWearAppWidgetProvider.updateAllWidgets(context)
+                                        actionStatusMessage = if (ok) {
+                                            "${storedPet.speciesName} deployed to Smartwatch & Dashboard!"
+                                        } else {
+                                            "${storedPet.speciesName} deployed to Phone Dashboard (Watch offline)"
+                                        }
+                                    }
+                                },
+                                onGenerateCommCode = {
+                                    val species = PetSpecies.getById(storedPet.speciesId)
+                                    val seed = (System.currentTimeMillis() and 0xFFFF).toInt()
+                                    val code = CommCodeCodec.encode128(
+                                        monsterId = storedPet.speciesId,
+                                        stage = species.stage,
+                                        attribute = species.attribute,
+                                        basePowerHp = species.basePower,
+                                        historicalVictories = storedPet.victories,
+                                        trainingEffort = storedPet.effort,
+                                        battleRngSeed = seed
                                     )
-                                    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                                        DigiVectorIcon(type = DigiIconType.MEMORIAL_GRAVE, size = 10.dp, tint = Color(0xFFFF8A80))
-                                        Text(
-                                            text = m.causeOfDeath,
-                                            fontSize = 9.sp,
-                                            fontFamily = FontFamily.Monospace,
-                                            color = Color(0xFFFF8A80)
+                                    val digiRom = CommCodeCodec.encodeDigiRom(
+                                        monsterId = storedPet.speciesId,
+                                        stage = species.stage,
+                                        attribute = species.attribute,
+                                        basePowerHp = species.basePower,
+                                        battleRngSeed = seed
+                                    )
+                                    commCodeDialogData = code to digiRom
+                                },
+                                onDelete = {
+                                    deleteConfirmPet = storedPet
+                                },
+                                onFuseWithActive = { pet, recipe ->
+                                    if (activePetForDeposit != null) {
+                                        pendingFusionExecution = FusionExecutionCandidate.ActiveWithVault(
+                                            activeState = activePetForDeposit!!,
+                                            vaultPet = pet,
+                                            recipe = recipe
                                         )
                                     }
                                 }
-                                Text(
-                                    text = "${m.finalStage} • Age: ${m.ageDays}d • Record: ${m.battlesWon}/${m.battlesTotal} (${(m.winRatio * 100).toInt()}%)",
-                                    fontSize = 10.5.sp,
-                                    color = Color(0xFFB0BEC5),
-                                    fontFamily = FontFamily.Monospace
+                            )
+                        }
+                    }
+                }
+            }
+
+            1 -> {
+                // =========================================================================
+                // SUB-TAB 1: FUSION LAB (CANON 85 RECIPES BROWSER & EXECUTION)
+                // =========================================================================
+                OutlinedTextField(
+                    value = fusionSearchQuery,
+                    onValueChange = { fusionSearchQuery = it },
+                    modifier = Modifier.fillMaxWidth(),
+                    placeholder = { Text("Search 85 recipes by species name...", color = Color.Gray, fontSize = 12.sp) },
+                    leadingIcon = { Icon(Icons.Default.Search, contentDescription = "Search", tint = Color.Gray) },
+                    singleLine = true
+                )
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .horizontalScroll(rememberScrollState()),
+                    horizontalArrangement = Arrangement.spacedBy(6.dp)
+                ) {
+                    FilterChip("All (${JogressEngine.BASE_RECIPES.size})", fusionTypeFilter == null && !onlyShowCanFuseNow) {
+                        fusionTypeFilter = null
+                        onlyShowCanFuseNow = false
+                    }
+                    FilterChip("Can Fuse Now", onlyShowCanFuseNow) {
+                        onlyShowCanFuseNow = !onlyShowCanFuseNow
+                    }
+                    FusionType.entries.forEach { fType ->
+                        FilterChip(fType.displayName, fusionTypeFilter == fType && !onlyShowCanFuseNow) {
+                            onlyShowCanFuseNow = false
+                            fusionTypeFilter = if (fusionTypeFilter == fType) null else fType
+                        }
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(10.dp))
+
+                // Determine owned species IDs
+                val ownedActiveId = activePetForDeposit?.speciesId
+                val ownedVaultIds = remember(vaultPets) { vaultPets.map { it.speciesId }.toSet() }
+
+                val displayedRecipes = JogressEngine.BASE_RECIPES.filter { recipe ->
+                    val primarySp = PetSpecies.getById(recipe.primarySpeciesId)
+                    val secondarySp = PetSpecies.getById(recipe.secondarySpeciesId)
+                    val targetSp = PetSpecies.getById(recipe.targetSpeciesId)
+
+                    val matchesSearch = primarySp.name.contains(fusionSearchQuery, ignoreCase = true) ||
+                            secondarySp.name.contains(fusionSearchQuery, ignoreCase = true) ||
+                            targetSp.name.contains(fusionSearchQuery, ignoreCase = true)
+
+                    val matchesType = fusionTypeFilter == null || recipe.fusionType == fusionTypeFilter
+
+                    val hasPrimary = (ownedActiveId == recipe.primarySpeciesId) || ownedVaultIds.contains(recipe.primarySpeciesId)
+                    val hasSecondary = (ownedActiveId == recipe.secondarySpeciesId) || ownedVaultIds.contains(recipe.secondarySpeciesId)
+                    val canFuse = hasPrimary && hasSecondary
+
+                    val matchesCanFuse = !onlyShowCanFuseNow || canFuse
+
+                    matchesSearch && matchesType && matchesCanFuse
+                }
+
+                if (displayedRecipes.isEmpty()) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .weight(1f),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            DigiVectorIcon(type = DigiIconType.DNA_HELIX, size = 32.dp, tint = Color.Gray)
+                            Spacer(modifier = Modifier.height(6.dp))
+                            Text(
+                                text = "NO MATCHING RECIPES FOUND",
+                                fontSize = 13.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = Color.Gray,
+                                fontFamily = FontFamily.Monospace
+                            )
+                            Spacer(modifier = Modifier.height(4.dp))
+                            Text(
+                                text = if (onlyShowCanFuseNow)
+                                    "No canon fusions match your current active & vault roster.\nRaise or store more species to unlock DNA Jogress!"
+                                else
+                                    "Try adjusting your search query or filter tags.",
+                                fontSize = 11.sp,
+                                color = Color.DarkGray,
+                                textAlign = TextAlign.Center
+                            )
+                        }
+                    }
+                } else {
+                    LazyColumn(
+                        modifier = Modifier.weight(1f),
+                        verticalArrangement = Arrangement.spacedBy(10.dp)
+                    ) {
+                        items(displayedRecipes) { recipe ->
+                            val primarySp = PetSpecies.getById(recipe.primarySpeciesId)
+                            val secondarySp = PetSpecies.getById(recipe.secondarySpeciesId)
+                            val targetSp = PetSpecies.getById(recipe.targetSpeciesId)
+
+                            val hasPrimaryInActive = ownedActiveId == recipe.primarySpeciesId
+                            val hasPrimaryInVault = ownedVaultIds.contains(recipe.primarySpeciesId)
+                            val hasSecondaryInActive = ownedActiveId == recipe.secondarySpeciesId
+                            val hasSecondaryInVault = ownedVaultIds.contains(recipe.secondarySpeciesId)
+
+                            val canFuseWithActive = (hasPrimaryInActive && hasSecondaryInVault) || (hasSecondaryInActive && hasPrimaryInVault)
+
+                            // Check if player has two distinct vault pets matching the pair
+                            val canFuseVaultWithVault = run {
+                                val primPet = vaultPets.firstOrNull { it.speciesId == recipe.primarySpeciesId }
+                                val secPet = vaultPets.firstOrNull { it.speciesId == recipe.secondarySpeciesId && it.id != primPet?.id }
+                                primPet != null && secPet != null
+                            }
+
+                            val canExecute = canFuseWithActive || canFuseVaultWithVault
+
+                            Card(
+                                modifier = Modifier.fillMaxWidth(),
+                                colors = CardDefaults.cardColors(containerColor = if (canExecute) Color(0xFF191226) else DigiWearPalette.CardSurface),
+                                shape = RoundedCornerShape(12.dp),
+                                border = BorderStroke(
+                                    if (canExecute) 1.5.dp else 1.dp,
+                                    if (canExecute) Color(recipe.fusionType.badgeColorHex) else DigiWearPalette.CardBorder
                                 )
-                                Text(
-                                    text = "\"${m.epitaph}\"",
-                                    fontSize = 10.sp,
-                                    color = Color(0xFF80CBC4),
-                                    fontFamily = FontFamily.Monospace
-                                )
+                            ) {
+                                Column(modifier = Modifier.padding(12.dp)) {
+                                    Row(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        horizontalArrangement = Arrangement.SpaceBetween,
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                                            DigiVectorIcon(type = DigiIconType.DNA_HELIX, size = 11.dp, tint = Color(recipe.fusionType.badgeColorHex))
+                                            Text(
+                                                text = recipe.fusionType.displayName.uppercase(),
+                                                fontSize = 10.sp,
+                                                fontWeight = FontWeight.Bold,
+                                                color = Color(recipe.fusionType.badgeColorHex),
+                                                fontFamily = FontFamily.Monospace
+                                            )
+                                        }
+                                        if (canExecute) {
+                                            Text(
+                                                text = "CAN FUSE NOW!",
+                                                fontSize = 9.sp,
+                                                fontWeight = FontWeight.Black,
+                                                color = Color(0xFF00E676),
+                                                fontFamily = FontFamily.Monospace
+                                            )
+                                        }
+                                    }
+
+                                    Spacer(modifier = Modifier.height(8.dp))
+
+                                    // Visualizer Row: Primary + Secondary = Target
+                                    Row(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        horizontalArrangement = Arrangement.SpaceEvenly,
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        // Component 1
+                                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                            SpriteCanvasRenderer(speciesId = primarySp.id, frame = SpriteFrame.IDLE_A, size = 36.dp)
+                                            Text(primarySp.name, fontSize = 10.sp, fontWeight = FontWeight.Bold, color = Color.White)
+                                            Text(
+                                                text = when {
+                                                    hasPrimaryInActive -> "Active"
+                                                    hasPrimaryInVault -> "In Vault"
+                                                    else -> "Missing"
+                                                },
+                                                fontSize = 8.sp,
+                                                fontFamily = FontFamily.Monospace,
+                                                color = if (hasPrimaryInActive || hasPrimaryInVault) Color(0xFF80CBC4) else Color(0xFFEF5350)
+                                            )
+                                        }
+
+                                        Text("+", fontSize = 16.sp, fontWeight = FontWeight.Black, color = Color.Gray)
+
+                                        // Component 2
+                                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                            SpriteCanvasRenderer(speciesId = secondarySp.id, frame = SpriteFrame.IDLE_A, size = 36.dp)
+                                            Text(secondarySp.name, fontSize = 10.sp, fontWeight = FontWeight.Bold, color = Color.White)
+                                            Text(
+                                                text = when {
+                                                    hasSecondaryInActive -> "Active"
+                                                    hasSecondaryInVault -> "In Vault"
+                                                    else -> "Missing"
+                                                },
+                                                fontSize = 8.sp,
+                                                fontFamily = FontFamily.Monospace,
+                                                color = if (hasSecondaryInActive || hasSecondaryInVault) Color(0xFF80CBC4) else Color(0xFFEF5350)
+                                            )
+                                        }
+
+                                        Text("→", fontSize = 16.sp, fontWeight = FontWeight.Black, color = DigiWearPalette.CrestGold)
+
+                                        // Target
+                                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                            SpriteCanvasRenderer(speciesId = targetSp.id, frame = SpriteFrame.IDLE_A, size = 42.dp)
+                                            Text(targetSp.name, fontSize = 11.sp, fontWeight = FontWeight.Black, color = Color(0xFF80D8FF))
+                                            Text(targetSp.stage.displayName, fontSize = 8.sp, color = Color.Gray)
+                                        }
+                                    }
+
+                                    Spacer(modifier = Modifier.height(6.dp))
+                                    Text(
+                                        text = recipe.description,
+                                        fontSize = 9.5.sp,
+                                        color = Color.LightGray
+                                    )
+
+                                    if (canExecute) {
+                                        Spacer(modifier = Modifier.height(8.dp))
+                                        Button(
+                                            onClick = {
+                                                if (canFuseWithActive && activePetForDeposit != null) {
+                                                    val vaultPartnerSpId = if (activePetForDeposit!!.speciesId == recipe.primarySpeciesId)
+                                                        recipe.secondarySpeciesId else recipe.primarySpeciesId
+                                                    val vaultPet = vaultPets.first { it.speciesId == vaultPartnerSpId }
+                                                    pendingFusionExecution = FusionExecutionCandidate.ActiveWithVault(
+                                                        activeState = activePetForDeposit!!,
+                                                        vaultPet = vaultPet,
+                                                        recipe = recipe
+                                                    )
+                                                } else if (canFuseVaultWithVault) {
+                                                    val petA = vaultPets.first { it.speciesId == recipe.primarySpeciesId }
+                                                    val petB = vaultPets.first { it.speciesId == recipe.secondarySpeciesId && it.id != petA.id }
+                                                    pendingFusionExecution = FusionExecutionCandidate.VaultWithVault(
+                                                        vaultPetA = petA,
+                                                        vaultPetB = petB,
+                                                        recipe = recipe
+                                                    )
+                                                }
+                                            },
+                                            modifier = Modifier.fillMaxWidth().height(32.dp),
+                                            colors = ButtonDefaults.buttonColors(containerColor = Color(recipe.fusionType.badgeColorHex))
+                                        ) {
+                                            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                                                DigiVectorIcon(type = DigiIconType.DNA_HELIX, size = 11.dp, tint = Color.Black)
+                                                Text("AWAKEN ${targetSp.name.uppercase()}", fontSize = 10.sp, fontWeight = FontWeight.Black, color = Color.Black, fontFamily = FontFamily.Monospace)
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            else -> {
+                // =========================================================================
+                // SUB-TAB 2: MEMORIAL GRAVEYARD VIEW
+                // =========================================================================
+                Row(
+                    modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = "HALL OF FAME // MEMORIAL GRAVEYARD",
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color(0xFF80CBC4),
+                        fontFamily = FontFamily.Monospace
+                    )
+                    Button(
+                        onClick = {
+                            scope.launch {
+                                val records = wearableManager.requestMemorialsFromWatch()
+                                if (!records.isNullOrEmpty()) {
+                                    for (r in records) {
+                                        db.phoneDao().insertMemorial(CompanionMemorialEntity.fromDomain(r))
+                                    }
+                                    actionStatusMessage = "Synced ${records.size} memorial record(s) from Smartwatch!"
+                                } else {
+                                    actionStatusMessage = "No new memorial records on Smartwatch (or watch offline)"
+                                }
+                            }
+                        },
+                        modifier = Modifier.height(28.dp),
+                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF00695C)),
+                        contentPadding = PaddingValues(horizontal = 8.dp)
+                    ) {
+                        Text("SYNC FROM WATCH", fontSize = 9.sp, fontWeight = FontWeight.Bold, fontFamily = FontFamily.Monospace)
+                    }
+                }
+
+                if (memorials.isEmpty()) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .weight(1f),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            DigiVectorIcon(type = DigiIconType.MEMORIAL_GRAVE, size = 36.dp, tint = Color(0xFF78909C))
+                            Spacer(modifier = Modifier.height(6.dp))
+                            Text(
+                                text = "NO DEPARTED PARTNERS YET",
+                                fontSize = 13.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = Color.Gray,
+                                fontFamily = FontFamily.Monospace
+                            )
+                            Spacer(modifier = Modifier.height(4.dp))
+                            Text(
+                                text = "Departed partners that complete their canonical lifecycle\nwill be respectfully commemorated in this Hall of Fame.",
+                                fontSize = 11.sp,
+                                color = Color.DarkGray,
+                                textAlign = TextAlign.Center
+                            )
+                        }
+                    }
+                } else {
+                    LazyColumn(
+                        modifier = Modifier.weight(1f),
+                        verticalArrangement = Arrangement.spacedBy(10.dp)
+                    ) {
+                        items(memorials, key = { it.id }) { m ->
+                            Card(
+                                modifier = Modifier.fillMaxWidth(),
+                                colors = CardDefaults.cardColors(containerColor = Color(0xFF131B24)),
+                                shape = RoundedCornerShape(12.dp),
+                                border = BorderStroke(1.dp, Color(0x5580CBC4))
+                            ) {
+                                Row(
+                                    modifier = Modifier.padding(12.dp),
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Box(
+                                        modifier = Modifier
+                                            .size(48.dp)
+                                            .background(Color(0xFF0A1016), RoundedCornerShape(8.dp))
+                                            .border(1.dp, Color(0x3380CBC4), RoundedCornerShape(8.dp)),
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        SpriteCanvasRenderer(
+                                            speciesId = m.speciesId,
+                                            frame = SpriteFrame.IDLE_A,
+                                            size = 36.dp
+                                        )
+                                    }
+                                    Spacer(modifier = Modifier.width(12.dp))
+                                    Column(modifier = Modifier.weight(1f)) {
+                                        Row(
+                                            modifier = Modifier.fillMaxWidth(),
+                                            horizontalArrangement = Arrangement.SpaceBetween,
+                                            verticalAlignment = Alignment.CenterVertically
+                                        ) {
+                                            Text(
+                                                text = "${m.speciesName} • GEN ${m.generation}",
+                                                fontSize = 13.sp,
+                                                fontWeight = FontWeight.Bold,
+                                                color = Color.White
+                                            )
+                                            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                                                DigiVectorIcon(type = DigiIconType.MEMORIAL_GRAVE, size = 10.dp, tint = Color(0xFFFF8A80))
+                                                Text(
+                                                    text = m.causeOfDeath,
+                                                    fontSize = 9.sp,
+                                                    fontFamily = FontFamily.Monospace,
+                                                    color = Color(0xFFFF8A80)
+                                                )
+                                            }
+                                        }
+                                        Text(
+                                            text = "${m.finalStage} • Age: ${m.ageDays}d • Record: ${m.battlesWon}/${m.battlesTotal} (${(m.winRatio * 100).toInt()}%)",
+                                            fontSize = 10.5.sp,
+                                            color = Color(0xFFB0BEC5),
+                                            fontFamily = FontFamily.Monospace
+                                        )
+                                        Text(
+                                            text = "\"${m.epitaph}\"",
+                                            fontSize = 10.sp,
+                                            color = Color(0xFF80CBC4),
+                                            fontFamily = FontFamily.Monospace
+                                        )
+                                    }
+                                }
                             }
                         }
                     }
@@ -618,17 +826,16 @@ fun DigiVaultScreen(
             }
         }
     }
-}
 
     // Deposit Active Partner Dialog
-    if (showDepositDialog) {
+    if (showDepositDialog && activePetForDeposit != null) {
+        val p = activePetForDeposit!!
+        val spec = PetSpecies.getById(p.speciesId)
         AlertDialog(
             onDismissRequest = { showDepositDialog = false },
             title = { Text("Deposit Active Partner") },
             text = {
                 Column {
-                    val p = activePetForDeposit ?: PetState(speciesId = 201)
-                    val spec = PetSpecies.getById(p.speciesId)
                     Text("Store ${spec.name} (${spec.stage.displayName}) into cryo-stasis vault?")
                     Spacer(modifier = Modifier.height(8.dp))
                     OutlinedTextField(
@@ -643,8 +850,6 @@ fun DigiVaultScreen(
                 Button(
                     onClick = {
                         scope.launch {
-                            val p = activePetForDeposit ?: PetState(speciesId = 201)
-                            val spec = PetSpecies.getById(p.speciesId)
                             db.phoneDao().insertVaultPet(
                                 StoredDigimonEntity(
                                     speciesId = p.speciesId,
@@ -784,14 +989,24 @@ fun DigiVaultScreen(
     }
 
     // DNA Digivolution / DigiXros Confirmation Dialog
-    pendingFusionPair?.let { (vaultPet, recipe) ->
-        val active = activePetForDeposit ?: PetState(speciesId = 201)
-        val activeSp = PetSpecies.getById(active.speciesId)
-        val vaultSp = PetSpecies.getById(vaultPet.speciesId)
+    pendingFusionExecution?.let { executionCandidate ->
+        val recipe = executionCandidate.recipe
         val targetSp = PetSpecies.getById(recipe.targetSpeciesId)
+        val (primName, primId, secName, secId) = when (executionCandidate) {
+            is FusionExecutionCandidate.ActiveWithVault -> {
+                val pSp = PetSpecies.getById(executionCandidate.activeState.speciesId)
+                val sSp = PetSpecies.getById(executionCandidate.vaultPet.speciesId)
+                Quad(pSp.name, pSp.id, sSp.name, sSp.id)
+            }
+            is FusionExecutionCandidate.VaultWithVault -> {
+                val pSp = PetSpecies.getById(executionCandidate.vaultPetA.speciesId)
+                val sSp = PetSpecies.getById(executionCandidate.vaultPetB.speciesId)
+                Quad(pSp.name, pSp.id, sSp.name, sSp.id)
+            }
+        }
 
         AlertDialog(
-            onDismissRequest = { pendingFusionPair = null },
+            onDismissRequest = { pendingFusionExecution = null },
             title = {
                 Text(
                     text = "${recipe.fusionType.displayName} Awakening",
@@ -812,32 +1027,21 @@ fun DigiVaultScreen(
                     )
                     Spacer(modifier = Modifier.height(12.dp))
 
-                    // 3-Way Partner Fusion Visualizer
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceEvenly,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                            SpriteCanvasRenderer(
-                                speciesId = activeSp.id,
-                                frame = SpriteFrame.IDLE_A,
-                                modifier = Modifier.size(46.dp)
-                            )
-                            Text(activeSp.name, fontSize = 10.sp, color = Color.White, fontWeight = FontWeight.Bold)
-                            Text("Active Partner", fontSize = 8.sp, color = Color.Gray)
+                            SpriteCanvasRenderer(speciesId = primId, frame = SpriteFrame.IDLE_A, modifier = Modifier.size(46.dp))
+                            Text(primName, fontSize = 10.sp, color = Color.White, fontWeight = FontWeight.Bold)
                         }
 
                         Text("+", fontSize = 18.sp, fontWeight = FontWeight.Black, color = Color(0xFFFFB74D))
 
                         Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                            SpriteCanvasRenderer(
-                                speciesId = vaultSp.id,
-                                frame = SpriteFrame.IDLE_A,
-                                modifier = Modifier.size(46.dp)
-                            )
-                            Text(vaultSp.name, fontSize = 10.sp, color = Color.White, fontWeight = FontWeight.Bold)
-                            Text("Vault Partner", fontSize = 8.sp, color = Color.Gray)
+                            SpriteCanvasRenderer(speciesId = secId, frame = SpriteFrame.IDLE_A, modifier = Modifier.size(46.dp))
+                            Text(secName, fontSize = 10.sp, color = Color.White, fontWeight = FontWeight.Bold)
                         }
 
                         Text("=", fontSize = 18.sp, fontWeight = FontWeight.Black, color = Color(0xFF64B5F6))
@@ -855,7 +1059,6 @@ fun DigiVaultScreen(
 
                     Spacer(modifier = Modifier.height(12.dp))
 
-                    // Fusion Synergy Stat Preview
                     Card(
                         modifier = Modifier.fillMaxWidth(),
                         colors = CardDefaults.cardColors(containerColor = Color(0xFF141A24))
@@ -864,8 +1067,6 @@ fun DigiVaultScreen(
                             Text("FUSION SYNERGY INHERITANCE", fontSize = 10.sp, fontWeight = FontWeight.Bold, color = Color(0xFF80D8FF))
                             Spacer(modifier = Modifier.height(4.dp))
                             Text("• Synergy Max HP: ${(targetSp.baseHp * 1.10f).toInt()} (+10% DNA Harmony)", fontSize = 11.sp, color = Color.LightGray)
-                            Text("• Combined Victories: ${active.victories + vaultPet.victories} Wins", fontSize = 11.sp, color = Color.LightGray)
-                            Text("• Inherited Effort: ${maxOf(active.effort, vaultPet.effort)} / 4", fontSize = 11.sp, color = Color.LightGray)
                             Text("• Digimon 0nl1ne / D-Com: 100% Wire Protocol Compatible", fontSize = 10.sp, color = Color(0xFF00E676), fontWeight = FontWeight.Bold)
                         }
                     }
@@ -875,39 +1076,86 @@ fun DigiVaultScreen(
                 Button(
                     onClick = {
                         scope.launch {
-                            val fusedState = JogressEngine.executeFusion(
-                                primary = active,
-                                secondarySpeciesId = vaultPet.speciesId,
-                                secondaryVictories = vaultPet.victories,
-                                secondaryEffort = vaultPet.effort
-                            )
-                            activePetForDeposit = fusedState
+                            when (executionCandidate) {
+                                is FusionExecutionCandidate.ActiveWithVault -> {
+                                    val fusedState = JogressEngine.executeFusion(
+                                        primary = executionCandidate.activeState,
+                                        secondarySpeciesId = executionCandidate.vaultPet.speciesId,
+                                        secondaryVictories = executionCandidate.vaultPet.victories,
+                                        secondaryEffort = executionCandidate.vaultPet.effort
+                                    )
+                                    activePetForDeposit = fusedState
+                                    wearableManager.sendPetStateToWatch(fusedState)
+                                    db.phoneDao().insertSnapshot(
+                                        SyncedPetEntity(
+                                            syncedTimestampUtc = System.currentTimeMillis() / 1000L,
+                                            speciesId = fusedState.speciesId,
+                                            speciesName = targetSp.name,
+                                            currentHp = fusedState.currentHp,
+                                            maxHp = fusedState.maxHp,
+                                            hunger = fusedState.hunger,
+                                            strength = fusedState.strength,
+                                            weight = fusedState.weight,
+                                            ageSeconds = fusedState.ageSeconds,
+                                            careMistakes = fusedState.careMistakes,
+                                            effort = fusedState.effort,
+                                            overfeedCount = fusedState.overfeedCount,
+                                            totalBattles = fusedState.totalBattles,
+                                            victories = fusedState.victories
+                                        )
+                                    )
+                                    db.phoneDao().deleteVaultPet(executionCandidate.vaultPet.id)
+                                    DigiWearAppWidgetProvider.updateAllWidgets(context)
+                                }
+                                is FusionExecutionCandidate.VaultWithVault -> {
+                                    val primaryState = PetState(
+                                        speciesId = executionCandidate.vaultPetA.speciesId,
+                                        currentHp = executionCandidate.vaultPetA.currentHp,
+                                        maxHp = executionCandidate.vaultPetA.maxHp,
+                                        hunger = executionCandidate.vaultPetA.hunger,
+                                        strength = executionCandidate.vaultPetA.strength,
+                                        weight = executionCandidate.vaultPetA.weight,
+                                        ageSeconds = executionCandidate.vaultPetA.ageSeconds,
+                                        careMistakes = executionCandidate.vaultPetA.careMistakes,
+                                        effort = executionCandidate.vaultPetA.effort,
+                                        overfeedCount = executionCandidate.vaultPetA.overfeedCount,
+                                        totalBattles = executionCandidate.vaultPetA.totalBattles,
+                                        victories = executionCandidate.vaultPetA.victories
+                                    )
+                                    val fusedState = JogressEngine.executeFusion(
+                                        primary = primaryState,
+                                        secondarySpeciesId = executionCandidate.vaultPetB.speciesId,
+                                        secondaryVictories = executionCandidate.vaultPetB.victories,
+                                        secondaryEffort = executionCandidate.vaultPetB.effort
+                                    )
+                                    // Insert resulting fused monster into Vault
+                                    db.phoneDao().insertVaultPet(
+                                        StoredDigimonEntity(
+                                            speciesId = fusedState.speciesId,
+                                            speciesName = targetSp.name,
+                                            customNickname = "Awakened ${targetSp.name}",
+                                            stageName = targetSp.stage.displayName,
+                                            attributeName = targetSp.attribute.displayName,
+                                            currentHp = fusedState.currentHp,
+                                            maxHp = fusedState.maxHp,
+                                            hunger = fusedState.hunger,
+                                            strength = fusedState.strength,
+                                            weight = fusedState.weight,
+                                            ageSeconds = fusedState.ageSeconds,
+                                            careMistakes = fusedState.careMistakes,
+                                            effort = fusedState.effort,
+                                            overfeedCount = fusedState.overfeedCount,
+                                            totalBattles = fusedState.totalBattles,
+                                            victories = fusedState.victories
+                                        )
+                                    )
+                                    // Remove both consumed vault partners
+                                    db.phoneDao().deleteVaultPet(executionCandidate.vaultPetA.id)
+                                    db.phoneDao().deleteVaultPet(executionCandidate.vaultPetB.id)
+                                }
+                            }
 
-                            // 1. Send to Smartwatch
-                            val ok = wearableManager.sendPetStateToWatch(fusedState)
-                            // 2. Save snapshot in DB
-                            val entity = SyncedPetEntity(
-                                speciesId = fusedState.speciesId,
-                                speciesName = targetSp.name,
-                                currentHp = fusedState.currentHp,
-                                maxHp = fusedState.maxHp,
-                                hunger = fusedState.hunger,
-                                strength = fusedState.strength,
-                                weight = fusedState.weight,
-                                ageSeconds = fusedState.ageSeconds,
-                                careMistakes = fusedState.careMistakes,
-                                effort = fusedState.effort,
-                                overfeedCount = fusedState.overfeedCount,
-                                totalBattles = fusedState.totalBattles,
-                                victories = fusedState.victories
-                            )
-                            db.phoneDao().insertSnapshot(entity)
-                            // 3. Remove consumed vault partner
-                            db.phoneDao().deleteVaultPet(vaultPet.id)
-                            // 4. Update home screen widget
-                            DigiWearAppWidgetProvider.updateAllWidgets(context)
-
-                            pendingFusionPair = null
+                            pendingFusionExecution = null
                             activeCelebrationSpeciesId = targetSp.id
                             activeCelebrationTitle = "DNA JOGRESS AWAKENING"
                             buzzerManager.playVictoryFanfare()
@@ -920,7 +1168,7 @@ fun DigiVaultScreen(
                 }
             },
             dismissButton = {
-                TextButton(onClick = { pendingFusionPair = null }) {
+                TextButton(onClick = { pendingFusionExecution = null }) {
                     Text("Cancel", color = Color.Gray)
                 }
             }
@@ -939,6 +1187,23 @@ fun DigiVaultScreen(
         )
     }
 }
+
+private sealed interface FusionExecutionCandidate {
+    val recipe: JogressRecipe
+    data class ActiveWithVault(
+        val activeState: PetState,
+        val vaultPet: StoredDigimonEntity,
+        override val recipe: JogressRecipe
+    ) : FusionExecutionCandidate
+
+    data class VaultWithVault(
+        val vaultPetA: StoredDigimonEntity,
+        val vaultPetB: StoredDigimonEntity,
+        override val recipe: JogressRecipe
+    ) : FusionExecutionCandidate
+}
+
+private data class Quad<A, B, C, D>(val first: A, val second: B, val third: C, val fourth: D)
 
 @Composable
 private fun VaultPetCard(
@@ -986,7 +1251,7 @@ private fun VaultPetCard(
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Text(
                             text = if (pet.customNickname.isNotEmpty()) "${pet.customNickname} (#${pet.speciesId} ${pet.speciesName})" else "#${pet.speciesId} ${pet.speciesName}",
-                            fontSize = 15.sp,
+                            fontSize = 14.sp,
                             fontWeight = FontWeight.Black,
                             color = Color.White
                         )

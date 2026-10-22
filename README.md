@@ -1,5 +1,5 @@
-# DigiWear ðŸ“ŸâŒš
-### Dual-Device Standalone Wear OS Virtual Pet System & Android Companion Ecosystem
+# DigiWear 📟⌚
+### The authentic 90s Virtual Pet experience, rebuilt for your smartwatch & phone.
 
 [![Platform](https://img.shields.io/badge/Platform-Wear%20OS%203.0%2B%20%7C%20Android%2013%2B-blue?logo=android&logoColor=white)](https://developer.android.com/wear)
 [![Kotlin](https://img.shields.io/badge/Kotlin-1.9.22-purple?logo=kotlin&logoColor=white)](https://kotlinlang.org)
@@ -10,28 +10,31 @@
 
 ---
 
-## ðŸŒŸ Executive Summary
+## 👋 Hey Tamers! Welcome to DigiWear
 
-**DigiWear** is an authentic, standalone virtual pet ecosystem designed from the ground up for modern Wear OS smartwatches and paired with a feature-complete Android companion application. 
+If you grew up carrying a keychain virtual pet, shaking a Pendulum on the playground, or obsessing over evolutionary branches on File Island, **DigiWear** was built for you.
 
-Recreating the golden era of handheld virtual pets (Generations V1 through V6, Pendulum, D-3, and Digimon X), DigiWear combines historical lifecycle simulation accuracy with modern smartwatch wearable hardware:
-- **Standalone Wear OS Simulation**: Operates 100% autonomously on your wrist without requiring an active smartphone tether. Physiological stats calculate via real-time UTC Unix timestamp deltas.
-- **Ultra-Low-Power Ambient Mode**: Custom monochrome outline shaders guarantee an On-Pixel Ratio (OPR â‰¤ 15%) for all-day battery endurance.
-- **Physical Hardware Button Interception**: Sub-millisecond synchronous key dispatch intercepts watch stem buttons (`STEM_PRIMARY`, `STEM_1`, `STEM_2`, `STEM_3`), rotary crown, and volume keys for zero-latency sweet-spot Quick Time Events (QTEs).
-- **Digimon 0nl1ne / D-Com / A-Com Compatibility**: Full cryptographic 128-bit Crockford Base32 Comm Code codec with HMAC-16 verification for offline and asynchronous pvp battles.
-- **DNA Digivolution (Jogress) & DigiXros**: Canonical multi-partner fusions across both solo vault storage and friend Comm Codes without altering external wire protocol compliance.
-- **114-Sector Adventure Campaign**: Connects real-world physical step tracking directly to narrative progression across 5 expansive Grand Canonical Sagas with boss checkpoints, relic spoils, and unlockable Starter Digi-Eggs.
-- **Rich Companion Android Hub**: DigiVault partner cryo-storage, 500-species animated Sprite Studio, Battle Hub & Code Scanner, Campaign Story Architect, Android Home Screen AppWidget, and remote watch settings sync.
+DigiWear brings the full 1997 classic virtual pet experience to modern smartwatches and phones with zero compromises. It runs **completely standalone** on your smartwatch—meaning you can leave your phone at home, go about your day, and raise your partner right on your wrist. When you want to dig deeper, the Android companion app gives you a dedicated hub for cryo-storage, DNA Jogress fusions, barcode wild encounters, online battles, and custom campaigns.
+
+### 🌟 What makes DigiWear special:
+- ⌚ **100% Standalone on Your Wrist**: Your partner lives directly on your watch. Hunger, strength, sleep, and battles calculate in real time even when disconnected from your phone.
+- 🔋 **All-Day Battery Life**: Smart 60s sensor batching, off-body sleep detection, and ultra-low-power ambient wireframes (≤ 6% OPR) keep your battery running strong all day long.
+- 🔘 **Real Physical Button Support**: Got physical buttons or a rotating crown? Use them just like the original `[A]`, `[B]`, and `[C]` buttons with snappy, zero-lag timing.
+- 🥚 **500 Authentic Monsters & 16 Starter Eggs**: Complete roster from Baby I to Super Ultimate with canonical multi-tone pixel sprites and 12 animation frames each.
+- 🧬 **85 DNA Jogress & DigiXros Fusions**: Fuse partners together on your watch or in the companion app's dedicated Fusion Lab.
+- 🥊 **Battle Anyone, Anywhere**: Fight via NFC Tap-to-Duel, scan real barcodes with your phone camera for wild battles, or connect to **Digimon 0nl1ne / D-Com / A-Com / WiFiCom** using standard 128-bit CommCodes.
+- 🚶 **Step-Powered Adventure Sagas**: 114 sectors across 5 storyline sagas where your real-world walking steps unlock bosses, rare eggs, and crests.
+- 📱 **Direct Wireless Sideloading**: Update your watch app straight from the phone companion app over Wi-Fi—no PC or terminal needed!
 
 ---
 
-## ðŸ§¬ Official Visual Sprite Sheet Digivolution & DNA Jogress Guide (All 500 Species)
+## 🧬 Evolution & DNA Jogress Guide (All 500 Species)
 
 Every single one of the **500 Digimon** in DigiWear is naturally reachable from the **16 Starter Digi-Eggs** via canonical Bandai 1997 V-Pet, Digimon Pendulum, and Digimon Color evolution rules, or via **85 DNA Jogress / DigiXros / Mode Change** combinations.
 
-ðŸ‘‰ **[Read the Complete Interactive Table & Guide (`DIGIVOLUTION_GUIDE.md`)](DIGIVOLUTION_GUIDE.md)**
+👉 **[Check out the complete Evolution Guide & Interactive Tables (`DIGIVOLUTION_GUIDE.md`)](DIGIVOLUTION_GUIDE.md)**
 
-### Visual Sprite Sheet Evolution & DNA Jogress Chart
+### Visual Evolution & DNA Jogress Chart
 ![DigiWear Full Sprite Sheet Evolution Guide](docs/digiwear_evolution_guide_chart.png)
 
 ### Master 500-Species Full-Color Pixel-Art Sprite Sheet
@@ -39,428 +42,204 @@ Every single one of the **500 Digimon** in DigiWear is naturally reachable from 
 
 ---
 
-## âŒš Universal Wear OS & Standalone AOSP Standard Watch Compatibility
+## ⌚ Watch Compatibility: Wear OS & Full Android Standard Watches
 
-DigiWear is engineered from the ground up to run natively on **both** Google **Wear OS 3.0â€“5.0+** smartwatches **and** standalone **AOSP / Full Android Standard Watches (FAWs)** running Android 9.0â€“15.0+ (including Kospet, Lokmat, Lemfo, Zeblaze, Rogbid, and generic round/square AOSP Android smartwatches without Google Play Services):
+DigiWear is built to run smoothly on both Google **Wear OS** smartwatches and standalone **AOSP / Full Android Watches (FAWs)**:
 
-| Subsystem | Wear OS 3.0 / 4.0 / 5.0+ Watches | Standalone AOSP / Full Android Standard Watches |
+| Feature | Wear OS 3.0 / 4.0 / 5.0+ | Standalone AOSP / Full Android Watches |
 | :--- | :--- | :--- |
-| **APK Binary (`release_bin/`)** | `wear-os-app-release.apk` | `digiwear-aosp-standard-watch-release.apk` (or `wear-os-app-release.apk`) |
-| **Manifest Hardware Flag** | `android.hardware.type.watch` (`required="false"`) | Installs cleanly via standard Android PackageInstaller / ADB without Wear OS flags |
-| **Wearable Shared Library** | `<uses-library android:name="com.google.android.wearable" android:required="false" />` | Dynamically guarded via reflection in `AmbientController` â€” zero crash when absent |
-| **Pedometer & Step Engine** | **Tier 1**: `Sensor.TYPE_STEP_COUNTER` / **Tier 2**: `TYPE_STEP_DETECTOR` | **Tier 3 Fallback**: Automatic **AOSP Wrist Accelerometer Gait Peak Detector** (`1.24g` threshold, `330ms` debounce) + `+100 Steps` bench button |
-| **Display Geometry (`WatchDisplayConfig`)** | Round OLED inset padding (`isScreenRound = true`) + Ambient OPR â‰¤ 15% | Adaptive Square/Rectangular & High-DPI Round AOSP scaling + **Display Shape Override (`AUTO` / `ROUND` / `SQUARE`)** in Settings |
-| **Hardware Buttons & Navigation** | `STEM_PRIMARY`, `STEM_1..3`, Rotary Bezel / Crown (`ACTION_SCROLL`) | Standard Android `VOLUME_UP` / `F1` (`[A]`), `ENTER` / `CAMERA` / `F2` (`[B]`), `BACK` / `ESCAPE` (`[C]`), native `BackHandler` edge-swipe support |
-| **Phone-to-Watch Sync** | Google Play Services Wearable Data Layer (`/sync/*`) | **AOSP LAN Bridge**: Direct TCP port `45820` + UDP auto-discovery on port `45821` over local Wi-Fi or Phone Hotspot (zero GMS required) |
-| **Multiplayer & Battles** | NFC Tap-to-Duel, Wild Barcode/NFC Scan, A-Com Relay, Comm Codes | NFC Tap-to-Duel (if hardware present), Optical/Barcode Wild Scan, and offline 16/26-char `DigiROM` / `CommCode` entry |
+| **Supported Devices** | Pixel Watch 1/2/3, Galaxy Watch 4/5/6/7/Ultra, TicWatch, OnePlus Watch 2 | Kospet, Lokmat, Lemfo, Zeblaze, Rogbid, and generic round/square Android watches |
+| **Release APK** | `DigiWear-WearOS-release.apk` | `digiwear-aosp-standard-watch-release.apk` (or `DigiWear-WearOS-release.apk`) |
+| **Google Play Services** | Supported (Uses Wearable Data Layer) | **Not needed!** Connects via direct Wi-Fi / Hotspot LAN Bridge (TCP 45820 / UDP 45821) |
+| **Step Tracking** | Hardware Step Counter & Step Detector | Hardware sensors with automatic wrist accelerometer fallback |
+| **Display Support** | Round OLED safe padding + Ambient OPR ≤ 6% | Square, Rectangular, and Round screens with **Display Shape Override (`AUTO` / `ROUND` / `SQUARE`)** |
+| **Physical Buttons** | Stem buttons, volume keys, and rotating crown | Physical keys (`VOLUME_UP` = `[A]`, `ENTER` = `[B]`, `BACK` = `[C]`) and swipe-to-back |
 
-### AOSP Smartwatch Wi-Fi & Hotspot LAN Bridge
-For Full Android Watches without Google Play Services:
-1. Connect your AOSP smartwatch and your Android phone to the same Wi-Fi network (or turn on your phone's Wi-Fi Hotspot and connect your watch).
-2. Open DigiWear on your watch, navigate to **Settings**, and locate **AOSP LAN BRIDGE** to see the watch's IP and port (e.g. `192.168.43.112:45820`).
-3. Open the Companion App on your phone, head to **Pet Dashboard â†’ Smartwatch Shell & Hardware Settings â†’ AOSP / Android Watch Wi-Fi & Hotspot Bridge**, and tap **`ðŸ” LINK AOSP`**.
-4. The companion app automatically broadcasts a UDP discovery probe on port `45821` to link your watch. If your watch has a static IP, you can also enter it manually. Once linked, all live state pulls, 1-tap Jogress beams, remote care actions, custom campaigns, and setting pushes sync in real-time over TCP.
+### 📶 AOSP Smartwatch Wi-Fi & Hotspot LAN Bridge
+Got a watch without Google Play Services? No problem:
+1. Connect your smartwatch and phone to the same Wi-Fi network (or turn on your phone's Wi-Fi Hotspot and connect your watch to it).
+2. On your watch, open DigiWear → **Settings** → **AOSP LAN BRIDGE** to see the watch's IP and port (e.g. `192.168.43.112:45820`).
+3. On your phone, open the companion app → **Settings** → **AOSP LAN BRIDGE** and tap **`🔍 LINK AOSP`**.
+4. The companion app finds your watch automatically and links up. You can sync live stats, send care commands, beam custom campaigns, and perform 1-tap fusions right over local Wi-Fi.
 
-### Display Shape Override for Round AOSP Watches
-Many round AOSP watches (Kospet, Lokmat, Lemfo, Zeblaze) run customized smartphone ROMs where Android misreports `isScreenRound = false`. DigiWear provides a 1-tap **Display Shape Override** (`AUTO` / `ROUND` / `SQUARE`) in both the Watch Settings and Phone Companion App. Setting this to `ROUND` enforces circular OLED safety margins to prevent any UI truncation on circular bezels.
-
-## ðŸ› System Architecture
-
-The project is structured into three decoupled, high-performance Gradle modules:
-
-```mermaid
-graph TD
-    subgraph Core ["Shared Core Module (:shared-vpet-core)"]
-        SE["PetSimulationEngine<br/>UTC Delta Life Decay Calculator"]
-        EE["EvolutionEngine<br/>Multi-Variable Condition Evaluator"]
-        JE["JogressEngine<br/>DNA & DigiXros Canonical Fusion Matrix"]
-        CC["CommCodeCodec<br/>128-bit Crockford Base32 + HMAC-16"]
-        BS["DeterministicBattleSolver<br/>PRNG Combat & 1.2x Elemental Triangle"]
-        AE["AdventureEngine<br/>114-Sector Step Campaign Parser"]
-        Catalog["PetSpecies Registry<br/>500 Authentic Species"]
-    end
-
-    subgraph WearApp ["Wear OS Smartwatch Application (:wear-os-app)"]
-        WDC["WatchDisplayConfig<br/>Round & Square Display Geometry"]
-        BG["BackgroundCanvas<br/>8 Selectable Themes + OLED Black"]
-        UI_W["Wear Compose UI<br/>Authentic 3-Button [A][B][C] + Touch Mode"]
-        HW["HardwareInputManager<br/>Stem Keys & Crown (Sub-ms QTE Interceptor)"]
-        Canvas_W["Canvas Sprite Engine<br/>FilterQuality.None 64x64 Pixel Art"]
-        Keypad["Crockford Base32 Keypad<br/>On-Wrist Comm Code Entry"]
-        AM["LocalAmbientModeManager<br/>Monochrome Outline / OPR â‰¤ 15%"]
-        WM["WorkManager PetDecayWorker<br/>Background Delta Processor"]
-        Sensors["Step Tracker Manager<br/>TYPE_STEP_COUNTER Sensor"]
-        Room_W[("Room DB: pet_state & adventure_state")]
-    end
-
-    subgraph PhoneApp ["Mobile Companion Smartphone Application (:phone-companion-app)"]
-        UI_P["Material Design 3 Compose"]
-        Vault["DigiVault Cryo-Storage<br/>Multi-Partner Preservation & Fusion"]
-        Widget["Android Home Screen AppWidget<br/>Live Pixel Art & Physiological Meters"]
-        Studio["500-Species Sprite Studio<br/>12-Frame Uniform Animation Viewer"]
-        Hub["Battle Hub & Comm Code Scanner"]
-        StoryEd["5-Saga Story Architect<br/>Custom JSON Campaign Editor"]
-        Backup["Cloud JSON State Backup & Transfer"]
-        Room_P[("Room DB: Synced History, Vault, Campaigns")]
-    end
-
-    SE --> Room_W
-    EE --> Room_W
-    JE --> Room_W
-    CC --> Keypad
-    Keypad --> UI_W
-    BS --> UI_W
-    AE --> Sensors
-    WDC --> UI_W
-    BG --> UI_W
-    HW --> UI_W
-    Catalog --> Canvas_W
-
-    SE --> UI_P
-    JE --> Vault
-    CC --> Hub
-    BS --> Hub
-    AE --> StoryEd
-    Catalog --> Studio
-    Room_P --> Widget
-
-    Room_W <--> |"Wearable Data Layer API<br/>/sync/update_settings & pet_state"| Room_P
-```
+### ⭕ Round Screen Fit for AOSP Watches
+Some round Android watches run phone ROMs that mistakenly report square screens. In DigiWear's Settings, simply toggle **Display Shape Override** to `ROUND` to pull all content safely within the circular bezel.
 
 ---
 
-## ðŸŽ® Key Features & Gameplay Mechanics
+## 🎮 How DigiWear Works
 
 ### 1. Authentic V-Pet Lifecycle Simulation
-State decay strictly follows the original Bandai virtual pet timing schedules based on real-world elapsed UTC time:
+Care timing follows the original Bandai schedules based on real elapsed time:
 
 ```
-Î”T = Current_UTC_Time - Last_Processed_UTC_Time
+Elapsed Time = Current UTC Time - Last Saved Time
 ```
 
-| Life Stage | Hunger Loss | Strength Loss | Waste Interval | Sleep Window | Mistake Grace Window |
+| Life Stage | Hunger Loss | Strength Loss | Poop Interval | Sleep Schedule | Care Mistake Grace Period |
 |---|---|---|---|---|---|
-| **Baby I** | 3 Minutes | 3 Minutes | 15 Minutes | No Sleep (Active Continuous) | Exempt (Care Mistakes Disabled) |
-| **Baby II** | 10 Minutes | 10 Minutes | 30 Minutes | 20:00 â€“ 07:00 | 10 Minutes post-call signal |
-| **Child** | 30 Minutes | 30 Minutes | 60 Minutes | 21:00 â€“ 08:00 | 10 Minutes post-call signal |
-| **Adult** | 45 Minutes | 45 Minutes | 90 Minutes | 22:00 â€“ 08:00 | 15 Minutes post-call signal |
-| **Perfect** | 60 Minutes | 60 Minutes | 120 Minutes | 23:00 â€“ 09:00 | 15 Minutes post-call signal |
-| **Ultimate** | 90 Minutes | 90 Minutes | 180 Minutes | 23:00 â€“ 09:00 | 15 Minutes post-call signal |
+| **Baby I** | Every 3 min | Every 3 min | Every 15 min | Always awake | No care mistakes |
+| **Baby II** | Every 10 min | Every 10 min | Every 30 min | 20:00 – 07:00 | 10 min after call |
+| **Child** | Every 30 min | Every 30 min | Every 60 min | 21:00 – 08:00 | 10 min after call |
+| **Adult** | Every 45 min | Every 45 min | Every 90 min | 22:00 – 08:00 | 15 min after call |
+| **Perfect** | Every 60 min | Every 60 min | Every 120 min | 23:00 – 09:00 | 15 min after call |
+| **Ultimate** | Every 90 min | Every 90 min | Every 180 min | 23:00 – 09:00 | 15 min after call |
 
-- **Metabolic Sleep Preservation**: Turning off lights when the pet enters its designated sleep window halts hunger and strength decay clocks.
-- **Care Mistakes**: Triggered only if hunger/strength calls or unextinguished sleep lights are ignored beyond the stage grace window.
-- **Overfeeding Mechanic**: Feeding up to 5 additional meals beyond full satiety increases weight and fulfills specific evolution branch criteria without prematurely sickening the pet.
-- **16 Starter Digi-Eggs**: Choose from Botamon (`#101`), Punimon (`#103`), Poyomon (`#105`), Yuramon (`#107`), Zurumon (`#109`), Mokumon (`#111`), Kuramon (`#113`), Nyokimon (`#130`), Pichimon (`#131`), Pukamon (`#132`), Cotsucomon (`#1101`), Fufumon (`#1104`), Algomon Baby I (`#1106`), Dokimon (`#1108`), Choromon (`#1111`), or Bubbmon Color (`#1113`) upon birth or reset.
+- **Sleep Preservation**: Tuck your partner in and turn off the lights during their sleep window to freeze hunger and strength decay until morning.
+- **Care Mistakes**: Counted only if you ignore a hunger/strength call or forget to turn off sleep lights past the grace window.
+- **Overfeeding**: Feed up to 5 extra meat past full satiety to build weight and meet specific evolution branch criteria without making your partner sick.
+- **16 Starter Digi-Eggs**: Choose your starting egg freely upon fresh start or rebirth: Botamon, Punimon, Poyomon, Yuramon, Zurumon, Mokumon, Kuramon, Nyokimon, Pichimon, Pukamon, Cotsucomon, Fufumon, Algomon Baby I, Dokimon, Choromon, or Bubbmon Color.
 
 ---
 
-### 2. Hybrid Input System & Zero-Latency Hardware Buttons
-DigiWear provides both classic physical handheld controls and modern touch ergonomics:
+### 2. Physical Button & Touch Controls
 
 1. **Authentic 3-Button LCD Mode**:
-   - Renders the iconic 8-icon Bandai LCD border:
-     - Top row: `[ðŸ– FOOD]`, `[ðŸ’¡ LIGHT]`, `[âš” BATTLE]`, `[ðŸ§¹ FLUSH]`
-     - Bottom row: `[ðŸ“Š STATUS]`, `[ðŸ¥Š TRAIN]`, `[ðŸ’‰ MEDS]`, `[ðŸš¨ ATTENTION]`
+   - Iconic 8-icon Bandai LCD border:
+     - Top row: `[🍖 FOOD]`, `[💡 LIGHT]`, `[⚔ BATTLE]`, `[🧹 FLUSH]`
+     - Bottom row: `[📊 STATUS]`, `[🥊 TRAIN]`, `[💉 MEDS]`, `[🚨 ATTENTION]`
    - Dedicated on-screen touch buttons: `[A]` (Select/Cycle), `[B]` (Confirm/Execute), and `[C]` (Cancel/Back).
-   - Direct touch on any of the 8 icons or active pet sprite remains fully responsive.
+   - Tapping icons or your partner directly works seamlessly.
 2. **Modern Touch Mode**:
-   - Smooth `ScalingLazyColumn` interface optimized for quick wrist navigation.
-3. **Hardware Key Interception (`HardwareInputManager`)**:
-   - Direct native event dispatch on the main UI thread with sub-millisecond latency:
-     - **Button A (Select / Next)**: `KEYCODE_STEM_1`, `KEYCODE_STEM_PRIMARY`, `KEYCODE_DPAD_UP`, `KEYCODE_VOLUME_UP`, Rotary Crown turn clockwise.
-     - **Button B (Confirm / QTE Strike)**: `KEYCODE_STEM_2`, `KEYCODE_ENTER`, `KEYCODE_DPAD_CENTER`, `KEYCODE_SPACE`.
-     - **Button C (Cancel / Back / Light)**: `KEYCODE_STEM_3`, `KEYCODE_BACK`, `KEYCODE_ESCAPE`.
-     - **Previous**: Rotary Crown turn counter-clockwise, `KEYCODE_DPAD_DOWN`, `KEYCODE_VOLUME_DOWN`.
-4. **Dual Training Modes (OG QTE & Pendulum Shake)**:
-   - **Original QTE Timing Bar**: Fast-oscillating power bar where hitting Button B or tapping inside the 80%â€“100% sweet spot smashes 5/5 iron blocks to grant maximum Effort and Strength.
-   - **Authentic Pendulum Shake**: Powered by real-time hardware accelerometer (`Sensor.TYPE_ACCELEROMETER`). Shake your wrist 5â€“8 times (Bandai Pendulum sweet spot) within a 3-second countdown window with haptic feedback ticks on each detected stroke. Features strict `DisposableEffect` sensor lifecycle management (0% idle battery consumption in ambient mode).
-   - Switchable at any time from Watch Settings or Companion App Settings.
-5. **Authentic 8-Bit Bandai Piezo Buzzer Sound Engine**:
-   - Faithful recreation of the classic 4-beep attention call (`pip-pip-pip-pip`), button clicks, hit chirps, and 8-bit victory fanfares via low-overhead `ToneGenerator`.
-   - Toggleable directly in Watch Settings or Companion App Settings (muted by default for discreet wrist wear).
-6. **Battle Critical Strike Reflex Window**:
-   - A 500ms reflex window during combat rounds that grants a +25% Critical Strike boost on physical keypress or screen tap.
+   - Smooth wrist-optimized list navigation for quick one-handed care.
+3. **Physical Hardware Key Support**:
+   - **Button A (Select / Cycle)**: Primary stem button, D-Pad Up, Volume Up, or clockwise crown turn.
+   - **Button B (Confirm / QTE Strike)**: Secondary stem button, Enter key, D-Pad Center, or Spacebar.
+   - **Button C (Cancel / Back / Light)**: Tertiary stem button, Back button, or Escape key.
+4. **Dual Training Modes**:
+   - **Classic QTE Bar**: Stop the oscillating power bar in the 80%–100% sweet spot to smash iron blocks and boost Effort and Strength.
+   - **Authentic Pendulum Shake**: Powered by your watch's accelerometer. Shake your wrist 5–8 times during the 3-second countdown to trigger mega hits with authentic haptic tick feedback.
+5. **Authentic 8-Bit Chiptune Buzzer**:
+   - Classic 4-beep attention calls (`pip-pip-pip-pip`), button clicks, hit chirps, and 8-bit victory fanfares (muted by default for discreet wear, toggleable in Settings).
 
 ---
 
-### 3. Full-Color Sprite Engine (500 Authentic Species)
-Every monster is rendered via a uniform 64 Ã— 64 px matrix canvas at `FilterQuality.None` for crisp, authentic pixel art across round and square screens, with 500 unique bespoke 16 Ã— 16 multi-tone matrices and 500 canonical color palettes:
+### 3. 4-Mode Battle System & 128-Bit CommCode
 
-```
-+-----------------------------------------------------------------------+
-| Row 0: [Idle Stance A]    | [Idle Stance B]    | [Walking Motion A]   |
-| Row 1: [Walking Motion B] | [Feeding Start]    | [Chewing / Joy]      |
-| Row 2: [Sleeping Frame A] | [Sleeping Frame B] | [Refusal / Displeased|
-| Row 3: [Attack Charge]    | [Attack Release]   | [Injury / Sick State]|
-+-----------------------------------------------------------------------+
-```
+Every battle features animated face-to-face combat (`flipHorizontal` on the left fighter), projectile clashes (`●━━▶` / `⚡MEGA HIT⚡`), live HP bars, and a 500ms QTE reflex window for a +25% critical strike boost:
 
-#### Roster Distribution (500 Species Across All Eras):
-- **Baby I (16 â€” `#101`, `#103`, `#105`, `#107`, `#109`, `#111`, `#113`, `#130`, `#131`, `#132`, `#1101`, `#1104`, `#1106`, `#1108`, `#1111`, `#1113`)**: Botamon, Punimon, Poyomon, Yuramon, Zurumon, Mokumon, Kuramon, Nyokimon, Pichimon, Pukamon, Cotsucomon, Fufumon, Algomon Baby I, Dokimon, Choromon, Bubbmon Color.
-- **Baby II (34 â€” `#102`, `#104`, `#106`, `#108`, `#110`, `#112`, `#114`â€“`#129`, `#133`â€“`#134`, `#1102`â€“`#1103`, `#1105`, `#1107`, `#1109`â€“`#1110`, `#1112`, `#1114`â€“`#1116`)**: Koromon, Tsunomon, Tokomon, Tanemon, Pagumon, DemiMeramon, DemiVeemon, Gigimon, Viximon, Gummymon, Chocomon, Yaamon, Bukamon, Pyocomon, Dorimon, Tsumemon, Nyaromon, Kapurimon, Minomon, Sunmon, Moonmon, Ketomon, Poromon, Upamon, Kakkinmon, Sakuttomon, Chibimon, Algomon Baby II, Bibimon, Wanyamon, Caprimon Color, Mochimon Color, Minomon Color, Babydmon.
-- **Child (85 â€” `#201`â€“`#260`, `#1201`â€“`#1225`)**: Agumon, Betamon, Gabumon, Elecmon, Patamon, Biyomon, Palmon, Tentomon, Gazimon, Gizamon, Kunemon, Veemon, Wormmon, Guilmon, Renamon, Terriermon, Lopmon, Impmon, BlackAgumon, BlackGabumon, Lucemon, Hackmon, Salamon, Gaomon, Hawkmon, Armadillomon, Dorumon, Kotemon, Monodramon, Floramon, Goblimon, Gomamon, Gotsumon, Otamamon, Candlemon, Bakumon, Hagurumon, Mushroomon, Crabmon, Syakomon, Lalamon, Falcomon, Kudamon, Ryudamon, Dracomon, Kamemon, Coronamon, Lunamon, ToyAgumon, Keramon, Pulsemon, Gammamon, Angoramon, Jellymon, Loogamon, Shoutmon, Gumdramon, Agunimon, Lobomon, Gazimon (Modern), Zubamon, Ludomon, Herissmon, Vorvomon, Jazamon, Blucomon, Sunarizamon, Ghostmon, Morphomon, Sangomon, Pomumon, Espimon, Biyomon Color, Agumon Black Color, Betamon Color, Palmon Color, Tentomon Color, Patamon Color, Gabumon Black Color, Gomamon Color, Gotsumon Color, Otamamon Color, ToyAgumon Color, Keramon Color, Terriermon Color.
-- **Adult (117 â€” `#301`â€“`#387`, `#1301`â€“`#1330`)**: Greymon, Tyrannomon, Devimon, Meramon, Numemon, Garurumon, Angemon, Togemon, Birdramon, Kabuterimon, Monochromon, Ogremon, Leomon, Seadramon, Sukamon, DarkTyrannomon, Devidramon, Cyclonemon, Tuskmon, Flymon, Raremon, Kuwagamon, Kokatorimon, Coelamon, Nanimon, Bakemon, Shellmon, Unimon, Frigimon, Vegiemon, Veedramon, Flamedramon, Stingmon, Growlmon, Kyubimon, Gargomon, Wizardmon, Gatomon, BlackGreymon, BlackGarurumon, BaoHackmon, Dorugamon, Sorcerymon, Aquilamon, Ankylomon, Gaogamon, Mojyamon, Starmon, Dokugumon, Ikkakumon, Golemon, Gekomon, Clockmon, Guardromon, Woodmon, Octomon, Gesomon, Ebidramon, Raidramon, Digmon, Shurimon, Submarimon, Peckmon, Sunflowmon, Reppamon, Ginryumon, Coredramon, Chrysalimon, Firamon, Lekismon, ExVeemon, Lynxmon, GeoGreymon, Bulkmon, BetelGammamon, KausGammamon, WezenGammamon, GulusGammamon, SymbareAngoramon, TeslaJellymon, Loogarmon, Pegasusmon, Nefertimon, Strikedramon, Dobermon, Sangloupmon, DarkKnightmon, Zubaeagermon, TiaLudomon, Filmon, Lavorvomon, Jazardmon, Pteramon, Paledramon, Tortamon, Gekomon Color, Woodmon Color, Snimon, Yanmamon, SandYanmamon, Musyamon, Fugamon, Hyogamon, KaratukiNumemon, Geremon, IceDevimon, DarkLizamon, Flarerizamon, RedVegiemon, NiseDrimogemon, Tuchidarumon, Gururumon, Saberdramon, Akatorimon, Allomon, Shadramon, Togemogumon.
-- **Perfect (111 â€” `#401`â€“`#477`, `#1401`â€“`#1434`)**: MetalGreymon, Monzaemon, SkullGreymon, WereGarurumon, MagnaAngemon, Lillymon, Garudamon, MegaKabuterimon, MegaSeadramon, Myotismon, Etemon, Mamemon, MetalMamemon, MetalTyrannomon, Ex-Tyrannomon, Megadramon, Piximon, Andromon, Giromon, Vademon, SkullMamemon, AeroVeedramon, Paildramon, WarGrowlmon, Taomon, Rapidmon, Angewomon, LadyDevimon, BlackMetalGreymon, BlackWereGarurumon, Cyberdramon, Antylamon, SaviorHackmon, Lucemon Chaos Mode, Dorugreymon, Knightmon, Silphymon, Zudomon, Shakkoumon, Dinobeemon, Cherrymon, Garbagemon, Digitamamon, ShogunGekomon, Volcamon, MarineDevimon, Triceramon, Infermon, Chirinmon, Hisyaryumon, Wingdramon, Yatagaramon, MachGaogamon, Flaremon, Crescemon, SkullSatamon, Mummymon, Arukenimon, Grademon, Astamon, Gargoylemon, Mammothmon, MetalGreymon (Virus), Cyberdramon (Savers), RizeGreymon, MachGaogamon (Savers), Boutmon, Canoweissmon, Regulusmon, Lamortemon, Thetismon, Soloogarmon, Baalmon, JewelBeemon, Dinobeemon (Chimera), SkullMeramon, Cerberusmon, Duramon, RaijiLudomon, Stegomon, Maildramon, Okuwamon, Scorpiomon, Brachiomon, Vermillimon, Meteormon, CatchMamemon, MetalGreymon Color, WereGarurumon Color, Garudamon Color, MegaKabuterimon Color, Lillymon Color, Zudomon Color, MagnaAngemon Color, HolyAngemon Priest Mode, Taomon Silver, Rapidmon Gold, BlackWarGrowlmon, MegaloGrowlmon Orange, Rapidmon Black, Angewomon Black, LadyDevimon Black, SkullBaluchimon, Cerberumon X, Manticoremon, Climbmon, Fumamon, Vulturemon, CrysPaledramon, Lavagorimon.
-- **Ultimate & Super Ultimate (137 â€” `#501`â€“`#592`, `#1501`â€“`#1545`)**: WarGreymon, Machinedramon, MetalGarurumon, Seraphimon, Rosemon, Phoenixmon, HerculesKabuterimon, Plesiomon, Piedmon, Omnimon, MetalEtemon, Imperialdramon Dragon Mode, Imperialdramon Fighter Mode, Imperialdramon Paladin Mode, Gallantmon, Gallantmon Crimson Mode, Sakuyamon, MegaGargomon, Beelzemon, Beelzemon Blast Mode, Magnamon, UlforceVeedramon, Alphamon, Alphamon Ouryuken, BlackWarGreymon, ChaosBlackWarGreymon, Diaboromon, Armaggeddemon, Apocalymon, Belphemon, Lilithmon, Daemon, Leviamon, Barbamon, Omnimon Alter-S, Omnimon Zwart, Mastemon, Jesmon, Gankoomon, Dynasmon, LordKnightmon, Craniummon, Sleipmon, Duftmon, Examon, Millenniummon, MoonMillenniummon, ZeedMillenniummon, Susanoomon, Dorugoramon, Gaiomon, Ophanimon, Vikemon, Chaosdramon, Kentaurosmon, Magnadramon, Cherubimon, RustTyrannomon, BlitzGreymon, CresGarurumon, Ouryumon, Slayerdramon, Apollomon, Dianamon, GraceNovamon, Lucemon Satan Mode, Chaosmon, BanchoLeomon, Darkdramon, MarineAngemon, TigerVespamon, Kuzuhamon, BlackSeraphimon, Ophanimon Falldown Mode, Ravemon, ShineGreymon, MirageGaogamon, Jesmon GX, Gallantmon X, WarGreymon X, MetalGarurumon X, Beelzemon X, Siriusmon, Diarbbitmon, Amphimon, Fenriloogamon, Kazuchimon, Arcturusmon, ShineGreymon Burst Mode, MirageGaogamon Burst Mode, Beelzemon Blast Mode (Apex), Omnimon Merciful Mode, Durandamon, BryweLudomon, RagnaLoordmon, Aegisdramon, GrandisKuwagamon, GranKuwagamon, HeavyLeomon, BanchoGolemon, BanchoStingmon, BanchoMamemon, BanchoLilimon, Darkdramon Chaos, Chaosmon Valdur Arm, UltimateChaosmon, Ogudomon, Lucemon Larva, Belphemon Sleep Mode, Daemon Super Ultimate, Leviamon X, Beelzemon 2010, Imperialdramon Fighter Mode Black, BlackImperialdramon Dragon Mode, ChaosGallantmon, MedievalGallantmon, Dukemon Crimson Mode X, Sakuyamon Miko Mode, Kuzuhamon Miko Mode, BlackMegaGargomon, Cherubimon Vice, ShadowSeraphimon, ClavisAngemon, SlashAngemon, Bagramon, DarknessBagramon, Tactimon, Blastmon, Death-X-mon, Death-X-DORUgoramon, DexDORUgreymon, Volcanicdramon, Metallicdramon, Hexeblaumon, Achillesmon, Shivamon, Chaosdramon X.
+1. **🏟 Mode 1 — Adventure Colosseum**:
+   - Step-powered quest sectors with environmental weather hazards (`Thunderstorm`, `Magma Heat`, `Tidal Current`, `Miasma Fog`, `Zero Gravity`, `Apocalymon Void`) and turn-by-turn boss combat.
+2. **📡 Mode 2 — Wild NFC & Barcode Scanner**:
+   - Tap any NFC tag/card or scan real retail UPC/EAN barcodes with your phone camera to spawn unique wild Digimon encounters, including an 18% rare boss spawn rate!
+3. **📶 Mode 3 — NFC Tap-to-Duel P2P**:
+   - Tap Watch-to-Watch, Watch-to-Phone, or Phone-to-Phone via NFC for instant local duels and DNA Jogress fusions.
+4. **🌐 Mode 4 — A-Com / D-Com / WiFiCom Online**:
+   - 100% compatible with the 128-bit Crockford Base32 CommCode standard (`DW2-...`) and original 16/26-char DigiROM protocols (`V1-XXXX-XXXX-XXXX`).
+   - **Watch-to-Phone Relay**: Tap your watch to your phone (or tap `RELAY DIGIROM` on your watch) to bridge your partner straight into the Phone Companion App's online tamer lobby.
 
 ---
 
-### 4. DNA Digivolution (Jogress) & DigiXros Architecture
+### 4. Step-Powered Adventure Engine (114 Sectors across 5 Sagas)
 
-DigiWear introduces authentic DNA Digivolution and DigiXros mechanics **without compromising compatibility with Digimon 0nl1ne, D-Com, and A-Com**:
+Turn your daily steps into adventure progression across 5 authentic sagas:
+1. **The Original Odyssey** (30 Sectors • File Island to Spiral Mountain • Climax: ZeedMillenniummon)
+2. **Project Ark: The X-Antibody Crisis** (25 Sectors • Versandi, Uluda & Skuld Terminals • Climax: Death-X-mon)
+3. **Frontier of the Ancients** (20 Sectors • Spirits of the Ten Warriors • Climax: Omnimon Merciful Mode)
+4. **Catastrophe of the Seven Sins** (21 Sectors • Dark Area Gates & Bancho Brigade • Climax: Ogudomon & DarknessBagramon)
+5. **Ghost Crypt: Hologram GRB Wave** (18 Sectors • Hologram Ghosts & Quantum Void • Climax: Apex Siriusmon)
 
-#### Why Wire Compatibility is 100% Preserved:
-In online battle simulators and physical 2-pin / 3-pin handheld communicators, communication packets contain only the **active combatant's current parameters**:
-
-```
-Payload = { MonsterID, Stage, Attribute, BasePowerHP, Victories, Effort, Seed, Salt, HMAC }
-```
-Because external simulators inspect only the resulting species, Omnimon (`#510`), Paildramon (`#423`), and Mastemon (`#537`) transmit as standard canonical monsters with valid base power, Stage 6 (Ultimate), and elemental attributes.
-
-#### Canonical Fusion Catalog (85 Total Recipes â€” Featured Highlights):
-
-| Target Species | Stage | Attribute | Fusion Recipe | Type |
-|---|---|---|---|---|
-| **Omnimon** (`#510`) | Ultimate | Vaccine | WarGreymon (`#501`) + MetalGarurumon (`#503`) | DNA Jogress |
-| **Omnimon Zwart** (`#536`) | Ultimate | Vaccine | BlackWarGreymon (`#525`) + BlackWereGarurumon (`#430`) | DNA Jogress |
-| **Omnimon Alter-S** (`#535`) | Ultimate | Vaccine | BlitzGreymon (`#559`) + CresGarurumon (`#560`) / WarGreymon (`#501`) + Machinedramon (`#502`) | DNA Jogress / Xros |
-| **Paildramon** (`#423`) | Perfect | Free | ExVeemon (`#371`) / Flamedramon (`#332`) / Veedramon (`#331`) + Stingmon (`#333`) | DNA Jogress |
-| **Silphymon** (`#437`) | Perfect | Free | Gatomon (`#338`) / Gaogamon (`#346`) + Aquilamon (`#344`) | DNA Jogress |
-| **Shakkoumon** (`#441`) | Perfect | Free | Angemon (`#307`) + Ankylomon (`#345`) | DNA Jogress |
-| **Imperialdramon DM** (`#512`) | Ultimate | Free | Paildramon (`#423`) + MetalGreymon (`#401`) / Megadramon (`#416`) | Mode Change |
-| **Imperialdramon PM** (`#514`) | Super Ult | Vaccine | Imperialdramon FM (`#513`) + Omnimon (`#510`) | Mode Change |
-| **Mastemon** (`#537`) | Ultimate | Vaccine | Angewomon (`#427`) + LadyDevimon (`#428`) | DNA Jogress |
-| **GraceNovamon** (`#565`) | Super Ult | Vaccine | Apollomon (`#563`) + Dianamon (`#564`) | DNA Jogress |
-| **Chaosmon** (`#567`) | Super Ult | Vaccine | BanchoLeomon (`#568`) + Darkdramon (`#569`) | DNA Jogress |
-| **Jesmon GX** (`#578`) | Super Ult | Data | Jesmon (`#538`) + Gankoomon (`#539`) | DigiXros |
-| **Examon** (`#545`) | Super Ult | Data | Wingdramon (`#451`) + Slayerdramon (`#562`) | DNA Jogress |
-| **RustTyrannomon** (`#558`) | Ultimate | Virus | MetalTyrannomon (`#414`) + Volcamon (`#445`) | DigiXros |
-| **Millenniummon** (`#546`) | Ultimate | Virus | Machinedramon (`#502`) + DarkTyrannomon (`#316`) | DNA Jogress |
-| **MoonMillenniummon** (`#547`)| Ultimate | Virus | Millenniummon (`#546`) + Diaboromon (`#527`) | Mode Change |
-| **ZeedMillenniummon** (`#548`)| Super Ult | Virus | MoonMillenniummon (`#547`) + Apocalymon (`#529`) | DNA Jogress |
-| **Alphamon Ouryuken** (`#524`) | Super Ult | Vaccine | Alphamon (`#523`) + Ouryumon (`#561`) / Cyberdramon (`#431`) | DigiXros |
-| **Gallantmon CM** (`#516`) | Super Ult | Vaccine | Gallantmon (`#515`) + Phoenixmon (`#506`) / AeroVeedramon (`#422`) | Mode Change |
-| **Gallantmon X** (`#579`) | Super Ult | Vaccine | Gallantmon (`#515`) + Dorumon (`#227`) | Mode Change |
-| **Beelzemon BM** (`#520`) | Super Ult | Virus | Beelzemon (`#519`) + Andromon (`#418`) / Megadramon (`#416`) | DigiXros |
-| **Apocalymon** (`#529`) | Super Ult | Free | Piedmon (`#509`) + Machinedramon (`#502`) | DNA Jogress |
-| **Susanoomon** (`#549`) | Super Ult | Vaccine | WarGreymon (`#501`) + Magnamon (`#521`) | DNA Jogress |
-
-#### Easy 1-Tap Jogress, DigiXros & Mode Change (Across Watch & Phone):
-1. **Watch Status Screen Chamber (`StatusScreen.kt`)**: Scroll to `EVO GUIDE & LINEAGE` on your wrist. Whenever your active partner matches a fusion recipe, the **âš¡ DNA JOGRESS / DIGIXROS READY** chamber renders the `[Partner Sprite] â†’ [Target Sprite]` equation with a 1-tap **`âš¡ FUSE`** button right on the watch. If your Digimon is a lower stage (Child/Adult), it displays a **Next Stage Jogress / Xros Unlocks** preview so you know what to aim for.
-2. **Watch Battle Transceiver (`BattleScreen.kt`)**: Below the CommCode input keypad, the **âš¡ DNA JOGRESS / DIGIXROS** matrix card automatically lists all recipes for your active partner with **`[CODE]`** (auto-populates partner 128-bit CommCode) and **`[âš¡FUSE]`** (1-tap fusion execution with fanfare).
-3. **Phone Dashboard Fusion Chamber (`PetDashboardScreen.kt`)**: The main dashboard contains a dedicated **`â–¸ âš¡ DNA JOGRESS, DIGIXROS & MODE CHANGE CHAMBER`** showing 3-sprite equations (`[Active] + [Partner] â•â•â–¶ [Target]`) with a 1-tap **`âš¡ AWAKEN & BEAM TO WATCH`** button that awakens the evolved form and syncs it immediately to your wrist. Also includes a toggleable 85-recipe catalog.
-4. **Phone Battle Hub Live Auto-Decoder (`BattleHubScreen.kt`)**: Entering or scanning a friend's CommCode automatically decodes the species and immediately reveals the **âš¡ DNA DIGIVOLVE WITH FRIEND'S CODE!** button without having to fight a match first. In addition, 1-tap partner code chips are provided for instant loading.
-5. **Phone Cryo-Vault Fusion Lab (`DigiVaultScreen.kt`)**: Displays all compatible partner recipes for your active Digimon with **`+VAULT`** (spawns partner into storage) and **`âš¡ FUSE`** (opens interactive 3-way fusion awakening dialog and beams the result to your watch).
-
-> ðŸ“– **Complete 500-Species Digivolution Guide & Lineage Chart**: See [**`DIGIVOLUTION_GUIDE.md`**](DIGIVOLUTION_GUIDE.md) for the complete stage-by-stage evolution requirements, Starter Digi-Egg paths, and all 85 DNA Jogress / Mode Change recipes.
+- **Switch Sagas Anytime**: Swap between sagas right on your wrist without losing your progress.
+- **Hardware Step Accuracy**: Preserves your step baseline across app restarts and device reboots so every step counts.
+- **Boss Rewards & Egg Unlocks**: Defeating apex bosses awards exclusive relics and permanently unlocks rare Starter Eggs like Mokumon, Pukamon, Cotsucomon, and Algomon Baby I.
 
 ---
 
-### 5. 4-Mode Battle System, Canonical V-Pet Formulas & 128-Bit Comm Code
+### 5. Android Phone Companion App
 
-DigiWear features **full face-to-face animated battle rendering** (`flipHorizontal = true` on the left fighter so both Digimon face each other, animated projectile clashes `â—â”â”â–¶` / `âš¡MEGA HITâš¡`, live HP bars, and QTE reflex boosts) across **4 distinct, separated Battle Modes** on both Watch and Phone:
-
-1. **ðŸŸ Mode 1 â€” Adventure Colosseum (`BattleMode.ADVENTURE`)**:
-   - 114-Sector Pedometer Quest across 5 Grand Sagas & Colosseum Boss Gates with sector weather hazards (`Thunderstorm`, `Magma Heat`, `Tidal Current`, `Miasma Fog`, `Zero Gravity`, `Apocalymon Void`) and live turn-by-turn face-to-face arena combat.
-2. **ðŸ“¡ Mode 2 â€” Wild NFC & Barcode Scanner (`BattleMode.WILD_SCAN`)**:
-   - Scan any physical NFC tag/card/transit pass/amiibo on Watch or Phone, or scan/enter any **UPC/EAN-13 product barcode or QR code** in the Companion App (`WildScanEncounterGenerator`) to deterministically discover Wild Digimon scaled to a Digital World Habitat Zone (`File Island Coast`, `Folder Continent`, `Net Ocean Trench`, `Dark Area Abyss`), with an 18% Rare Boss Anomaly escalation!
-3. **ðŸ“¶ Mode 3 â€” NFC Tap-to-Duel P2P (`BattleMode.NFC_TAP_DUEL`)**:
-   - Tap Watch-to-Watch, Watch-to-Phone, or Phone-to-Phone via NFC Reader/NDEF (`application/vnd.com.digiwear.battle`) or 128-bit Crockford Base32 CommCodes for instant peer-to-peer duels and DNA Jogress fusions.
-4. **ðŸŒ Mode 4 â€” A-Com / D-Com / WiFiCom + Watch NFC Relay (`BattleMode.ACOM_DCOM_WIFICOM`)**:
-   - Full `V1-XXXX-XXXX-XXXX` (48-bit) and `V1-XXXX-XXXX` (32-bit) DigiROM transceiver for Digimon 0nl1ne, w0rld, Alpha Terminal, A-Com, D-Com, and WiFiCom.
-   - **Watch-to-Phone NFC & DataLayer Relay**: Tap your Smartwatch to your Phone (or tap **`ðŸ“² RELAY DIGIROM TO PHONE`** on the Watch) to bridge your Watch Partner's live DigiROM into the Phone Companion App's A-Com / WiFiCom Online Tamer Lobby, and beam opponents right back to your wrist!
-
-#### Canonical Bandai V-Pet Battle Formulas (`DeterministicBattleSolver`):
-- **Effective Power (`EFF PWR`)**: `BasePower + (Effort Ã— 8) + min(Victories, 50) Ã— 2 + StageBonus`
-- **Hit Rate (`HIT%`)**: `clamp(50% + ((AttackerEffPower - DefenderEffPower) / (AttackerEffPower + DefenderEffPower)) Ã— 35% + AttributeBonus(Â±10%) + CritBoost(+12%), 20%, 95%)`
-- **Attack Tiers**:
-  - `SINGLE` (Standard Shot)
-  - `DOUBLE` (Twin Barrage on favorable PRNG roll)
-  - `MEGA_HIT` (Triggered by QTE / Pendulum Shake Reflex Boost `+25%` or natural Critical Strike `1.35Ã—`)
-- **Elemental Triangle (`1.2Ã—` Damage & `+10%` Hit Rate)**: `Vaccine > Virus > Data > Vaccine` (`Free` is neutral).
-- **Environmental Sector Modifiers (`1.15Ã—` Damage)**: Weather hazards amplify matching elemental attributes during Adventure & Wild Scan battles.
-
-#### Bit Allocation Table (128 Bits / 16 Bytes):
-```
-Bit 000-007: Protocol Version (8-bit, 0x01)
-Bit 008-023: Monster ID (16-bit, species index 101..1545)
-Bit 024-027: Stage Index (4-bit, 0x1=Baby I .. 0x6=Ultimate)
-Bit 028-031: Attribute (4-bit, 0=Vaccine, 1=Data, 2=Virus, 3=Free)
-Bit 032-047: Base Power / HP (16-bit)
-Bit 048-063: Historical Victories (16-bit)
-Bit 064-079: Training Effort (16-bit)
-Bit 080-095: Battle PRNG Seed (16-bit)
-Bit 096-111: Timestamp Salt (16-bit)
-Bit 112-127: HMAC-16 Cryptographic Checksum (16-bit)
-```
+The companion app gives you a clean 5-tab control center:
+1. **V-PET Tab**: Live viewport of your active partner inside a retro 1997 brick shell with biological gauges and remote care buttons.
+2. **VAULT Tab**: Cryo-storage to keep your favorite Digimon safe in stasis, plus a dedicated **Fusion Lab** listing all 85 Jogress recipes and a Memorial Hall of Fame.
+3. **BATTLE Tab**: NFC duels, UPC barcode wild scanning, online D-Com packet battles, and 100-floor Colosseum tower gauntlet.
+4. **EXPEDITION Tab**: Master 500-species DigiDex and 114-sector saga exploration maps.
+5. **SETTINGS Tab**: Watch hardware toggles (3-button mode, wrist placement, haptics, buzzer, contrast), smartwatch connection diagnostics, AOSP Wi-Fi bridge, and full JSON database backup/restore.
+6. **Home Screen AppWidget**: Put your live partner right on your phone home screen with live hunger hearts (`♥♥♥♥`), strength stars (`★★★★`), and quick-care buttons.
 
 ---
 
-### 6. Grand Canonical Sagas & Adventure Engine (114 Sectors across 5 Sagas)
+## 🚀 Installation & Sideloading
 
-Connects real physical movement from the smartwatch step counter (`TYPE_STEP_COUNTER`) directly to 5 authentic Grand Canonical Sagas spanning 114 sectors of Digital Monster lore, incorporating the entire 500-species roster:
+### 📱 Option 1: Direct Phone-to-Watch Wireless Sideloading (Recommended — No PC Needed!)
 
-```mermaid
-graph TD
-    S1["1. The Original Odyssey<br/>30 Sectors â€¢ File Island to Spiral Mountain<br/>Climax: ZeedMillenniummon"]
-    S2["2. Project Ark: The X-Antibody Crisis<br/>25 Sectors â€¢ Versandi, Uluda & Skuld Terminals<br/>Climax: Death-X-mon"]
-    S3["3. Frontier of the Ancients<br/>20 Sectors â€¢ Spirits of the Ten Warriors<br/>Climax: Omnimon Merciful Mode"]
-    S4["4. Catastrophe of the Seven Sins<br/>21 Sectors â€¢ Dark Area Gates & Bancho Brigade<br/>Climax: Ogudomon & DarknessBagramon"]
-    S5["5. Ghost Crypt: Hologram GRB Wave<br/>18 Sectors â€¢ Hologram Ghosts & Quantum Void<br/>Climax: Apex Siriusmon"]
-```
-
-- **On-Wrist Saga Switcher (`SAGA â–¾`)**: Switch between all 5 Grand Sagas on-the-fly directly from the watch UI, preserving progress, unlocked starter eggs, and collected spoils across all campaigns.
-- **Persistent Hardware Step Baseline**: `StepTrackerManager` persists the hardware step counter baseline in `SharedPreferences` across app restarts and screen-off periods (automatically detecting device reboots), ensuring every background step is credited toward sector progression.
-- **Narrative Dialogue & Boss Encounters**: Every sector features authentic narrative scene text, authentic boss entrance battle quotes, and defeat reactions.
-- **Egg Unlocks & Relic Spoils**: Defeating sector apex bosses rewards exclusive items (`X_ANTIBODY_CORE`, `CREST_OF_ANCIENT_FLAME`, `WRATH_CORE`, `SIRIUS_SOLAR_CORE`) and permanently unlocks rare Starter Eggs (`Mokumon`, `Pukamon`, `Cotsucomon`, `Algomon Baby I`) in the Starter Egg menu!
-- **Deterministic Boss & Wild Encounter Combat**: Both Sector Boss gates and random Wild Digimon encounters resolve real turn-by-turn combat via `DeterministicBattleSolver` (`[B]` button or touch), crediting victories directly toward partner evolution requirements.
-- **16+ Environmental Sector Modifiers (`1.15x` Damage)**: Dynamic hazards (`glitch_fog`, `x_program_fog`, `cocytus_blizzard`, `hellfire_storm`, `gehenna_flames`, `grb_cataclysm`, `seven_sins_maw`, `temporal_singularity`, `seraphic_grace`) alter elemental combat damage variables in real time.
-- **Boss Clear Flags**: Defeating sector bosses awards permanent campaign progress flags (`FLAG_INFINITY_CLEARED`, `FLAG_GENESIS_CLEARED`, `FLAG_ARK_25`, `FLAG_FRO_20`, `FLAG_SDL_21`, `FLAG_GG_FINAL`).
+The easiest way to install and update DigiWear on your watch:
+1. Install **`DigiWear-Companion-release.apk`** on your Android phone.
+2. Open the companion app and go to **Settings → Wireless ADB Watch Sideloader**.
+3. Connect your watch and phone to the same Wi-Fi network (or your phone's Wi-Fi Hotspot).
+4. On your watch, open **Developer Options** and enable **ADB Debugging** and **Wireless Debugging**.
+5. In the companion app, tap **Auto-Detect** (or enter the watch's IP and port), then tap **Connect**.
+6. When prompted on your watch, tap **Always Allow**.
+7. Tap **Download Latest** (or pick an APK from your phone), then tap **⚡ Sideload DigiWear to Watch ⚡**.
+8. The companion app installs the APK, grants step and sensor permissions, and launches the app on your wrist automatically!
 
 ---
 
-### 7. Companion App, DigiVault, DigiDex & Home Screen Widget
+### 💻 Option 2: One-Click Helper Scripts (PC / Mac)
 
-The mobile application (`:phone-companion-app`) serves as a full-featured management hub connected via 6 bidirectional Wearable Data Layer endpoints (`/sync/request_pet_state`, `/sync/response_pet_state`, `/sync/update_pet_state`, `/sync/update_settings`, `/sync/battle_code`, `/sync/campaign_data`):
-- **DigiVault Cryo-Preservation**: Archive raised Digimon in zero-decay cryostasis. Browse stored partners with live animated pixel art, search/filter by stage, deploy back to the watch & phone dashboard with one click, or generate dual 128-bit Base32 Comm Codes and `V1-XXXX-XXXX-XXXX` DigiROM packets.
-- **Android Home Screen AppWidget**: Built with standard `RemoteViews` rendering the live 64 Ã— 64 color pixel-art sprite, stage, weight, hunger hearts (`â™¥â™¥â™¥â™¥`), and strength stars (`â˜…â˜…â˜…â˜…`). Refreshes automatically on watch sync, DigiDex morph, DNA Jogress fusion, backup restore, and DigiVault deployment.
-- **500-Species DigiDex, Evolution Encyclopedia & 6-Mode Sprite Studio**: Search and filter all 500 species by stage or ID, inspect all 12 animation frames across 6 live preview modes (`IDLE`, `WALK`, `FEED`, `SLEEP`, `ATTACK`, `STATUS`) with authentic V-Pet pixel overlays, browse interactive pre-evolutions, branching evolutions, and DNA Jogress recipes, and morph your active partner or synthesize into DigiVault.
-- **Story Architect with 5 Grand Saga Presets**: Inspect and customize campaign sectors with visual boss sprites, wild encounter pools, and 1-tap "LOAD SAGA" presets for all 5 canonical sagas, pushing directly to the watch over DataLayer or AOSP Wi-Fi LAN Bridge.
-- **JSON Cloud Portability**: Export and import either single `PetState` JSON snapshots or a Full Companion Archive (`FullCompanionArchive`: Active Pet + DigiVault Cryo-Storage + Custom Campaigns) with one-click JSON backup and restore.
-- **Remote Watch Settings & Live Pull Sync**: Wirelessly pull live `PetState` from the watch or push 5 authentic LCD & shell themes (`classic_vpet_lcd`, `amber_pendulum_lcd`, `digivice_ic_blue`, `file_island_day`, `dark_oled_minimal`), haptic vibration motor, 1997 piezo chiptune buzzer, 3-button mode, and pendulum shake mode.
+If you have a computer with ADB set up, use the included helper scripts:
+- **Windows**: Double-click `sideload.bat` (or run `.\sideload.ps1` in PowerShell).
+- **macOS / Linux**: Run `./sideload.sh`.
+
+The script automatically detects connected devices over USB or Wi-Fi and installs the latest APKs.
 
 ---
 
-## ðŸ›  Tech Stack & Dependencies
-
-| Layer | Component | Version / Technology |
-|---|---|---|
-| **Core Language** | Kotlin | `1.9.22` (JVM 17 Target) |
-| **Wear OS UI** | Jetpack Compose for Wear OS | `1.3.0` (`ScalingLazyColumn`, `ScreenScaffold`) |
-| **Companion UI** | Jetpack Compose (Material 3) | `1.6.2` / `material3:1.2.0` |
-| **Persistence** | Room SQLite Persistence | `2.6.1` (KSP schema compiler) |
-| **Background Work** | WorkManager | `2.9.0` (Periodic delta processor) |
-| **Serialization** | Kotlinx Serialization | `1.6.3` (JSON payload contracts) |
-| **Hardware Keys** | Android Input Framework | `KeyEvent` Main Thread Interceptor |
-| **Wearable Sync** | Google Play Services Wearable | `18.1.0` (Data Layer API) |
-| **Testing** | JUnit 4 + Coroutines Test | Unit & cryptographic validation |
-
----
-
-## ðŸš€ Building & Sideloading
-
-### Prerequisites
-- **Android Studio** (Hedgehog 2023.1.1 or newer recommended)
-- **JDK 17** (Bundled JetBrains Runtime `jbr` or OpenJDK 17)
-- **Android SDK API 34** (Wear OS minSdk 26, Phone minSdk 26)
-
-### 1. Compile and Test All Modules
-To compile, run unit tests, and assemble both Debug and Release APKs:
+### 🛠 Option 3: Manual ADB Commands
 
 ```bash
-# On Linux / macOS
-./gradlew test assembleDebug assembleRelease
+# Connect to your watch over Wi-Fi
+adb pair <WATCH_IP>:<PAIRING_PORT>
+adb connect <WATCH_IP>:<CONNECT_PORT>
 
-# On Windows PowerShell / Command Prompt
-.\gradlew.bat test assembleDebug assembleRelease
-```
+# Install the watch app
+adb -s <WATCH_IP>:<CONNECT_PORT> install -r release_bin/DigiWear-WearOS-release.apk
 
-### 2. Output Binaries
-
-All modules assemble cleanly with 0 errors:
-
-| Module | Build Variant | Size | Output File Location |
-|---|---|---|---|
-| **Wear OS Smartwatch** | Release (Signed) | **21.41 MB** | `release_bin/DigiWear-WearOS-release.apk` *(also `wear-os-app-release.apk`)* |
-| **Standalone AOSP Smartwatch** | Release (Signed) | **21.41 MB** | `release_bin/digiwear-aosp-standard-watch-release.apk` |
-| **Wear OS & AOSP Smartwatch** | Debug | **26.16 MB** | `release_bin/wear-os-app-debug.apk` |
-| **Phone Companion** | Release (Signed) | **12.23 MB** | `release_bin/DigiWear-Companion-release.apk` *(also `phone-companion-app-release.apk`)* |
-| **Phone Companion** | Debug | **17.61 MB** | `release_bin/phone-companion-app-debug.apk` |
-
----
-
-### 3. Sideloading to Devices
-
-#### âš¡ Automated One-Click Sideloading Companion Scripts (Recommended):
-DigiWear includes interactive helper scripts that automatically locate `adb` on your system (checking PATH and default Android SDK folders), assist with Wi-Fi pairing/connecting, and install both signed APKs without manual terminal commands:
-
-- **Windows (Double-Click or Command Line)**:
-  ```cmd
-  sideload.bat
-  ```
-  *(Or in PowerShell: `.\sideload.ps1`)*
-
-- **macOS / Linux**:
-  ```bash
-  chmod +x sideload.sh
-  ./sideload.sh
-  ```
-
-The wizard guides you through:
-1. Detecting connected devices via USB or wireless Wi-Fi.
-2. Entering your watch's IP and port (e.g., `192.168.1.50:5555`) or 6-digit Wi-Fi pairing code.
-3. Automatically installing the latest signed release APKs with proper replace (`-r`) and downgrade (`-d`) flags.
-
----
-
-#### Manual Sideloading via Standard ADB:
-
-##### Sideloading to Wear OS or AOSP Smartwatch via ADB over Wi-Fi:
-1. On your smartwatch, enable **Developer Options** (Settings â†’ System â†’ About â†’ tap *Build Number* 7 times).
-2. Under Developer Options, enable **ADB Debugging** and **Debug over Wi-Fi**.
-3. Note the IP address and pairing port shown on the watch.
-4. From your terminal:
-   ```bash
-   adb pair <WATCH_IP>:<PAIRING_PORT>
-   adb connect <WATCH_IP>:<CONNECT_PORT>
-   adb -s <WATCH_IP>:<CONNECT_PORT> install -r release_bin/DigiWear-WearOS-release.apk
-   ```
-
-##### Installing Phone Companion App:
-Connect your Android phone via USB with USB Debugging enabled:
-```bash
+# Install the companion app on your phone via USB
 adb install -r release_bin/DigiWear-Companion-release.apk
 ```
 
 ---
 
-## ðŸ§ª Verification & Test Suite
+## 📦 Release Binaries (`release_bin/`)
 
-The shared core logic includes complete unit test coverage across 9 dedicated test suites:
-- **`SpriteMatrixRegistryTest`**: Audits all 500 species for 16 Ã— 16 bounds, valid pixel character tokens, non-hollow multi-tone fills, zero duplicate matrices, zero duplicate palettes, 12-frame stance differentiation, and Ambient Mode On-Pixel Ratio (OPR â‰¤ 15%).
-- **`RosterAuditTest`**: Audits all 500 species for ID-to-stage integrity, evolution graph validity, Perfect â†’ Ultimate ascension criteria (â‰¥ 3 days age, â‰¥ 25 battles), all 85 Jogress/DigiXros recipes, and 100% Digimon 0nl1ne / D-Com wire roundtrip compatibility.
-- **`ExpandedRosterTest`**: Validates roster stage distribution and starter Digi-Egg evolutionary trees.
-- **`CommCodeCodecTest`**: 128-bit payload binary serialization, Crockford Base32 alphabet validation, error-tolerant character mapping (`O` â†’ `0`, `I`/`L` â†’ `1`), and HMAC-16 tamper detection.
-- **`DeterministicBattleSolverTest`**: Combined PRNG seed turn reproducibility, 1.2Ã— elemental advantage damage calculations, +25% QTE Critical Strike reflex boost, environmental weather hazard modifiers, and 10-round combat termination.
-- **`PetSimulationEngineTest`**: Physiological decay math across all 6 stages, metabolic sleep freezing, and care mistake grace windows.
-- **`EvolutionEngineTest`**: Multi-variable branching evolution evaluation across age, care mistakes, effort, overfeeds, and battle win ratios.
-- **`AdventureEngineTest`**: 30-node step accumulation, hazard weather mechanics, and final boss victory flag recording (`Node 130` ZeedMillenniummon).
-- **`JogressEngineTest`**: Commutative fusion recipe matching (WarGreymon + MetalGarurumon == MetalGarurumon + WarGreymon â†’ Omnimon), inherited stat bonuses, and Digimon 0nl1ne Comm Code roundtrip verification.
+Pre-compiled, signed APKs are ready to install in the `release_bin/` directory and on [GitHub Releases](https://github.com/Dalinuxx/DigiWear/releases):
 
-Execute tests via:
+| File | Target Platform | Description |
+|---|---|---|
+| `DigiWear-WearOS-release.apk` | Wear OS 3.0+ | Official signed release for Galaxy Watch, Pixel Watch, TicWatch, etc. |
+| `digiwear-aosp-standard-watch-release.apk` | Standalone AOSP | Official signed release for Kospet, Lemfo, Zeblaze, etc. |
+| `DigiWear-Companion-release.apk` | Android 13+ Phone | Official signed companion app with Wireless Sideloading & DigiVault |
+| `wear-os-app-debug.apk` | Development | Watch debug build with developer logging enabled |
+| `phone-companion-app-debug.apk` | Development | Phone debug build with developer logging enabled |
+
+---
+
+## 🧪 Building from Source
+
 ```bash
+# Run the complete test suite
 ./gradlew test
+
+# Build all release and debug APKs
+./gradlew assembleRelease assembleDebug
 ```
 
 ---
 
-## ðŸ¤ Contributing
+## 🤝 Community & Contributing
 
-Contributions, bug reports, and sprite submissions are welcome!
+Contributions, feedback, bug reports, and sprite suggestions are always welcome!
 1. Fork the repository.
-2. Create your feature branch (`git checkout -b feature/NewFeature`).
-3. Commit your changes (`git commit -m 'Add NewFeature'`).
-4. Ensure all unit tests pass: `./gradlew test`.
-5. Push to your branch (`git push origin feature/NewFeature`).
-6. Open a Pull Request.
+2. Create your branch: `git checkout -b feature/MyFeature`.
+3. Test your changes: `./gradlew test`.
+4. Commit & push: `git commit -m 'Add MyFeature'` and open a Pull Request.
 
 ---
 
-## ðŸ“œ Disclaimer & Acknowledgments
+## 📜 Disclaimer & Credits
 
 - **Digimon** and all associated characters, names, and assets are trademarks of **Bandai**, **Toei Animation**, and **Akiyoshi Hongo**.
-- This project is an open-source fan recreation developed for non-commercial educational and preservation purposes.
-- Special thanks to the virtual pet and emulation communities:
+- This project is an open-source fan creation developed for non-commercial educational and preservation purposes.
+- Huge thanks to the virtual pet and fan emulation communities:
   - **[Humulos (Digital Monster Reference Engine)](https://humulos.com/digimon/)** for comprehensive lifecycle parameters and evolution branch data.
   - **[The Spriters Resource](https://www.spriters-resource.com/lcd_handhelds/)** for LCD sprite archives.
   - **[GMMan / DigimonColorSpriteTool](https://github.com/GMMan/DigimonColorSpriteTool)** for color sprite extraction tools.
@@ -469,5 +248,5 @@ Contributions, bug reports, and sprite submissions are welcome!
 ---
 
 <p align="center">
-  <b>Built with â¤ï¸ for Virtual Pet Trainers Worldwide</b>
+  <b>Built with ❤️ for Virtual Pet Trainers Worldwide</b>
 </p>
