@@ -8,8 +8,10 @@ import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -44,6 +46,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
@@ -285,7 +288,8 @@ fun ExpeditionScreen(
                             val isCurrent = parsedStory?.campaignId.equals(saga.campaignId, ignoreCase = true)
                             Card(
                                 modifier = Modifier
-                                    .width(220.dp)
+                                    .width(230.dp)
+                                    .height(180.dp)
                                     .clickable {
                                         rawJson = AdventureEngine.serializeCampaign(saga)
                                     },
@@ -298,41 +302,52 @@ fun ExpeditionScreen(
                                     if (isCurrent) Color(0xFF64FFDA) else Color(0xFF263238)
                                 )
                             ) {
-                                Column(modifier = Modifier.padding(10.dp)) {
-                                    Text(
-                                        text = saga.title,
-                                        fontSize = 11.sp,
-                                        fontWeight = FontWeight.Bold,
-                                        color = if (isCurrent) Color(0xFF64FFDA) else Color.White,
-                                        maxLines = 2
-                                    )
-                                    Spacer(modifier = Modifier.height(4.dp))
-                                    Text(
-                                        text = "${saga.nodes.size} Sectors • ${saga.recommendedStage}",
-                                        fontSize = 9.sp,
-                                        color = Color(0xFF80CBC4),
-                                        fontFamily = FontFamily.Monospace
-                                    )
-                                    Spacer(modifier = Modifier.height(4.dp))
-                                    Text(
-                                        text = saga.description,
-                                        fontSize = 8.5.sp,
-                                        color = Color(0xFFB0BEC5),
-                                        maxLines = 2
-                                    )
-                                    Spacer(modifier = Modifier.height(8.dp))
+                                Column(
+                                    modifier = Modifier
+                                        .fillMaxSize()
+                                        .padding(12.dp),
+                                    verticalArrangement = Arrangement.SpaceBetween
+                                ) {
+                                    Column {
+                                        Text(
+                                            text = saga.title,
+                                            fontSize = 11.sp,
+                                            fontWeight = FontWeight.Bold,
+                                            color = if (isCurrent) Color(0xFF64FFDA) else Color.White,
+                                            maxLines = 2,
+                                            lineHeight = 14.sp
+                                        )
+                                        Spacer(modifier = Modifier.height(4.dp))
+                                        Text(
+                                            text = "${saga.nodes.size} Sectors • ${saga.recommendedStage}",
+                                            fontSize = 9.sp,
+                                            color = Color(0xFF80CBC4),
+                                            fontFamily = FontFamily.Monospace
+                                        )
+                                        Spacer(modifier = Modifier.height(4.dp))
+                                        Text(
+                                            text = saga.description,
+                                            fontSize = 8.5.sp,
+                                            color = Color(0xFFB0BEC5),
+                                            maxLines = 2,
+                                            lineHeight = 12.sp,
+                                            overflow = TextOverflow.Ellipsis
+                                        )
+                                    }
                                     Button(
                                         onClick = {
                                             rawJson = AdventureEngine.serializeCampaign(saga)
                                         },
-                                        modifier = Modifier.fillMaxWidth().height(26.dp),
+                                        modifier = Modifier.fillMaxWidth().height(32.dp),
+                                        contentPadding = PaddingValues(horizontal = 8.dp, vertical = 2.dp),
+                                        shape = RoundedCornerShape(6.dp),
                                         colors = ButtonDefaults.buttonColors(
                                             containerColor = if (isCurrent) Color(0xFF00897B) else Color(0xFF263238)
                                         )
                                     ) {
                                         Text(
                                             text = if (isCurrent) "SELECTED [OK]" else "SELECT SAGA",
-                                            fontSize = 9.sp,
+                                            fontSize = 9.5.sp,
                                             fontWeight = FontWeight.Bold,
                                             fontFamily = FontFamily.Monospace
                                         )
@@ -371,7 +386,9 @@ fun ExpeditionScreen(
                             customCampaigns.forEach { c ->
                                 val isCurrent = parsedStory?.campaignId.equals(c.campaignId, ignoreCase = true)
                                 Card(
-                                    modifier = Modifier.width(220.dp),
+                                    modifier = Modifier
+                                        .width(230.dp)
+                                        .height(130.dp),
                                     colors = CardDefaults.cardColors(
                                         containerColor = if (isCurrent) Color(0xFF332A15) else DigiWearPalette.CardInner
                                     ),
@@ -381,36 +398,47 @@ fun ExpeditionScreen(
                                         if (isCurrent) Color(0xFFFFD54F) else Color(0xFF263238)
                                     )
                                 ) {
-                                    Column(modifier = Modifier.padding(10.dp)) {
-                                        Text(
-                                            text = c.title,
-                                            fontSize = 11.sp,
-                                            fontWeight = FontWeight.Bold,
-                                            color = if (isCurrent) Color(0xFFFFE082) else Color.White,
-                                            maxLines = 1
-                                        )
-                                        Spacer(modifier = Modifier.height(2.dp))
-                                        Text(
-                                            text = "ID: ${c.campaignId}",
-                                            fontSize = 9.sp,
-                                            color = Color(0xFFB0BEC5),
-                                            fontFamily = FontFamily.Monospace
-                                        )
-                                        Spacer(modifier = Modifier.height(8.dp))
+                                    Column(
+                                        modifier = Modifier
+                                            .fillMaxSize()
+                                            .padding(12.dp),
+                                        verticalArrangement = Arrangement.SpaceBetween
+                                    ) {
+                                        Column {
+                                            Text(
+                                                text = c.title,
+                                                fontSize = 11.sp,
+                                                fontWeight = FontWeight.Bold,
+                                                color = if (isCurrent) Color(0xFFFFE082) else Color.White,
+                                                maxLines = 1,
+                                                overflow = TextOverflow.Ellipsis
+                                            )
+                                            Spacer(modifier = Modifier.height(2.dp))
+                                            Text(
+                                                text = "ID: ${c.campaignId}",
+                                                fontSize = 9.sp,
+                                                color = Color(0xFFB0BEC5),
+                                                fontFamily = FontFamily.Monospace,
+                                                maxLines = 1,
+                                                overflow = TextOverflow.Ellipsis
+                                            )
+                                        }
                                         Row(
                                             modifier = Modifier.fillMaxWidth(),
                                             horizontalArrangement = Arrangement.spacedBy(6.dp)
                                         ) {
                                             Button(
                                                 onClick = { rawJson = c.jsonContent },
-                                                modifier = Modifier.weight(1f).height(26.dp),
+                                                modifier = Modifier.weight(1f).height(32.dp),
+                                                contentPadding = PaddingValues(horizontal = 8.dp, vertical = 2.dp),
+                                                shape = RoundedCornerShape(6.dp),
                                                 colors = ButtonDefaults.buttonColors(
                                                     containerColor = if (isCurrent) Color(0xFFFFA000) else Color(0xFF37474F)
                                                 )
                                             ) {
                                                 Text(
                                                     text = if (isCurrent) "SELECTED" else "LOAD",
-                                                    fontSize = 9.sp,
+                                                    fontSize = 9.5.sp,
                                                     fontWeight = FontWeight.Bold,
                                                     fontFamily = FontFamily.Monospace
                                                 )
@@ -421,11 +449,13 @@ fun ExpeditionScreen(
                                                         db.phoneDao().deleteCampaign(c.campaignId)
                                                     }
                                                 },
-                                                modifier = Modifier.height(26.dp),
+                                                modifier = Modifier.height(32.dp),
+                                                contentPadding = PaddingValues(horizontal = 10.dp, vertical = 2.dp),
+                                                shape = RoundedCornerShape(6.dp),
                                                 colors = ButtonDefaults.outlinedButtonColors(contentColor = Color(0xFFFF5252)),
                                                 border = BorderStroke(1.dp, Color(0x66FF5252))
                                             ) {
-                                                Icon(Icons.Default.Delete, contentDescription = "Delete", modifier = Modifier.size(11.dp))
+                                                Icon(Icons.Default.Delete, contentDescription = "Delete", modifier = Modifier.size(14.dp))
                                             }
                                         }
                                     }
@@ -502,6 +532,8 @@ fun ExpeditionScreen(
                     }
                 }
             }
+
+            Spacer(modifier = Modifier.height(28.dp))
         }
     }
 
@@ -529,31 +561,41 @@ fun ExpeditionScreen(
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Column {
+                        Column(
+                            modifier = Modifier
+                                .weight(1f)
+                                .padding(end = 12.dp)
+                        ) {
                             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                                DigiVectorIcon(type = DigiIconType.QUEST, size = 14.dp, tint = Color(0xFF80CBC4))
+                                DigiVectorIcon(type = DigiIconType.MAP_COMPASS, size = 14.dp, tint = Color(0xFF80CBC4))
                                 Text(
                                     text = "ROADMAP // ${parsedStory?.title?.uppercase() ?: "QUEST"}",
-                                    fontSize = 12.sp,
+                                    fontSize = 11.5.sp,
                                     fontWeight = FontWeight.Bold,
                                     color = Color.White,
-                                    fontFamily = FontFamily.Monospace
+                                    fontFamily = FontFamily.Monospace,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis
                                 )
                             }
                             Text(
                                 text = "${parsedStory?.nodes?.size ?: 0} Sectors • Rec: ${parsedStory?.recommendedStage ?: "ANY"} • ${parsedStory?.nodes?.sumOf { it.requiredSteps } ?: 0} Steps",
                                 fontSize = 9.sp,
                                 color = Color.Gray,
-                                fontFamily = FontFamily.Monospace
+                                fontFamily = FontFamily.Monospace,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis
                             )
                         }
 
                         OutlinedButton(
                             onClick = { showSectorDetailsModal = false },
                             shape = RoundedCornerShape(8.dp),
-                            border = BorderStroke(1.dp, Color(0xFF546E7A))
+                            border = BorderStroke(1.dp, Color(0xFF546E7A)),
+                            contentPadding = PaddingValues(horizontal = 14.dp, vertical = 6.dp),
+                            modifier = Modifier.defaultMinSize(minWidth = 72.dp, minHeight = 32.dp)
                         ) {
-                            Text("CLOSE", fontSize = 10.sp, color = Color.White, fontFamily = FontFamily.Monospace)
+                            Text("CLOSE", fontSize = 10.sp, color = Color.White, fontFamily = FontFamily.Monospace, maxLines = 1)
                         }
                     }
 
@@ -726,6 +768,8 @@ fun ExpeditionScreen(
                     }
                 }
             }
+
+            Spacer(modifier = Modifier.height(28.dp))
         }
     }
 
@@ -753,23 +797,33 @@ fun ExpeditionScreen(
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                            DigiVectorIcon(type = DigiIconType.SETTINGS_GEAR, size = 14.dp, tint = Color(0xFF80CBC4))
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(6.dp),
+                            modifier = Modifier
+                                .weight(1f)
+                                .padding(end = 12.dp)
+                        ) {
+                            DigiVectorIcon(type = DigiIconType.ARCHITECT_PEN, size = 14.dp, tint = Color(0xFF80CBC4))
                             Text(
-                                text = "STORY ARCHITECT // JSON SCHEMA EDITOR",
-                                fontSize = 12.sp,
+                                text = "STORY ARCHITECT // JSON EDITOR",
+                                fontSize = 11.5.sp,
                                 fontWeight = FontWeight.Bold,
                                 color = Color.White,
-                                fontFamily = FontFamily.Monospace
+                                fontFamily = FontFamily.Monospace,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis
                             )
                         }
 
                         OutlinedButton(
                             onClick = { showEditorModal = false },
                             shape = RoundedCornerShape(8.dp),
-                            border = BorderStroke(1.dp, Color(0xFF546E7A))
+                            border = BorderStroke(1.dp, Color(0xFF546E7A)),
+                            contentPadding = PaddingValues(horizontal = 14.dp, vertical = 6.dp),
+                            modifier = Modifier.defaultMinSize(minWidth = 72.dp, minHeight = 32.dp)
                         ) {
-                            Text("CLOSE", fontSize = 10.sp, color = Color.White, fontFamily = FontFamily.Monospace)
+                            Text("CLOSE", fontSize = 10.sp, color = Color.White, fontFamily = FontFamily.Monospace, maxLines = 1)
                         }
                     }
 
@@ -827,14 +881,18 @@ fun ExpeditionScreen(
 
                                 Row(
                                     modifier = Modifier.fillMaxWidth(),
-                                    horizontalArrangement = Arrangement.SpaceBetween
+                                    horizontalArrangement = Arrangement.spacedBy(10.dp)
                                 ) {
                                     OutlinedButton(
                                         onClick = {
                                             rawJson = AdventureEngine.DEFAULT_CAMPAIGN_JSON.trim()
-                                        }
+                                        },
+                                        modifier = Modifier.weight(1f).height(40.dp),
+                                        shape = RoundedCornerShape(8.dp),
+                                        border = BorderStroke(1.dp, Color(0xFF546E7A)),
+                                        contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp)
                                     ) {
-                                        Text("RESET DEFAULT", fontSize = 10.sp, fontFamily = FontFamily.Monospace)
+                                        Text("RESET DEFAULT", fontSize = 10.sp, color = Color(0xFFB0BEC5), fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
                                     }
 
                                     Button(
@@ -858,11 +916,14 @@ fun ExpeditionScreen(
                                                 }
                                             }
                                         },
+                                        modifier = Modifier.weight(1f).height(40.dp),
+                                        shape = RoundedCornerShape(8.dp),
+                                        contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp),
                                         colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF00897B))
                                     ) {
-                                        Icon(Icons.AutoMirrored.Filled.Send, contentDescription = "Deploy", modifier = Modifier.size(15.dp))
+                                        DigiVectorIcon(type = DigiIconType.BEAM_ANTENNA, size = 15.dp, tint = Color.White)
                                         Spacer(modifier = Modifier.width(6.dp))
-                                        Text("SAVE & DEPLOY", fontSize = 11.sp, fontWeight = FontWeight.Bold, fontFamily = FontFamily.Monospace)
+                                        Text("SAVE & DEPLOY", fontSize = 10.5.sp, fontWeight = FontWeight.Bold, fontFamily = FontFamily.Monospace, color = Color.White)
                                     }
                                 }
                             }
@@ -870,6 +931,8 @@ fun ExpeditionScreen(
                     }
                 }
             }
+
+            Spacer(modifier = Modifier.height(28.dp))
         }
     }
 }

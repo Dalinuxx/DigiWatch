@@ -495,14 +495,14 @@ fun SettingsScreen(
                 // Settings Switch Rows (With weight(1f) to guarantee clean label line wrapping)
                 SettingSwitchRow(
                     title = "HAPTIC FEEDBACK",
-                    subtitle = "Tactile clicks on watch for steps, sparring & evolutions",
+                    subtitle = "Tactile wrist vibration for steps, sparring hits, and evolution calls",
                     checked = vibrationEnabled,
                     onCheckedChange = { vibrationEnabled = it }
                 )
 
                 SettingSwitchRow(
                     title = "CHIPTUNE PIEZO BUZZER",
-                    subtitle = "1997 Bandai square-wave chiptune sound FX and alerts",
+                    subtitle = "Retro 8-bit square-wave audio for alerts, training prompts, and care beeps",
                     checked = soundEnabled,
                     onCheckedChange = {
                         soundEnabled = it
@@ -512,28 +512,106 @@ fun SettingsScreen(
 
                 SettingSwitchRow(
                     title = "3-BUTTON LCD CONTROLS",
-                    subtitle = "[A•SEL] [B•OK] [C•ESC] LCD bar + Rotary/Stem hardware keys",
+                    subtitle = if (threeButtonMode) {
+                        "Virtual [A] [B] [C] side buttons enabled on watch face (1997 classic brick layout)"
+                    } else {
+                        "Full-screen direct touch gestures enabled (Modern tap-anywhere layout)"
+                    },
                     checked = threeButtonMode,
                     onCheckedChange = { threeButtonMode = it }
                 )
 
-                SettingSwitchRow(
-                    title = "TRAINING METHOD",
-                    subtitle = if (pendulumShakeMode) "Pendulum Shake (5-8 physical wrist shakes)" else "Timing QTE (Default hit timing)",
-                    checked = pendulumShakeMode,
-                    onCheckedChange = { pendulumShakeMode = it }
-                )
+                // Dedicated Mode Selector for Training Method
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 6.dp)
+                ) {
+                    Text(
+                        text = "TRAINING METHOD",
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.White,
+                        fontFamily = FontFamily.Monospace
+                    )
+                    Spacer(modifier = Modifier.height(2.dp))
+                    Text(
+                        text = if (pendulumShakeMode) {
+                            "Pendulum Shake: Shake watch 5 to 8 times using wrist accelerometer (Digimon Pendulum)."
+                        } else {
+                            "Timing QTE: Tap action button when cursor hits the sweet spot zone (Digital Monster)."
+                        },
+                        fontSize = 9.sp,
+                        color = if (pendulumShakeMode) Color(0xFFFFD54F) else Color(0xFF80D8FF),
+                        lineHeight = 12.sp
+                    )
+                    Spacer(modifier = Modifier.height(6.dp))
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .weight(1f)
+                                .background(
+                                    if (!pendulumShakeMode) Color(0xFF00695C) else DigiWearPalette.CardInner,
+                                    RoundedCornerShape(8.dp)
+                                )
+                                .border(
+                                    1.dp,
+                                    if (!pendulumShakeMode) Color(0xFF64FFDA) else Color(0xFF263238),
+                                    RoundedCornerShape(8.dp)
+                                )
+                                .clickable { pendulumShakeMode = false }
+                                .padding(vertical = 8.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                text = "TIMING QTE",
+                                fontSize = 9.5.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = if (!pendulumShakeMode) Color.White else Color.Gray,
+                                fontFamily = FontFamily.Monospace
+                            )
+                        }
+
+                        Box(
+                            modifier = Modifier
+                                .weight(1f)
+                                .background(
+                                    if (pendulumShakeMode) Color(0xFF4A148C) else DigiWearPalette.CardInner,
+                                    RoundedCornerShape(8.dp)
+                                )
+                                .border(
+                                    1.dp,
+                                    if (pendulumShakeMode) Color(0xFFE040FB) else Color(0xFF263238),
+                                    RoundedCornerShape(8.dp)
+                                )
+                                .clickable { pendulumShakeMode = true }
+                                .padding(vertical = 8.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                text = "PENDULUM SHAKE",
+                                fontSize = 9.5.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = if (pendulumShakeMode) Color.White else Color.Gray,
+                                fontFamily = FontFamily.Monospace
+                            )
+                        }
+                    }
+                }
 
                 SettingSwitchRow(
                     title = "24-HOUR CLOCK FORMAT",
-                    subtitle = if (clockFormat24h) "24H military time on watch face" else "12H AM/PM time",
+                    subtitle = if (clockFormat24h) "24H military format on watch face (e.g. 15:45)" else "12H standard format with AM/PM (e.g. 3:45 PM)",
                     checked = clockFormat24h,
                     onCheckedChange = { clockFormat24h = it }
                 )
 
                 SettingSwitchRow(
                     title = "HAZARD ALERTS",
-                    subtitle = "Environmental weather hazard notifications during adventures",
+                    subtitle = "Warn when active sector has adverse conditions (glitch fog, radiation, blizzard)",
                     checked = hazardAlertsEnabled,
                     onCheckedChange = { hazardAlertsEnabled = it }
                 )

@@ -77,7 +77,6 @@ fun CutInOverlay(
     val highResBitmap = remember(speciesId) {
         com.digiwear.wear.render.PortraitAssetCache.getPortrait(context, speciesId)
     }
-    val reticlePath = remember { Path() }
 
     val infiniteTransition = rememberInfiniteTransition(label = "CutInAnim")
     val speedlinePhase by infiniteTransition.animateFloat(
@@ -88,16 +87,6 @@ fun CutInOverlay(
             repeatMode = RepeatMode.Restart
         ),
         label = "Speedlines"
-    )
-
-    val eyeGlintPulse by infiniteTransition.animateFloat(
-        initialValue = 0.5f,
-        targetValue = 1.2f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(250, easing = FastOutSlowInEasing),
-            repeatMode = RepeatMode.Reverse
-        ),
-        label = "Glint"
     )
 
     LaunchedEffect(speciesId, autoDismissMs) {
@@ -114,12 +103,13 @@ fun CutInOverlay(
             .clickable { onDismiss?.invoke() },
         contentAlignment = Alignment.Center
     ) {
-        // 1. Dynamic Canvas Layer: Speedlines, Aura, High-Res Portrait & Lens Flares
+        // 1. Dynamic Canvas Layer: Speedlines, Aura, High-Res Portrait & Manga Slash Action Frame
         Canvas(modifier = Modifier.fillMaxSize()) {
             val center = Offset(size.width / 2f, size.height / 2f - 10.dp.toPx())
             val boxPx = 140.dp.toPx()
             drawActionSpeedlines(center, speedlinePhase, attrColor, secColor)
             drawAttributeAura(center, attrColor, secColor)
+            drawMangaActionFrame(center, boxPx, attrColor, secColor)
             if (highResBitmap != null) {
                 drawImage(
                     image = highResBitmap,
@@ -132,8 +122,6 @@ fun CutInOverlay(
             } else {
                 drawMagnifiedHeadshot(cutIn, center, boxPx)
             }
-            drawEyeGlints(cutIn, center, boxPx, eyeGlintPulse, attrColor)
-            drawCyberReticle(center, 150.dp.toPx(), attrColor, reticlePath)
         }
 
         // 2. HUD Overlay Layer: Title, Name, Attribute & Battle Cry
@@ -319,96 +307,67 @@ private fun DrawScope.drawMagnifiedHeadshot(
 }
 
 /**
- * Draws dazzling 4-point star lens flares over the detected eye points.
+ * Draws an authentic diagonal manga action panel frame inspired by official Color V-Pets
+ * (Digital Monster Color & Pendulum Color battle cut-ins). Replaces tactical HUD reticles and eye dots
+ * with bold diagonal anime slashes and attribute energy borders.
  */
-private fun DrawScope.drawEyeGlints(
-    cutIn: CutInPortraitData,
+private fun DrawScope.drawMangaActionFrame(
     center: Offset,
-    renderBoxSize: Float,
-    pulse: Float,
-    glintColor: Color
+    boxPx: Float,
+    attrColor: Color,
+    secColor: Color
 ) {
-    val cols = cutIn.headCropMatrix[0].length
-    val rows = cutIn.headCropMatrix.size
-    val cellSize = renderBoxSize / cols.toFloat()
-    val startX = center.x - (cols * cellSize) / 2f
-    val startY = center.y - (rows * cellSize) / 2f
+    val slant = 12.dp.toPx()
+    val topY = center.y - (boxPx * 0.52f)
+    val bottomY = center.y + (boxPx * 0.52f)
 
-    for (eye in cutIn.eyePoints) {
-        val ex = startX + eye.first * cellSize + (cellSize / 2f)
-        val ey = startY + eye.second * cellSize + (cellSize / 2f)
-        val flareLen = 12.dp.toPx() * pulse
+    // Top primary diagonal slash
+    drawLine(
+        color = attrColor.copy(alpha = 0.95f),
+        start = Offset(0f, topY - slant),
+        end = Offset(size.width, topY + slant),
+        strokeWidth = 2.5.dp.toPx()
+    )
+    // Top highlight line
+    drawLine(
+        color = Color.White.copy(alpha = 0.6f),
+        start = Offset(0f, topY - slant - 2.dp.toPx()),
+        end = Offset(size.width, topY + slant - 2.dp.toPx()),
+        strokeWidth = 1.dp.toPx()
+    )
 
-        // Glowing Core
-        drawCircle(
-            color = Color.White,
-            radius = 2.5.dp.toPx() * pulse,
-            center = Offset(ex, ey)
-        )
-        drawCircle(
-            color = glintColor.copy(alpha = 0.6f),
-            radius = 5.dp.toPx() * pulse,
-            center = Offset(ex, ey)
-        )
+    // Bottom primary diagonal slash
+    drawLine(
+        color = attrColor.copy(alpha = 0.95f),
+        start = Offset(0f, bottomY - slant),
+        end = Offset(size.width, bottomY + slant),
+        strokeWidth = 2.5.dp.toPx()
+    )
+    // Bottom highlight line
+    drawLine(
+        color = Color.White.copy(alpha = 0.6f),
+        start = Offset(0f, bottomY - slant + 2.dp.toPx()),
+        end = Offset(size.width, bottomY + slant + 2.dp.toPx()),
+        strokeWidth = 1.dp.toPx()
+    )
 
-        // 4-point flare rays
-        drawLine(
-            color = Color.White.copy(alpha = 0.9f),
-            start = Offset(ex - flareLen, ey),
-            end = Offset(ex + flareLen, ey),
-            strokeWidth = 1.8f
-        )
-        drawLine(
-            color = Color.White.copy(alpha = 0.9f),
-            start = Offset(ex, ey - flareLen),
-            end = Offset(ex, ey + flareLen),
-            strokeWidth = 1.8f
-        )
-    }
-}
+    // Flanking diagonal energy slashes
+    val wingLen = 14.dp.toPx()
+    val left = center.x - (boxPx * 0.52f)
+    val right = center.x + (boxPx * 0.52f)
 
-/**
- * Draws sci-fi tactical targeting brackets around the headshot.
- */
-private fun DrawScope.drawCyberReticle(
-    center: Offset,
-    boxSize: Float,
-    reticleColor: Color,
-    path: Path
-) {
-    val half = boxSize / 2f
-    val cornerLen = 14.dp.toPx()
-    val stroke = 2.dp.toPx()
-
-    val left = center.x - half
-    val right = center.x + half
-    val top = center.y - half
-    val bottom = center.y + half
-
-    path.reset()
-    path.apply {
-        // Top-Left [
-        moveTo(left, top + cornerLen)
-        lineTo(left, top)
-        lineTo(left + cornerLen, top)
-
-        // Top-Right ]
-        moveTo(right - cornerLen, top)
-        lineTo(right, top)
-        lineTo(right, top + cornerLen)
-
-        // Bottom-Left [
-        moveTo(left, bottom - cornerLen)
-        lineTo(left, bottom)
-        lineTo(left + cornerLen, bottom)
-
-        // Bottom-Right ]
-        moveTo(right - cornerLen, bottom)
-        lineTo(right, bottom)
-        lineTo(right, bottom - cornerLen)
-    }
-
-    drawPath(path = path, color = reticleColor.copy(alpha = 0.85f), style = androidx.compose.ui.graphics.drawscope.Stroke(width = stroke))
+    drawLine(
+        color = secColor.copy(alpha = 0.8f),
+        start = Offset(left, center.y - wingLen),
+        end = Offset(left - 5.dp.toPx(), center.y + wingLen),
+        strokeWidth = 2.dp.toPx()
+    )
+    drawLine(
+        color = secColor.copy(alpha = 0.8f),
+        start = Offset(right, center.y - wingLen),
+        end = Offset(right + 5.dp.toPx(), center.y + wingLen),
+        strokeWidth = 2.dp.toPx()
+    )
 }
 
 /**

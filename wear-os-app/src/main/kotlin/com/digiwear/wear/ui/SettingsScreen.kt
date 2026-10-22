@@ -400,17 +400,17 @@ fun SettingsScreen(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Column(modifier = Modifier.weight(1f)) {
+                Column(modifier = Modifier.weight(1f).padding(end = 4.dp)) {
                     Text(
                         text = "TRAINING METHOD",
-                        fontSize = 9.5.sp,
+                        fontSize = 9.sp,
                         color = Color.White,
                         fontFamily = FontFamily.Monospace
                     )
                     Text(
-                        text = if (isPendulumShakeMode) "Pendulum Shake (5-8)" else "Timing QTE (Default)",
-                        fontSize = 7.5.sp,
-                        color = if (isPendulumShakeMode) Color(0xFFFFD54F) else Color.LightGray
+                        text = if (isPendulumShakeMode) "Pendulum: Shake wrist 5-8x" else "Timing QTE: Tap hit bar",
+                        fontSize = 7.sp,
+                        color = if (isPendulumShakeMode) Color(0xFFFFD54F) else Color(0xFF80D8FF)
                     )
                 }
                 Button(
@@ -419,7 +419,7 @@ fun SettingsScreen(
                         repository.setPendulumShakeMode(next)
                         if (isVibrationEnabled) hapticManager.playStepMilestone()
                     },
-                    modifier = Modifier.size(width = 58.dp, height = 30.dp),
+                    modifier = Modifier.size(width = 62.dp, height = 30.dp),
                     colors = ButtonDefaults.buttonColors(
                         backgroundColor = if (isPendulumShakeMode) Color(0xFF6A1B9A) else Color(0xFF00695C)
                     )
