@@ -32,7 +32,6 @@ import androidx.compose.material.icons.filled.CloudDownload
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.FileDownload
 import androidx.compose.material.icons.filled.FileUpload
-import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Warning
@@ -634,29 +633,6 @@ fun SettingsScreen(
         }
 
         Spacer(modifier = Modifier.height(14.dp))
-
-        // --- 6. ABOUT & BANDAI CANON PARITY ---
-        Card(
-            modifier = Modifier.fillMaxWidth(),
-            colors = CardDefaults.cardColors(containerColor = Color(0xFF0B1017)),
-            shape = RoundedCornerShape(16.dp),
-            border = BorderStroke(1.dp, Color(0xFF1E2836))
-        ) {
-            Column(modifier = Modifier.padding(14.dp)) {
-                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                    Icon(Icons.Default.Info, contentDescription = null, tint = Color(0xFF80CBC4), modifier = Modifier.size(14.dp))
-                    Text("DIGIWEAR v2.0 // SPECIFICATION", fontSize = 10.sp, fontWeight = FontWeight.Bold, color = Color(0xFF80CBC4), fontFamily = FontFamily.Monospace)
-                }
-                Spacer(modifier = Modifier.height(4.dp))
-                Text(
-                    text = "Faithful recreation of 1997 Bandai Digital Monster Ver. 1–5, Pendulum, and Digimon Color rules.\n" +
-                            "Simulation computes strictly via real-time UTC Unix deltas with zero active CPU polling loops.",
-                    fontSize = 9.sp,
-                    color = Color.Gray,
-                    lineHeight = 13.sp
-                )
-            }
-        }
 
         syncStatus?.let {
             Spacer(modifier = Modifier.height(8.dp))

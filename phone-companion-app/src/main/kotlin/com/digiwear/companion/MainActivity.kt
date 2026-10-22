@@ -61,7 +61,6 @@ import com.digiwear.companion.ui.DigiVaultScreen
 import com.digiwear.companion.ui.DigiWearPalette
 import com.digiwear.companion.ui.PetDashboardScreen
 import com.digiwear.companion.ui.SpriteStudioScreen
-import com.digiwear.companion.ui.StoryAndBackupScreen
 import kotlinx.coroutines.flow.MutableStateFlow
 
 object NfcBattleBridge {

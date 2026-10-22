@@ -479,12 +479,12 @@ fun BattleHubScreen(
             val battleModes = listOf(
                 Triple(BattleMode.NFC_TAP_DUEL, DigiIconType.NFC_WAVE, "NFC DUEL"),
                 Triple(BattleMode.WILD_SCAN, DigiIconType.RADAR_SCAN, "WILD SCAN"),
-                Triple(BattleMode.ACOM_DCOM_WIFICOM, DigiIconType.GLOBE_NET, "A-COM / WIFI"),
+                Triple(BattleMode.ACOM_DCOM_WIFICOM, DigiIconType.GLOBE_NET, "A-COM/WIFI"),
                 Triple(BattleMode.ADVENTURE, DigiIconType.TROPHY_CROWN, "COLOSSEUM")
             )
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(6.dp)
+                horizontalArrangement = Arrangement.spacedBy(4.dp)
             ) {
                 battleModes.forEach { opt ->
                     val mode = opt.first
@@ -504,10 +504,13 @@ fun BattleHubScreen(
                                 RoundedCornerShape(10.dp)
                             )
                             .clickable { selectedBattleMode = mode }
-                            .padding(vertical = 9.dp, horizontal = 4.dp),
+                            .padding(vertical = 9.dp, horizontal = 2.dp),
                         contentAlignment = Alignment.Center
                     ) {
-                        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(3.dp)
+                        ) {
                             DigiVectorIcon(
                                 type = iconType,
                                 size = 10.dp,
@@ -515,10 +518,12 @@ fun BattleHubScreen(
                             )
                             Text(
                                 text = label,
-                                fontSize = 9.5.sp,
+                                fontSize = 8.5.sp,
                                 fontWeight = FontWeight.Black,
                                 color = if (active) Color(0xFFFF8A80) else Color(0xFFB0BEC5),
-                                fontFamily = FontFamily.Monospace
+                                fontFamily = FontFamily.Monospace,
+                                maxLines = 1,
+                                softWrap = false
                             )
                         }
                     }

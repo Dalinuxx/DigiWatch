@@ -8,6 +8,7 @@ import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -95,7 +96,9 @@ private val PREVIEW_MODES = listOf("IDLE", "WALK", "FEED", "SLEEP", "ATTACK", "S
 @Composable
 fun SpriteStudioScreen(
     db: PhoneDatabase,
-    wearableManager: PhoneWearableManager
+    wearableManager: PhoneWearableManager,
+    showHeader: Boolean = true,
+    contentPadding: PaddingValues = PaddingValues(16.dp)
 ) {
     var selectedSpeciesId by remember { mutableIntStateOf(201) } // Agumon
     var selectedFrameIndex by remember { mutableIntStateOf(0) }
@@ -194,18 +197,20 @@ fun SpriteStudioScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .background(DigiWearPalette.CyberBg)
-                .padding(16.dp)
+                .padding(contentPadding)
                 .verticalScroll(scrollState),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            DigiSectionHeader(
-                tag = "DIGIDEX // FIELD GUIDE & SPRITE STUDIO",
-                title = "${PetSpecies.SPECIES_REGISTRY.size}-Species Canonical DigiDex",
-                subtitle = "Discovery Progress, Biometrics, Lineage Trees & Reference Book Lore",
-                accentColor = DigiWearPalette.CrestGold
-            )
+            if (showHeader) {
+                DigiSectionHeader(
+                    tag = "DIGIDEX // FIELD GUIDE & SPRITE STUDIO",
+                    title = "${PetSpecies.SPECIES_REGISTRY.size}-Species Canonical DigiDex",
+                    subtitle = "Discovery Progress, Biometrics, Lineage Trees & Reference Book Lore",
+                    accentColor = DigiWearPalette.CrestGold
+                )
 
-            Spacer(modifier = Modifier.height(12.dp))
+                Spacer(modifier = Modifier.height(12.dp))
+            }
 
             // 550-Species DigiDex Discovery Progress Card
             Card(

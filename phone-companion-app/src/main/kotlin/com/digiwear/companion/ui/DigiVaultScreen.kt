@@ -94,7 +94,7 @@ fun DigiVaultScreen(
     var activeCelebrationSpeciesId by remember { mutableStateOf<Int?>(null) }
     var activeCelebrationTitle by remember { mutableStateOf<String?>(null) }
 
-    var activeTab by remember { mutableIntStateOf(0) } // 0: CRYO-VAULT, 1: FUSION LAB, 2: MEMORIAL GRAVEYARD
+    var activeTab by remember { mutableIntStateOf(0) } // 0: CRYO-VAULT, 1: DIGIDEX, 2: FUSION LAB, 3: MEMORIAL GRAVEYARD
     var searchQuery by remember { mutableStateOf("") }
     var selectedStageFilter by remember { mutableStateOf<PetStage?>(null) }
     var activePetForDeposit by remember { mutableStateOf<PetState?>(null) }
@@ -151,15 +151,21 @@ fun DigiVaultScreen(
     ) {
         // Header
         DigiSectionHeader(
-            tag = "DIGIVAULT // CRYO-STASIS & FUSION CENTER",
+            tag = "DIGIVAULT // CRYO-STASIS & COMPENDIUM",
             title = when (activeTab) {
                 0 -> "Preserved Partners (${vaultPets.size})"
-                1 -> "DNA Jogress & DigiXros Lab (${JogressEngine.BASE_RECIPES.size})"
+                1 -> "500-Species Master DigiDex"
+                2 -> "DNA Jogress & DigiXros Lab (${JogressEngine.BASE_RECIPES.size})"
                 else -> "Hall of Fame Memorial (${memorials.size})"
             },
-            accentColor = Color(0xFF26A69A),
+            accentColor = when (activeTab) {
+                0 -> Color(0xFF26A69A)
+                1 -> Color(0xFF00E5FF)
+                2 -> Color(0xFFCE93D8)
+                else -> Color(0xFF90A4AE)
+            },
             trailingContent = {
-                if (activePetForDeposit != null) {
+                if (activeTab == 0 && activePetForDeposit != null) {
                     Button(
                         onClick = { showDepositDialog = true },
                         colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF00897B))
@@ -184,10 +190,10 @@ fun DigiVaultScreen(
 
         Spacer(modifier = Modifier.height(10.dp))
 
-        // 3 Dedicated Sub-Tabs: CRYO-VAULT, FUSION LAB, MEMORIAL
+        // 4 Dedicated Sub-Tabs: CRYO-VAULT, DIGIDEX, FUSION LAB, MEMORIAL
         Row(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(6.dp)
+            horizontalArrangement = Arrangement.spacedBy(4.dp)
         ) {
             // Tab 0: CRYO-VAULT
             Button(
@@ -196,56 +202,84 @@ fun DigiVaultScreen(
                 colors = ButtonDefaults.buttonColors(
                     containerColor = if (activeTab == 0) Color(0xFF00897B) else Color(0xFF1E2630)
                 ),
-                contentPadding = PaddingValues(horizontal = 4.dp, vertical = 8.dp)
+                contentPadding = PaddingValues(horizontal = 2.dp, vertical = 8.dp)
             ) {
-                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(3.dp)) {
                     DigiVectorIcon(type = DigiIconType.VAULT_SAFE, size = 11.dp, tint = if (activeTab == 0) Color.White else Color(0xFF90A4AE))
                     Text(
                         text = "VAULT (${vaultPets.size})",
-                        fontSize = 10.sp,
+                        fontSize = 9.sp,
                         fontWeight = FontWeight.Bold,
                         fontFamily = FontFamily.Monospace,
-                        color = if (activeTab == 0) Color.White else Color(0xFF90A4AE)
+                        color = if (activeTab == 0) Color.White else Color(0xFF90A4AE),
+                        maxLines = 1,
+                        softWrap = false
                     )
                 }
             }
-            // Tab 1: FUSION LAB
+            // Tab 1: DIGIDEX
             Button(
                 onClick = { activeTab = 1 },
-                modifier = Modifier.weight(1.1f),
+                modifier = Modifier.weight(1f),
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = if (activeTab == 1) Color(0xFF6A1B9A) else Color(0xFF1E2630)
+                    containerColor = if (activeTab == 1) Color(0xFF00838F) else Color(0xFF1E2630)
                 ),
-                contentPadding = PaddingValues(horizontal = 4.dp, vertical = 8.dp)
+                contentPadding = PaddingValues(horizontal = 2.dp, vertical = 8.dp)
             ) {
-                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                    DigiVectorIcon(type = DigiIconType.DNA_HELIX, size = 11.dp, tint = if (activeTab == 1) Color.White else Color(0xFFEA80FC))
+                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(3.dp)) {
+                    DigiVectorIcon(type = DigiIconType.SEARCH_LENS, size = 11.dp, tint = if (activeTab == 1) Color.White else Color(0xFF80DEEA))
                     Text(
-                        text = "FUSION LAB",
-                        fontSize = 10.sp,
+                        text = "DIGIDEX",
+                        fontSize = 9.sp,
                         fontWeight = FontWeight.Bold,
                         fontFamily = FontFamily.Monospace,
-                        color = if (activeTab == 1) Color.White else Color(0xFFEA80FC)
+                        color = if (activeTab == 1) Color.White else Color(0xFF80DEEA),
+                        maxLines = 1,
+                        softWrap = false
                     )
                 }
             }
-            // Tab 2: MEMORIAL
+            // Tab 2: FUSION LAB
             Button(
                 onClick = { activeTab = 2 },
                 modifier = Modifier.weight(1f),
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = if (activeTab == 2) Color(0xFF455A64) else Color(0xFF1E2630)
+                    containerColor = if (activeTab == 2) Color(0xFF6A1B9A) else Color(0xFF1E2630)
                 ),
-                contentPadding = PaddingValues(horizontal = 4.dp, vertical = 8.dp)
+                contentPadding = PaddingValues(horizontal = 2.dp, vertical = 8.dp)
             ) {
-                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                    DigiVectorIcon(type = DigiIconType.MEMORIAL_GRAVE, size = 11.dp, tint = if (activeTab == 2) Color.White else Color(0xFF90A4AE))
+                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(3.dp)) {
+                    DigiVectorIcon(type = DigiIconType.DNA_HELIX, size = 11.dp, tint = if (activeTab == 2) Color.White else Color(0xFFEA80FC))
                     Text(
-                        text = "MEMORIAL (${memorials.size})",
-                        fontSize = 10.sp,
+                        text = "FUSION",
+                        fontSize = 9.sp,
                         fontWeight = FontWeight.Bold,
                         fontFamily = FontFamily.Monospace,
-                        color = if (activeTab == 2) Color.White else Color(0xFF90A4AE)
+                        color = if (activeTab == 2) Color.White else Color(0xFFEA80FC),
+                        maxLines = 1,
+                        softWrap = false
+                    )
+                }
+            }
+            // Tab 3: MEMORIAL
+            Button(
+                onClick = { activeTab = 3 },
+                modifier = Modifier.weight(1f),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = if (activeTab == 3) Color(0xFF455A64) else Color(0xFF1E2630)
+                ),
+                contentPadding = PaddingValues(horizontal = 2.dp, vertical = 8.dp)
+            ) {
+                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(3.dp)) {
+                    DigiVectorIcon(type = DigiIconType.MEMORIAL_GRAVE, size = 11.dp, tint = if (activeTab == 3) Color.White else Color(0xFF90A4AE))
+                    Text(
+                        text = "MEMORIAL",
+                        fontSize = 9.sp,
+                        fontWeight = FontWeight.Bold,
+                        fontFamily = FontFamily.Monospace,
+                        color = if (activeTab == 3) Color.White else Color(0xFF90A4AE),
+                        maxLines = 1,
+                        softWrap = false
                     )
                 }
             }
@@ -440,7 +474,21 @@ fun DigiVaultScreen(
 
             1 -> {
                 // =========================================================================
-                // SUB-TAB 1: FUSION LAB (CANON 85 RECIPES BROWSER & EXECUTION)
+                // SUB-TAB 1: 500-SPECIES MASTER DIGIDEX
+                // =========================================================================
+                Box(modifier = Modifier.fillMaxSize()) {
+                    SpriteStudioScreen(
+                        db = db,
+                        wearableManager = wearableManager,
+                        showHeader = false,
+                        contentPadding = PaddingValues(0.dp)
+                    )
+                }
+            }
+
+            2 -> {
+                // =========================================================================
+                // SUB-TAB 2: FUSION LAB (CANON 85 RECIPES BROWSER & EXECUTION)
                 // =========================================================================
                 OutlinedTextField(
                     value = fusionSearchQuery,
@@ -691,7 +739,7 @@ fun DigiVaultScreen(
 
             else -> {
                 // =========================================================================
-                // SUB-TAB 2: MEMORIAL GRAVEYARD VIEW
+                // SUB-TAB 3: MEMORIAL GRAVEYARD VIEW
                 // =========================================================================
                 Row(
                     modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp),
