@@ -69,6 +69,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import com.digiwear.companion.BuildConfig
 import com.digiwear.companion.data.PhoneDatabase
 import com.digiwear.companion.data.SyncedPetEntity
 import com.digiwear.companion.datalayer.PhoneWearableManager
@@ -162,6 +163,38 @@ fun SettingsScreen(
         )
 
         Spacer(modifier = Modifier.height(14.dp))
+
+        if (BuildConfig.DEBUG) {
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                colors = CardDefaults.cardColors(containerColor = Color(0xFF14241E)),
+                shape = RoundedCornerShape(12.dp),
+                border = BorderStroke(1.dp, Color(0xFF00E676))
+            ) {
+                Row(
+                    modifier = Modifier.padding(12.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    DigiVectorIcon(type = DigiIconType.SETTINGS_GEAR, size = 14.dp, tint = Color(0xFF00E676))
+                    Column {
+                        Text(
+                            text = "DEBUG BUILD ACTIVE",
+                            fontSize = 11.sp,
+                            fontWeight = FontWeight.Black,
+                            color = Color(0xFF00E676),
+                            fontFamily = FontFamily.Monospace
+                        )
+                        Text(
+                            text = "Developer Sprite Studio & 12-frame matrix enabled in DigiDex tab.",
+                            fontSize = 9.sp,
+                            color = Color.LightGray
+                        )
+                    }
+                }
+            }
+            Spacer(modifier = Modifier.height(14.dp))
+        }
 
         // --- 1. SMARTWATCH CONNECTION STATUS & DISCOVERY ---
         Card(

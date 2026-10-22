@@ -1,5 +1,7 @@
 package com.digiwear.companion.ui
 
+import com.digiwear.companion.BuildConfig
+
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -203,9 +205,9 @@ fun SpriteStudioScreen(
         ) {
             if (showHeader) {
                 DigiSectionHeader(
-                    tag = "DIGIDEX // FIELD GUIDE & SPRITE STUDIO",
+                    tag = if (BuildConfig.DEBUG) "DIGIDEX // FIELD GUIDE & SPRITE STUDIO [DEBUG]" else "DIGIDEX // ENCYCLOPEDIC COMPENDIUM",
                     title = "${PetSpecies.SPECIES_REGISTRY.size}-Species Canonical DigiDex",
-                    subtitle = "Discovery Progress, Biometrics, Lineage Trees & Reference Book Lore",
+                    subtitle = if (BuildConfig.DEBUG) "Discovery Progress, Biometrics, Lineage Trees & Debug Sprite Sheet Matrix" else "Discovery Progress, Biometrics, Lineage Trees & Reference Book Lore",
                     accentColor = DigiWearPalette.CrestGold
                 )
 
@@ -782,169 +784,209 @@ fun SpriteStudioScreen(
             }
         }
 
-        Spacer(modifier = Modifier.height(16.dp))
+        if (BuildConfig.DEBUG) {
+            Spacer(modifier = Modifier.height(16.dp))
 
-        // 3x4 Grid Layout Inspector (12 full-color frames)
-        Text(
-            text = "▸ SPRITE SHEET MATRIX (3 COLUMNS x 4 ROWS)",
-            fontSize = 11.sp,
-            fontWeight = FontWeight.Bold,
-            color = DigiWearPalette.DigiviceCyan,
-            fontFamily = FontFamily.Monospace
-        )
-        Spacer(modifier = Modifier.height(8.dp))
-
-        for (row in 0..3) {
-            Row(
+            // 3x4 Grid Layout Inspector (12 full-color frames) - DEBUG ONLY
+            Card(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
+                colors = CardDefaults.cardColors(containerColor = Color(0xFF101722)),
+                shape = RoundedCornerShape(16.dp),
+                border = BorderStroke(1.dp, Color(0xFF00E5FF).copy(alpha = 0.5f))
             ) {
-                for (col in 0..2) {
-                    val frameIndex = row * 3 + col
-                    val frameMeta = SPRITE_GRID_FRAMES[frameIndex]
-                    val isSelected = selectedFrameIndex == frameIndex
-
-                    Card(
-                        modifier = Modifier
-                            .weight(1f)
-                            .padding(4.dp)
-                            .clickable {
-                                selectedFrameIndex = frameIndex
-                                animFrame = frameIndex
-                            },
-                        colors = CardDefaults.cardColors(
-                            containerColor = if (isSelected) Color(0xFF16324A) else DigiWearPalette.CardSurface
-                        ),
-                        border = BorderStroke(1.dp, if (isSelected) DigiWearPalette.DigiviceCyan else DigiWearPalette.CardBorder),
-                        shape = RoundedCornerShape(8.dp)
+                Column(modifier = Modifier.padding(14.dp)) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Column(
-                            modifier = Modifier.padding(6.dp),
-                            horizontalAlignment = Alignment.CenterHorizontally
-                        ) {
+                        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                            DigiVectorIcon(type = DigiIconType.RADAR_SCAN, size = 14.dp, tint = Color(0xFF00E5FF))
                             Text(
-                                text = "[$row,$col] #${frameIndex}",
-                                fontSize = 8.sp,
-                                color = Color.Gray,
+                                text = "SPRITE STUDIO // SHEET MATRIX",
+                                fontSize = 11.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = Color(0xFF00E5FF),
                                 fontFamily = FontFamily.Monospace
                             )
-                            Spacer(modifier = Modifier.height(2.dp))
-                            SpriteCanvasRenderer(
-                                speciesId = selectedSpeciesId,
-                                frame = SpriteFrame.fromIndex(frameIndex),
-                                size = 48.dp
-                            )
-                            Spacer(modifier = Modifier.height(2.dp))
+                        }
+                        Surface(
+                            shape = RoundedCornerShape(4.dp),
+                            color = Color(0xFF004D40)
+                        ) {
                             Text(
-                                text = frameMeta.name,
+                                text = "DEBUG ONLY",
                                 fontSize = 8.sp,
-                                maxLines = 1,
-                                color = Color.LightGray,
-                                textAlign = TextAlign.Center
+                                fontWeight = FontWeight.Bold,
+                                color = Color(0xFF64FFDA),
+                                fontFamily = FontFamily.Monospace,
+                                modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
                             )
                         }
+                    }
+
+                    Text(
+                        text = "12 raw dot-matrix frames [3 columns x 4 rows] for sprite sheet alignment & animation QA:",
+                        fontSize = 9.sp,
+                        color = Color.LightGray,
+                        modifier = Modifier.padding(top = 4.dp, bottom = 8.dp)
+                    )
+
+                    for (row in 0..3) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            for (col in 0..2) {
+                                val frameIndex = row * 3 + col
+                                val frameMeta = SPRITE_GRID_FRAMES[frameIndex]
+                                val isSelected = selectedFrameIndex == frameIndex
+
+                                Card(
+                                    modifier = Modifier
+                                        .weight(1f)
+                                        .padding(3.dp)
+                                        .clickable {
+                                            selectedFrameIndex = frameIndex
+                                            animFrame = frameIndex
+                                        },
+                                    colors = CardDefaults.cardColors(
+                                        containerColor = if (isSelected) Color(0xFF16324A) else DigiWearPalette.CardSurface
+                                    ),
+                                    border = BorderStroke(1.dp, if (isSelected) DigiWearPalette.DigiviceCyan else DigiWearPalette.CardBorder),
+                                    shape = RoundedCornerShape(8.dp)
+                                ) {
+                                    Column(
+                                        modifier = Modifier.padding(5.dp),
+                                        horizontalAlignment = Alignment.CenterHorizontally
+                                    ) {
+                                        Text(
+                                            text = "[$row,$col] #${frameIndex}",
+                                            fontSize = 7.5.sp,
+                                            color = Color.Gray,
+                                            fontFamily = FontFamily.Monospace
+                                        )
+                                        Spacer(modifier = Modifier.height(2.dp))
+                                        SpriteCanvasRenderer(
+                                            speciesId = selectedSpeciesId,
+                                            frame = SpriteFrame.fromIndex(frameIndex),
+                                            size = 44.dp
+                                        )
+                                        Spacer(modifier = Modifier.height(2.dp))
+                                        Text(
+                                            text = frameMeta.name,
+                                            fontSize = 7.5.sp,
+                                            maxLines = 1,
+                                            color = Color.LightGray,
+                                            textAlign = TextAlign.Center
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(12.dp))
+
+                    // Functional Action Buttons: Morph Active Partner or Deposit to Vault (DEBUG DEV TOOLS)
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Button(
+                            onClick = {
+                                scope.launch {
+                                    val morphedState = PetState(
+                                        speciesId = selectedSpecies.id,
+                                        currentHp = selectedSpecies.baseHp,
+                                        maxHp = selectedSpecies.baseHp,
+                                        hunger = 4,
+                                        strength = 4,
+                                        weight = selectedSpecies.baselineWeight,
+                                        effort = 4,
+                                        victories = 10,
+                                        totalBattles = 12
+                                    )
+                                    db.phoneDao().insertSnapshot(
+                                        SyncedPetEntity(
+                                            syncedTimestampUtc = System.currentTimeMillis() / 1000L,
+                                            speciesId = morphedState.speciesId,
+                                            speciesName = selectedSpecies.name,
+                                            currentHp = morphedState.currentHp,
+                                            maxHp = morphedState.maxHp,
+                                            hunger = morphedState.hunger,
+                                            strength = morphedState.strength,
+                                            weight = morphedState.weight,
+                                            ageSeconds = morphedState.ageSeconds,
+                                            careMistakes = morphedState.careMistakes,
+                                            effort = morphedState.effort,
+                                            overfeedCount = morphedState.overfeedCount,
+                                            totalBattles = morphedState.totalBattles,
+                                            victories = morphedState.victories
+                                        )
+                                    )
+                                    val sentToWatch = wearableManager.sendPetStateToWatch(morphedState)
+                                    DigiWearAppWidgetProvider.updateAllWidgets(context)
+                                    syncMessage = if (sentToWatch) {
+                                        "[DEBUG] Morphed active partner to ${selectedSpecies.name} & synced to Watch!"
+                                    } else {
+                                        "[DEBUG] Set ${selectedSpecies.name} on Phone Dashboard & Widget (Watch offline)"
+                                    }
+                                }
+                            },
+                            modifier = Modifier
+                                .weight(1f)
+                                .height(44.dp),
+                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF00897B))
+                        ) {
+                            Icon(Icons.AutoMirrored.Filled.Send, contentDescription = "Morph", modifier = Modifier.size(14.dp))
+                            Spacer(modifier = Modifier.width(4.dp))
+                            Text("MORPH PARTNER", fontSize = 10.sp, fontWeight = FontWeight.Bold, fontFamily = FontFamily.Monospace)
+                        }
+
+                        OutlinedButton(
+                            onClick = {
+                                scope.launch {
+                                    db.phoneDao().insertVaultPet(
+                                        StoredDigimonEntity(
+                                            speciesId = selectedSpecies.id,
+                                            speciesName = selectedSpecies.name,
+                                            stageName = selectedSpecies.stage.displayName,
+                                            attributeName = selectedSpecies.attribute.displayName,
+                                            currentHp = selectedSpecies.baseHp,
+                                            maxHp = selectedSpecies.baseHp,
+                                            hunger = 4,
+                                            strength = 4,
+                                            weight = selectedSpecies.baselineWeight,
+                                            ageSeconds = 3600L,
+                                            careMistakes = 0,
+                                            effort = 4,
+                                            overfeedCount = 0,
+                                            totalBattles = 10,
+                                            victories = 8,
+                                            notes = "Synthesized via DigiDex Sprite Studio (Debug)"
+                                        )
+                                    )
+                                    syncMessage = "[DEBUG] Added ${selectedSpecies.name} to DigiVault Archive!"
+                                }
+                            },
+                            modifier = Modifier
+                                .weight(1f)
+                                .height(44.dp),
+                            border = BorderStroke(1.dp, Color(0xFF00E5FF))
+                        ) {
+                            Icon(Icons.Default.Archive, contentDescription = "Vault", modifier = Modifier.size(14.dp), tint = Color(0xFF00E5FF))
+                            Spacer(modifier = Modifier.width(4.dp))
+                            Text("ADD TO VAULT", fontSize = 10.sp, fontWeight = FontWeight.Bold, fontFamily = FontFamily.Monospace, color = Color(0xFF00E5FF))
+                        }
+                    }
+
+                    syncMessage?.let {
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text(text = "▸ $it", fontSize = 10.sp, color = Color(0xFF00E676), fontFamily = FontFamily.Monospace)
                     }
                 }
             }
-        }
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        // Functional Action Buttons: Morph Active Partner or Deposit to Vault
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            Button(
-                onClick = {
-                    scope.launch {
-                        val morphedState = PetState(
-                            speciesId = selectedSpecies.id,
-                            currentHp = selectedSpecies.baseHp,
-                            maxHp = selectedSpecies.baseHp,
-                            hunger = 4,
-                            strength = 4,
-                            weight = selectedSpecies.baselineWeight,
-                            effort = 4,
-                            victories = 10,
-                            totalBattles = 12
-                        )
-                        db.phoneDao().insertSnapshot(
-                            SyncedPetEntity(
-                                syncedTimestampUtc = System.currentTimeMillis() / 1000L,
-                                speciesId = morphedState.speciesId,
-                                speciesName = selectedSpecies.name,
-                                currentHp = morphedState.currentHp,
-                                maxHp = morphedState.maxHp,
-                                hunger = morphedState.hunger,
-                                strength = morphedState.strength,
-                                weight = morphedState.weight,
-                                ageSeconds = morphedState.ageSeconds,
-                                careMistakes = morphedState.careMistakes,
-                                effort = morphedState.effort,
-                                overfeedCount = morphedState.overfeedCount,
-                                totalBattles = morphedState.totalBattles,
-                                victories = morphedState.victories
-                            )
-                        )
-                        val sentToWatch = wearableManager.sendPetStateToWatch(morphedState)
-                        DigiWearAppWidgetProvider.updateAllWidgets(context)
-                        syncMessage = if (sentToWatch) {
-                            "Morphed active partner to ${selectedSpecies.name} & synced to Watch!"
-                        } else {
-                            "Set ${selectedSpecies.name} on Phone Dashboard & Widget (Watch offline)"
-                        }
-                    }
-                },
-                modifier = Modifier
-                    .weight(1f)
-                    .height(48.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF00897B))
-            ) {
-                Icon(Icons.AutoMirrored.Filled.Send, contentDescription = "Morph", modifier = Modifier.size(16.dp))
-                Spacer(modifier = Modifier.width(6.dp))
-                Text("MORPH PARTNER", fontSize = 11.sp, fontWeight = FontWeight.Bold, fontFamily = FontFamily.Monospace)
-            }
-
-            OutlinedButton(
-                onClick = {
-                    scope.launch {
-                        db.phoneDao().insertVaultPet(
-                            StoredDigimonEntity(
-                                speciesId = selectedSpecies.id,
-                                speciesName = selectedSpecies.name,
-                                stageName = selectedSpecies.stage.displayName,
-                                attributeName = selectedSpecies.attribute.displayName,
-                                currentHp = selectedSpecies.baseHp,
-                                maxHp = selectedSpecies.baseHp,
-                                hunger = 4,
-                                strength = 4,
-                                weight = selectedSpecies.baselineWeight,
-                                ageSeconds = 3600L,
-                                careMistakes = 0,
-                                effort = 4,
-                                overfeedCount = 0,
-                                totalBattles = 10,
-                                victories = 8,
-                                notes = "Synthesized via DigiDex Sprite Studio"
-                            )
-                        )
-                        syncMessage = "Added ${selectedSpecies.name} to DigiVault Archive!"
-                    }
-                },
-                modifier = Modifier
-                    .weight(1f)
-                    .height(48.dp)
-            ) {
-                Icon(Icons.Default.Archive, contentDescription = "Vault", modifier = Modifier.size(16.dp))
-                Spacer(modifier = Modifier.width(6.dp))
-                Text("ADD TO VAULT", fontSize = 11.sp, fontWeight = FontWeight.Bold, fontFamily = FontFamily.Monospace)
-            }
-        }
-
-        syncMessage?.let {
-            Spacer(modifier = Modifier.height(8.dp))
-            Text(text = "▸ $it", fontSize = 11.sp, color = Color(0xFF00E676), fontFamily = FontFamily.Monospace)
         }
     }
 
