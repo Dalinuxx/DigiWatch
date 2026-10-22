@@ -157,4 +157,103 @@ class AdventureEngineTest {
         val afterBoss = AdventureEngine.recordBossVictory(saga, progress, boss)
         assertTrue("Must unlock Dokimon Egg 1108", afterBoss.unlockedEggs.contains(1108))
     }
+
+    @Test
+    fun testSagaProgressPreservationOnSwitch() {
+        val fileIsland = CampaignStoryRegistry.FILE_ISLAND_ODYSSEY
+        val projectArk = CampaignStoryRegistry.PROJECT_ARK_DMX
+
+        // 1. Play File Island to Node 4 with custom flags and accumulated steps
+        var progress = AdventureProgress(
+            campaignId = fileIsland.campaignId,
+            currentNodeIndex = 4,
+            highestUnlockedNodeIndex = 4,
+            accumulatedStepsCurrentNode = 250,
+            clearedFlags = setOf("FLAG_FOREST_CLEARED")
+        )
+
+        // 2. Switch to Project Ark
+        progress = AdventureEngine.switchCampaign(progress, projectArk)
+        assertEquals(projectArk.campaignId, progress.campaignId)
+        assertEquals(0, progress.currentNodeIndex)
+        assertEquals(0, progress.highestUnlockedNodeIndex)
+        assertEquals(0, progress.accumulatedStepsCurrentNode)
+        assertTrue(progress.clearedFlags.isEmpty())
+
+        // 3. Advance Project Ark to Node 2
+        progress = progress.copy(
+            currentNodeIndex = 2,
+            highestUnlockedNodeIndex = 2,
+            accumulatedStepsCurrentNode = 120,
+            clearedFlags = setOf("FLAG_VERSANDI_GATE")
+        )
+
+        // 4. Switch back to File Island -> must restore exact previous state!
+        progress = AdventureEngine.switchCampaign(progress, fileIsland)
+        assertEquals(fileIsland.campaignId, progress.campaignId)
+        assertEquals(4, progress.currentNodeIndex)
+        assertEquals(4, progress.highestUnlockedNodeIndex)
+        assertEquals(250, progress.accumulatedStepsCurrentNode)
+        assertTrue(progress.clearedFlags.contains("FLAG_FOREST_CLEARED"))
+
+        // 5. Switch back to Project Ark -> must restore Project Ark's state!
+        progress = AdventureEngine.switchCampaign(progress, projectArk)
+        assertEquals(projectArk.campaignId, progress.campaignId)
+        assertEquals(2, progress.currentNodeIndex)
+        assertEquals(2, progress.highestUnlockedNodeIndex)
+        assertEquals(120, progress.accumulatedStepsCurrentNode)
+        assertTrue(progress.clearedFlags.contains("FLAG_VERSANDI_GATE"))
+    }
+
+    @Test
+    fun testStageSelectionAndReplayingEarlierSector() {
+        val story = AdventureEngine.parseCampaign(AdventureEngine.DEFAULT_CAMPAIGN_JSON)
+        val initial = AdventureProgress(
+            campaignId = story.campaignId,
+            currentNodeIndex = 5,
+            highestUnlockedNodeIndex = 5
+        )
+
+        // Select earlier cleared Sector 2 (node index 1)
+        val replayingSector2 = AdventureEngine.selectNode(initial, 1, story)
+        assertEquals(1, replayingSector2.currentNodeIndex)
+        assertEquals(5, replayingSector2.highestUnlockedNodeIndex)
+        assertEquals(0, replayingSector2.accumulatedStepsCurrentNode)
+
+        // Step through Sector 2 until node is cleared (requiredSteps for node 1 is 800)
+        val stepResult = AdventureEngine.processSteps(story, replayingSector2, 850, Random(42))
+        assertTrue(stepResult.nodeCleared)
+        // Advances to node 2, but highestUnlockedNodeIndex stays at 5!
+        assertEquals(2, stepResult.updatedProgress.currentNodeIndex)
+        assertEquals(5, stepResult.updatedProgress.highestUnlockedNodeIndex)
+
+        // Out-of-bounds target selection coercion
+        val clampedHigh = AdventureEngine.selectNode(stepResult.updatedProgress, 999, story)
+        assertEquals(5, clampedHigh.currentNodeIndex)
+
+        val clampedLow = AdventureEngine.selectNode(stepResult.updatedProgress, -5, story)
+        assertEquals(0, clampedLow.currentNodeIndex)
+    }
+
+    @Test
+    fun testSerializeAndParseSagaStatesRoundTrip() {
+        val saga = com.digiwear.core.model.SagaProgressRecord(
+            campaignId = "seven_demon_lords",
+            currentNodeIndex = 7,
+            highestUnlockedNodeIndex = 9,
+            accumulatedStepsCurrentNode = 450,
+            clearedFlags = setOf("LUCEMON_SEAL", "BEELZEMON_SEAL"),
+            isCompleted = false
+        )
+        val map = mapOf("seven_demon_lords" to saga)
+        val json = AdventureEngine.serializeSagaStates(map)
+        val parsed = AdventureEngine.parseSagaStates(json)
+
+        assertEquals(1, parsed.size)
+        val recovered = parsed["seven_demon_lords"]!!
+        assertEquals(7, recovered.currentNodeIndex)
+        assertEquals(9, recovered.highestUnlockedNodeIndex)
+        assertEquals(450, recovered.accumulatedStepsCurrentNode)
+        assertEquals(setOf("LUCEMON_SEAL", "BEELZEMON_SEAL"), recovered.clearedFlags)
+    }
 }

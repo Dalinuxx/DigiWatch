@@ -63,14 +63,32 @@ data class CampaignStory(
 )
 
 @Serializable
+data class SagaProgressRecord(
+    @SerialName("campaign_id")
+    val campaignId: String,
+    @SerialName("current_node_index")
+    val currentNodeIndex: Int = 0,
+    @SerialName("highest_unlocked_node_index")
+    val highestUnlockedNodeIndex: Int = 0,
+    @SerialName("accumulated_steps_current_node")
+    val accumulatedStepsCurrentNode: Int = 0,
+    @SerialName("cleared_flags")
+    val clearedFlags: Set<String> = emptySet(),
+    @SerialName("is_completed")
+    val isCompleted: Boolean = false
+)
+
+@Serializable
 data class AdventureProgress(
     val campaignId: String = "file_island_corrupted_sector",
     val currentNodeIndex: Int = 0,
+    val highestUnlockedNodeIndex: Int = 0,
     val accumulatedStepsCurrentNode: Int = 0,
     val totalAdventureSteps: Int = 0,
     val clearedFlags: Set<String> = emptySet(),
     val isCompleted: Boolean = false,
     val unlockedEggs: Set<Int> = emptySet(),
     val collectedItems: Set<String> = emptySet(),
-    val unlockedCampaigns: Set<String> = emptySet()
+    val unlockedCampaigns: Set<String> = emptySet(),
+    val sagaStates: Map<String, SagaProgressRecord> = emptyMap()
 )

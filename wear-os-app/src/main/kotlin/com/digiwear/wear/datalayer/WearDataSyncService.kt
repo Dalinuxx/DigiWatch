@@ -151,6 +151,12 @@ class WearDataSyncService : WearableListenerService() {
                 val campaignJson = String(messageEvent.data, Charsets.UTF_8).trim()
                 if (campaignJson.isNotEmpty()) {
                     repo.saveCustomCampaignJson(campaignJson)
+                    scope.launch {
+                        try {
+                            val parsed = com.digiwear.core.adventure.AdventureEngine.parseCampaign(campaignJson)
+                            repo.switchCampaign(parsed.campaignId)
+                        } catch (_: Exception) {}
+                    }
                 }
             }
             else -> super.onMessageReceived(messageEvent)

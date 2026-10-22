@@ -47,6 +47,7 @@ import com.digiwear.core.model.BattleResult
 import com.digiwear.core.model.BossEncounter
 import com.digiwear.core.model.PetSpecies
 import com.digiwear.core.model.PetState
+import com.digiwear.core.model.SagaProgressRecord
 import com.digiwear.core.model.SpriteFrame
 import com.digiwear.wear.data.PetRepository
 import com.digiwear.wear.haptic.HapticManager
@@ -80,6 +81,7 @@ fun AdventureScreen(
     var eventMessage by remember { mutableStateOf<String?>(null) }
     var wildEncounterMonsterId by remember { mutableStateOf<Int?>(null) }
     var showSagaPicker by remember { mutableStateOf(false) }
+    var showSectorPicker by remember { mutableStateOf(false) }
 
     // Live Adventure Combat Arena State
     var activeBattleResult by remember { mutableStateOf<BattleResult?>(null) }
@@ -112,9 +114,10 @@ fun AdventureScreen(
     }
     val stepRatio = (progress.accumulatedStepsCurrentNode.toFloat() / currentNode.requiredSteps.coerceAtLeast(1).toFloat()).coerceIn(0f, 1f)
 
-    androidx.activity.compose.BackHandler(enabled = showSagaPicker) {
+    androidx.activity.compose.BackHandler(enabled = showSagaPicker || showSectorPicker) {
         buzzerManager.playButtonBeep()
         showSagaPicker = false
+        showSectorPicker = false
     }
 
     val executeAdventureCombat: suspend (Int, Int?, Int?, BossEncounter?) -> Unit = { enemySpeciesId, hpOverride, powerOverride, bossToClear ->
@@ -281,19 +284,21 @@ fun AdventureScreen(
     }
 }
 
-    LaunchedEffect(currentNode, progress, wildEncounterMonsterId, petState, isBattling, showSagaPicker) {
+    LaunchedEffect(currentNode, progress, wildEncounterMonsterId, petState, isBattling, showSagaPicker, showSectorPicker) {
         HardwareInputManager.buttonEvents.collect { button ->
             if (isBattling) return@collect
             when (button) {
                 VPetButton.C -> {
                     if (showSagaPicker) {
                         showSagaPicker = false
+                    } else if (showSectorPicker) {
+                        showSectorPicker = false
                     } else {
                         onBack()
                     }
                 }
                 VPetButton.B -> {
-                    if (showSagaPicker) return@collect
+                    if (showSagaPicker || showSectorPicker) return@collect
                     val activeWild = wildEncounterMonsterId
                     val boss = currentNode.bossEncounter
                     if (activeWild != null) {
@@ -551,6 +556,27 @@ fun AdventureScreen(
             items(builtInSagas.size) { idx ->
                 val saga = builtInSagas[idx]
                 val isActive = saga.campaignId.equals(story.campaignId, ignoreCase = true)
+                val sagaRecord = if (isActive) {
+                    SagaProgressRecord(
+                        campaignId = saga.campaignId,
+                        currentNodeIndex = progress.currentNodeIndex,
+                        highestUnlockedNodeIndex = progress.highestUnlockedNodeIndex,
+                        accumulatedStepsCurrentNode = progress.accumulatedStepsCurrentNode,
+                        clearedFlags = progress.clearedFlags,
+                        isCompleted = progress.isCompleted
+                    )
+                } else {
+                    progress.sagaStates[saga.campaignId]
+                }
+
+                val progressSummary = when {
+                    isActive && progress.isCompleted -> "COMPLETED [100%]"
+                    sagaRecord?.isCompleted == true -> "COMPLETED [100%]"
+                    sagaRecord != null && (sagaRecord.highestUnlockedNodeIndex > 0 || sagaRecord.accumulatedStepsCurrentNode > 0) ->
+                        "SEC ${sagaRecord.currentNodeIndex + 1}/${saga.nodes.size} (Max: ${sagaRecord.highestUnlockedNodeIndex + 1}) • IN PROGRESS"
+                    else -> "NOT STARTED"
+                }
+
                 Spacer(modifier = Modifier.height(3.dp))
                 Column(
                     modifier = Modifier
@@ -575,16 +601,39 @@ fun AdventureScreen(
                         }
                         .padding(6.dp)
                 ) {
-                    Text(
-                        text = saga.title,
-                        fontSize = 8.5.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = if (isActive) Color(0xFF64FFDA) else Color.White
-                    )
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = saga.title,
+                            fontSize = 8.5.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = if (isActive) Color(0xFF64FFDA) else Color.White,
+                            modifier = Modifier.weight(1f)
+                        )
+                        if (isActive) {
+                            Text(
+                                text = "ACTIVE",
+                                fontSize = 6.5.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = Color(0xFF64FFDA),
+                                fontFamily = FontFamily.Monospace
+                            )
+                        }
+                    }
                     Text(
                         text = "${saga.nodes.size} Sectors • Rec: ${saga.recommendedStage}",
                         fontSize = 7.sp,
                         color = Color.LightGray,
+                        fontFamily = FontFamily.Monospace
+                    )
+                    Text(
+                        text = progressSummary,
+                        fontSize = 6.5.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = if (sagaRecord?.isCompleted == true || (isActive && progress.isCompleted)) Color(0xFFFFD54F) else Color(0xFF80CBC4),
                         fontFamily = FontFamily.Monospace
                     )
                 }
@@ -593,6 +642,126 @@ fun AdventureScreen(
                 Spacer(modifier = Modifier.height(6.dp))
                 Button(
                     onClick = { showSagaPicker = false },
+                    modifier = Modifier.fillMaxWidth().height(26.dp).padding(horizontal = 4.dp),
+                    colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFF37474F))
+                ) {
+                    Text("CLOSE", fontSize = 8.sp)
+                }
+            }
+        }
+        return
+    }
+
+    // Sector Selector Overlay Dialog (Stage Replay / Frontline Selection)
+    if (showSectorPicker) {
+        ScalingLazyColumn(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Color(0xFF080D12)),
+            contentPadding = displayConfig.contentPadding,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            item {
+                Text(
+                    text = "SELECT SECTOR",
+                    fontSize = displayConfig.headerFontSize,
+                    fontWeight = FontWeight.Black,
+                    color = Color(0xFF26A69A),
+                    fontFamily = FontFamily.Monospace
+                )
+            }
+            item {
+                Text(
+                    text = "${story.title}: Replay cleared sectors or jump to frontline:",
+                    fontSize = 7.sp,
+                    color = Color.Gray,
+                    textAlign = TextAlign.Center
+                )
+            }
+
+            items(story.nodes.size) { idx ->
+                val node = story.nodes[idx]
+                val isCurrent = idx == currentNodeIndex
+                val isUnlocked = idx <= progress.highestUnlockedNodeIndex
+                val isCleared = idx < progress.highestUnlockedNodeIndex || (idx == progress.highestUnlockedNodeIndex && progress.isCompleted)
+
+                val badgeText = when {
+                    isCurrent -> "ACTIVE"
+                    isCleared -> "CLEARED [REPLAY]"
+                    isUnlocked -> "UNLOCKED"
+                    else -> "LOCKED"
+                }
+
+                val cardBg = when {
+                    isCurrent -> Color(0xFF004D40)
+                    isUnlocked -> Color(0xFF141F28)
+                    else -> Color(0xFF0D1217)
+                }
+
+                val borderColor = when {
+                    isCurrent -> Color(0xFF64FFDA)
+                    isUnlocked -> Color(0xFF26A69A)
+                    else -> Color(0xFF1C2833)
+                }
+
+                Spacer(modifier = Modifier.height(3.dp))
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 4.dp)
+                        .background(cardBg, RoundedCornerShape(8.dp))
+                        .border(1.dp, borderColor, RoundedCornerShape(8.dp))
+                        .clickable(enabled = isUnlocked) {
+                            scope.launch {
+                                repository.selectAdventureNode(idx)
+                                showSectorPicker = false
+                                hapticManager.playStepMilestone()
+                                buzzerManager.playButtonBeep()
+                                eventMessage = "Deployed to Sector ${idx + 1}: ${node.name}!"
+                            }
+                        }
+                        .padding(6.dp)
+                ) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = "SEC ${idx + 1}: ${node.name}",
+                            fontSize = 8.5.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = if (isUnlocked) Color.White else Color.DarkGray,
+                            modifier = Modifier.weight(1f)
+                        )
+                        Text(
+                            text = badgeText,
+                            fontSize = 6.5.sp,
+                            fontWeight = FontWeight.Bold,
+                            fontFamily = FontFamily.Monospace,
+                            color = when {
+                                isCurrent -> Color(0xFF64FFDA)
+                                isCleared -> Color(0xFF80CBC4)
+                                isUnlocked -> Color(0xFFFFB74D)
+                                else -> Color.Gray
+                            }
+                        )
+                    }
+                    Spacer(modifier = Modifier.height(2.dp))
+                    Text(
+                        text = "${node.requiredSteps} steps • ${node.environmentEffect.uppercase()}" +
+                            (node.bossEncounter?.let { " • BOSS: ${it.bossName.ifBlank { "Gate Boss" }}" } ?: ""),
+                        fontSize = 7.sp,
+                        color = if (isUnlocked) Color.LightGray else Color.DarkGray,
+                        fontFamily = FontFamily.Monospace
+                    )
+                }
+            }
+
+            item {
+                Spacer(modifier = Modifier.height(6.dp))
+                Button(
+                    onClick = { showSectorPicker = false },
                     modifier = Modifier.fillMaxWidth().height(26.dp).padding(horizontal = 4.dp),
                     colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFF37474F))
                 ) {
@@ -628,16 +797,27 @@ fun AdventureScreen(
                     color = Color(0xFF26A69A),
                     fontFamily = FontFamily.Monospace
                 )
-                Box(
-                    modifier = Modifier
-                        .background(Color(0xFF00695C), RoundedCornerShape(4.dp))
-                        .clickable { showSagaPicker = true }
-                        .padding(horizontal = 6.dp, vertical = 2.dp)
-                ) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Text("SAGA", fontSize = 7.sp, fontWeight = FontWeight.Bold, color = Color.White, fontFamily = FontFamily.Monospace)
-                        Spacer(modifier = Modifier.width(2.dp))
-                        DigiVectorIcon(type = DigiIconType.ARROW_DOWN, size = 6.dp, tint = Color.White)
+                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                    Box(
+                        modifier = Modifier
+                            .background(Color(0xFF142820), RoundedCornerShape(4.dp))
+                            .border(0.5.dp, Color(0xFF26A69A), RoundedCornerShape(4.dp))
+                            .clickable { showSectorPicker = true }
+                            .padding(horizontal = 5.dp, vertical = 2.dp)
+                    ) {
+                        Text("SECTORS", fontSize = 7.sp, fontWeight = FontWeight.Bold, color = Color(0xFF80CBC4), fontFamily = FontFamily.Monospace)
+                    }
+                    Box(
+                        modifier = Modifier
+                            .background(Color(0xFF00695C), RoundedCornerShape(4.dp))
+                            .clickable { showSagaPicker = true }
+                            .padding(horizontal = 5.dp, vertical = 2.dp)
+                    ) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Text("SAGA", fontSize = 7.sp, fontWeight = FontWeight.Bold, color = Color.White, fontFamily = FontFamily.Monospace)
+                            Spacer(modifier = Modifier.width(2.dp))
+                            DigiVectorIcon(type = DigiIconType.ARROW_DOWN, size = 6.dp, tint = Color.White)
+                        }
                     }
                 }
             }
@@ -649,15 +829,21 @@ fun AdventureScreen(
                     .padding(vertical = 1.dp)
                     .background(Color(0xFF142820), RoundedCornerShape(4.dp))
                     .border(0.5.dp, Color(0xFF26A69A), RoundedCornerShape(4.dp))
-                    .padding(horizontal = 6.dp, vertical = 1.dp)
+                    .clickable { showSectorPicker = true }
+                    .padding(horizontal = 6.dp, vertical = 2.dp)
             ) {
-                Text(
-                    text = "$actLabel • SEC ${currentNodeIndex + 1}/${story.nodes.size}",
-                    fontSize = 7.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = Color(0xFF80CBC4),
-                    fontFamily = FontFamily.Monospace
-                )
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(
+                        text = "$actLabel • SEC ${currentNodeIndex + 1}/${story.nodes.size}" +
+                            if (progress.highestUnlockedNodeIndex > currentNodeIndex) " [REPLAY]" else "",
+                        fontSize = 7.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color(0xFF80CBC4),
+                        fontFamily = FontFamily.Monospace
+                    )
+                    Spacer(modifier = Modifier.width(3.dp))
+                    DigiVectorIcon(type = DigiIconType.ARROW_DOWN, size = 6.dp, tint = Color(0xFF80CBC4))
+                }
             }
         }
 

@@ -4,8 +4,11 @@ import com.digiwear.core.model.AdventureProgress
 import com.digiwear.core.model.BossEncounter
 import com.digiwear.core.model.CampaignNode
 import com.digiwear.core.model.CampaignStory
+import com.digiwear.core.model.SagaProgressRecord
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.builtins.MapSerializer
+import kotlinx.serialization.builtins.serializer
 import java.util.Random
 
 data class AdventureStepResult(
@@ -105,9 +108,11 @@ object AdventureEngine {
             // Move to next node
             val nextIdx = currentIdx + 1
             val completed = nextIdx >= nodes.size
+            val newHighest = maxOf(progress.highestUnlockedNodeIndex, nextIdx.coerceAtMost(nodes.lastIndex))
             val newCampaigns = if (completed) progress.unlockedCampaigns + story.campaignId else progress.unlockedCampaigns
             val updatedProgress = progress.copy(
-                currentNodeIndex = nextIdx,
+                currentNodeIndex = nextIdx.coerceAtMost(nodes.lastIndex),
+                highestUnlockedNodeIndex = newHighest,
                 accumulatedStepsCurrentNode = 0,
                 totalAdventureSteps = newTotalSteps,
                 unlockedCampaigns = newCampaigns,
@@ -155,10 +160,12 @@ object AdventureEngine {
         val newItems = if (boss.rewardItem.isNotBlank()) progress.collectedItems + boss.rewardItem else progress.collectedItems
         val nextIdx = progress.currentNodeIndex + 1
         val completed = nextIdx >= story.nodes.size
+        val newHighest = maxOf(progress.highestUnlockedNodeIndex, nextIdx.coerceAtMost(story.nodes.lastIndex))
         val newCampaigns = if (completed) progress.unlockedCampaigns + story.campaignId else progress.unlockedCampaigns
 
         return progress.copy(
-            currentNodeIndex = nextIdx,
+            currentNodeIndex = nextIdx.coerceAtMost(story.nodes.lastIndex),
+            highestUnlockedNodeIndex = newHighest,
             accumulatedStepsCurrentNode = 0,
             clearedFlags = newFlags,
             unlockedEggs = newEggs,
@@ -167,4 +174,101 @@ object AdventureEngine {
             isCompleted = completed
         )
     }
+
+    /**
+     * Seamlessly swaps the active adventure campaign without losing progress.
+     * Snapshots the outgoing campaign's node index, unlocked sectors, steps, and flags into [sagaStates],
+     * and restores the incoming campaign's previously saved state (or initializes node 0 if new).
+     */
+    fun switchCampaign(
+        currentProgress: AdventureProgress,
+        newStory: CampaignStory
+    ): AdventureProgress {
+        if (currentProgress.campaignId.equals(newStory.campaignId, ignoreCase = true)) {
+            return currentProgress
+        }
+
+        // 1. Snapshot outgoing active saga
+        val currentSnapshot = SagaProgressRecord(
+            campaignId = currentProgress.campaignId,
+            currentNodeIndex = currentProgress.currentNodeIndex,
+            highestUnlockedNodeIndex = currentProgress.highestUnlockedNodeIndex,
+            accumulatedStepsCurrentNode = currentProgress.accumulatedStepsCurrentNode,
+            clearedFlags = currentProgress.clearedFlags,
+            isCompleted = currentProgress.isCompleted
+        )
+        val updatedSagas = currentProgress.sagaStates + (currentProgress.campaignId to currentSnapshot)
+
+        // 2. Restore incoming saga if already exists, or start fresh at Sector 1 (index 0)
+        val existing = updatedSagas[newStory.campaignId]
+        val maxTargetIdx = (newStory.nodes.size - 1).coerceAtLeast(0)
+        return if (existing != null) {
+            currentProgress.copy(
+                campaignId = newStory.campaignId,
+                currentNodeIndex = existing.currentNodeIndex.coerceIn(0, maxTargetIdx),
+                highestUnlockedNodeIndex = existing.highestUnlockedNodeIndex.coerceIn(0, maxTargetIdx),
+                accumulatedStepsCurrentNode = existing.accumulatedStepsCurrentNode,
+                clearedFlags = existing.clearedFlags,
+                isCompleted = existing.isCompleted,
+                sagaStates = updatedSagas
+            )
+        } else {
+            currentProgress.copy(
+                campaignId = newStory.campaignId,
+                currentNodeIndex = 0,
+                highestUnlockedNodeIndex = 0,
+                accumulatedStepsCurrentNode = 0,
+                clearedFlags = emptySet(),
+                isCompleted = false,
+                sagaStates = updatedSagas
+            )
+        }
+    }
+
+    /**
+     * Changes the active playable sector within the current campaign to [targetIndex].
+     * The player can freely choose any sector between 0 and [highestUnlockedNodeIndex].
+     */
+    fun selectNode(
+        progress: AdventureProgress,
+        targetIndex: Int,
+        story: CampaignStory
+    ): AdventureProgress {
+        val maxUnlocked = progress.highestUnlockedNodeIndex.coerceIn(0, (story.nodes.size - 1).coerceAtLeast(0))
+        val validTarget = targetIndex.coerceIn(0, maxUnlocked)
+        if (validTarget == progress.currentNodeIndex) {
+            return progress
+        }
+        return progress.copy(
+            currentNodeIndex = validTarget,
+            accumulatedStepsCurrentNode = 0
+        )
+    }
+
+    /**
+     * Serializes [sagaStates] map to a JSON string for persistent database storage.
+     */
+    fun serializeSagaStates(sagaStates: Map<String, SagaProgressRecord>): String =
+        try {
+            jsonParser.encodeToString(
+                MapSerializer(String.serializer(), SagaProgressRecord.serializer()),
+                sagaStates
+            )
+        } catch (_: Exception) {
+            "{}"
+        }
+
+    /**
+     * Deserializes a persistent JSON string into a [sagaStates] map.
+     */
+    fun parseSagaStates(jsonStr: String): Map<String, SagaProgressRecord> =
+        if (jsonStr.isBlank() || jsonStr == "{}") emptyMap()
+        else try {
+            jsonParser.decodeFromString(
+                MapSerializer(String.serializer(), SagaProgressRecord.serializer()),
+                jsonStr
+            )
+        } catch (_: Exception) {
+            emptyMap()
+        }
 }

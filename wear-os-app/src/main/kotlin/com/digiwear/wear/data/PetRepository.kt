@@ -44,7 +44,7 @@ class PetRepository private constructor(context: Context) {
         appContext,
         DigiWearDatabase::class.java,
         "digiwear_wear.db"
-    ).fallbackToDestructiveMigration().build()
+    ).addMigrations(MIGRATION_3_4).fallbackToDestructiveMigration().build()
 
     private val dao = db.petDao()
 
@@ -292,13 +292,15 @@ class PetRepository private constructor(context: Context) {
             AdventureProgress(
                 campaignId = entity.campaignId,
                 currentNodeIndex = entity.currentNodeIndex,
+                highestUnlockedNodeIndex = entity.highestUnlockedNodeIndex,
                 accumulatedStepsCurrentNode = entity.accumulatedStepsCurrentNode,
                 totalAdventureSteps = entity.totalAdventureSteps,
                 clearedFlags = flags,
                 isCompleted = entity.isCompleted,
                 unlockedEggs = eggs,
                 collectedItems = items,
-                unlockedCampaigns = campaigns
+                unlockedCampaigns = campaigns,
+                sagaStates = AdventureEngine.parseSagaStates(entity.sagaStatesJson)
             )
         } else {
             AdventureProgress()
@@ -324,13 +326,15 @@ class PetRepository private constructor(context: Context) {
             AdventureProgress(
                 campaignId = currentEntity.campaignId,
                 currentNodeIndex = currentEntity.currentNodeIndex,
+                highestUnlockedNodeIndex = currentEntity.highestUnlockedNodeIndex,
                 accumulatedStepsCurrentNode = currentEntity.accumulatedStepsCurrentNode,
                 totalAdventureSteps = currentEntity.totalAdventureSteps,
                 clearedFlags = flags,
                 isCompleted = currentEntity.isCompleted,
                 unlockedEggs = eggs,
                 collectedItems = items,
-                unlockedCampaigns = campaigns
+                unlockedCampaigns = campaigns,
+                sagaStates = AdventureEngine.parseSagaStates(currentEntity.sagaStatesJson)
             )
         } else {
             AdventureProgress()
@@ -617,23 +621,7 @@ class PetRepository private constructor(context: Context) {
     suspend fun addAdventureSteps(steps: Int): AdventureStepResult = withContext(Dispatchers.IO) {
         stateMutex.withLock {
             val story = getActiveCampaign()
-            val currentEntity = dao.getAdventureState()
-            val flags = if (currentEntity?.clearedFlagsCsv.isNullOrBlank()) emptySet() else currentEntity!!.clearedFlagsCsv.split(",").toSet()
-            val eggs = if (currentEntity?.unlockedEggsCsv.isNullOrBlank()) emptySet() else currentEntity!!.unlockedEggsCsv.split(",").mapNotNull { it.toIntOrNull() }.toSet()
-            val items = if (currentEntity?.collectedItemsCsv.isNullOrBlank()) emptySet() else currentEntity!!.collectedItemsCsv.split(",").filter { it.isNotBlank() }.toSet()
-            val campaigns = if (currentEntity?.unlockedCampaignsCsv.isNullOrBlank()) emptySet() else currentEntity!!.unlockedCampaignsCsv.split(",").filter { it.isNotBlank() }.toSet()
-            val progress = AdventureProgress(
-                campaignId = currentEntity?.campaignId ?: story.campaignId,
-                currentNodeIndex = currentEntity?.currentNodeIndex ?: 0,
-                accumulatedStepsCurrentNode = currentEntity?.accumulatedStepsCurrentNode ?: 0,
-                totalAdventureSteps = currentEntity?.totalAdventureSteps ?: 0,
-                clearedFlags = flags,
-                isCompleted = currentEntity?.isCompleted ?: false,
-                unlockedEggs = eggs,
-                collectedItems = items,
-                unlockedCampaigns = campaigns
-            )
-
+            val progress = getAdventureProgress()
             val result = AdventureEngine.processSteps(story, progress, steps)
             val updated = result.updatedProgress
             dao.insertOrUpdateAdventure(
@@ -641,13 +629,15 @@ class PetRepository private constructor(context: Context) {
                     id = 1,
                     campaignId = updated.campaignId,
                     currentNodeIndex = updated.currentNodeIndex,
+                    highestUnlockedNodeIndex = updated.highestUnlockedNodeIndex,
                     accumulatedStepsCurrentNode = updated.accumulatedStepsCurrentNode,
                     totalAdventureSteps = updated.totalAdventureSteps,
                     clearedFlagsCsv = updated.clearedFlags.joinToString(","),
                     isCompleted = updated.isCompleted,
                     unlockedEggsCsv = updated.unlockedEggs.joinToString(","),
                     collectedItemsCsv = updated.collectedItems.joinToString(","),
-                    unlockedCampaignsCsv = updated.unlockedCampaigns.joinToString(",")
+                    unlockedCampaignsCsv = updated.unlockedCampaigns.joinToString(","),
+                    sagaStatesJson = AdventureEngine.serializeSagaStates(updated.sagaStates)
                 )
             )
             notifySurfaceUpdates()
@@ -658,36 +648,22 @@ class PetRepository private constructor(context: Context) {
     suspend fun recordBossVictory(boss: BossEncounter): AdventureProgress = withContext(Dispatchers.IO) {
         stateMutex.withLock {
             val story = getActiveCampaign()
-            val currentEntity = dao.getAdventureState()
-            val flags = if (currentEntity?.clearedFlagsCsv.isNullOrBlank()) emptySet() else currentEntity!!.clearedFlagsCsv.split(",").toSet()
-            val eggs = if (currentEntity?.unlockedEggsCsv.isNullOrBlank()) emptySet() else currentEntity!!.unlockedEggsCsv.split(",").mapNotNull { it.toIntOrNull() }.toSet()
-            val items = if (currentEntity?.collectedItemsCsv.isNullOrBlank()) emptySet() else currentEntity!!.collectedItemsCsv.split(",").filter { it.isNotBlank() }.toSet()
-            val campaigns = if (currentEntity?.unlockedCampaignsCsv.isNullOrBlank()) emptySet() else currentEntity!!.unlockedCampaignsCsv.split(",").filter { it.isNotBlank() }.toSet()
-            val progress = AdventureProgress(
-                campaignId = currentEntity?.campaignId ?: story.campaignId,
-                currentNodeIndex = currentEntity?.currentNodeIndex ?: 0,
-                accumulatedStepsCurrentNode = currentEntity?.accumulatedStepsCurrentNode ?: 0,
-                totalAdventureSteps = currentEntity?.totalAdventureSteps ?: 0,
-                clearedFlags = flags,
-                isCompleted = currentEntity?.isCompleted ?: false,
-                unlockedEggs = eggs,
-                collectedItems = items,
-                unlockedCampaigns = campaigns
-            )
-
+            val progress = getAdventureProgress()
             val updated = AdventureEngine.recordBossVictory(story, progress, boss)
             dao.insertOrUpdateAdventure(
                 AdventureEntity(
                     id = 1,
                     campaignId = updated.campaignId,
                     currentNodeIndex = updated.currentNodeIndex,
+                    highestUnlockedNodeIndex = updated.highestUnlockedNodeIndex,
                     accumulatedStepsCurrentNode = updated.accumulatedStepsCurrentNode,
                     totalAdventureSteps = updated.totalAdventureSteps,
                     clearedFlagsCsv = updated.clearedFlags.joinToString(","),
                     isCompleted = updated.isCompleted,
                     unlockedEggsCsv = updated.unlockedEggs.joinToString(","),
                     collectedItemsCsv = updated.collectedItems.joinToString(","),
-                    unlockedCampaignsCsv = updated.unlockedCampaigns.joinToString(",")
+                    unlockedCampaignsCsv = updated.unlockedCampaigns.joinToString(","),
+                    sagaStatesJson = AdventureEngine.serializeSagaStates(updated.sagaStates)
                 )
             )
             notifySurfaceUpdates()
@@ -696,33 +672,69 @@ class PetRepository private constructor(context: Context) {
     }
 
     /**
-     * Switches the active campaign on the watch to one of the built-in sagas.
+     * Switches the active campaign on the watch with seamless progress preservation.
+     * Snapshots the previous campaign's progress into [sagaStates] and restores
+     * the target campaign's progress (or starts at node 0 if first time).
      */
     suspend fun switchCampaign(campaignId: String) = withContext(Dispatchers.IO) {
         stateMutex.withLock {
             val builtIn = AdventureEngine.getCampaignById(campaignId)
+            val targetStory = builtIn ?: getActiveCampaign()
             val json = if (builtIn != null) {
                 AdventureEngine.serializeCampaign(builtIn)
             } else {
                 AdventureEngine.DEFAULT_CAMPAIGN_JSON
             }
             saveCustomCampaignJson(json)
-            val current = dao.getAdventureState()
+            val currentProgress = getAdventureProgress()
+            val updated = AdventureEngine.switchCampaign(currentProgress, targetStory)
             dao.insertOrUpdateAdventure(
                 AdventureEntity(
                     id = 1,
-                    campaignId = campaignId,
-                    currentNodeIndex = 0,
-                    accumulatedStepsCurrentNode = 0,
-                    totalAdventureSteps = current?.totalAdventureSteps ?: 0,
-                    clearedFlagsCsv = "",
-                    isCompleted = false,
-                    unlockedEggsCsv = current?.unlockedEggsCsv ?: "",
-                    collectedItemsCsv = current?.collectedItemsCsv ?: "",
-                    unlockedCampaignsCsv = current?.unlockedCampaignsCsv ?: ""
+                    campaignId = updated.campaignId,
+                    currentNodeIndex = updated.currentNodeIndex,
+                    highestUnlockedNodeIndex = updated.highestUnlockedNodeIndex,
+                    accumulatedStepsCurrentNode = updated.accumulatedStepsCurrentNode,
+                    totalAdventureSteps = updated.totalAdventureSteps,
+                    clearedFlagsCsv = updated.clearedFlags.joinToString(","),
+                    isCompleted = updated.isCompleted,
+                    unlockedEggsCsv = updated.unlockedEggs.joinToString(","),
+                    collectedItemsCsv = updated.collectedItems.joinToString(","),
+                    unlockedCampaignsCsv = updated.unlockedCampaigns.joinToString(","),
+                    sagaStatesJson = AdventureEngine.serializeSagaStates(updated.sagaStates)
                 )
             )
             notifySurfaceUpdates()
+        }
+    }
+
+    /**
+     * Selects an unlocked sector ([targetIndex] between 0 and [highestUnlockedNodeIndex])
+     * allowing the player to replay earlier stages or return to their active frontline.
+     */
+    suspend fun selectAdventureNode(nodeIndex: Int): AdventureProgress = withContext(Dispatchers.IO) {
+        stateMutex.withLock {
+            val currentProgress = getAdventureProgress()
+            val story = getActiveCampaign()
+            val updated = AdventureEngine.selectNode(currentProgress, nodeIndex, story)
+            dao.insertOrUpdateAdventure(
+                AdventureEntity(
+                    id = 1,
+                    campaignId = updated.campaignId,
+                    currentNodeIndex = updated.currentNodeIndex,
+                    highestUnlockedNodeIndex = updated.highestUnlockedNodeIndex,
+                    accumulatedStepsCurrentNode = updated.accumulatedStepsCurrentNode,
+                    totalAdventureSteps = updated.totalAdventureSteps,
+                    clearedFlagsCsv = updated.clearedFlags.joinToString(","),
+                    isCompleted = updated.isCompleted,
+                    unlockedEggsCsv = updated.unlockedEggs.joinToString(","),
+                    collectedItemsCsv = updated.collectedItems.joinToString(","),
+                    unlockedCampaignsCsv = updated.unlockedCampaigns.joinToString(","),
+                    sagaStatesJson = AdventureEngine.serializeSagaStates(updated.sagaStates)
+                )
+            )
+            notifySurfaceUpdates()
+            updated
         }
     }
 

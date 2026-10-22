@@ -212,6 +212,12 @@ object AospLanSyncServer {
                     val campaignJson = payload.trim()
                     if (campaignJson.isNotEmpty()) {
                         repo.saveCustomCampaignJson(campaignJson)
+                        scope.launch {
+                            try {
+                                val parsed = com.digiwear.core.adventure.AdventureEngine.parseCampaign(campaignJson)
+                                repo.switchCampaign(parsed.campaignId)
+                            } catch (_: Exception) {}
+                        }
                     }
                     "OK"
                 }

@@ -109,11 +109,13 @@ data class AdventureEntity(
     val id: Int = 1,
     val campaignId: String = "file_island_corrupted_sector",
     val currentNodeIndex: Int = 0,
+    val highestUnlockedNodeIndex: Int = 0,
     val accumulatedStepsCurrentNode: Int = 0,
     val totalAdventureSteps: Int = 0,
     val clearedFlagsCsv: String = "",
     val isCompleted: Boolean = false,
     val unlockedEggsCsv: String = "",
     val collectedItemsCsv: String = "",
-    val unlockedCampaignsCsv: String = ""
+    val unlockedCampaignsCsv: String = "",
+    val sagaStatesJson: String = "{}"
 )
