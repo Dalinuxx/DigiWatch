@@ -26,20 +26,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.automirrored.filled.HelpOutline
-import androidx.compose.material.icons.filled.CheckCircle
-import androidx.compose.material.icons.filled.CloudDownload
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.FileOpen
-import androidx.compose.material.icons.filled.HelpOutline
-import androidx.compose.material.icons.filled.PlayArrow
-import androidx.compose.material.icons.filled.Refresh
-import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.filled.Terminal
-import androidx.compose.material.icons.filled.Warning
-import androidx.compose.material.icons.filled.Watch
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -47,7 +33,6 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CheckboxDefaults
-import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
@@ -159,9 +144,9 @@ fun WatchSideloadScreen(
                 colors = ButtonDefaults.outlinedButtonColors(contentColor = DigiWearPalette.DigiviceCyan),
                 shape = RoundedCornerShape(6.dp)
             ) {
-                Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", modifier = Modifier.size(14.dp))
+                DigiVectorIcon(type = DigiIconType.ARROW_LEFT, size = 14.dp, tint = DigiWearPalette.DigiviceCyan)
                 Spacer(modifier = Modifier.width(6.dp))
-                Text("← BACK TO SETTINGS", fontSize = 10.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
+                Text("BACK TO SETTINGS", fontSize = 10.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
             }
         }
 
@@ -198,7 +183,7 @@ fun WatchSideloadScreen(
                         border = BorderStroke(1.dp, DigiWearPalette.CrestGold),
                         colors = ButtonDefaults.outlinedButtonColors(contentColor = DigiWearPalette.CrestGold)
                     ) {
-                        Icon(Icons.AutoMirrored.Filled.HelpOutline, contentDescription = "Guide", modifier = Modifier.size(14.dp))
+                        DigiVectorIcon(type = DigiIconType.ATTENTION, size = 14.dp, tint = DigiWearPalette.CrestGold)
                         Spacer(modifier = Modifier.width(4.dp))
                         Text("GUIDE", fontSize = 10.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
                     }
@@ -291,7 +276,7 @@ fun WatchSideloadScreen(
                     ) {
                         Column(modifier = Modifier.padding(10.dp)) {
                             Row(verticalAlignment = Alignment.CenterVertically) {
-                                Icon(Icons.Default.Warning, contentDescription = null, tint = Color(0xFFFFB74D), modifier = Modifier.size(16.dp))
+                                DigiVectorIcon(type = DigiIconType.ATTENTION, tint = Color(0xFFFFB74D), size = 16.dp)
                                 Spacer(modifier = Modifier.width(6.dp))
                                 Text(
                                     text = "NO WATCH CONNECTED OVER ADB",
@@ -396,7 +381,7 @@ fun WatchSideloadScreen(
                         colors = ButtonDefaults.outlinedButtonColors(contentColor = Color(0xFFB0BEC5)),
                         shape = RoundedCornerShape(6.dp)
                     ) {
-                        Icon(Icons.Default.Search, contentDescription = "Scan", modifier = Modifier.size(14.dp))
+                        DigiVectorIcon(type = DigiIconType.SEARCH_LENS, size = 14.dp, tint = Color(0xFFB0BEC5))
                         Spacer(modifier = Modifier.width(4.dp))
                         Text(if (isScanningLan) "SCANNING..." else "AUTO-DETECT", fontSize = 10.sp, fontFamily = FontFamily.Monospace)
                     }
@@ -430,7 +415,7 @@ fun WatchSideloadScreen(
                                     horizontalArrangement = Arrangement.SpaceBetween
                                 ) {
                                     Row(verticalAlignment = Alignment.CenterVertically) {
-                                        Icon(Icons.Default.Watch, contentDescription = null, tint = Color(0xFF26A69A), modifier = Modifier.size(16.dp))
+                                        DigiVectorIcon(type = DigiIconType.WATCH, tint = Color(0xFF26A69A), size = 16.dp)
                                         Spacer(modifier = Modifier.width(6.dp))
                                         Text(
                                             text = "${details.model} (${details.manufacturer})",
@@ -522,7 +507,7 @@ fun WatchSideloadScreen(
                         shape = RoundedCornerShape(6.dp),
                         modifier = Modifier.weight(1f)
                     ) {
-                        Icon(Icons.Default.FileOpen, contentDescription = null, modifier = Modifier.size(14.dp))
+                        DigiVectorIcon(type = DigiIconType.VAULT_SAFE, size = 14.dp, tint = DigiWearPalette.DigiviceCyan)
                         Spacer(modifier = Modifier.width(4.dp))
                         Text("SELECT APK", fontSize = 10.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
                     }
@@ -559,7 +544,7 @@ fun WatchSideloadScreen(
                         shape = RoundedCornerShape(6.dp),
                         modifier = Modifier.weight(1f)
                     ) {
-                        Icon(Icons.Default.CloudDownload, contentDescription = null, modifier = Modifier.size(14.dp))
+                        DigiVectorIcon(type = DigiIconType.COMM_ANTENNA, size = 14.dp, tint = DigiWearPalette.CrestGold)
                         Spacer(modifier = Modifier.width(4.dp))
                         Text(if (isDownloading) "DOWNLOADING..." else "DOWNLOAD LATEST", fontSize = 9.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
                     }
@@ -599,7 +584,7 @@ fun WatchSideloadScreen(
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Row(verticalAlignment = Alignment.CenterVertically) {
-                                Icon(Icons.Default.CheckCircle, contentDescription = null, tint = Color(0xFF00E676), modifier = Modifier.size(16.dp))
+                                DigiVectorIcon(type = DigiIconType.CHECK, tint = Color(0xFF00E676), size = 16.dp)
                                 Spacer(modifier = Modifier.width(8.dp))
                                 Column {
                                     Text(
@@ -731,7 +716,7 @@ fun WatchSideloadScreen(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(Icons.Default.Terminal, contentDescription = null, tint = Color(0xFF00E676), modifier = Modifier.size(14.dp))
+                        DigiVectorIcon(type = DigiIconType.COMM_LINK, tint = Color(0xFF00E676), size = 14.dp)
                         Spacer(modifier = Modifier.width(6.dp))
                         Text(
                             text = "LIVE D-TERMINAL LOGS",
@@ -823,7 +808,7 @@ fun WatchSideloadScreen(
                             shape = RoundedCornerShape(6.dp),
                             modifier = Modifier.weight(1f)
                         ) {
-                            Icon(Icons.Default.Refresh, contentDescription = null, modifier = Modifier.size(12.dp))
+                            DigiVectorIcon(type = DigiIconType.SCAN, size = 12.dp, tint = Color(0xFFB0BEC5))
                             Spacer(modifier = Modifier.width(4.dp))
                             Text("STATUS", fontSize = 9.sp, fontFamily = FontFamily.Monospace)
                         }
@@ -835,7 +820,7 @@ fun WatchSideloadScreen(
                             shape = RoundedCornerShape(6.dp),
                             modifier = Modifier.weight(1f)
                         ) {
-                            Icon(Icons.Default.PlayArrow, contentDescription = null, modifier = Modifier.size(12.dp))
+                            DigiVectorIcon(type = DigiIconType.BOLT, size = 12.dp, tint = Color(0xFF00E676))
                             Spacer(modifier = Modifier.width(4.dp))
                             Text("LAUNCH", fontSize = 9.sp, fontFamily = FontFamily.Monospace)
                         }
@@ -847,7 +832,7 @@ fun WatchSideloadScreen(
                             shape = RoundedCornerShape(6.dp),
                             modifier = Modifier.weight(1f)
                         ) {
-                            Icon(Icons.Default.Delete, contentDescription = null, modifier = Modifier.size(12.dp))
+                            DigiVectorIcon(type = DigiIconType.CLOSE, size = 12.dp, tint = Color(0xFFE57373))
                             Spacer(modifier = Modifier.width(4.dp))
                             Text("UNINSTALL", fontSize = 9.sp, fontFamily = FontFamily.Monospace)
                         }
@@ -861,6 +846,9 @@ fun WatchSideloadScreen(
     if (showGuideDialog) {
         AlertDialog(
             onDismissRequest = { showGuideDialog = false },
+            containerColor = DigiWearPalette.CardSurface,
+            shape = RoundedCornerShape(12.dp),
+            modifier = Modifier.border(BorderStroke(1.dp, DigiWearPalette.CardBorder), RoundedCornerShape(12.dp)),
             confirmButton = {
                 TextButton(onClick = { showGuideDialog = false }) {
                     Text("GOT IT", color = DigiWearPalette.DigiviceCyan, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
@@ -914,7 +902,6 @@ fun WatchSideloadScreen(
                     )
                 }
             },
-            containerColor = Color(0xFF141D29),
             textContentColor = Color.White,
             titleContentColor = DigiWearPalette.DigiviceCyan
         )

@@ -22,19 +22,10 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.Send
-import androidx.compose.material.icons.filled.Bolt
-import androidx.compose.material.icons.filled.CameraAlt
-import androidx.compose.material.icons.filled.ContentCopy
-import androidx.compose.material.icons.filled.PlayArrow
-import androidx.compose.material.icons.filled.QrCodeScanner
-import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -858,7 +849,7 @@ fun BattleHubScreen(
                                 },
                                 modifier = Modifier.weight(1f)
                             ) {
-                                Icon(Icons.Default.ContentCopy, contentDescription = "Copy Base32", modifier = Modifier.size(14.dp))
+                                DigiVectorIcon(type = DigiIconType.COPY, size = 14.dp, tint = Color.White)
                                 Spacer(modifier = Modifier.width(4.dp))
                                 Text("Base32", fontSize = 10.sp, fontFamily = FontFamily.Monospace)
                             }
@@ -870,7 +861,7 @@ fun BattleHubScreen(
                                 },
                                 modifier = Modifier.weight(1f)
                             ) {
-                                Icon(Icons.Default.ContentCopy, contentDescription = "Copy ROM", modifier = Modifier.size(14.dp))
+                                DigiVectorIcon(type = DigiIconType.COPY, size = 14.dp, tint = Color.White)
                                 Spacer(modifier = Modifier.width(4.dp))
                                 Text("DigiROM", fontSize = 10.sp, fontFamily = FontFamily.Monospace)
                             }
@@ -880,7 +871,7 @@ fun BattleHubScreen(
                                 modifier = Modifier.weight(1f),
                                 colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF37474F))
                             ) {
-                                Icon(Icons.Default.Refresh, contentDescription = "Reroll", modifier = Modifier.size(14.dp))
+                                DigiVectorIcon(type = DigiIconType.SCAN, size = 14.dp, tint = Color.White)
                                 Spacer(modifier = Modifier.width(4.dp))
                                 Text("Seed", fontSize = 10.sp, fontFamily = FontFamily.Monospace)
                             }
@@ -922,7 +913,7 @@ fun BattleHubScreen(
                                 modifier = Modifier.weight(1f),
                                 colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF00897B))
                             ) {
-                                Icon(Icons.AutoMirrored.Filled.Send, contentDescription = "Beam", modifier = Modifier.size(14.dp))
+                                DigiVectorIcon(type = DigiIconType.BEAM_ANTENNA, size = 14.dp, tint = Color.White)
                                 Spacer(modifier = Modifier.width(4.dp))
                                 Text("BEAM TO WATCH", fontSize = 10.sp, fontWeight = FontWeight.Bold, fontFamily = FontFamily.Monospace)
                             }
@@ -1079,7 +1070,7 @@ fun BattleHubScreen(
                                         },
                                         colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF00897B))
                                     ) {
-                                        Icon(Icons.Default.CameraAlt, contentDescription = "Camera Scan", modifier = Modifier.size(14.dp))
+                                        DigiVectorIcon(type = DigiIconType.CAMERA, size = 14.dp, tint = Color.White)
                                         Spacer(modifier = Modifier.width(4.dp))
                                         Text("CAM", fontSize = 11.sp, fontWeight = FontWeight.Black, fontFamily = FontFamily.Monospace)
                                     }
@@ -1383,7 +1374,7 @@ fun BattleHubScreen(
                             modifier = Modifier.fillMaxWidth(),
                             colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF00897B))
                         ) {
-                            Icon(Icons.Default.QrCodeScanner, contentDescription = "Scan QR", modifier = Modifier.size(16.dp))
+                            DigiVectorIcon(type = DigiIconType.QR, size = 16.dp, tint = Color.White)
                             Spacer(modifier = Modifier.width(6.dp))
                             Text("POINT-AND-SHOOT CAMERA SCANNER", fontSize = 10.5.sp, fontWeight = FontWeight.Black, fontFamily = FontFamily.Monospace)
                         }
@@ -1458,7 +1449,7 @@ fun BattleHubScreen(
                                 modifier = Modifier.weight(1.2f),
                                 colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFD32F2F))
                             ) {
-                                Icon(Icons.Default.PlayArrow, contentDescription = "Simulate", modifier = Modifier.size(14.dp))
+                                DigiVectorIcon(type = DigiIconType.BATTLE, size = 14.dp, tint = Color.White)
                                 Spacer(modifier = Modifier.width(2.dp))
                                 Text("FIGHT!", fontSize = 10.sp, fontWeight = FontWeight.Black, fontFamily = FontFamily.Monospace)
                             }
@@ -1643,7 +1634,7 @@ fun BattleHubScreen(
                                     if (isAnimatingBattle && activeTurn != null) {
                                         Spacer(modifier = Modifier.height(8.dp))
                                         Text(
-                                            text = "${activeTurn.attackerName} [${activeTurn.attackType}] → -${activeTurn.damage} HP!",
+                                            text = "${activeTurn.attackerName} [${activeTurn.attackType}] -> -${activeTurn.damage} HP!",
                                             fontSize = 11.sp,
                                             fontWeight = FontWeight.Bold,
                                             color = if (activeTurn.isAdvantage) Color(0xFF00E676) else Color.White,
@@ -1725,7 +1716,7 @@ fun BattleHubScreen(
                                     horizontalArrangement = Arrangement.SpaceBetween
                                 ) {
                                     Text(
-                                        text = "R${turn.round} [${turn.attackType} • ${turn.hitRatePercent}%]: ${turn.attackerName} → ${turn.defenderName}",
+                                        text = "R${turn.round} [${turn.attackType} • ${turn.hitRatePercent}%]: ${turn.attackerName} -> ${turn.defenderName}",
                                         fontSize = 9.5.sp,
                                         color = Color.White,
                                         fontFamily = FontFamily.Monospace

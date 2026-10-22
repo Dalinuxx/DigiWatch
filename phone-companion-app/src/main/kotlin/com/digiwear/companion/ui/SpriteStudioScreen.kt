@@ -24,15 +24,10 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.Send
-import androidx.compose.material.icons.filled.Archive
-import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
@@ -321,7 +316,7 @@ fun SpriteStudioScreen(
                 onValueChange = { searchQuery = it },
                 modifier = Modifier.fillMaxWidth(),
                 placeholder = { Text("Search ${PetSpecies.SPECIES_REGISTRY.size} Digimon by name or ID...", color = Color.Gray, fontSize = 12.sp) },
-                leadingIcon = { Icon(Icons.Default.Search, contentDescription = "Search", tint = Color.Gray) },
+                leadingIcon = { DigiVectorIcon(type = DigiIconType.SEARCH_LENS, tint = Color.Gray, size = 16.dp) },
                 singleLine = true
             )
 
@@ -683,7 +678,10 @@ fun SpriteStudioScreen(
                                 SpriteCanvasRenderer(speciesId = pre.id, frame = SpriteFrame.IDLE_A, size = 24.dp)
                                 Spacer(modifier = Modifier.width(6.dp))
                                 Column {
-                                    Text("← ${pre.name} (${pre.stage.displayName})", fontSize = 10.sp, fontWeight = FontWeight.Bold, color = Color.White)
+                                    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                                        DigiVectorIcon(type = DigiIconType.ARROW_LEFT, size = 10.dp, tint = Color.White)
+                                        Text("${pre.name} (${pre.stage.displayName})", fontSize = 10.sp, fontWeight = FontWeight.Bold, color = Color.White)
+                                    }
                                     rule?.let {
                                         Text(
                                             text = com.digiwear.core.engine.EvolutionEngine.describeRule(it),
@@ -726,7 +724,7 @@ fun SpriteStudioScreen(
                                 Spacer(modifier = Modifier.width(8.dp))
                                 Column {
                                     Text(
-                                        text = "→ #${target.id} ${target.name} (${target.stage.displayName} • ${target.attribute.displayName})",
+                                        text = "-> #${target.id} ${target.name} (${target.stage.displayName} • ${target.attribute.displayName})",
                                         fontSize = 12.sp,
                                         fontWeight = FontWeight.Bold,
                                         color = Color.White
@@ -942,7 +940,7 @@ fun SpriteStudioScreen(
                                 .height(44.dp),
                             colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF00897B))
                         ) {
-                            Icon(Icons.AutoMirrored.Filled.Send, contentDescription = "Morph", modifier = Modifier.size(14.dp))
+                            DigiVectorIcon(type = DigiIconType.BEAM_ANTENNA, size = 14.dp, tint = Color.White)
                             Spacer(modifier = Modifier.width(4.dp))
                             Text("MORPH PARTNER", fontSize = 10.sp, fontWeight = FontWeight.Bold, fontFamily = FontFamily.Monospace)
                         }
@@ -978,7 +976,7 @@ fun SpriteStudioScreen(
                                 .height(44.dp),
                             border = BorderStroke(1.dp, Color(0xFF00E5FF))
                         ) {
-                            Icon(Icons.Default.Archive, contentDescription = "Vault", modifier = Modifier.size(14.dp), tint = Color(0xFF00E5FF))
+                            DigiVectorIcon(type = DigiIconType.VAULT_SAFE, size = 14.dp, tint = Color(0xFF00E5FF))
                             Spacer(modifier = Modifier.width(4.dp))
                             Text("ADD TO VAULT", fontSize = 10.sp, fontWeight = FontWeight.Bold, fontFamily = FontFamily.Monospace, color = Color(0xFF00E5FF))
                         }
@@ -1013,8 +1011,8 @@ private fun StageFilterChip(text: String, isSelected: Boolean, onClick: () -> Un
                 RoundedCornerShape(8.dp)
             )
             .border(
-                1.dp,
-                if (isSelected) Color(0xFF80CBC4) else DigiWearPalette.CardBorder,
+                if (isSelected) 1.5.dp else 1.dp,
+                if (isSelected) Color(0xFF64FFDA) else DigiWearPalette.CardBorder,
                 RoundedCornerShape(8.dp)
             )
             .clickable(onClick = onClick)

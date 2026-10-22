@@ -149,7 +149,12 @@ fun WatchDigiDexScreen(
                             modifier = Modifier
                                 .padding(horizontal = 2.dp)
                                 .background(
-                                    if (isSelected) Color(0xFF00E5FF) else Color(0xFF141C28),
+                                    if (isSelected) Color(0xFF006064) else Color(0xFF141C28),
+                                    RoundedCornerShape(4.dp)
+                                )
+                                .border(
+                                    if (isSelected) 1.5.dp else 1.dp,
+                                    if (isSelected) Color(0xFF00E5FF) else Color(0xFF263238),
                                     RoundedCornerShape(4.dp)
                                 )
                                 .clickable { selectedStageFilter = stage }
@@ -159,7 +164,7 @@ fun WatchDigiDexScreen(
                                 text = label,
                                 fontSize = 6.5.sp,
                                 fontWeight = FontWeight.Bold,
-                                color = if (isSelected) Color.Black else Color(0xFFB0BEC5),
+                                color = if (isSelected) Color.White else Color(0xFFB0BEC5),
                                 fontFamily = FontFamily.Monospace
                             )
                         }
@@ -224,7 +229,24 @@ fun WatchDigiDexScreen(
             }
 
             item {
-                Spacer(modifier = Modifier.height(30.dp))
+                Spacer(modifier = Modifier.height(8.dp))
+                Button(
+                    onClick = onBack,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(30.dp)
+                        .padding(horizontal = displayConfig.horizontalPadding),
+                    colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFF263238))
+                ) {
+                    Text(
+                        text = "BACK [C]",
+                        fontSize = 9.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.White,
+                        fontFamily = FontFamily.Monospace
+                    )
+                }
+                Spacer(modifier = Modifier.height(20.dp))
             }
         }
 
@@ -330,8 +352,8 @@ fun WatchDigiDexScreen(
                         modifier = Modifier.height(22.dp)
                     ) {
                         Text(
-                            text = "CLOSE [C]",
-                            fontSize = 7.sp,
+                            text = "BACK [C]",
+                            fontSize = 9.sp,
                             fontWeight = FontWeight.Bold,
                             color = Color.White,
                             fontFamily = FontFamily.Monospace

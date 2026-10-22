@@ -348,7 +348,9 @@ class PhoneWearableManager(private val context: Context) {
         sleepSchedule: String = "21:00_07:00",
         ambientStyle: String = "MINIMAL_DOT",
         hazardAlertsEnabled: Boolean = true,
-        clockFormat24h: Boolean = false
+        clockFormat24h: Boolean = false,
+        lifespanCanonicalEnabled: Boolean = true,
+        combatInjuriesEnabled: Boolean = true
     ): Boolean = withContext(Dispatchers.IO) {
         val nodes = getConnectedWatchNodes()
         if (nodes.isEmpty()) return@withContext false
@@ -370,6 +372,8 @@ class PhoneWearableManager(private val context: Context) {
             put("ambient_display_style", ambientStyle)
             put("hazard_alerts_enabled", hazardAlertsEnabled.toString())
             put("clock_format_24h", clockFormat24h.toString())
+            put("lifespan_canonical_enabled", lifespanCanonicalEnabled.toString())
+            put("combat_injuries_enabled", combatInjuriesEnabled.toString())
         }
         val jsonStr = json.encodeToString(map)
         val payload = jsonStr.toByteArray(Charsets.UTF_8)

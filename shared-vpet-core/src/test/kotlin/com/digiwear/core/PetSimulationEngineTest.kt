@@ -271,4 +271,53 @@ class PetSimulationEngineTest {
         assertEquals(90, evolvedKoromon.maxHp)
         assertEquals(2, evolvedKoromon.traitedEggBonus)
     }
+
+    @Test
+    fun testRangeSleepSchedules() {
+        // Child stage (e.g. Agumon): base sleep is 21 to 8
+        val stage = PetStage.CHILD
+
+        // Test 20:00_07:00 (Bed at 20, Wake at 7)
+        assertTrue(PetSimulationEngine.isSleepWindowWithSchedule(stage, 20, 0, "20:00_07:00"))
+        assertTrue(PetSimulationEngine.isSleepWindowWithSchedule(stage, 23, 30, "20:00_07:00"))
+        assertTrue(PetSimulationEngine.isSleepWindowWithSchedule(stage, 6, 59, "20:00_07:00"))
+        assertFalse(PetSimulationEngine.isSleepWindowWithSchedule(stage, 7, 0, "20:00_07:00"))
+        assertFalse(PetSimulationEngine.isSleepWindowWithSchedule(stage, 19, 59, "20:00_07:00"))
+
+        // Test 23:00_08:00 (Bed at 23, Wake at 8)
+        assertFalse(PetSimulationEngine.isSleepWindowWithSchedule(stage, 22, 0, "23:00_08:00"))
+        assertTrue(PetSimulationEngine.isSleepWindowWithSchedule(stage, 23, 0, "23:00_08:00"))
+        assertTrue(PetSimulationEngine.isSleepWindowWithSchedule(stage, 3, 0, "23:00_08:00"))
+        assertTrue(PetSimulationEngine.isSleepWindowWithSchedule(stage, 7, 59, "23:00_08:00"))
+        assertFalse(PetSimulationEngine.isSleepWindowWithSchedule(stage, 8, 0, "23:00_08:00"))
+
+        // Test minute-level precision 20:30_07:30
+        assertFalse(PetSimulationEngine.isSleepWindowWithSchedule(stage, 20, 29, "20:30_07:30"))
+        assertTrue(PetSimulationEngine.isSleepWindowWithSchedule(stage, 20, 30, "20:30_07:30"))
+        assertTrue(PetSimulationEngine.isSleepWindowWithSchedule(stage, 7, 29, "20:30_07:30"))
+        assertFalse(PetSimulationEngine.isSleepWindowWithSchedule(stage, 7, 30, "20:30_07:30"))
+
+        // Test hyphen delimiter and whitespace trimming
+        assertTrue(PetSimulationEngine.isSleepWindowWithSchedule(stage, 21, 0, " 20:00 - 07:00 "))
+        assertFalse(PetSimulationEngine.isSleepWindowWithSchedule(stage, 19, 0, "20:00-07:00"))
+
+        // Test same-day sleep window (e.g. nap 13:00 to 15:00)
+        assertFalse(PetSimulationEngine.isSleepWindowWithSchedule(stage, 12, 59, "13:00_15:00"))
+        assertTrue(PetSimulationEngine.isSleepWindowWithSchedule(stage, 13, 0, "13:00_15:00"))
+        assertTrue(PetSimulationEngine.isSleepWindowWithSchedule(stage, 14, 59, "13:00_15:00"))
+        assertFalse(PetSimulationEngine.isSleepWindowWithSchedule(stage, 15, 0, "13:00_15:00"))
+        assertFalse(PetSimulationEngine.isSleepWindowWithSchedule(stage, 22, 0, "13:00_15:00"))
+
+        // Test legacy NIGHT_OWL (0 to 8)
+        assertTrue(PetSimulationEngine.isSleepWindowWithSchedule(stage, 0, 0, "NIGHT_OWL"))
+        assertTrue(PetSimulationEngine.isSleepWindowWithSchedule(stage, 7, 0, "NIGHT_OWL"))
+        assertFalse(PetSimulationEngine.isSleepWindowWithSchedule(stage, 8, 0, "NIGHT_OWL"))
+
+        // Test invalid/empty fallback to canonical stage sleep (Child: 21:00 to 08:00)
+        assertTrue(PetSimulationEngine.isSleepWindowWithSchedule(stage, 22, 0, "CORRUPTED_STRING"))
+        assertFalse(PetSimulationEngine.isSleepWindowWithSchedule(stage, 12, 0, "CORRUPTED_STRING"))
+
+        // Test Baby I (never sleeps)
+        assertFalse(PetSimulationEngine.isSleepWindowWithSchedule(PetStage.BABY_I, 22, 0, "20:00_07:00"))
+    }
 }

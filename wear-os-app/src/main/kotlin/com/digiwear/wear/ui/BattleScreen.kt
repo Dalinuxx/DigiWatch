@@ -1523,7 +1523,7 @@ fun BattleScreen(
                     .padding(horizontal = displayConfig.horizontalPadding),
                 colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFF37474F))
             ) {
-                Text("BACK", fontSize = 10.sp)
+                Text("BACK [C]", fontSize = 9.sp, fontWeight = FontWeight.Bold, fontFamily = FontFamily.Monospace)
             }
         }
     }

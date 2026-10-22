@@ -22,14 +22,10 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.Send
-import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -298,7 +294,7 @@ fun ExpeditionScreen(
                                 ),
                                 shape = RoundedCornerShape(10.dp),
                                 border = BorderStroke(
-                                    1.dp,
+                                    if (isCurrent) 1.5.dp else 1.dp,
                                     if (isCurrent) Color(0xFF64FFDA) else Color(0xFF263238)
                                 )
                             ) {
@@ -394,7 +390,7 @@ fun ExpeditionScreen(
                                     ),
                                     shape = RoundedCornerShape(10.dp),
                                     border = BorderStroke(
-                                        1.dp,
+                                        if (isCurrent) 1.5.dp else 1.dp,
                                         if (isCurrent) Color(0xFFFFD54F) else Color(0xFF263238)
                                     )
                                 ) {
@@ -455,7 +451,7 @@ fun ExpeditionScreen(
                                                 colors = ButtonDefaults.outlinedButtonColors(contentColor = Color(0xFFFF5252)),
                                                 border = BorderStroke(1.dp, Color(0x66FF5252))
                                             ) {
-                                                Icon(Icons.Default.Delete, contentDescription = "Delete", modifier = Modifier.size(14.dp))
+                                                DigiVectorIcon(type = DigiIconType.CLOSE, size = 14.dp, tint = Color(0xFFFF5252))
                                             }
                                         }
                                     }

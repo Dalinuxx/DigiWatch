@@ -38,15 +38,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.FlashOff
-import androidx.compose.material.icons.filled.FlashOn
-import androidx.compose.material.icons.filled.QrCodeScanner
-import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -315,11 +308,10 @@ private fun CameraPreviewAndScanner(
                             },
                         contentAlignment = Alignment.Center
                     ) {
-                        Icon(
-                            imageVector = if (isTorchOn) Icons.Default.FlashOn else Icons.Default.FlashOff,
-                            contentDescription = "Torch",
-                            tint = if (isTorchOn) Color(0xFFFFD54F) else Color.White,
-                            modifier = Modifier.size(18.dp)
+                        DigiVectorIcon(
+                            type = DigiIconType.BOLT,
+                            size = 18.dp,
+                            tint = if (isTorchOn) Color(0xFFFFD54F) else Color.White
                         )
                     }
                 }
@@ -334,11 +326,10 @@ private fun CameraPreviewAndScanner(
                         .clickable(onClick = onDismiss),
                     contentAlignment = Alignment.Center
                 ) {
-                    Icon(
-                        imageVector = Icons.Default.Close,
-                        contentDescription = "Close",
-                        tint = Color(0xFFFF5252),
-                        modifier = Modifier.size(20.dp)
+                    DigiVectorIcon(
+                        type = DigiIconType.CLOSE,
+                        size = 20.dp,
+                        tint = Color(0xFFFF5252)
                     )
                 }
             }
@@ -361,7 +352,7 @@ private fun CameraPreviewAndScanner(
                         .padding(horizontal = 14.dp, vertical = 10.dp)
                 ) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(Icons.Default.Warning, contentDescription = null, tint = Color(0xFFFF5252), modifier = Modifier.size(18.dp))
+                        DigiVectorIcon(type = DigiIconType.ATTENTION, tint = Color(0xFFFF5252), size = 18.dp)
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(
                             text = statusMessage,
@@ -540,11 +531,10 @@ private fun CameraPermissionFallback(
                 .border(2.dp, Color(0xFF00E5FF), CircleShape),
             contentAlignment = Alignment.Center
         ) {
-            Icon(
-                imageVector = Icons.Default.QrCodeScanner,
-                contentDescription = null,
+            DigiVectorIcon(
+                type = DigiIconType.QR,
                 tint = Color(0xFF00E5FF),
-                modifier = Modifier.size(36.dp)
+                size = 36.dp
             )
         }
 

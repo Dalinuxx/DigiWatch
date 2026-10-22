@@ -22,13 +22,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.Send
-import androidx.compose.material.icons.filled.Archive
-import androidx.compose.material.icons.filled.ContentCopy
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.FlashOn
-import androidx.compose.material.icons.filled.Search
 import com.digiwear.companion.data.CompanionMemorialEntity
 import com.digiwear.companion.data.SyncedPetEntity
 import com.digiwear.core.fusion.FusionType
@@ -39,7 +32,6 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -170,7 +162,7 @@ fun DigiVaultScreen(
                         onClick = { showDepositDialog = true },
                         colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF00897B))
                     ) {
-                        Icon(Icons.Default.Archive, contentDescription = "Deposit", modifier = Modifier.size(16.dp))
+                        DigiVectorIcon(type = DigiIconType.VAULT_SAFE, size = 16.dp, tint = Color.White)
                         Spacer(modifier = Modifier.width(6.dp))
                         Text("DEPOSIT ACTIVE", fontSize = 10.sp, fontWeight = FontWeight.Bold, fontFamily = FontFamily.Monospace)
                     }
@@ -196,13 +188,21 @@ fun DigiVaultScreen(
             horizontalArrangement = Arrangement.spacedBy(4.dp)
         ) {
             // Tab 0: CRYO-VAULT
-            Button(
-                onClick = { activeTab = 0 },
-                modifier = Modifier.weight(1f),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = if (activeTab == 0) Color(0xFF00897B) else Color(0xFF1E2630)
-                ),
-                contentPadding = PaddingValues(horizontal = 2.dp, vertical = 8.dp)
+            Box(
+                modifier = Modifier
+                    .weight(1f)
+                    .background(
+                        if (activeTab == 0) Color(0xFF00897B) else DigiWearPalette.CardSurface,
+                        RoundedCornerShape(8.dp)
+                    )
+                    .border(
+                        if (activeTab == 0) 1.5.dp else 1.dp,
+                        if (activeTab == 0) Color(0xFF64FFDA) else DigiWearPalette.CardBorder,
+                        RoundedCornerShape(8.dp)
+                    )
+                    .clickable { activeTab = 0 }
+                    .padding(horizontal = 2.dp, vertical = 8.dp),
+                contentAlignment = Alignment.Center
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(3.dp)) {
                     DigiVectorIcon(type = DigiIconType.VAULT_SAFE, size = 11.dp, tint = if (activeTab == 0) Color.White else Color(0xFF90A4AE))
@@ -218,13 +218,21 @@ fun DigiVaultScreen(
                 }
             }
             // Tab 1: DIGIDEX
-            Button(
-                onClick = { activeTab = 1 },
-                modifier = Modifier.weight(1f),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = if (activeTab == 1) Color(0xFF00838F) else Color(0xFF1E2630)
-                ),
-                contentPadding = PaddingValues(horizontal = 2.dp, vertical = 8.dp)
+            Box(
+                modifier = Modifier
+                    .weight(1f)
+                    .background(
+                        if (activeTab == 1) Color(0xFF00838F) else DigiWearPalette.CardSurface,
+                        RoundedCornerShape(8.dp)
+                    )
+                    .border(
+                        if (activeTab == 1) 1.5.dp else 1.dp,
+                        if (activeTab == 1) Color(0xFF64FFDA) else DigiWearPalette.CardBorder,
+                        RoundedCornerShape(8.dp)
+                    )
+                    .clickable { activeTab = 1 }
+                    .padding(horizontal = 2.dp, vertical = 8.dp),
+                contentAlignment = Alignment.Center
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(3.dp)) {
                     DigiVectorIcon(type = DigiIconType.SEARCH_LENS, size = 11.dp, tint = if (activeTab == 1) Color.White else Color(0xFF80DEEA))
@@ -240,13 +248,21 @@ fun DigiVaultScreen(
                 }
             }
             // Tab 2: FUSION LAB
-            Button(
-                onClick = { activeTab = 2 },
-                modifier = Modifier.weight(1f),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = if (activeTab == 2) Color(0xFF6A1B9A) else Color(0xFF1E2630)
-                ),
-                contentPadding = PaddingValues(horizontal = 2.dp, vertical = 8.dp)
+            Box(
+                modifier = Modifier
+                    .weight(1f)
+                    .background(
+                        if (activeTab == 2) Color(0xFF6A1B9A) else DigiWearPalette.CardSurface,
+                        RoundedCornerShape(8.dp)
+                    )
+                    .border(
+                        if (activeTab == 2) 1.5.dp else 1.dp,
+                        if (activeTab == 2) Color(0xFF64FFDA) else DigiWearPalette.CardBorder,
+                        RoundedCornerShape(8.dp)
+                    )
+                    .clickable { activeTab = 2 }
+                    .padding(horizontal = 2.dp, vertical = 8.dp),
+                contentAlignment = Alignment.Center
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(3.dp)) {
                     DigiVectorIcon(type = DigiIconType.DNA_HELIX, size = 11.dp, tint = if (activeTab == 2) Color.White else Color(0xFFEA80FC))
@@ -262,13 +278,21 @@ fun DigiVaultScreen(
                 }
             }
             // Tab 3: MEMORIAL
-            Button(
-                onClick = { activeTab = 3 },
-                modifier = Modifier.weight(1f),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = if (activeTab == 3) Color(0xFF455A64) else Color(0xFF1E2630)
-                ),
-                contentPadding = PaddingValues(horizontal = 2.dp, vertical = 8.dp)
+            Box(
+                modifier = Modifier
+                    .weight(1f)
+                    .background(
+                        if (activeTab == 3) Color(0xFF455A64) else DigiWearPalette.CardSurface,
+                        RoundedCornerShape(8.dp)
+                    )
+                    .border(
+                        if (activeTab == 3) 1.5.dp else 1.dp,
+                        if (activeTab == 3) Color(0xFF64FFDA) else DigiWearPalette.CardBorder,
+                        RoundedCornerShape(8.dp)
+                    )
+                    .clickable { activeTab = 3 }
+                    .padding(horizontal = 2.dp, vertical = 8.dp),
+                contentAlignment = Alignment.Center
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(3.dp)) {
                     DigiVectorIcon(type = DigiIconType.MEMORIAL_GRAVE, size = 11.dp, tint = if (activeTab == 3) Color.White else Color(0xFF90A4AE))
@@ -297,7 +321,7 @@ fun DigiVaultScreen(
                     onValueChange = { searchQuery = it },
                     modifier = Modifier.fillMaxWidth(),
                     placeholder = { Text("Search vault by species or nickname...", color = Color.Gray, fontSize = 12.sp) },
-                    leadingIcon = { Icon(Icons.Default.Search, contentDescription = "Search", tint = Color.Gray) },
+                    leadingIcon = { DigiVectorIcon(type = DigiIconType.SEARCH_LENS, tint = Color.Gray, size = 16.dp) },
                     singleLine = true
                 )
 
@@ -495,7 +519,7 @@ fun DigiVaultScreen(
                     onValueChange = { fusionSearchQuery = it },
                     modifier = Modifier.fillMaxWidth(),
                     placeholder = { Text("Search 85 recipes by species name...", color = Color.Gray, fontSize = 12.sp) },
-                    leadingIcon = { Icon(Icons.Default.Search, contentDescription = "Search", tint = Color.Gray) },
+                    leadingIcon = { DigiVectorIcon(type = DigiIconType.SEARCH_LENS, tint = Color.Gray, size = 16.dp) },
                     singleLine = true
                 )
 
@@ -681,7 +705,7 @@ fun DigiVaultScreen(
                                             )
                                         }
 
-                                        Text("→", fontSize = 16.sp, fontWeight = FontWeight.Black, color = DigiWearPalette.CrestGold)
+                                        DigiVectorIcon(type = DigiIconType.ARROW_RIGHT, size = 16.dp, tint = DigiWearPalette.CrestGold)
 
                                         // Target
                                         Column(horizontalAlignment = Alignment.CenterHorizontally) {
@@ -881,15 +905,18 @@ fun DigiVaultScreen(
         val spec = PetSpecies.getById(p.speciesId)
         AlertDialog(
             onDismissRequest = { showDepositDialog = false },
-            title = { Text("Deposit Active Partner") },
+            containerColor = DigiWearPalette.CardSurface,
+            shape = RoundedCornerShape(12.dp),
+            modifier = Modifier.border(BorderStroke(1.dp, DigiWearPalette.CardBorder), RoundedCornerShape(12.dp)),
+            title = { Text("Deposit Active Partner", fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold, color = Color.White) },
             text = {
                 Column {
-                    Text("Store ${spec.name} (${spec.stage.displayName}) into cryo-stasis vault?")
+                    Text("Store ${spec.name} (${spec.stage.displayName}) into cryo-stasis vault?", fontFamily = FontFamily.Monospace, color = Color.LightGray)
                     Spacer(modifier = Modifier.height(8.dp))
                     OutlinedTextField(
                         value = nicknameInput,
                         onValueChange = { nicknameInput = it },
-                        label = { Text("Custom Nickname (Optional)") },
+                        label = { Text("Custom Nickname (Optional)", fontFamily = FontFamily.Monospace) },
                         singleLine = true
                     )
                 }
@@ -922,14 +949,15 @@ fun DigiVaultScreen(
                             nicknameInput = ""
                             actionStatusMessage = "${spec.name} safely stored in DigiVault!"
                         }
-                    }
+                    },
+                    shape = RoundedCornerShape(6.dp)
                 ) {
-                    Text("Confirm Deposit")
+                    Text("CONFIRM DEPOSIT", fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold, fontSize = 11.sp)
                 }
             },
             dismissButton = {
                 TextButton(onClick = { showDepositDialog = false }) {
-                    Text("Cancel")
+                    Text("CANCEL", color = Color(0xFFB0BEC5), fontFamily = FontFamily.Monospace, fontSize = 11.sp)
                 }
             }
         )
@@ -939,10 +967,13 @@ fun DigiVaultScreen(
     commCodeDialogData?.let { (code, digiRom) ->
         AlertDialog(
             onDismissRequest = { commCodeDialogData = null },
-            title = { Text("Comm Code & 0nl1ne DigiROM") },
+            containerColor = DigiWearPalette.CardSurface,
+            shape = RoundedCornerShape(12.dp),
+            modifier = Modifier.border(BorderStroke(1.dp, DigiWearPalette.CardBorder), RoundedCornerShape(12.dp)),
+            title = { Text("Comm Code & 0nl1ne DigiROM", fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold, color = DigiWearPalette.DigiviceCyan) },
             text = {
                 Column {
-                    Text("128-bit Base32 Comm Code:", fontSize = 11.sp, color = Color.Gray)
+                    Text("128-bit Base32 Comm Code:", fontSize = 11.sp, color = Color.Gray, fontFamily = FontFamily.Monospace)
                     Spacer(modifier = Modifier.height(4.dp))
                     Text(
                         text = CommCodeCodec.formatWithHyphens(code),
@@ -957,7 +988,7 @@ fun DigiVaultScreen(
                             .padding(10.dp)
                     )
                     Spacer(modifier = Modifier.height(10.dp))
-                    Text("Digimon 0nl1ne / D-Com / A-Com Packet:", fontSize = 11.sp, color = Color.Gray)
+                    Text("Digimon 0nl1ne / D-Com / A-Com Packet:", fontSize = 11.sp, color = Color.Gray, fontFamily = FontFamily.Monospace)
                     Spacer(modifier = Modifier.height(4.dp))
                     Text(
                         text = digiRom,
@@ -980,11 +1011,12 @@ fun DigiVaultScreen(
                             clipboardManager.setText(AnnotatedString(code))
                             Toast.makeText(context, "Base32 Comm Code copied!", Toast.LENGTH_SHORT).show()
                             commCodeDialogData = null
-                        }
+                        },
+                        shape = RoundedCornerShape(6.dp)
                     ) {
-                        Icon(Icons.Default.ContentCopy, contentDescription = "Copy", modifier = Modifier.size(14.dp))
+                        DigiVectorIcon(type = DigiIconType.COPY, size = 14.dp, tint = Color.White)
                         Spacer(modifier = Modifier.width(4.dp))
-                        Text("Base32", fontSize = 11.sp)
+                        Text("Base32", fontSize = 11.sp, fontFamily = FontFamily.Monospace)
                     }
                     Button(
                         onClick = {
@@ -992,17 +1024,18 @@ fun DigiVaultScreen(
                             Toast.makeText(context, "DigiROM Packet copied!", Toast.LENGTH_SHORT).show()
                             commCodeDialogData = null
                         },
-                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFB8C00))
+                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFB8C00)),
+                        shape = RoundedCornerShape(6.dp)
                     ) {
-                        Icon(Icons.Default.ContentCopy, contentDescription = "Copy ROM", modifier = Modifier.size(14.dp))
+                        DigiVectorIcon(type = DigiIconType.COPY, size = 14.dp, tint = Color.White)
                         Spacer(modifier = Modifier.width(4.dp))
-                        Text("DigiROM", fontSize = 11.sp)
+                        Text("DigiROM", fontSize = 11.sp, fontFamily = FontFamily.Monospace)
                     }
                 }
             },
             dismissButton = {
                 TextButton(onClick = { commCodeDialogData = null }) {
-                    Text("Close")
+                    Text("CLOSE", color = Color(0xFFB0BEC5), fontFamily = FontFamily.Monospace, fontSize = 11.sp)
                 }
             }
         )
@@ -1012,8 +1045,11 @@ fun DigiVaultScreen(
     deleteConfirmPet?.let { petToDelete ->
         AlertDialog(
             onDismissRequest = { deleteConfirmPet = null },
-            title = { Text("Release Digimon?") },
-            text = { Text("Are you sure you want to release ${petToDelete.speciesName} from DigiVault? This cannot be undone.") },
+            containerColor = DigiWearPalette.CardSurface,
+            shape = RoundedCornerShape(12.dp),
+            modifier = Modifier.border(BorderStroke(1.dp, DigiWearPalette.CardBorder), RoundedCornerShape(12.dp)),
+            title = { Text("Release Digimon?", fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold, color = Color.White) },
+            text = { Text("Are you sure you want to release ${petToDelete.speciesName} from DigiVault? This cannot be undone.", fontFamily = FontFamily.Monospace, color = Color.LightGray, fontSize = 11.sp) },
             confirmButton = {
                 Button(
                     onClick = {
@@ -1023,14 +1059,15 @@ fun DigiVaultScreen(
                             actionStatusMessage = "${petToDelete.speciesName} released from vault."
                         }
                     },
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFD32F2F))
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFD32F2F)),
+                    shape = RoundedCornerShape(6.dp)
                 ) {
-                    Text("Release")
+                    Text("RELEASE", color = Color.White, fontWeight = FontWeight.Bold, fontFamily = FontFamily.Monospace, fontSize = 11.sp)
                 }
             },
             dismissButton = {
                 TextButton(onClick = { deleteConfirmPet = null }) {
-                    Text("Cancel")
+                    Text("CANCEL", color = Color(0xFFB0BEC5), fontFamily = FontFamily.Monospace, fontSize = 11.sp)
                 }
             }
         )
@@ -1055,11 +1092,15 @@ fun DigiVaultScreen(
 
         AlertDialog(
             onDismissRequest = { pendingFusionExecution = null },
+            containerColor = DigiWearPalette.CardSurface,
+            shape = RoundedCornerShape(12.dp),
+            modifier = Modifier.border(BorderStroke(1.dp, DigiWearPalette.CardBorder), RoundedCornerShape(12.dp)),
             title = {
                 Text(
                     text = "${recipe.fusionType.displayName} Awakening",
                     fontWeight = FontWeight.Bold,
-                    color = Color(recipe.fusionType.badgeColorHex)
+                    color = Color(recipe.fusionType.badgeColorHex),
+                    fontFamily = FontFamily.Monospace
                 )
             },
             text = {
@@ -1210,14 +1251,15 @@ fun DigiVaultScreen(
                             actionStatusMessage = "Awakened ${targetSp.name} via ${recipe.fusionType.displayName}!"
                         }
                     },
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF00E676))
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF00E676)),
+                    shape = RoundedCornerShape(6.dp)
                 ) {
-                    Text("Awaken ${targetSp.name}!", fontWeight = FontWeight.Black, color = Color.Black)
+                    Text("AWAKEN ${targetSp.name.uppercase()}!", fontWeight = FontWeight.Black, color = Color.Black, fontFamily = FontFamily.Monospace, fontSize = 11.sp)
                 }
             },
             dismissButton = {
                 TextButton(onClick = { pendingFusionExecution = null }) {
-                    Text("Cancel", color = Color.Gray)
+                    Text("CANCEL", color = Color(0xFFB0BEC5), fontFamily = FontFamily.Monospace, fontSize = 11.sp)
                 }
             }
         )
@@ -1409,7 +1451,7 @@ private fun VaultPetCard(
                     modifier = Modifier.height(32.dp),
                     colors = ButtonDefaults.outlinedButtonColors(contentColor = Color(0xFFEF5350))
                 ) {
-                    Icon(Icons.Default.Delete, contentDescription = "Delete", modifier = Modifier.size(14.dp))
+                    DigiVectorIcon(type = DigiIconType.CLOSE, size = 14.dp, tint = Color(0xFFEF5350))
                 }
 
                 Spacer(modifier = Modifier.width(8.dp))
@@ -1419,7 +1461,7 @@ private fun VaultPetCard(
                     modifier = Modifier.height(32.dp),
                     colors = ButtonDefaults.outlinedButtonColors(contentColor = DigiWearPalette.CrestGold)
                 ) {
-                    Icon(Icons.Default.FlashOn, contentDescription = "Comm Code", modifier = Modifier.size(14.dp))
+                    DigiVectorIcon(type = DigiIconType.BOLT, size = 14.dp, tint = DigiWearPalette.CrestGold)
                     Spacer(modifier = Modifier.width(4.dp))
                     Text("D-COM CODE", fontSize = 9.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
                 }
@@ -1431,7 +1473,7 @@ private fun VaultPetCard(
                     modifier = Modifier.height(32.dp),
                     colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF00897B))
                 ) {
-                    Icon(Icons.AutoMirrored.Filled.Send, contentDescription = "Deploy", modifier = Modifier.size(14.dp))
+                    DigiVectorIcon(type = DigiIconType.BEAM_ANTENNA, size = 14.dp, tint = Color.White)
                     Spacer(modifier = Modifier.width(4.dp))
                     Text("DEPLOY TO WATCH", fontSize = 9.sp, fontWeight = FontWeight.Bold, fontFamily = FontFamily.Monospace)
                 }
@@ -1449,8 +1491,8 @@ private fun FilterChip(text: String, isSelected: Boolean, onClick: () -> Unit) {
                 RoundedCornerShape(8.dp)
             )
             .border(
-                1.dp,
-                if (isSelected) Color(0xFF80CBC4) else DigiWearPalette.CardBorder,
+                if (isSelected) 1.5.dp else 1.dp,
+                if (isSelected) Color(0xFF64FFDA) else DigiWearPalette.CardBorder,
                 RoundedCornerShape(8.dp)
             )
             .clickable(onClick = onClick)

@@ -24,17 +24,10 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Archive
-import androidx.compose.material.icons.filled.AutoAwesome
-import androidx.compose.material.icons.filled.Bolt
-import androidx.compose.material.icons.filled.Refresh
-import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -357,7 +350,7 @@ fun PetDashboardScreen(
                             shape = RoundedCornerShape(8.dp),
                             contentPadding = PaddingValues(horizontal = 10.dp, vertical = 6.dp)
                         ) {
-                            Icon(Icons.Default.Refresh, contentDescription = "Sync", modifier = Modifier.size(13.dp), tint = DigiWearPalette.DigiviceCyan)
+                            DigiVectorIcon(type = DigiIconType.SCAN, size = 13.dp, tint = DigiWearPalette.DigiviceCyan)
                             Spacer(modifier = Modifier.width(4.dp))
                             Text(
                                 text = if (isSyncing) "SYNCING..." else "SYNC WATCH",
@@ -507,7 +500,7 @@ fun PetDashboardScreen(
                     border = BorderStroke(1.dp, if (vaultDepositSuccess != null) Color(0xFF00E676) else DigiWearPalette.DigiviceCyan),
                     colors = ButtonDefaults.outlinedButtonColors(contentColor = DigiWearPalette.DigiviceCyan)
                 ) {
-                    Icon(Icons.Default.Archive, contentDescription = null, modifier = Modifier.size(16.dp))
+                    DigiVectorIcon(type = DigiIconType.VAULT_SAFE, size = 16.dp, tint = if (vaultDepositSuccess != null) Color(0xFF00E676) else DigiWearPalette.DigiviceCyan)
                     Spacer(modifier = Modifier.width(6.dp))
                     Text(
                         text = vaultDepositSuccess ?: "FREEZE & DEPOSIT PARTNER TO DIGIVAULT",
@@ -795,7 +788,7 @@ fun PetDashboardScreen(
                     ) {
                         Column(modifier = Modifier.padding(10.dp)) {
                             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                                Icon(Icons.Default.Settings, contentDescription = null, tint = DigiWearPalette.DigiviceCyan, modifier = Modifier.size(12.dp))
+                                DigiVectorIcon(type = DigiIconType.SETTINGS_GEAR, tint = DigiWearPalette.DigiviceCyan, size = 12.dp)
                                 Text("WATCH SETTINGS", fontSize = 10.sp, fontWeight = FontWeight.Bold, color = DigiWearPalette.DigiviceCyan, fontFamily = FontFamily.Monospace)
                             }
                             Spacer(modifier = Modifier.height(2.dp))

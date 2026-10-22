@@ -1238,7 +1238,7 @@ private fun ThreeButtonPetView(
                         }
                     } else {
                         val promptText = if (selectedMenuIndex != null) {
-                            "► ${VPetMenu.entries[selectedMenuIndex].label} ◄"
+                            "[ ${VPetMenu.entries[selectedMenuIndex].label} ]"
                         } else actionFeedback ?: if (petState.isSleeping) "ZZZ... SLEEPING" else null
 
                         if (promptText != null) {

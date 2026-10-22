@@ -26,6 +26,7 @@ class SettingsSyncTest {
             "theme",
             "vibration",
             "vpet_3button_mode",
+            "vpet_button_placement",
             "pendulum_shake_mode",
             "sound_enabled",
             "nfc_bridge_mode",
@@ -35,13 +36,16 @@ class SettingsSyncTest {
             "sleep_schedule",
             "ambient_display_style",
             "hazard_alerts_enabled",
-            "clock_format_24h"
+            "clock_format_24h",
+            "lifespan_canonical_enabled",
+            "combat_injuries_enabled"
         )
 
         val sampleSettings = mapOf(
             "theme" to BackgroundTheme.CLASSIC_VPET_LCD.id,
             "vibration" to "true",
             "vpet_3button_mode" to "true",
+            "vpet_button_placement" to "RIGHT",
             "pendulum_shake_mode" to "false",
             "sound_enabled" to "true",
             "nfc_bridge_mode" to "NFC_DUEL",
@@ -51,23 +55,30 @@ class SettingsSyncTest {
             "sleep_schedule" to "21:00_07:00",
             "ambient_display_style" to "MINIMAL_DOT",
             "hazard_alerts_enabled" to "true",
-            "clock_format_24h" to "false"
+            "clock_format_24h" to "false",
+            "lifespan_canonical_enabled" to "true",
+            "combat_injuries_enabled" to "true"
         )
 
-        assertEquals("Settings map must have all 13 required keys", requiredKeys, sampleSettings.keys)
+        assertEquals("Settings map must have all 16 required keys", requiredKeys, sampleSettings.keys)
 
         // Verify parsing logic
         assertEquals(BackgroundTheme.CLASSIC_VPET_LCD, BackgroundTheme.fromId(sampleSettings["theme"]!!))
         assertTrue(sampleSettings["vibration"]!!.toBoolean())
         assertTrue(sampleSettings["vpet_3button_mode"]!!.toBoolean())
+        assertEquals("RIGHT", sampleSettings["vpet_button_placement"])
         assertTrue(!sampleSettings["pendulum_shake_mode"]!!.toBoolean())
         assertTrue(sampleSettings["sound_enabled"]!!.toBoolean())
+        assertEquals("NFC_DUEL", sampleSettings["nfc_bridge_mode"])
+        assertEquals("AUTO", sampleSettings["display_shape_override"])
         assertEquals(5000, sampleSettings["daily_step_goal"]!!.toInt())
         assertEquals("MEDIUM", sampleSettings["lcd_contrast_level"])
         assertEquals("21:00_07:00", sampleSettings["sleep_schedule"])
         assertEquals("MINIMAL_DOT", sampleSettings["ambient_display_style"])
         assertTrue(sampleSettings["hazard_alerts_enabled"]!!.toBoolean())
         assertTrue(!sampleSettings["clock_format_24h"]!!.toBoolean())
+        assertTrue(sampleSettings["lifespan_canonical_enabled"]!!.toBoolean())
+        assertTrue(sampleSettings["combat_injuries_enabled"]!!.toBoolean())
     }
 
     @Test

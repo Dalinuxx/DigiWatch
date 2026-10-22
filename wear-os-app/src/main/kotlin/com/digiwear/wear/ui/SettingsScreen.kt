@@ -1,6 +1,7 @@
 package com.digiwear.wear.ui
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -13,6 +14,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -234,13 +236,16 @@ fun SettingsScreen(
                         repository.setContrastLevel(next)
                         if (isVibrationEnabled) hapticManager.playStepMilestone()
                     },
-                    modifier = Modifier.size(width = 54.dp, height = 30.dp),
+                    modifier = Modifier
+                        .size(width = 54.dp, height = 30.dp)
+                        .border(1.5.dp, Color(0xFF00E5FF), CircleShape),
                     colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFF37474F))
                 ) {
                     Text(
                         text = contrastLevel,
                         fontSize = 8.sp,
-                        fontWeight = FontWeight.Bold
+                        fontWeight = FontWeight.Bold,
+                        color = Color.White
                     )
                 }
             }
@@ -465,13 +470,16 @@ fun SettingsScreen(
                         repository.setDailyStepGoal(nextGoal)
                         if (isVibrationEnabled) hapticManager.playStepMilestone()
                     },
-                    modifier = Modifier.size(width = 58.dp, height = 30.dp),
+                    modifier = Modifier
+                        .size(width = 58.dp, height = 30.dp)
+                        .border(1.5.dp, Color(0xFF00E5FF), CircleShape),
                     colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFF00838F))
                 ) {
                     Text(
                         text = "${dailyStepGoal / 1000}K",
                         fontSize = 8.sp,
-                        fontWeight = FontWeight.Bold
+                        fontWeight = FontWeight.Bold,
+                        color = Color.White
                     )
                 }
             }
@@ -510,13 +518,16 @@ fun SettingsScreen(
                         repository.setSleepSchedule(next)
                         if (isVibrationEnabled) hapticManager.playStepMilestone()
                     },
-                    modifier = Modifier.size(width = 58.dp, height = 30.dp),
+                    modifier = Modifier
+                        .size(width = 58.dp, height = 30.dp)
+                        .border(1.5.dp, Color(0xFF00E5FF), CircleShape),
                     colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFF4527A0))
                 ) {
                     Text(
                         text = sleepSchedule.substringBefore("_"),
                         fontSize = 8.sp,
-                        fontWeight = FontWeight.Bold
+                        fontWeight = FontWeight.Bold,
+                        color = Color.White
                     )
                 }
             }
@@ -555,7 +566,9 @@ fun SettingsScreen(
                         repository.setAmbientStyle(next)
                         if (isVibrationEnabled) hapticManager.playStepMilestone()
                     },
-                    modifier = Modifier.size(width = 58.dp, height = 30.dp),
+                    modifier = Modifier
+                        .size(width = 58.dp, height = 30.dp)
+                        .border(1.5.dp, Color(0xFF00E5FF), CircleShape),
                     colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFF2E7D32))
                 ) {
                     Text(
@@ -565,7 +578,8 @@ fun SettingsScreen(
                             else -> "DOT"
                         },
                         fontSize = 8.sp,
-                        fontWeight = FontWeight.Bold
+                        fontWeight = FontWeight.Bold,
+                        color = Color.White
                     )
                 }
             }
@@ -737,7 +751,9 @@ fun SettingsScreen(
                         repository.setNfcBridgeMode(nextMode)
                         if (isVibrationEnabled) hapticManager.playStepMilestone()
                     },
-                    modifier = Modifier.size(width = 58.dp, height = 30.dp),
+                    modifier = Modifier
+                        .size(width = 58.dp, height = 30.dp)
+                        .border(1.5.dp, Color(0xFF00E5FF), CircleShape),
                     colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFF0277BD))
                 ) {
                     Text(
@@ -747,7 +763,8 @@ fun SettingsScreen(
                             else -> "DUEL"
                         },
                         fontSize = 8.sp,
-                        fontWeight = FontWeight.Bold
+                        fontWeight = FontWeight.Bold,
+                        color = Color.White
                     )
                 }
             }

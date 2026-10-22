@@ -645,7 +645,7 @@ fun AdventureScreen(
                     modifier = Modifier.fillMaxWidth().height(26.dp).padding(horizontal = 4.dp),
                     colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFF37474F))
                 ) {
-                    Text("CLOSE", fontSize = 8.sp)
+                    Text("BACK [C]", fontSize = 9.sp, fontWeight = FontWeight.Bold, fontFamily = FontFamily.Monospace)
                 }
             }
         }
@@ -765,7 +765,7 @@ fun AdventureScreen(
                     modifier = Modifier.fillMaxWidth().height(26.dp).padding(horizontal = 4.dp),
                     colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFF37474F))
                 ) {
-                    Text("CLOSE", fontSize = 8.sp)
+                    Text("BACK [C]", fontSize = 9.sp, fontWeight = FontWeight.Bold, fontFamily = FontFamily.Monospace)
                 }
             }
         }
@@ -1257,7 +1257,7 @@ fun AdventureScreen(
                     .padding(horizontal = displayConfig.horizontalPadding),
                 colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFF37474F))
             ) {
-                Text("BACK", fontSize = 10.sp)
+                Text("BACK [C]", fontSize = 9.sp, fontWeight = FontWeight.Bold, fontFamily = FontFamily.Monospace)
             }
         }
     }

@@ -719,7 +719,7 @@ fun StatusScreen(
                         .padding(horizontal = displayConfig.horizontalPadding),
                     colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFF263238))
                 ) {
-                    Text("BACK [B / C]", fontSize = 9.sp, fontWeight = FontWeight.Bold, fontFamily = FontFamily.Monospace)
+                    Text("BACK [C]", fontSize = 9.sp, fontWeight = FontWeight.Bold, fontFamily = FontFamily.Monospace)
                 }
             }
         }
@@ -839,7 +839,7 @@ fun StatusScreen(
                                 .padding(horizontal = displayConfig.horizontalPadding),
                             colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFF263238))
                         ) {
-                            Text("CLOSE [C]", fontSize = 8.sp, fontFamily = FontFamily.Monospace)
+                            Text("BACK [C]", fontSize = 9.sp, fontWeight = FontWeight.Bold, fontFamily = FontFamily.Monospace)
                         }
                     }
                 }

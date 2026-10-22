@@ -180,15 +180,35 @@ object PetSimulationEngine {
     ): Boolean {
         val baseStart = stage.sleepStartHour ?: return false
         val baseEnd = stage.sleepEndHour ?: return false
-        val (start, end) = when (sleepScheduleMode.uppercase()) {
-            "NIGHT_OWL" -> 0 to 8
-            "EARLY_BIRD" -> 21 to 6
-            else -> baseStart to baseEnd
+        val trimmed = sleepScheduleMode.trim().uppercase()
+        val (startMinutes, endMinutes) = when (trimmed) {
+            "NIGHT_OWL" -> (0 * 60) to (8 * 60)
+            "EARLY_BIRD" -> (21 * 60) to (6 * 60)
+            else -> {
+                val delimiter = if (trimmed.contains("_")) "_" else if (trimmed.contains("-")) "-" else null
+                if (delimiter != null) {
+                    val parts = trimmed.split(delimiter)
+                    val bedParts = parts.getOrNull(0)?.trim()?.split(":")
+                    val wakeParts = parts.getOrNull(1)?.trim()?.split(":")
+                    val bedHour = bedParts?.getOrNull(0)?.toIntOrNull()
+                    val bedMin = bedParts?.getOrNull(1)?.toIntOrNull() ?: 0
+                    val wakeHour = wakeParts?.getOrNull(0)?.toIntOrNull()
+                    val wakeMin = wakeParts?.getOrNull(1)?.toIntOrNull() ?: 0
+                    if (bedHour != null && wakeHour != null) {
+                        (bedHour * 60 + bedMin) to (wakeHour * 60 + wakeMin)
+                    } else {
+                        (baseStart * 60) to (baseEnd * 60)
+                    }
+                } else {
+                    (baseStart * 60) to (baseEnd * 60)
+                }
+            }
         }
-        return if (start > end) {
-            hour >= start || hour < end
+        val currentMinutes = hour * 60 + minute
+        return if (startMinutes > endMinutes) {
+            currentMinutes >= startMinutes || currentMinutes < endMinutes
         } else {
-            hour in start until end
+            currentMinutes in startMinutes until endMinutes
         }
     }
 

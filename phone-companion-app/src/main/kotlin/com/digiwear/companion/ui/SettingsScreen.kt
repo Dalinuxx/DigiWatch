@@ -22,26 +22,11 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.HelpOutline
-import androidx.compose.material.icons.filled.Archive
-import androidx.compose.material.icons.filled.Bolt
-import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.CloudDownload
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.FileDownload
-import androidx.compose.material.icons.filled.FileUpload
-import androidx.compose.material.icons.filled.Refresh
-import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material.icons.filled.Warning
-import androidx.compose.material.icons.filled.Watch
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
@@ -65,6 +50,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
@@ -111,10 +97,12 @@ fun SettingsScreen(
     var displayShapeOverride by remember { mutableStateOf("AUTO") }
     var dailyStepGoal by remember { mutableIntStateOf(5000) }
     var contrastLevel by remember { mutableStateOf("MEDIUM") }
-    var sleepSchedule by remember { mutableStateOf("CANONICAL") }
+    var sleepSchedule by remember { mutableStateOf("21:00_07:00") }
     var ambientStyle by remember { mutableStateOf("MINIMAL_DOT") }
     var hazardAlertsEnabled by remember { mutableStateOf(true) }
     var clockFormat24h by remember { mutableStateOf(false) }
+    var lifespanCanonicalEnabled by remember { mutableStateOf(true) }
+    var combatInjuriesEnabled by remember { mutableStateOf(true) }
     var aospWatchIp by remember { mutableStateOf("") }
     var isAutoDetectingAosp by remember { mutableStateOf(false) }
 
@@ -143,6 +131,8 @@ fun SettingsScreen(
             watchSettings["ambient_display_style"]?.let { ambientStyle = it }
             watchSettings["hazard_alerts_enabled"]?.let { hazardAlertsEnabled = it.toBoolean() }
             watchSettings["clock_format_24h"]?.let { clockFormat24h = it.toBoolean() }
+            watchSettings["lifespan_canonical_enabled"]?.let { lifespanCanonicalEnabled = it.toBoolean() }
+            watchSettings["combat_injuries_enabled"]?.let { combatInjuriesEnabled = it.toBoolean() }
         }
         aospWatchIp = wearableManager.getConfiguredAospWatchIp()
     }
@@ -262,7 +252,7 @@ fun SettingsScreen(
                         shape = RoundedCornerShape(8.dp),
                         border = BorderStroke(1.dp, DigiWearPalette.DigiviceCyan)
                     ) {
-                        Icon(Icons.Default.Refresh, contentDescription = "Refresh", modifier = Modifier.size(13.dp), tint = DigiWearPalette.DigiviceCyan)
+                        DigiVectorIcon(type = DigiIconType.SCAN, size = 13.dp, tint = DigiWearPalette.DigiviceCyan)
                         Spacer(modifier = Modifier.width(4.dp))
                         Text(if (isSyncing) "CHECKING..." else "REFRESH", fontSize = 10.sp, fontFamily = FontFamily.Monospace, color = DigiWearPalette.DigiviceCyan)
                     }
@@ -279,7 +269,7 @@ fun SettingsScreen(
                     ) {
                         Column {
                             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                                Icon(Icons.Default.Watch, contentDescription = null, tint = Color(0xFFFFB74D), modifier = Modifier.size(14.dp))
+                                DigiVectorIcon(type = DigiIconType.WATCH, size = 14.dp, tint = Color(0xFFFFB74D))
                                 Text(
                                     text = "PAIRING SUGGESTION",
                                     fontSize = 10.sp,
@@ -315,7 +305,7 @@ fun SettingsScreen(
         ) {
             Column(modifier = Modifier.padding(14.dp)) {
                 Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                    Icon(Icons.Default.Bolt, contentDescription = null, tint = Color(0xFF00E5FF), modifier = Modifier.size(16.dp))
+                    DigiVectorIcon(type = DigiIconType.BOLT, size = 16.dp, tint = Color(0xFF00E5FF))
                     Text(
                         text = "WIRELESS ADB SIDELOAD TO WATCH",
                         fontSize = 11.sp,
@@ -611,6 +601,34 @@ fun SettingsScreen(
                     }
                 }
 
+                // Button Rail Placement
+                Text(text = "BUTTON RAIL PLACEMENT:", fontSize = 10.sp, fontWeight = FontWeight.Bold, color = Color(0xFF80CBC4), fontFamily = FontFamily.Monospace)
+                Spacer(modifier = Modifier.height(4.dp))
+                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    listOf("RIGHT" to "RIGHT (BANDAI OG)", "LEFT" to "LEFT").forEach { (placeId, label) ->
+                        val active = buttonPlacement == placeId
+                        Box(
+                            modifier = Modifier
+                                .weight(1f)
+                                .background(if (active) Color(0xFF00695C) else DigiWearPalette.CardInner, RoundedCornerShape(8.dp))
+                                .border(if (active) 1.5.dp else 1.dp, if (active) Color(0xFF64FFDA) else Color(0xFF37474F), RoundedCornerShape(8.dp))
+                                .clickable { buttonPlacement = placeId }
+                                .padding(vertical = 8.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                text = label,
+                                fontSize = 9.5.sp,
+                                fontWeight = if (active) FontWeight.Bold else FontWeight.Medium,
+                                color = if (active) Color.White else Color(0xFFB0BEC5),
+                                fontFamily = FontFamily.Monospace
+                            )
+                        }
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(10.dp))
+
                 SettingSwitchRow(
                     title = "24-HOUR CLOCK FORMAT",
                     subtitle = if (clockFormat24h) "24H military format on watch face (e.g. 15:45)" else "12H standard format with AM/PM (e.g. 3:45 PM)",
@@ -624,6 +642,88 @@ fun SettingsScreen(
                     checked = hazardAlertsEnabled,
                     onCheckedChange = { hazardAlertsEnabled = it }
                 )
+
+                SettingSwitchRow(
+                    title = "CANONICAL 1997 LIFESPAN",
+                    subtitle = "Faithful 1997 death and traited egg inheritance vs modern immortal",
+                    checked = lifespanCanonicalEnabled,
+                    onCheckedChange = { lifespanCanonicalEnabled = it }
+                )
+
+                SettingSwitchRow(
+                    title = "BATTLE INJURIES",
+                    subtitle = "25% defeat injury risk requiring first aid vs safe sparring",
+                    checked = combatInjuriesEnabled,
+                    onCheckedChange = { combatInjuriesEnabled = it }
+                )
+
+                Spacer(modifier = Modifier.height(10.dp))
+
+                // Sleep Schedule
+                Text(text = "SLEEP SCHEDULE:", fontSize = 10.sp, fontWeight = FontWeight.Bold, color = Color(0xFFB39DDB), fontFamily = FontFamily.Monospace)
+                Spacer(modifier = Modifier.height(4.dp))
+                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                    listOf(
+                        "20:00_07:00" to "20:00\n07:00",
+                        "21:00_07:00" to "21:00\n07:00",
+                        "22:00_08:00" to "22:00\n08:00",
+                        "23:00_08:00" to "23:00\n08:00"
+                    ).forEach { (schedId, label) ->
+                        val active = sleepSchedule == schedId
+                        Box(
+                            modifier = Modifier
+                                .weight(1f)
+                                .background(if (active) Color(0xFF4527A0) else DigiWearPalette.CardInner, RoundedCornerShape(8.dp))
+                                .border(if (active) 1.5.dp else 1.dp, if (active) Color(0xFFB39DDB) else Color(0xFF37474F), RoundedCornerShape(8.dp))
+                                .clickable { sleepSchedule = schedId }
+                                .padding(vertical = 8.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                text = label,
+                                fontSize = 8.5.sp,
+                                fontWeight = if (active) FontWeight.Bold else FontWeight.Medium,
+                                color = if (active) Color.White else Color(0xFFB0BEC5),
+                                fontFamily = FontFamily.Monospace,
+                                textAlign = TextAlign.Center,
+                                lineHeight = 11.sp
+                            )
+                        }
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(10.dp))
+
+                // Ambient Display Style
+                Text(text = "AMBIENT DISPLAY STYLE:", fontSize = 10.sp, fontWeight = FontWeight.Bold, color = Color(0xFF81C784), fontFamily = FontFamily.Monospace)
+                Spacer(modifier = Modifier.height(4.dp))
+                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                    listOf(
+                        "MINIMAL_DOT" to "MINIMAL DOT",
+                        "OUTLINE" to "OUTLINE WIRE",
+                        "DIMMED_LCD" to "DIMMED RETRO"
+                    ).forEach { (styleId, label) ->
+                        val active = ambientStyle == styleId
+                        Box(
+                            modifier = Modifier
+                                .weight(1f)
+                                .background(if (active) Color(0xFF2E7D32) else DigiWearPalette.CardInner, RoundedCornerShape(8.dp))
+                                .border(if (active) 1.5.dp else 1.dp, if (active) Color(0xFF81C784) else Color(0xFF37474F), RoundedCornerShape(8.dp))
+                                .clickable { ambientStyle = styleId }
+                                .padding(vertical = 8.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                text = label,
+                                fontSize = 8.5.sp,
+                                fontWeight = if (active) FontWeight.Bold else FontWeight.Medium,
+                                color = if (active) Color.White else Color(0xFFB0BEC5),
+                                fontFamily = FontFamily.Monospace,
+                                textAlign = TextAlign.Center
+                            )
+                        }
+                    }
+                }
 
                 Spacer(modifier = Modifier.height(10.dp))
 
@@ -700,7 +800,9 @@ fun SettingsScreen(
                                 sleepSchedule = sleepSchedule,
                                 ambientStyle = ambientStyle,
                                 hazardAlertsEnabled = hazardAlertsEnabled,
-                                clockFormat24h = clockFormat24h
+                                clockFormat24h = clockFormat24h,
+                                lifespanCanonicalEnabled = lifespanCanonicalEnabled,
+                                combatInjuriesEnabled = combatInjuriesEnabled
                             )
                             syncStatus = if (sent) "Successfully beamed settings to Smartwatch!" else "Settings saved locally on Phone."
                         }
@@ -747,7 +849,7 @@ fun SettingsScreen(
                         shape = RoundedCornerShape(8.dp),
                         border = BorderStroke(1.dp, Color(0xFFCE93D8))
                     ) {
-                        Icon(Icons.Default.Archive, contentDescription = null, tint = Color(0xFFCE93D8), modifier = Modifier.size(14.dp))
+                        DigiVectorIcon(type = DigiIconType.VAULT_SAFE, size = 14.dp, tint = Color(0xFFCE93D8))
                         Spacer(modifier = Modifier.width(4.dp))
                         Text("BACKUP / JSON", fontSize = 10.sp, color = Color(0xFFCE93D8), fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
                     }
@@ -758,7 +860,7 @@ fun SettingsScreen(
                         shape = RoundedCornerShape(8.dp),
                         border = BorderStroke(1.dp, Color(0xFFFF5252))
                     ) {
-                        Icon(Icons.Default.Delete, contentDescription = null, tint = Color(0xFFFF5252), modifier = Modifier.size(14.dp))
+                        DigiVectorIcon(type = DigiIconType.CLOSE, size = 14.dp, tint = Color(0xFFFF5252))
                         Spacer(modifier = Modifier.width(4.dp))
                         Text("WIPE DATA", fontSize = 10.sp, color = Color(0xFFFF5252), fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
                     }
@@ -834,8 +936,26 @@ fun SettingsScreen(
     if (showResetConfirmDialog) {
         AlertDialog(
             onDismissRequest = { showResetConfirmDialog = false },
-            title = { Text("Reset Companion Database?") },
-            text = { Text("This will clear all local companion snapshots, cryo-vault partners, and discovered species. Smartwatch data is not affected.") },
+            containerColor = DigiWearPalette.CardSurface,
+            shape = RoundedCornerShape(12.dp),
+            modifier = Modifier.border(BorderStroke(1.dp, DigiWearPalette.CardBorder), RoundedCornerShape(12.dp)),
+            title = {
+                Text(
+                    text = "Reset Companion Database?",
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.White,
+                    fontFamily = FontFamily.Monospace
+                )
+            },
+            text = {
+                Text(
+                    text = "This will clear all local companion snapshots, cryo-vault partners, and discovered species. Smartwatch data is not affected.",
+                    fontSize = 11.sp,
+                    color = Color(0xFFB0BEC5),
+                    fontFamily = FontFamily.Monospace
+                )
+            },
             confirmButton = {
                 Button(
                     onClick = {
@@ -846,14 +966,15 @@ fun SettingsScreen(
                             syncStatus = "Companion database reset to clean state."
                         }
                     },
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFF5252))
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFF5252)),
+                    shape = RoundedCornerShape(6.dp)
                 ) {
-                    Text("RESET DATA", color = Color.White)
+                    Text("RESET DATA", color = Color.White, fontWeight = FontWeight.Bold, fontFamily = FontFamily.Monospace, fontSize = 11.sp)
                 }
             },
             dismissButton = {
                 TextButton(onClick = { showResetConfirmDialog = false }) {
-                    Text("CANCEL")
+                    Text("CANCEL", color = Color(0xFFB0BEC5), fontWeight = FontWeight.Bold, fontFamily = FontFamily.Monospace, fontSize = 11.sp)
                 }
             }
         )
