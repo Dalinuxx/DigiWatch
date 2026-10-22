@@ -55,13 +55,30 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import android.graphics.Bitmap
+import android.net.Uri
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.ui.draw.drawWithCache
+import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.PointMode
+import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.unit.IntSize
 import com.digiwear.companion.BuildConfig
 import com.digiwear.companion.data.PhoneDatabase
 import com.digiwear.companion.data.SyncedPetEntity
 import com.digiwear.companion.datalayer.PhoneWearableManager
+import com.digiwear.companion.render.SpriteCanvasRenderer
+import com.digiwear.companion.render.WallpaperProcessor
 import com.digiwear.core.model.BackgroundTheme
+import com.digiwear.core.model.CustomThemeConfig
+import com.digiwear.core.model.LcdPattern
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import java.util.Locale
 
 /**
  * Dedicated Settings and Diagnostics screen for DigiWear.
@@ -106,33 +123,115 @@ fun SettingsScreen(
     var aospWatchIp by remember { mutableStateOf("") }
     var isAutoDetectingAosp by remember { mutableStateOf(false) }
 
+    // Custom Theme & Wallpaper Builder State
+    var customPrimaryHex by remember { mutableStateOf(0xFF8B956DL) }
+    var customGridHex by remember { mutableStateOf(0xFF9CA67EL) }
+    var customPattern by remember { mutableStateOf(LcdPattern.DOT_MATRIX) }
+    var customWallpaperBitmap by remember { mutableStateOf<Bitmap?>(null) }
+    var customThemeTab by remember { mutableIntStateOf(0) } // 0 = Matrix Builder, 1 = Photo Wallpaper
+
+    // Custom Sleep Schedule Picker State
+    var showSleepSchedulePicker by remember { mutableStateOf(false) }
+    var customBedHour by remember { mutableIntStateOf(22) }
+    var customBedMinute by remember { mutableIntStateOf(30) }
+    var customWakeHour by remember { mutableIntStateOf(7) }
+    var customWakeMinute by remember { mutableIntStateOf(0) }
+
+    // Photo Wallpaper Gallery Picker Launcher
+    val wallpaperLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent()
+    ) { uri: Uri? ->
+        if (uri != null) {
+            scope.launch {
+                val processed = WallpaperProcessor.processWallpaper(context, uri)
+                if (processed != null) {
+                    WallpaperProcessor.saveToInternalStorage(context, processed)
+                    customWallpaperBitmap = processed
+                    selectedTheme = BackgroundTheme.CUSTOM_WALLPAPER
+                    customThemeTab = 1
+
+                    val pngBytes = WallpaperProcessor.compressToPngBytes(processed)
+                    val sentAsset = wearableManager.sendWallpaperToWatch(pngBytes)
+                    val sentSettings = wearableManager.sendSettingsToWatch(
+                        themeId = CustomThemeConfig.WALLPAPER_THEME_ID,
+                        vibrationEnabled = vibrationEnabled,
+                        threeButtonMode = threeButtonMode,
+                        buttonPlacement = buttonPlacement,
+                        pendulumShakeMode = pendulumShakeMode,
+                        soundEnabled = soundEnabled,
+                        nfcBridgeMode = nfcBridgeMode,
+                        displayShapeOverride = displayShapeOverride,
+                        dailyStepGoal = dailyStepGoal,
+                        contrastLevel = contrastLevel,
+                        sleepSchedule = sleepSchedule,
+                        ambientStyle = ambientStyle,
+                        hazardAlertsEnabled = hazardAlertsEnabled,
+                        clockFormat24h = clockFormat24h,
+                        lifespanCanonicalEnabled = lifespanCanonicalEnabled,
+                        combatInjuriesEnabled = combatInjuriesEnabled
+                    )
+                    syncStatus = if (sentAsset || sentSettings) "Wallpaper imported & beamed to Smartwatch!" else "Wallpaper saved locally on Phone."
+                } else {
+                    Toast.makeText(context, "Failed to decode wallpaper image", Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
+    }
+
     // Backup & Restore State
     var showBackupRestoreModal by remember { mutableStateOf(false) }
     var showResetConfirmDialog by remember { mutableStateOf(false) }
 
+    fun applyWatchSettings(watchSettings: Map<String, String>) {
+        watchSettings["theme"]?.let { themeId ->
+            val parsed = CustomThemeConfig.parse(themeId)
+            if (parsed != null) {
+                selectedTheme = BackgroundTheme.CUSTOM_MATRIX
+                customPrimaryHex = parsed.primaryColorHex
+                customGridHex = parsed.gridColorHex
+                customPattern = parsed.pattern
+            } else if (themeId.equals(CustomThemeConfig.WALLPAPER_THEME_ID, ignoreCase = true)) {
+                selectedTheme = BackgroundTheme.CUSTOM_WALLPAPER
+                customThemeTab = 1
+            } else {
+                selectedTheme = BackgroundTheme.fromId(themeId)
+            }
+        }
+        watchSettings["vibration"]?.let { vibrationEnabled = it.toBoolean() }
+        watchSettings["vpet_3button_mode"]?.let { threeButtonMode = it.toBoolean() }
+        watchSettings["vpet_button_placement"]?.let { buttonPlacement = it }
+        watchSettings["pendulum_shake_mode"]?.let { pendulumShakeMode = it.toBoolean() }
+        watchSettings["sound_enabled"]?.let { soundEnabled = it.toBoolean(); buzzerManager.isEnabled = it.toBoolean() }
+        watchSettings["nfc_bridge_mode"]?.let { nfcBridgeMode = it }
+        watchSettings["display_shape_override"]?.let { displayShapeOverride = it }
+        watchSettings["daily_step_goal"]?.toIntOrNull()?.let { dailyStepGoal = it }
+        watchSettings["lcd_contrast_level"]?.let { contrastLevel = it }
+        watchSettings["sleep_schedule"]?.let { sched ->
+            sleepSchedule = sched
+            val parts = sched.split("_")
+            val bedParts = parts.getOrNull(0)?.split(":")
+            val wakeParts = parts.getOrNull(1)?.split(":")
+            customBedHour = bedParts?.getOrNull(0)?.toIntOrNull() ?: customBedHour
+            customBedMinute = bedParts?.getOrNull(1)?.toIntOrNull() ?: customBedMinute
+            customWakeHour = wakeParts?.getOrNull(0)?.toIntOrNull() ?: customWakeHour
+            customWakeMinute = wakeParts?.getOrNull(1)?.toIntOrNull() ?: customWakeMinute
+        }
+        watchSettings["ambient_display_style"]?.let { ambientStyle = it }
+        watchSettings["hazard_alerts_enabled"]?.let { hazardAlertsEnabled = it.toBoolean() }
+        watchSettings["clock_format_24h"]?.let { clockFormat24h = it.toBoolean() }
+        watchSettings["lifespan_canonical_enabled"]?.let { lifespanCanonicalEnabled = it.toBoolean() }
+        watchSettings["combat_injuries_enabled"]?.let { combatInjuriesEnabled = it.toBoolean() }
+    }
+
     // Initial load
     LaunchedEffect(Unit) {
+        customWallpaperBitmap = WallpaperProcessor.loadFromInternalStorage(context)
         val nodes = wearableManager.getConnectedWatchNodes()
         connectedWatchNodeCount = nodes.size
         hasCheckedConnection = true
-        val watchSettings = wearableManager.requestSettingsFromWatch()
+        val watchSettings = wearableManager.requestSettingsFromWatch() ?: wearableManager.getCachedSettings()
         if (watchSettings != null) {
-            watchSettings["theme"]?.let { selectedTheme = BackgroundTheme.fromId(it) }
-            watchSettings["vibration"]?.let { vibrationEnabled = it.toBoolean() }
-            watchSettings["vpet_3button_mode"]?.let { threeButtonMode = it.toBoolean() }
-            watchSettings["vpet_button_placement"]?.let { buttonPlacement = it }
-            watchSettings["pendulum_shake_mode"]?.let { pendulumShakeMode = it.toBoolean() }
-            watchSettings["sound_enabled"]?.let { soundEnabled = it.toBoolean(); buzzerManager.isEnabled = it.toBoolean() }
-            watchSettings["nfc_bridge_mode"]?.let { nfcBridgeMode = it }
-            watchSettings["display_shape_override"]?.let { displayShapeOverride = it }
-            watchSettings["daily_step_goal"]?.toIntOrNull()?.let { dailyStepGoal = it }
-            watchSettings["lcd_contrast_level"]?.let { contrastLevel = it }
-            watchSettings["sleep_schedule"]?.let { sleepSchedule = it }
-            watchSettings["ambient_display_style"]?.let { ambientStyle = it }
-            watchSettings["hazard_alerts_enabled"]?.let { hazardAlertsEnabled = it.toBoolean() }
-            watchSettings["clock_format_24h"]?.let { clockFormat24h = it.toBoolean() }
-            watchSettings["lifespan_canonical_enabled"]?.let { lifespanCanonicalEnabled = it.toBoolean() }
-            watchSettings["combat_injuries_enabled"]?.let { combatInjuriesEnabled = it.toBoolean() }
+            applyWatchSettings(watchSettings)
         }
         aospWatchIp = wearableManager.getConfiguredAospWatchIp()
     }
@@ -242,9 +341,7 @@ fun SettingsScreen(
                                 connectedWatchNodeCount = nodes.size
                                 val watchSettings = wearableManager.requestSettingsFromWatch()
                                 if (watchSettings != null) {
-                                    watchSettings["theme"]?.let { selectedTheme = BackgroundTheme.fromId(it) }
-                                    watchSettings["vibration"]?.let { vibrationEnabled = it.toBoolean() }
-                                    watchSettings["sound_enabled"]?.let { soundEnabled = it.toBoolean() }
+                                    applyWatchSettings(watchSettings)
                                 }
                                 syncStatus = "Refreshed: ${nodes.size} watch node(s) found"
                                 isSyncing = false
@@ -471,10 +568,15 @@ fun SettingsScreen(
                                 .padding(horizontal = 9.dp, vertical = 7.dp)
                         ) {
                             Row(verticalAlignment = Alignment.CenterVertically) {
+                                val swatchColor = when (theme) {
+                                    BackgroundTheme.CUSTOM_MATRIX -> Color(customPrimaryHex)
+                                    BackgroundTheme.CUSTOM_WALLPAPER -> Color(0xFF00E5FF)
+                                    else -> Color(theme.primaryColorHex)
+                                }
                                 Box(
                                     modifier = Modifier
                                         .size(10.dp)
-                                        .background(Color(theme.primaryColorHex), CircleShape)
+                                        .background(swatchColor, CircleShape)
                                         .border(0.75.dp, if (isSelected) Color(0xFF64FFDA) else Color(0xFF546E7A), CircleShape)
                                 )
                                 Spacer(modifier = Modifier.width(6.dp))
@@ -485,6 +587,387 @@ fun SettingsScreen(
                                     color = if (isSelected) Color.White else Color(0xFFB0BEC5),
                                     fontFamily = FontFamily.Monospace
                                 )
+                            }
+                        }
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(10.dp))
+
+                // --- CUSTOM LCD THEME & WALLPAPER BUILDER CARD ---
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = CardDefaults.cardColors(containerColor = Color(0xFF141E24)),
+                    shape = RoundedCornerShape(12.dp),
+                    border = BorderStroke(1.dp, Color(0xFF00E5FF).copy(alpha = 0.4f))
+                ) {
+                    Column(modifier = Modifier.padding(12.dp)) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Column {
+                                Text(
+                                    text = "CUSTOM LCD & WALLPAPER",
+                                    fontSize = 10.5.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = Color(0xFF00E5FF),
+                                    fontFamily = FontFamily.Monospace
+                                )
+                                Text(
+                                    text = "Matrix builder & photo wallpaper importer",
+                                    fontSize = 8.5.sp,
+                                    color = Color(0xFF90A4AE)
+                                )
+                            }
+                        }
+
+                        Spacer(modifier = Modifier.height(8.dp))
+
+                        // Mode tabs: [ MATRIX BUILDER ] | [ PHOTO WALLPAPER ]
+                        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                            Box(
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .background(if (customThemeTab == 0) Color(0xFF00695C) else DigiWearPalette.CardInner, RoundedCornerShape(6.dp))
+                                    .border(if (customThemeTab == 0) 1.5.dp else 1.dp, if (customThemeTab == 0) Color(0xFF64FFDA) else Color(0xFF37474F), RoundedCornerShape(6.dp))
+                                    .clickable { customThemeTab = 0 }
+                                    .padding(vertical = 6.dp),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text(
+                                    text = "MATRIX BUILDER",
+                                    fontSize = 9.sp,
+                                    fontWeight = if (customThemeTab == 0) FontWeight.Bold else FontWeight.Medium,
+                                    color = if (customThemeTab == 0) Color.White else Color(0xFFB0BEC5),
+                                    fontFamily = FontFamily.Monospace
+                                )
+                            }
+
+                            Box(
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .background(if (customThemeTab == 1) Color(0xFF283593) else DigiWearPalette.CardInner, RoundedCornerShape(6.dp))
+                                    .border(if (customThemeTab == 1) 1.5.dp else 1.dp, if (customThemeTab == 1) Color(0xFF8C9EFF) else Color(0xFF37474F), RoundedCornerShape(6.dp))
+                                    .clickable { customThemeTab = 1 }
+                                    .padding(vertical = 6.dp),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text(
+                                    text = "PHOTO WALLPAPER",
+                                    fontSize = 9.sp,
+                                    fontWeight = if (customThemeTab == 1) FontWeight.Bold else FontWeight.Medium,
+                                    color = if (customThemeTab == 1) Color.White else Color(0xFFB0BEC5),
+                                    fontFamily = FontFamily.Monospace
+                                )
+                            }
+                        }
+
+                        Spacer(modifier = Modifier.height(10.dp))
+
+                        if (customThemeTab == 0) {
+                            // === 1. MATRIX BUILDER ===
+                            Text(text = "BACKLIGHT COLOR:", fontSize = 9.5.sp, fontWeight = FontWeight.Bold, color = Color(0xFFFFD54F), fontFamily = FontFamily.Monospace)
+                            Spacer(modifier = Modifier.height(4.dp))
+                            Row(
+                                modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
+                                horizontalArrangement = Arrangement.spacedBy(6.dp)
+                            ) {
+                                listOf(
+                                    0xFF8B956DL to "Olive 1997",
+                                    0xFFDDAA33L to "Amber",
+                                    0xFF00E5FFL to "Cyber Cyan",
+                                    0xFF00C853L to "Emerald",
+                                    0xFFA8B39BL to "Silver GB",
+                                    0xFF9C27B0L to "Violet",
+                                    0xFFFF5252L to "Coral Red",
+                                    0xFF80D8FFL to "Ice Blue",
+                                    0xFF000000L to "OLED Black"
+                                ).forEach { (colorHex, name) ->
+                                    val isSel = customPrimaryHex == colorHex
+                                    Column(
+                                        horizontalAlignment = Alignment.CenterHorizontally,
+                                        modifier = Modifier
+                                            .clickable { customPrimaryHex = colorHex }
+                                            .padding(2.dp)
+                                    ) {
+                                        Box(
+                                            modifier = Modifier
+                                                .size(28.dp)
+                                                .background(Color(colorHex), RoundedCornerShape(6.dp))
+                                                .border(if (isSel) 2.dp else 1.dp, if (isSel) Color.White else Color(0xFF37474F), RoundedCornerShape(6.dp))
+                                        )
+                                        Text(text = name, fontSize = 7.sp, color = if (isSel) Color.White else Color.Gray, fontFamily = FontFamily.Monospace)
+                                    }
+                                }
+                            }
+
+                            Spacer(modifier = Modifier.height(8.dp))
+
+                            Text(text = "GRID / MATRIX COLOR:", fontSize = 9.5.sp, fontWeight = FontWeight.Bold, color = Color(0xFF80CBC4), fontFamily = FontFamily.Monospace)
+                            Spacer(modifier = Modifier.height(4.dp))
+                            Row(
+                                modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
+                                horizontalArrangement = Arrangement.spacedBy(6.dp)
+                            ) {
+                                listOf(
+                                    0xFF7A845CL to "Olive Shadow",
+                                    0xFF37474FL to "Matrix Shadow",
+                                    0xFF00E5FFL to "Neon Cyan",
+                                    0xFF1A1A1AL to "Charcoal",
+                                    0xFF6C227EL to "Synth Twilight",
+                                    0xFFFFD54FL to "Gold Accent",
+                                    0xFF000000L to "Black"
+                                ).forEach { (colorHex, name) ->
+                                    val isSel = customGridHex == colorHex
+                                    Column(
+                                        horizontalAlignment = Alignment.CenterHorizontally,
+                                        modifier = Modifier
+                                            .clickable { customGridHex = colorHex }
+                                            .padding(2.dp)
+                                    ) {
+                                        Box(
+                                            modifier = Modifier
+                                                .size(28.dp)
+                                                .background(Color(colorHex), RoundedCornerShape(6.dp))
+                                                .border(if (isSel) 2.dp else 1.dp, if (isSel) Color.White else Color(0xFF37474F), RoundedCornerShape(6.dp))
+                                        )
+                                        Text(text = name, fontSize = 7.sp, color = if (isSel) Color.White else Color.Gray, fontFamily = FontFamily.Monospace)
+                                    }
+                                }
+                            }
+
+                            Spacer(modifier = Modifier.height(8.dp))
+
+                            Text(text = "LCD PATTERN:", fontSize = 9.5.sp, fontWeight = FontWeight.Bold, color = Color(0xFFB39DDB), fontFamily = FontFamily.Monospace)
+                            Spacer(modifier = Modifier.height(4.dp))
+                            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                                LcdPattern.entries.forEach { pattern ->
+                                    val isSel = customPattern == pattern
+                                    Box(
+                                        modifier = Modifier
+                                            .weight(1f)
+                                            .background(if (isSel) Color(0xFF4527A0) else DigiWearPalette.CardInner, RoundedCornerShape(6.dp))
+                                            .border(if (isSel) 1.5.dp else 1.dp, if (isSel) Color(0xFFB39DDB) else Color(0xFF37474F), RoundedCornerShape(6.dp))
+                                            .clickable { customPattern = pattern }
+                                            .padding(vertical = 6.dp),
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        Text(
+                                            text = pattern.displayName,
+                                            fontSize = 8.sp,
+                                            fontWeight = if (isSel) FontWeight.Bold else FontWeight.Medium,
+                                            color = if (isSel) Color.White else Color(0xFFB0BEC5),
+                                            fontFamily = FontFamily.Monospace,
+                                            textAlign = TextAlign.Center
+                                        )
+                                    }
+                                }
+                            }
+
+                            Spacer(modifier = Modifier.height(10.dp))
+
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.Center,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Box(
+                                    modifier = Modifier
+                                        .size(130.dp)
+                                        .border(1.5.dp, Color(0xFF64FFDA), RoundedCornerShape(12.dp))
+                                        .drawWithCache {
+                                            val prim = Color(customPrimaryHex)
+                                            val sec = Color(CustomThemeConfig.deriveSecondaryColorHex(customPrimaryHex, customGridHex)).copy(alpha = 0.35f)
+                                            val grid25 = Color(customGridHex).copy(alpha = 0.25f)
+                                            val grid20 = Color(customGridHex).copy(alpha = 0.20f)
+                                            val bezelH = Color(customGridHex).copy(alpha = 0.45f)
+
+                                            val pts = if (customPattern == LcdPattern.DOT_MATRIX) {
+                                                val list = ArrayList<Offset>(500)
+                                                var x = 3.5f
+                                                while (x < size.width) {
+                                                    var y = 3.5f
+                                                    while (y < size.height) {
+                                                        list.add(Offset(x, y))
+                                                        y += 7f
+                                                    }
+                                                    x += 7f
+                                                }
+                                                list
+                                            } else emptyList()
+
+                                            onDrawBehind {
+                                                drawRect(color = prim)
+                                                when (customPattern) {
+                                                    LcdPattern.DOT_MATRIX -> {
+                                                        drawPoints(points = pts, pointMode = PointMode.Points, color = grid25, strokeWidth = 1.5f)
+                                                        drawRoundRect(color = bezelH, topLeft = Offset(3f, 3f), size = Size(size.width - 6f, size.height - 6f), cornerRadius = CornerRadius(10f, 10f), style = Stroke(width = 2f))
+                                                    }
+                                                    LcdPattern.GRID -> {
+                                                        var x = 0f
+                                                        while (x < size.width) {
+                                                            drawLine(color = grid20, start = Offset(x, 0f), end = Offset(x, size.height), strokeWidth = 1f)
+                                                            x += 18f
+                                                        }
+                                                        var y = 0f
+                                                        while (y < size.height) {
+                                                            drawLine(color = grid20, start = Offset(0f, y), end = Offset(size.width, y), strokeWidth = 1f)
+                                                            y += 18f
+                                                        }
+                                                    }
+                                                    LcdPattern.SCANLINES -> {
+                                                        var y = 0f
+                                                        while (y < size.height) {
+                                                            drawLine(color = sec, start = Offset(0f, y), end = Offset(size.width, y), strokeWidth = 1f)
+                                                            y += 10f
+                                                        }
+                                                    }
+                                                    LcdPattern.OLED -> {
+                                                        drawRect(color = prim)
+                                                    }
+                                                }
+                                            }
+                                        },
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    SpriteCanvasRenderer(speciesId = 1, size = 64.dp)
+                                }
+                            }
+
+                            Spacer(modifier = Modifier.height(10.dp))
+
+                            Button(
+                                onClick = {
+                                    val sec = CustomThemeConfig.deriveSecondaryColorHex(customPrimaryHex, customGridHex)
+                                    val config = CustomThemeConfig(customPrimaryHex, sec, customGridHex, customPattern)
+                                    selectedTheme = BackgroundTheme.CUSTOM_MATRIX
+                                    scope.launch {
+                                        val sent = wearableManager.sendSettingsToWatch(
+                                            themeId = config.toThemeId(),
+                                            vibrationEnabled = vibrationEnabled,
+                                            threeButtonMode = threeButtonMode,
+                                            buttonPlacement = buttonPlacement,
+                                            pendulumShakeMode = pendulumShakeMode,
+                                            soundEnabled = soundEnabled,
+                                            nfcBridgeMode = nfcBridgeMode,
+                                            displayShapeOverride = displayShapeOverride,
+                                            dailyStepGoal = dailyStepGoal,
+                                            contrastLevel = contrastLevel,
+                                            sleepSchedule = sleepSchedule,
+                                            ambientStyle = ambientStyle,
+                                            hazardAlertsEnabled = hazardAlertsEnabled,
+                                            clockFormat24h = clockFormat24h,
+                                            lifespanCanonicalEnabled = lifespanCanonicalEnabled,
+                                            combatInjuriesEnabled = combatInjuriesEnabled
+                                        )
+                                        syncStatus = if (sent) "Custom matrix theme beamed to Smartwatch!" else "Custom theme saved locally."
+                                    }
+                                },
+                                modifier = Modifier.fillMaxWidth(),
+                                shape = RoundedCornerShape(8.dp),
+                                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF00BFA5))
+                            ) {
+                                DigiVectorIcon(type = DigiIconType.BEAM_ANTENNA, size = 14.dp, tint = Color.Black)
+                                Spacer(modifier = Modifier.width(6.dp))
+                                Text("APPLY & BEAM CUSTOM THEME", fontSize = 10.sp, fontWeight = FontWeight.Bold, fontFamily = FontFamily.Monospace, color = Color.Black)
+                            }
+                        } else {
+                            // === 2. PHOTO WALLPAPER ===
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.Center,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Box(
+                                    modifier = Modifier
+                                        .size(130.dp)
+                                        .border(1.5.dp, Color(0xFF8C9EFF), RoundedCornerShape(12.dp))
+                                        .drawWithCache {
+                                            val bmp = customWallpaperBitmap?.asImageBitmap()
+                                            onDrawBehind {
+                                                if (bmp != null) {
+                                                    drawImage(image = bmp, dstSize = IntSize(size.width.toInt(), size.height.toInt()))
+                                                    drawRoundRect(
+                                                        color = Color(0x40000000),
+                                                        topLeft = Offset(3f, 3f),
+                                                        size = Size(size.width - 6f, size.height - 6f),
+                                                        cornerRadius = CornerRadius(10f, 10f),
+                                                        style = Stroke(width = 2f)
+                                                    )
+                                                } else {
+                                                    drawRect(color = Color(0xFF1E2830))
+                                                }
+                                            }
+                                        },
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    if (customWallpaperBitmap != null) {
+                                        SpriteCanvasRenderer(speciesId = 1, size = 64.dp)
+                                    } else {
+                                        Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.padding(8.dp)) {
+                                            DigiVectorIcon(type = DigiIconType.CAMERA, size = 24.dp, tint = Color(0xFF80D8FF))
+                                            Spacer(modifier = Modifier.height(4.dp))
+                                            Text(
+                                                text = "NO PHOTO\nIMPORTED",
+                                                fontSize = 8.sp,
+                                                fontFamily = FontFamily.Monospace,
+                                                color = Color.LightGray,
+                                                textAlign = TextAlign.Center
+                                            )
+                                        }
+                                    }
+                                }
+                            }
+
+                            Spacer(modifier = Modifier.height(10.dp))
+
+                            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                Button(
+                                    onClick = { wallpaperLauncher.launch("image/*") },
+                                    modifier = Modifier.weight(1f),
+                                    shape = RoundedCornerShape(8.dp),
+                                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF3D5AFE))
+                                ) {
+                                    Text("CHOOSE PHOTO", fontSize = 9.5.sp, fontWeight = FontWeight.Bold, fontFamily = FontFamily.Monospace, color = Color.White)
+                                }
+
+                                if (customWallpaperBitmap != null) {
+                                    Button(
+                                        onClick = {
+                                            selectedTheme = BackgroundTheme.CUSTOM_WALLPAPER
+                                            scope.launch {
+                                                val bytes = WallpaperProcessor.compressToPngBytes(customWallpaperBitmap!!)
+                                                val sentAsset = wearableManager.sendWallpaperToWatch(bytes)
+                                                val sentSettings = wearableManager.sendSettingsToWatch(
+                                                    themeId = CustomThemeConfig.WALLPAPER_THEME_ID,
+                                                    vibrationEnabled = vibrationEnabled,
+                                                    threeButtonMode = threeButtonMode,
+                                                    buttonPlacement = buttonPlacement,
+                                                    pendulumShakeMode = pendulumShakeMode,
+                                                    soundEnabled = soundEnabled,
+                                                    nfcBridgeMode = nfcBridgeMode,
+                                                    displayShapeOverride = displayShapeOverride,
+                                                    dailyStepGoal = dailyStepGoal,
+                                                    contrastLevel = contrastLevel,
+                                                    sleepSchedule = sleepSchedule,
+                                                    ambientStyle = ambientStyle,
+                                                    hazardAlertsEnabled = hazardAlertsEnabled,
+                                                    clockFormat24h = clockFormat24h,
+                                                    lifespanCanonicalEnabled = lifespanCanonicalEnabled,
+                                                    combatInjuriesEnabled = combatInjuriesEnabled
+                                                )
+                                                syncStatus = if (sentAsset || sentSettings) "Wallpaper beamed to Smartwatch!" else "Wallpaper saved locally."
+                                            }
+                                        },
+                                        modifier = Modifier.weight(1f),
+                                        shape = RoundedCornerShape(8.dp),
+                                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF00E5FF))
+                                    ) {
+                                        Text("BEAM TO WATCH", fontSize = 9.5.sp, fontWeight = FontWeight.Bold, fontFamily = FontFamily.Monospace, color = Color.Black)
+                                    }
+                                }
                             }
                         }
                     }
@@ -663,13 +1146,16 @@ fun SettingsScreen(
                 // Sleep Schedule
                 Text(text = "SLEEP SCHEDULE:", fontSize = 10.sp, fontWeight = FontWeight.Bold, color = Color(0xFFB39DDB), fontFamily = FontFamily.Monospace)
                 Spacer(modifier = Modifier.height(4.dp))
-                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                    listOf(
-                        "20:00_07:00" to "20:00\n07:00",
-                        "21:00_07:00" to "21:00\n07:00",
-                        "22:00_08:00" to "22:00\n08:00",
-                        "23:00_08:00" to "23:00\n08:00"
-                    ).forEach { (schedId, label) ->
+                val sleepPresets = listOf(
+                    "20:00_07:00" to "20:00\n07:00",
+                    "21:00_07:00" to "21:00\n07:00",
+                    "22:00_08:00" to "22:00\n08:00",
+                    "23:00_08:00" to "23:00\n08:00"
+                )
+                val isCustomSleepActive = sleepPresets.none { it.first == sleepSchedule }
+
+                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                    sleepPresets.forEach { (schedId, label) ->
                         val active = sleepSchedule == schedId
                         Box(
                             modifier = Modifier
@@ -682,14 +1168,52 @@ fun SettingsScreen(
                         ) {
                             Text(
                                 text = label,
-                                fontSize = 8.5.sp,
+                                fontSize = 8.sp,
                                 fontWeight = if (active) FontWeight.Bold else FontWeight.Medium,
                                 color = if (active) Color.White else Color(0xFFB0BEC5),
                                 fontFamily = FontFamily.Monospace,
                                 textAlign = TextAlign.Center,
-                                lineHeight = 11.sp
+                                lineHeight = 10.sp
                             )
                         }
+                    }
+
+                    // Custom Sleep Schedule Chip
+                    val customChipText = if (isCustomSleepActive && sleepSchedule.contains("_")) {
+                        val parts = sleepSchedule.split("_")
+                        "CUSTOM\n${parts[0]}\n${parts.getOrElse(1) { "" }}"
+                    } else {
+                        "CUSTOM\nSET"
+                    }
+                    Box(
+                        modifier = Modifier
+                            .weight(1.15f)
+                            .background(if (isCustomSleepActive) Color(0xFF512DA8) else DigiWearPalette.CardInner, RoundedCornerShape(8.dp))
+                            .border(if (isCustomSleepActive) 1.5.dp else 1.dp, if (isCustomSleepActive) Color(0xFFD1C4E9) else Color(0xFF37474F), RoundedCornerShape(8.dp))
+                            .clickable {
+                                if (isCustomSleepActive && sleepSchedule.contains("_")) {
+                                    val parts = sleepSchedule.split("_")
+                                    val bedParts = parts.getOrNull(0)?.split(":")
+                                    val wakeParts = parts.getOrNull(1)?.split(":")
+                                    customBedHour = bedParts?.getOrNull(0)?.toIntOrNull() ?: customBedHour
+                                    customBedMinute = bedParts?.getOrNull(1)?.toIntOrNull() ?: customBedMinute
+                                    customWakeHour = wakeParts?.getOrNull(0)?.toIntOrNull() ?: customWakeHour
+                                    customWakeMinute = wakeParts?.getOrNull(1)?.toIntOrNull() ?: customWakeMinute
+                                }
+                                showSleepSchedulePicker = true
+                            }
+                            .padding(vertical = 8.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = customChipText,
+                            fontSize = 7.5.sp,
+                            fontWeight = if (isCustomSleepActive) FontWeight.Bold else FontWeight.Medium,
+                            color = if (isCustomSleepActive) Color.White else Color(0xFFB0BEC5),
+                            fontFamily = FontFamily.Monospace,
+                            textAlign = TextAlign.Center,
+                            lineHeight = 9.sp
+                        )
                     }
                 }
 
@@ -787,8 +1311,16 @@ fun SettingsScreen(
                 Button(
                     onClick = {
                         scope.launch {
+                            val activeThemeId = when (selectedTheme) {
+                                BackgroundTheme.CUSTOM_MATRIX -> {
+                                    val sec = CustomThemeConfig.deriveSecondaryColorHex(customPrimaryHex, customGridHex)
+                                    CustomThemeConfig(customPrimaryHex, sec, customGridHex, customPattern).toThemeId()
+                                }
+                                BackgroundTheme.CUSTOM_WALLPAPER -> CustomThemeConfig.WALLPAPER_THEME_ID
+                                else -> selectedTheme.id
+                            }
                             val sent = wearableManager.sendSettingsToWatch(
-                                themeId = selectedTheme.id,
+                                themeId = activeThemeId,
                                 vibrationEnabled = vibrationEnabled,
                                 threeButtonMode = threeButtonMode,
                                 buttonPlacement = buttonPlacement,
@@ -975,6 +1507,227 @@ fun SettingsScreen(
             },
             dismissButton = {
                 TextButton(onClick = { showResetConfirmDialog = false }) {
+                    Text("CANCEL", color = Color(0xFFB0BEC5), fontWeight = FontWeight.Bold, fontFamily = FontFamily.Monospace, fontSize = 11.sp)
+                }
+            }
+        )
+    }
+
+    // --- Custom Sleep Schedule Time Picker Dialog ---
+    if (showSleepSchedulePicker) {
+        AlertDialog(
+            onDismissRequest = { showSleepSchedulePicker = false },
+            containerColor = DigiWearPalette.CardSurface,
+            shape = RoundedCornerShape(12.dp),
+            modifier = Modifier.border(BorderStroke(1.dp, Color(0xFFB39DDB)), RoundedCornerShape(12.dp)),
+            title = {
+                Text(
+                    text = "CUSTOM SLEEP SCHEDULE",
+                    fontSize = 13.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.White,
+                    fontFamily = FontFamily.Monospace
+                )
+            },
+            text = {
+                Column(modifier = Modifier.fillMaxWidth()) {
+                    Text(
+                        text = "Configure exact bed and wake hours. Your virtual pet rests and halts discipline decay during this window.",
+                        fontSize = 9.5.sp,
+                        color = Color(0xFFB0BEC5),
+                        fontFamily = FontFamily.Monospace
+                    )
+                    Spacer(modifier = Modifier.height(14.dp))
+
+                    // Bedtime Row
+                    Text(
+                        text = "BEDTIME (SLEEP START):",
+                        fontSize = 10.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color(0xFFFFD54F),
+                        fontFamily = FontFamily.Monospace
+                    )
+                    Spacer(modifier = Modifier.height(6.dp))
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.Center,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Button(
+                            onClick = { customBedHour = (customBedHour + 23) % 24 },
+                            modifier = Modifier.size(36.dp),
+                            contentPadding = androidx.compose.foundation.layout.PaddingValues(0.dp),
+                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF263238))
+                        ) {
+                            Text("-", fontSize = 14.sp, fontWeight = FontWeight.Bold, color = Color.White)
+                        }
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(
+                            text = String.format(Locale.US, "%02d", customBedHour),
+                            fontSize = 18.sp,
+                            fontWeight = FontWeight.Black,
+                            color = Color.White,
+                            fontFamily = FontFamily.Monospace
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Button(
+                            onClick = { customBedHour = (customBedHour + 1) % 24 },
+                            modifier = Modifier.size(36.dp),
+                            contentPadding = androidx.compose.foundation.layout.PaddingValues(0.dp),
+                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF263238))
+                        ) {
+                            Text("+", fontSize = 14.sp, fontWeight = FontWeight.Bold, color = Color.White)
+                        }
+
+                        Spacer(modifier = Modifier.width(12.dp))
+                        Text(":", fontSize = 18.sp, fontWeight = FontWeight.Bold, color = Color.White)
+                        Spacer(modifier = Modifier.width(12.dp))
+
+                        Button(
+                            onClick = { customBedMinute = (customBedMinute + 55) % 60 },
+                            modifier = Modifier.size(36.dp),
+                            contentPadding = androidx.compose.foundation.layout.PaddingValues(0.dp),
+                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF263238))
+                        ) {
+                            Text("-", fontSize = 14.sp, fontWeight = FontWeight.Bold, color = Color.White)
+                        }
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(
+                            text = String.format(Locale.US, "%02d", customBedMinute),
+                            fontSize = 18.sp,
+                            fontWeight = FontWeight.Black,
+                            color = Color.White,
+                            fontFamily = FontFamily.Monospace
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Button(
+                            onClick = { customBedMinute = (customBedMinute + 5) % 60 },
+                            modifier = Modifier.size(36.dp),
+                            contentPadding = androidx.compose.foundation.layout.PaddingValues(0.dp),
+                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF263238))
+                        ) {
+                            Text("+", fontSize = 14.sp, fontWeight = FontWeight.Bold, color = Color.White)
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(14.dp))
+
+                    // Wake-up Time Row
+                    Text(
+                        text = "WAKE-UP TIME (PET WAKES UP):",
+                        fontSize = 10.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color(0xFF80D8FF),
+                        fontFamily = FontFamily.Monospace
+                    )
+                    Spacer(modifier = Modifier.height(6.dp))
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.Center,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Button(
+                            onClick = { customWakeHour = (customWakeHour + 23) % 24 },
+                            modifier = Modifier.size(36.dp),
+                            contentPadding = androidx.compose.foundation.layout.PaddingValues(0.dp),
+                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF263238))
+                        ) {
+                            Text("-", fontSize = 14.sp, fontWeight = FontWeight.Bold, color = Color.White)
+                        }
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(
+                            text = String.format(Locale.US, "%02d", customWakeHour),
+                            fontSize = 18.sp,
+                            fontWeight = FontWeight.Black,
+                            color = Color.White,
+                            fontFamily = FontFamily.Monospace
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Button(
+                            onClick = { customWakeHour = (customWakeHour + 1) % 24 },
+                            modifier = Modifier.size(36.dp),
+                            contentPadding = androidx.compose.foundation.layout.PaddingValues(0.dp),
+                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF263238))
+                        ) {
+                            Text("+", fontSize = 14.sp, fontWeight = FontWeight.Bold, color = Color.White)
+                        }
+
+                        Spacer(modifier = Modifier.width(12.dp))
+                        Text(":", fontSize = 18.sp, fontWeight = FontWeight.Bold, color = Color.White)
+                        Spacer(modifier = Modifier.width(12.dp))
+
+                        Button(
+                            onClick = { customWakeMinute = (customWakeMinute + 55) % 60 },
+                            modifier = Modifier.size(36.dp),
+                            contentPadding = androidx.compose.foundation.layout.PaddingValues(0.dp),
+                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF263238))
+                        ) {
+                            Text("-", fontSize = 14.sp, fontWeight = FontWeight.Bold, color = Color.White)
+                        }
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(
+                            text = String.format(Locale.US, "%02d", customWakeMinute),
+                            fontSize = 18.sp,
+                            fontWeight = FontWeight.Black,
+                            color = Color.White,
+                            fontFamily = FontFamily.Monospace
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Button(
+                            onClick = { customWakeMinute = (customWakeMinute + 5) % 60 },
+                            modifier = Modifier.size(36.dp),
+                            contentPadding = androidx.compose.foundation.layout.PaddingValues(0.dp),
+                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF263238))
+                        ) {
+                            Text("+", fontSize = 14.sp, fontWeight = FontWeight.Bold, color = Color.White)
+                        }
+                    }
+                }
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        val formatted = String.format(Locale.US, "%02d:%02d_%02d:%02d", customBedHour, customBedMinute, customWakeHour, customWakeMinute)
+                        sleepSchedule = formatted
+                        showSleepSchedulePicker = false
+                        scope.launch {
+                            val activeThemeId = when (selectedTheme) {
+                                BackgroundTheme.CUSTOM_MATRIX -> {
+                                    val sec = CustomThemeConfig.deriveSecondaryColorHex(customPrimaryHex, customGridHex)
+                                    CustomThemeConfig(customPrimaryHex, sec, customGridHex, customPattern).toThemeId()
+                                }
+                                BackgroundTheme.CUSTOM_WALLPAPER -> CustomThemeConfig.WALLPAPER_THEME_ID
+                                else -> selectedTheme.id
+                            }
+                            val sent = wearableManager.sendSettingsToWatch(
+                                themeId = activeThemeId,
+                                vibrationEnabled = vibrationEnabled,
+                                threeButtonMode = threeButtonMode,
+                                buttonPlacement = buttonPlacement,
+                                pendulumShakeMode = pendulumShakeMode,
+                                soundEnabled = soundEnabled,
+                                nfcBridgeMode = nfcBridgeMode,
+                                displayShapeOverride = displayShapeOverride,
+                                dailyStepGoal = dailyStepGoal,
+                                contrastLevel = contrastLevel,
+                                sleepSchedule = formatted,
+                                ambientStyle = ambientStyle,
+                                hazardAlertsEnabled = hazardAlertsEnabled,
+                                clockFormat24h = clockFormat24h,
+                                lifespanCanonicalEnabled = lifespanCanonicalEnabled,
+                                combatInjuriesEnabled = combatInjuriesEnabled
+                            )
+                            syncStatus = if (sent) "Custom sleep schedule $formatted beamed to Smartwatch!" else "Saved schedule locally."
+                        }
+                    },
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF7E57C2)),
+                    shape = RoundedCornerShape(6.dp)
+                ) {
+                    Text("APPLY & BEAM", color = Color.White, fontWeight = FontWeight.Bold, fontFamily = FontFamily.Monospace, fontSize = 11.sp)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showSleepSchedulePicker = false }) {
                     Text("CANCEL", color = Color(0xFFB0BEC5), fontWeight = FontWeight.Bold, fontFamily = FontFamily.Monospace, fontSize = 11.sp)
                 }
             }

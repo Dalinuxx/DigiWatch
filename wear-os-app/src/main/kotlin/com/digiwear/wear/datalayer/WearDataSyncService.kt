@@ -1,10 +1,15 @@
 package com.digiwear.wear.datalayer
 
 import com.digiwear.core.model.BackgroundTheme
+import com.digiwear.core.model.CustomThemeConfig
 import com.digiwear.core.model.PetState
 import com.digiwear.wear.complication.DigiWearComplicationService
 import com.digiwear.wear.data.PetRepository
 import com.digiwear.wear.tile.DigiWearTileService
+import com.google.android.gms.tasks.Tasks
+import com.google.android.gms.wearable.DataEvent
+import com.google.android.gms.wearable.DataEventBuffer
+import com.google.android.gms.wearable.DataMapItem
 import com.google.android.gms.wearable.MessageEvent
 import com.google.android.gms.wearable.Wearable
 import com.google.android.gms.wearable.WearableListenerService
@@ -14,6 +19,7 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
+import java.io.File
 
 class WearDataSyncService : WearableListenerService() {
 
@@ -63,7 +69,7 @@ class WearDataSyncService : WearableListenerService() {
                         val str = String(messageEvent.data, Charsets.UTF_8)
                         val map = json.decodeFromString<Map<String, String>>(str)
                         map["theme"]?.let { themeId ->
-                            repo.setTheme(BackgroundTheme.fromId(themeId))
+                            repo.setThemeId(themeId)
                         }
                         map["vibration"]?.let { vibStr ->
                             repo.setVibrationEnabled(vibStr.toBoolean())
@@ -159,7 +165,45 @@ class WearDataSyncService : WearableListenerService() {
                     }
                 }
             }
+            "/sync/upload_wallpaper" -> {
+                scope.launch {
+                    try {
+                        val bytes = messageEvent.data
+                        if (bytes.isNotEmpty()) {
+                            val file = File(applicationContext.filesDir, "custom_wallpaper.png")
+                            file.writeBytes(bytes)
+                            repo.setThemeId(CustomThemeConfig.WALLPAPER_THEME_ID)
+                            repo.notifyWallpaperUpdated()
+                        }
+                    } catch (_: Exception) {}
+                }
+            }
             else -> super.onMessageReceived(messageEvent)
+        }
+    }
+
+    override fun onDataChanged(dataEvents: DataEventBuffer) {
+        val repo = PetRepository.getInstance(applicationContext)
+        for (event in dataEvents) {
+            if (event.type == DataEvent.TYPE_CHANGED && event.dataItem.uri.path == "/custom_wallpaper") {
+                val dataMapItem = DataMapItem.fromDataItem(event.dataItem)
+                val asset = dataMapItem.dataMap.getAsset("wallpaper_asset")
+                if (asset != null) {
+                    scope.launch {
+                        try {
+                            val fd = Tasks.await(Wearable.getDataClient(applicationContext).getFdForAsset(asset))
+                            fd?.inputStream?.use { input ->
+                                val file = File(applicationContext.filesDir, "custom_wallpaper.png")
+                                file.outputStream().use { output ->
+                                    input.copyTo(output)
+                                }
+                                repo.setThemeId(CustomThemeConfig.WALLPAPER_THEME_ID)
+                                repo.notifyWallpaperUpdated()
+                            }
+                        } catch (_: Exception) {}
+                    }
+                }
+            }
         }
     }
 

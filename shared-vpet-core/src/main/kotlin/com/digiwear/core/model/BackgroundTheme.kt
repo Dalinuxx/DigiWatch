@@ -78,10 +78,30 @@ enum class BackgroundTheme(
         secondaryColorHex = 0xFF0A0A0A,
         gridColorHex = 0xFF141414,
         description = "Pitch black high-efficiency minimal display"
+    ),
+    CUSTOM_MATRIX(
+        id = "custom_matrix",
+        displayName = "Custom Matrix",
+        primaryColorHex = 0xFF8B956D,
+        secondaryColorHex = 0xFF7A845C,
+        gridColorHex = 0xFF9CA67E,
+        description = "User-customized backlight and pattern matrix"
+    ),
+    CUSTOM_WALLPAPER(
+        id = "custom_wallpaper",
+        displayName = "Wallpaper Photo",
+        primaryColorHex = 0xFF000000,
+        secondaryColorHex = 0xFF141414,
+        gridColorHex = 0xFF282828,
+        description = "Imported photo wallpaper background"
     );
 
     companion object {
         fun fromId(id: String?): BackgroundTheme {
+            if (id == null) return CLASSIC_VPET_LCD
+            if (id.startsWith(CustomThemeConfig.PREFIX, ignoreCase = true)) {
+                return CUSTOM_MATRIX
+            }
             return entries.firstOrNull { it.id.equals(id, ignoreCase = true) } ?: CLASSIC_VPET_LCD
         }
     }

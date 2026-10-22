@@ -154,7 +154,7 @@ object AospLanSyncServer {
                 "/sync/update_settings" -> {
                     try {
                         val map = json.decodeFromString<Map<String, String>>(payload)
-                        map["theme"]?.let { repo.setTheme(BackgroundTheme.fromId(it)) }
+                        map["theme"]?.let { repo.setThemeId(it) }
                         map["vibration"]?.let { repo.setVibrationEnabled(it.toBoolean()) }
                         map["vpet_3button_mode"]?.let { repo.setThreeButtonMode(it.toBoolean()) }
                         map["vpet_button_placement"]?.let { repo.setButtonPlacement(it) }
@@ -220,6 +220,22 @@ object AospLanSyncServer {
                         }
                     }
                     "OK"
+                }
+                "/sync/upload_wallpaper" -> {
+                    try {
+                        val bytes = android.util.Base64.decode(payload.trim(), android.util.Base64.DEFAULT)
+                        if (bytes.isNotEmpty()) {
+                            val file = java.io.File(context.filesDir, "custom_wallpaper.png")
+                            file.writeBytes(bytes)
+                            repo.setThemeId(com.digiwear.core.model.CustomThemeConfig.WALLPAPER_THEME_ID)
+                            repo.notifyWallpaperUpdated()
+                            "OK"
+                        } else {
+                            "ERR"
+                        }
+                    } catch (_: Exception) {
+                        "ERR"
+                    }
                 }
                 else -> "UNKNOWN"
             }

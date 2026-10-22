@@ -3,7 +3,9 @@ package com.digiwear.companion.datalayer
 import android.content.Context
 import com.digiwear.core.model.PetState
 import com.google.android.gms.tasks.Tasks
+import com.google.android.gms.wearable.Asset
 import com.google.android.gms.wearable.MessageClient
+import com.google.android.gms.wearable.PutDataMapRequest
 import com.google.android.gms.wearable.Wearable
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
@@ -273,9 +275,13 @@ class PhoneWearableManager(private val context: Context) {
                     Tasks.await(mc.sendMessage(node, "/sync/request_settings", emptyPayload))
                 } catch (_: Exception) {}
             }
-            withTimeoutOrNull(2500L) {
+            val result = withTimeoutOrNull(2500L) {
                 deferred.await()
             }
+            if (result != null) {
+                runCatching { prefs.edit().putString("cached_watch_settings", json.encodeToString(result)).apply() }
+            }
+            result
         } catch (_: Exception) {
             null
         } finally {
@@ -283,6 +289,11 @@ class PhoneWearableManager(private val context: Context) {
                 Tasks.await(mc.removeListener(listener))
             } catch (_: Exception) {}
         }
+    }
+
+    fun getCachedSettings(): Map<String, String>? {
+        val raw = prefs.getString("cached_watch_settings", null) ?: return null
+        return runCatching { json.decodeFromString<Map<String, String>>(raw) }.getOrNull()
     }
 
     suspend fun requestMemorialsFromWatch(): List<com.digiwear.core.model.MemorialRecord>? = withContext(Dispatchers.IO) {
@@ -376,6 +387,7 @@ class PhoneWearableManager(private val context: Context) {
             put("combat_injuries_enabled", combatInjuriesEnabled.toString())
         }
         val jsonStr = json.encodeToString(map)
+        runCatching { prefs.edit().putString("cached_watch_settings", jsonStr).apply() }
         val payload = jsonStr.toByteArray(Charsets.UTF_8)
         var success = false
         for (node in nodes) {
@@ -488,6 +500,51 @@ class PhoneWearableManager(private val context: Context) {
                 } catch (_: Exception) {}
             }
         }
+        success
+    }
+
+    suspend fun sendWallpaperToWatch(imageBytes: ByteArray): Boolean = withContext(Dispatchers.IO) {
+        val nodes = getConnectedWatchNodes()
+        if (nodes.isEmpty()) return@withContext false
+
+        var success = false
+        // 1. Wear OS DataLayer via PutDataMapRequest with Asset
+        val wearNodes = nodes.filterNot { it.startsWith(AOSP_NODE_PREFIX) }
+        if (wearNodes.isNotEmpty()) {
+            try {
+                val asset = Asset.createFromBytes(imageBytes)
+                val putDataMapReq = PutDataMapRequest.create("/custom_wallpaper").apply {
+                    dataMap.putAsset("wallpaper_asset", asset)
+                    dataMap.putLong("timestamp", System.currentTimeMillis())
+                }
+                val request = putDataMapReq.asPutDataRequest().setUrgent()
+                Tasks.await(Wearable.getDataClient(context).putDataItem(request))
+                success = true
+            } catch (_: Exception) {}
+
+            // Direct message delivery fallback
+            val mc = messageClient
+            if (mc != null) {
+                for (node in wearNodes) {
+                    try {
+                        Tasks.await(mc.sendMessage(node, "/sync/upload_wallpaper", imageBytes))
+                        success = true
+                    } catch (_: Exception) {}
+                }
+            }
+        }
+
+        // 2. AOSP LAN Nodes via Base64 TCP Socket Bridge
+        val aospNodes = nodes.filter { it.startsWith(AOSP_NODE_PREFIX) }
+        if (aospNodes.isNotEmpty()) {
+            val base64Str = android.util.Base64.encodeToString(imageBytes, android.util.Base64.NO_WRAP)
+            for (node in aospNodes) {
+                val ip = node.removePrefix(AOSP_NODE_PREFIX)
+                val resp = sendTcpCommandToAospWatch(ip, "/sync/upload_wallpaper", base64Str)
+                if (resp == "OK") success = true
+            }
+        }
+
         success
     }
 }

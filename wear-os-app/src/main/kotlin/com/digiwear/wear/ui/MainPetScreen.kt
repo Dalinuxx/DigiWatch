@@ -108,6 +108,8 @@ fun MainPetScreen(
     val ambientState = LocalAmbientState.current
     val petState by repository.petStateFlow.collectAsState(initial = PetState())
     val currentTheme by repository.themeFlow.collectAsState(initial = BackgroundTheme.CLASSIC_VPET_LCD)
+    val customThemeConfig by repository.customThemeConfigFlow.collectAsState(initial = null)
+    val wallpaperVersion by repository.wallpaperVersionFlow.collectAsState(initial = 0L)
     val isThreeButtonMode by repository.threeButtonModeFlow.collectAsState(initial = true)
     val buttonPlacement by repository.buttonPlacementFlow.collectAsState(initial = "RIGHT")
     val isPendulumShakeMode by repository.pendulumShakeModeFlow.collectAsState(initial = false)
@@ -409,7 +411,9 @@ fun MainPetScreen(
             isAmbient = false,
             lightsOff = petState.lightsOff,
             contrastLevel = contrastLevel,
-            ambientStyle = ambientStyle
+            ambientStyle = ambientStyle,
+            customThemeConfig = customThemeConfig,
+            wallpaperVersion = wallpaperVersion
         )
 
         if (isTrainingActive) {

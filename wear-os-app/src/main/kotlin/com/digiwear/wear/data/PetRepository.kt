@@ -35,6 +35,8 @@ import java.time.Instant
 import java.time.ZoneId
 import java.util.concurrent.TimeUnit
 
+import com.digiwear.core.model.CustomThemeConfig
+
 class PetRepository private constructor(context: Context) {
 
     private val appContext = context.applicationContext
@@ -50,10 +52,28 @@ class PetRepository private constructor(context: Context) {
 
     private val prefs = appContext.getSharedPreferences("digiwear_wear_prefs", Context.MODE_PRIVATE)
 
+    private val rawStoredTheme = prefs.getString("selected_theme", BackgroundTheme.CLASSIC_VPET_LCD.id) ?: BackgroundTheme.CLASSIC_VPET_LCD.id
+
+    private val _themeIdFlow = MutableStateFlow(rawStoredTheme)
+    val themeIdFlow: StateFlow<String> = _themeIdFlow.asStateFlow()
+
     private val _themeFlow = MutableStateFlow(
-        BackgroundTheme.fromId(prefs.getString("selected_theme", BackgroundTheme.CLASSIC_VPET_LCD.id))
+        BackgroundTheme.fromId(rawStoredTheme)
     )
     val themeFlow: Flow<BackgroundTheme> = _themeFlow.asStateFlow()
+
+    private val _customThemeConfigFlow = MutableStateFlow(
+        CustomThemeConfig.parse(prefs.getString("custom_theme_config", null))
+            ?: CustomThemeConfig.parse(rawStoredTheme)
+    )
+    val customThemeConfigFlow: StateFlow<CustomThemeConfig?> = _customThemeConfigFlow.asStateFlow()
+
+    private val _wallpaperVersionFlow = MutableStateFlow(0L)
+    val wallpaperVersionFlow: StateFlow<Long> = _wallpaperVersionFlow.asStateFlow()
+
+    fun notifyWallpaperUpdated() {
+        _wallpaperVersionFlow.value++
+    }
 
     private val _vibrationFlow = MutableStateFlow(
         prefs.getBoolean("vibration_enabled", true)
@@ -100,10 +120,15 @@ class PetRepository private constructor(context: Context) {
     )
     val contrastLevelFlow: StateFlow<String> = _contrastLevelFlow.asStateFlow()
 
-    private val _sleepScheduleFlow = MutableStateFlow(
-        prefs.getString("sleep_schedule", "21:00_07:00") ?: "21:00_07:00"
-    )
+    private val rawStoredSleep = prefs.getString("sleep_schedule", "21:00_07:00") ?: "21:00_07:00"
+    private val _sleepScheduleFlow = MutableStateFlow(rawStoredSleep)
     val sleepScheduleFlow: StateFlow<String> = _sleepScheduleFlow.asStateFlow()
+
+    private val _customSleepScheduleFlow = MutableStateFlow<String?>(
+        prefs.getString("custom_sleep_schedule", null)
+            ?: if (rawStoredSleep.contains("_") && !isPresetSleepSchedule(rawStoredSleep)) rawStoredSleep else null
+    )
+    val customSleepScheduleFlow: StateFlow<String?> = _customSleepScheduleFlow.asStateFlow()
 
     private val _ambientStyleFlow = MutableStateFlow(
         prefs.getString("ambient_display_style", "MINIMAL_DOT") ?: "MINIMAL_DOT"
@@ -142,8 +167,31 @@ class PetRepository private constructor(context: Context) {
     private var cachedCampaign: Pair<String, CampaignStory>? = null
 
     fun setTheme(theme: BackgroundTheme) {
-        prefs.edit().putString("selected_theme", theme.id).apply()
-        _themeFlow.value = theme
+        if (theme == BackgroundTheme.CUSTOM_MATRIX && _customThemeConfigFlow.value != null) {
+            setThemeId(_customThemeConfigFlow.value!!.toThemeId())
+        } else {
+            setThemeId(theme.id)
+        }
+    }
+
+    fun setThemeId(themeId: String) {
+        val effectiveThemeId = if (themeId == BackgroundTheme.CUSTOM_MATRIX.id && _customThemeConfigFlow.value != null) {
+            _customThemeConfigFlow.value!!.toThemeId()
+        } else {
+            themeId
+        }
+        prefs.edit().putString("selected_theme", effectiveThemeId).apply()
+        _themeIdFlow.value = effectiveThemeId
+        _themeFlow.value = BackgroundTheme.fromId(effectiveThemeId)
+        val parsed = CustomThemeConfig.parse(effectiveThemeId)
+        if (parsed != null) {
+            prefs.edit().putString("custom_theme_config", effectiveThemeId).apply()
+            _customThemeConfigFlow.value = parsed
+        } else if (effectiveThemeId == "custom_matrix" && _customThemeConfigFlow.value == null) {
+            val defaultConfig = CustomThemeConfig()
+            _customThemeConfigFlow.value = defaultConfig
+            prefs.edit().putString("custom_theme_config", defaultConfig.toThemeId()).apply()
+        }
     }
 
     fun setVibrationEnabled(enabled: Boolean) {
@@ -194,6 +242,10 @@ class PetRepository private constructor(context: Context) {
     fun setSleepSchedule(schedule: String) {
         prefs.edit().putString("sleep_schedule", schedule).apply()
         _sleepScheduleFlow.value = schedule
+        if (schedule.contains("_") && !isPresetSleepSchedule(schedule)) {
+            prefs.edit().putString("custom_sleep_schedule", schedule).apply()
+            _customSleepScheduleFlow.value = schedule
+        }
     }
 
     fun setAmbientStyle(style: String) {
@@ -222,7 +274,11 @@ class PetRepository private constructor(context: Context) {
     }
 
     fun getSettingsMap(): Map<String, String> = mapOf(
-        "theme" to _themeFlow.value.id,
+        "theme" to if (_themeFlow.value == BackgroundTheme.CUSTOM_MATRIX && _customThemeConfigFlow.value != null) {
+            _customThemeConfigFlow.value!!.toThemeId()
+        } else {
+            _themeIdFlow.value
+        },
         "vibration" to _vibrationFlow.value.toString(),
         "vpet_3button_mode" to _threeButtonModeFlow.value.toString(),
         "vpet_button_placement" to _buttonPlacementFlow.value,
@@ -767,5 +823,8 @@ class PetRepository private constructor(context: Context) {
                 }
             }
         }
+
+        fun isPresetSleepSchedule(sched: String?): Boolean =
+            sched == "20:00_07:00" || sched == "21:00_07:00" || sched == "22:00_08:00" || sched == "23:00_08:00"
     }
 }

@@ -57,6 +57,7 @@ fun SettingsScreen(
     val listState = rememberScalingLazyListState()
 
     val currentTheme by repository.themeFlow.collectAsState(initial = BackgroundTheme.CLASSIC_VPET_LCD)
+    val customThemeConfig by repository.customThemeConfigFlow.collectAsState(initial = null)
     val isVibrationEnabled by repository.vibrationFlow.collectAsState(initial = true)
     val isThreeButtonMode by repository.threeButtonModeFlow.collectAsState(initial = true)
     val buttonPlacement by repository.buttonPlacementFlow.collectAsState(initial = "RIGHT")
@@ -67,6 +68,7 @@ fun SettingsScreen(
     val dailyStepGoal by repository.dailyStepGoalFlow.collectAsState(initial = 5000)
     val contrastLevel by repository.contrastLevelFlow.collectAsState(initial = "MEDIUM")
     val sleepSchedule by repository.sleepScheduleFlow.collectAsState(initial = "21:00_07:00")
+    val customSleepSched by repository.customSleepScheduleFlow.collectAsState(initial = null)
     val ambientStyle by repository.ambientStyleFlow.collectAsState(initial = "MINIMAL_DOT")
     val hazardAlertsEnabled by repository.hazardAlertsFlow.collectAsState(initial = true)
     val clockFormat24h by repository.clockFormatFlow.collectAsState(initial = false)
@@ -174,10 +176,15 @@ fun SettingsScreen(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     modifier = Modifier.weight(1f).padding(horizontal = 4.dp)
                 ) {
+                    val swatchColor = when {
+                        currentTheme == BackgroundTheme.CUSTOM_MATRIX && customThemeConfig != null -> Color(customThemeConfig!!.primaryColorHex)
+                        currentTheme == BackgroundTheme.CUSTOM_WALLPAPER -> Color(0xFF00E5FF)
+                        else -> Color(currentTheme.primaryColorHex)
+                    }
                     Box(
                         modifier = Modifier
                             .size(24.dp, 12.dp)
-                            .background(Color(currentTheme.primaryColorHex), RoundedCornerShape(2.dp))
+                            .background(swatchColor, RoundedCornerShape(2.dp))
                     )
                     Text(
                         text = currentTheme.displayName,
@@ -490,7 +497,15 @@ fun SettingsScreen(
         // ==========================================
         item {
             Spacer(modifier = Modifier.height(6.dp))
-            val currentSleep = sleepScheduleOptions.find { it.first == sleepSchedule } ?: sleepScheduleOptions[1]
+            val presetSleep = sleepScheduleOptions.find { it.first == sleepSchedule }
+            val currentSleepLabel = presetSleep?.second ?: run {
+                if (sleepSchedule.contains("_")) {
+                    val parts = sleepSchedule.split("_")
+                    "Custom (${parts.getOrElse(0) { "" }}–${parts.getOrElse(1) { "" }})"
+                } else {
+                    "Custom ($sleepSchedule)"
+                }
+            }
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -506,15 +521,24 @@ fun SettingsScreen(
                         fontFamily = FontFamily.Monospace
                     )
                     Text(
-                        text = currentSleep.second,
+                        text = currentSleepLabel,
                         fontSize = 7.5.sp,
                         color = Color(0xFFB39DDB)
                     )
                 }
                 Button(
                     onClick = {
-                        val idx = sleepScheduleOptions.indexOfFirst { it.first == sleepSchedule }.coerceAtLeast(0)
-                        val next = sleepScheduleOptions[(idx + 1) % sleepScheduleOptions.size].first
+                        val allOptions = if (customSleepSched != null && !sleepScheduleOptions.any { it.first == customSleepSched }) {
+                            sleepScheduleOptions.map { it.first } + customSleepSched!!
+                        } else {
+                            sleepScheduleOptions.map { it.first }
+                        }
+                        val idx = allOptions.indexOf(sleepSchedule)
+                        val next = if (idx >= 0) {
+                            allOptions[(idx + 1) % allOptions.size]
+                        } else {
+                            allOptions[0]
+                        }
                         repository.setSleepSchedule(next)
                         if (isVibrationEnabled) hapticManager.playStepMilestone()
                     },
@@ -524,7 +548,7 @@ fun SettingsScreen(
                     colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFF4527A0))
                 ) {
                     Text(
-                        text = sleepSchedule.substringBefore("_"),
+                        text = if (presetSleep != null) sleepSchedule.substringBefore("_") else "CUSTOM",
                         fontSize = 8.sp,
                         fontWeight = FontWeight.Bold,
                         color = Color.White
