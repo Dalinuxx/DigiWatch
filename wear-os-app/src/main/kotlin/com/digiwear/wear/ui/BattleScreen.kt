@@ -1161,7 +1161,10 @@ fun BattleScreen(
                         modifier = Modifier.height(22.dp),
                         colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFF455A64))
                     ) {
-                        Text("NEXT ▶", fontSize = 7.sp)
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Text("NEXT ", fontSize = 7.sp)
+                            DigiVectorIcon(type = DigiIconType.ARROW_RIGHT, size = 7.dp, tint = Color.White)
+                        }
                     }
                 }
             }

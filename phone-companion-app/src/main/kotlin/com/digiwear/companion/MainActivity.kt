@@ -22,11 +22,8 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Archive
 import androidx.compose.material.icons.filled.AutoAwesome
-import androidx.compose.material.icons.filled.Explore
-import androidx.compose.material.icons.filled.FlashOn
-import androidx.compose.material.icons.filled.Pets
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
@@ -53,6 +50,8 @@ import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.IconButton
 import com.digiwear.companion.ui.ExpeditionScreen
 import com.digiwear.companion.ui.SettingsScreen
+import com.digiwear.companion.ui.DigiIconType
+import com.digiwear.companion.ui.DigiVectorIcon
 import com.digiwear.companion.data.PhoneDatabase
 import com.digiwear.companion.datalayer.PhoneWearableManager
 import com.digiwear.companion.nfc.NfcDuelManager
@@ -219,11 +218,10 @@ fun MainPhoneApp(
                         onClick = { selectedTab = 4 },
                         modifier = Modifier.size(28.dp)
                     ) {
-                        Icon(
-                            imageVector = Icons.Default.Settings,
-                            contentDescription = "Settings",
-                            tint = if (selectedTab == 4) Color(0xFF00E5FF) else Color(0xFF90A4AE),
-                            modifier = Modifier.size(18.dp)
+                        DigiVectorIcon(
+                            type = DigiIconType.SETTINGS_GEAR,
+                            size = 18.dp,
+                            tint = if (selectedTab == 4) Color(0xFF00E5FF) else Color(0xFF90A4AE)
                         )
                     }
                 }
@@ -236,35 +234,65 @@ fun MainPhoneApp(
                 NavigationBarItem(
                     selected = selectedTab == 0,
                     onClick = { selectedTab = 0 },
-                    icon = { Icon(Icons.Default.Pets, contentDescription = "V-Pet") },
+                    icon = {
+                        DigiVectorIcon(
+                            type = DigiIconType.VPET_DEVICE,
+                            size = 20.dp,
+                            tint = if (selectedTab == 0) Color(0xFF00E5FF) else Color(0xFF78909C)
+                        )
+                    },
                     label = { Text("V-PET", fontSize = 9.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold) },
                     colors = navItemColors
                 )
                 NavigationBarItem(
                     selected = selectedTab == 1,
                     onClick = { selectedTab = 1 },
-                    icon = { Icon(Icons.Default.Archive, contentDescription = "Vault") },
+                    icon = {
+                        DigiVectorIcon(
+                            type = DigiIconType.VAULT_SAFE,
+                            size = 20.dp,
+                            tint = if (selectedTab == 1) Color(0xFF00E5FF) else Color(0xFF78909C)
+                        )
+                    },
                     label = { Text("VAULT", fontSize = 9.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold) },
                     colors = navItemColors
                 )
                 NavigationBarItem(
                     selected = selectedTab == 2,
                     onClick = { selectedTab = 2 },
-                    icon = { Icon(Icons.Default.FlashOn, contentDescription = "D-Com") },
+                    icon = {
+                        DigiVectorIcon(
+                            type = DigiIconType.COMM_ANTENNA,
+                            size = 20.dp,
+                            tint = if (selectedTab == 2) Color(0xFF00E5FF) else Color(0xFF78909C)
+                        )
+                    },
                     label = { Text("D-COM", fontSize = 9.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold) },
                     colors = navItemColors
                 )
                 NavigationBarItem(
                     selected = selectedTab == 3,
                     onClick = { selectedTab = 3 },
-                    icon = { Icon(Icons.Default.Explore, contentDescription = "Expedition") },
+                    icon = {
+                        DigiVectorIcon(
+                            type = DigiIconType.MAP_COMPASS,
+                            size = 20.dp,
+                            tint = if (selectedTab == 3) Color(0xFF00E5FF) else Color(0xFF78909C)
+                        )
+                    },
                     label = { Text("EXPEDITION", fontSize = 8.5.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold) },
                     colors = navItemColors
                 )
                 NavigationBarItem(
                     selected = selectedTab == 4,
                     onClick = { selectedTab = 4 },
-                    icon = { Icon(Icons.Default.Settings, contentDescription = "Settings") },
+                    icon = {
+                        DigiVectorIcon(
+                            type = DigiIconType.SETTINGS_GEAR,
+                            size = 20.dp,
+                            tint = if (selectedTab == 4) Color(0xFF00E5FF) else Color(0xFF78909C)
+                        )
+                    },
                     label = { Text("SETTINGS", fontSize = 8.5.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold) },
                     colors = navItemColors
                 )

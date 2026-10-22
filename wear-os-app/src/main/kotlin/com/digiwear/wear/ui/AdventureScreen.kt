@@ -634,7 +634,11 @@ fun AdventureScreen(
                         .clickable { showSagaPicker = true }
                         .padding(horizontal = 6.dp, vertical = 2.dp)
                 ) {
-                    Text("SAGA ▾", fontSize = 7.sp, fontWeight = FontWeight.Bold, color = Color.White, fontFamily = FontFamily.Monospace)
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text("SAGA", fontSize = 7.sp, fontWeight = FontWeight.Bold, color = Color.White, fontFamily = FontFamily.Monospace)
+                        Spacer(modifier = Modifier.width(2.dp))
+                        DigiVectorIcon(type = DigiIconType.ARROW_DOWN, size = 6.dp, tint = Color.White)
+                    }
                 }
             }
         }

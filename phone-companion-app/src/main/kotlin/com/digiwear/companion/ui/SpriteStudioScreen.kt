@@ -739,7 +739,10 @@ fun SpriteStudioScreen(
                                     )
                                 }
                             }
-                            Text("VIEW ▶", fontSize = 9.sp, color = DigiWearPalette.DigiviceCyan, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Text("VIEW ", fontSize = 9.sp, color = DigiWearPalette.DigiviceCyan, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
+                                DigiVectorIcon(type = DigiIconType.ARROW_RIGHT, size = 9.dp, tint = DigiWearPalette.DigiviceCyan)
+                            }
                         }
                     }
                 }

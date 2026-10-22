@@ -338,10 +338,10 @@ fun SettingsScreen(
                     shape = RoundedCornerShape(10.dp),
                     colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF00E5FF))
                 ) {
-                    Icon(Icons.Default.Bolt, contentDescription = null, tint = Color.Black, modifier = Modifier.size(15.dp))
+                    DigiVectorIcon(type = DigiIconType.BOLT, size = 15.dp, tint = Color.Black)
                     Spacer(modifier = Modifier.width(6.dp))
                     Text(
-                        text = "⚡ OPEN WIRELESS ADB WATCH SIDELOADER ⚡",
+                        text = "OPEN WIRELESS ADB WATCH SIDELOADER",
                         fontSize = 10.5.sp,
                         fontWeight = FontWeight.Black,
                         fontFamily = FontFamily.Monospace,
@@ -610,7 +610,9 @@ fun SettingsScreen(
                     shape = RoundedCornerShape(10.dp),
                     colors = ButtonDefaults.buttonColors(containerColor = DigiWearPalette.DigiviceCyan)
                 ) {
-                    Text("📡 BEAM SETTINGS TO SMARTWATCH", fontSize = 10.5.sp, fontWeight = FontWeight.Black, fontFamily = FontFamily.Monospace, color = Color.Black)
+                    DigiVectorIcon(type = DigiIconType.BEAM_ANTENNA, size = 15.dp, tint = Color.Black)
+                    Spacer(modifier = Modifier.width(6.dp))
+                    Text("BEAM SETTINGS TO SMARTWATCH", fontSize = 10.5.sp, fontWeight = FontWeight.Black, fontFamily = FontFamily.Monospace, color = Color.Black)
                 }
             }
         }

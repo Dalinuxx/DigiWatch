@@ -244,10 +244,10 @@ fun PetDashboardScreen(
                             shape = RoundedCornerShape(10.dp),
                             colors = ButtonDefaults.buttonColors(containerColor = DigiWearPalette.DigiviceCyan)
                         ) {
-                            Icon(Icons.Default.Refresh, contentDescription = null, tint = Color.Black, modifier = Modifier.size(15.dp))
+                            DigiVectorIcon(type = DigiIconType.BEAM_ANTENNA, size = 15.dp, tint = Color.Black)
                             Spacer(modifier = Modifier.width(6.dp))
                             Text(
-                                text = if (isSyncing) "CONNECTING TO WATCH..." else "📡 SYNC FROM SMARTWATCH",
+                                text = if (isSyncing) "CONNECTING TO WATCH..." else "SYNC FROM SMARTWATCH",
                                 fontSize = 10.5.sp,
                                 fontWeight = FontWeight.Black,
                                 fontFamily = FontFamily.Monospace,
@@ -263,10 +263,10 @@ fun PetDashboardScreen(
                             shape = RoundedCornerShape(10.dp),
                             border = BorderStroke(1.dp, DigiWearPalette.CrestGold)
                         ) {
-                            Icon(Icons.Default.AutoAwesome, contentDescription = null, tint = DigiWearPalette.CrestGold, modifier = Modifier.size(15.dp))
+                            DigiVectorIcon(type = DigiIconType.EGG, size = 15.dp, tint = DigiWearPalette.CrestGold)
                             Spacer(modifier = Modifier.width(6.dp))
                             Text(
-                                text = if (showStarterEggPicker) "HIDE STARTER DIGI-EGGS" else "🥚 CHOOSE STARTER DIGI-EGG (STANDALONE)",
+                                text = if (showStarterEggPicker) "HIDE STARTER DIGI-EGGS" else "CHOOSE STARTER DIGI-EGG (STANDALONE)",
                                 fontSize = 10.5.sp,
                                 fontWeight = FontWeight.Bold,
                                 fontFamily = FontFamily.Monospace,
@@ -741,13 +741,24 @@ fun PetDashboardScreen(
                             ),
                             border = BorderStroke(1.dp, if (currentPet.isFrozen) Color(0xFF00E5FF) else Color(0xFF546E7A))
                         ) {
-                            Text(
-                                text = if (currentPet.isFrozen) "❄️ WAKE FROM COLD SLEEP" else "❄️ COLD SLEEP / REST MODE (PAUSE DECAY)",
-                                fontSize = 10.sp,
-                                fontWeight = FontWeight.Bold,
-                                color = if (currentPet.isFrozen) Color(0xFF00E5FF) else Color(0xFF80D8FF),
-                                fontFamily = FontFamily.Monospace
-                            )
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.Center
+                            ) {
+                                DigiVectorIcon(
+                                    type = DigiIconType.COLD_SLEEP,
+                                    size = 14.dp,
+                                    tint = if (currentPet.isFrozen) Color(0xFF00E5FF) else Color(0xFF80D8FF)
+                                )
+                                Spacer(modifier = Modifier.width(6.dp))
+                                Text(
+                                    text = if (currentPet.isFrozen) "WAKE FROM COLD SLEEP" else "COLD SLEEP / REST MODE (PAUSE DECAY)",
+                                    fontSize = 10.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = if (currentPet.isFrozen) Color(0xFF00E5FF) else Color(0xFF80D8FF),
+                                    fontFamily = FontFamily.Monospace
+                                )
+                            }
                         }
                     }
                 }

@@ -693,12 +693,21 @@ fun WatchSideloadScreen(
             shape = RoundedCornerShape(8.dp),
             modifier = Modifier.fillMaxWidth().height(48.dp)
         ) {
-            Text(
-                text = if (isBusy) "SIDELOADING IN PROGRESS..." else "⚡ SIDELOAD DIGIWEAR TO WATCH ⚡",
-                fontWeight = FontWeight.Black,
-                fontFamily = FontFamily.Monospace,
-                fontSize = 12.sp
-            )
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Center
+            ) {
+                if (!isBusy) {
+                    DigiVectorIcon(type = DigiIconType.BOLT, size = 16.dp, tint = Color.Black)
+                    Spacer(modifier = Modifier.width(6.dp))
+                }
+                Text(
+                    text = if (isBusy) "SIDELOADING IN PROGRESS..." else "SIDELOAD DIGIWEAR TO WATCH",
+                    fontWeight = FontWeight.Black,
+                    fontFamily = FontFamily.Monospace,
+                    fontSize = 12.sp
+                )
+            }
         }
 
         if (isBusy) {

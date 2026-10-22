@@ -165,7 +165,7 @@ fun SettingsScreen(
                     modifier = Modifier.size(32.dp),
                     colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFF263238))
                 ) {
-                    Text("◀", fontSize = 10.sp)
+                    DigiVectorIcon(type = DigiIconType.ARROW_LEFT, size = 12.dp, tint = Color.White)
                 }
 
                 Column(
@@ -196,7 +196,7 @@ fun SettingsScreen(
                     modifier = Modifier.size(32.dp),
                     colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFF263238))
                 ) {
-                    Text("▶", fontSize = 10.sp)
+                    DigiVectorIcon(type = DigiIconType.ARROW_RIGHT, size = 12.dp, tint = Color.White)
                 }
             }
         }

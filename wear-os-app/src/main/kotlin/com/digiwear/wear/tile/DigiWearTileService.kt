@@ -200,7 +200,7 @@ class DigiWearTileService : TileService() {
 
         column.addContent(
             LayoutElementBuilders.Text.Builder()
-                .setText("► TAP TO OPEN ◄")
+                .setText("TAP TO OPEN")
                 .setFontStyle(
                     LayoutElementBuilders.FontStyle.Builder()
                         .setSize(sp(8f))

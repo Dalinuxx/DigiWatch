@@ -237,10 +237,10 @@ fun ExpeditionScreen(
                             colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF00897B)),
                             shape = RoundedCornerShape(10.dp)
                         ) {
-                            Icon(Icons.AutoMirrored.Filled.Send, contentDescription = "Deploy", modifier = Modifier.size(15.dp))
+                            DigiVectorIcon(type = DigiIconType.BEAM_ANTENNA, size = 16.dp, tint = Color.White)
                             Spacer(modifier = Modifier.width(6.dp))
                             Text(
-                                text = "📡 DEPLOY SAGA TO SMARTWATCH",
+                                text = "DEPLOY SAGA TO SMARTWATCH",
                                 fontSize = 11.sp,
                                 fontWeight = FontWeight.Bold,
                                 fontFamily = FontFamily.Monospace,
@@ -468,9 +468,9 @@ fun ExpeditionScreen(
                         shape = RoundedCornerShape(10.dp)
                     ) {
                         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                            DigiVectorIcon(type = DigiIconType.QUEST, size = 15.dp, tint = Color.White)
+                            DigiVectorIcon(type = DigiIconType.MAP_COMPASS, size = 15.dp, tint = Color.White)
                             Text(
-                                text = "🗺️ VIEW QUEST & SECTOR DETAILS (${parsedStory?.nodes?.size ?: 0} SECTORS)",
+                                text = "VIEW QUEST & SECTOR DETAILS (${parsedStory?.nodes?.size ?: 0} SECTORS)",
                                 fontSize = 10.5.sp,
                                 fontWeight = FontWeight.Black,
                                 fontFamily = FontFamily.Monospace,
@@ -490,9 +490,9 @@ fun ExpeditionScreen(
                         shape = RoundedCornerShape(10.dp)
                     ) {
                         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                            DigiVectorIcon(type = DigiIconType.SETTINGS_GEAR, size = 14.dp, tint = Color(0xFF80CBC4))
+                            DigiVectorIcon(type = DigiIconType.ARCHITECT_PEN, size = 14.dp, tint = Color(0xFF80CBC4))
                             Text(
-                                text = "✏️ STORY ARCHITECT & JSON EDITOR",
+                                text = "STORY ARCHITECT & JSON EDITOR",
                                 fontSize = 10.5.sp,
                                 fontWeight = FontWeight.Bold,
                                 fontFamily = FontFamily.Monospace,

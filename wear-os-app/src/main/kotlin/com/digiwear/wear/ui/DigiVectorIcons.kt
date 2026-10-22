@@ -68,7 +68,16 @@ enum class DigiIconType {
     CLOSE,
     REWARD,
     SPARKLE,
-    WATCH, WATCH_DEVICE
+    WATCH, WATCH_DEVICE,
+    BEAM_ANTENNA,
+    MAP_COMPASS,
+    ARCHITECT_PEN,
+    COLD_SLEEP,
+    ARROW_LEFT,
+    ARROW_RIGHT,
+    ARROW_DOWN,
+    VPET_DEVICE,
+    COMM_ANTENNA
 }
 
 @Composable
@@ -126,6 +135,15 @@ fun DigiVectorIcon(
             DigiIconType.REWARD -> drawRewardChestIcon(w, h, s, if (hasCustomTint) tint else Color(0xFFFFD54F))
             DigiIconType.SPARKLE -> drawSparkleIcon(w, h, s, if (hasCustomTint) tint else Color(0xFFFFD54F))
             DigiIconType.WATCH, DigiIconType.WATCH_DEVICE -> drawWatchIcon(w, h, s, if (hasCustomTint) tint else Color(0xFF00E5FF))
+            DigiIconType.BEAM_ANTENNA -> drawBeamAntennaIcon(w, h, s, if (hasCustomTint) tint else Color(0xFF00E5FF))
+            DigiIconType.MAP_COMPASS -> drawMapCompassIcon(w, h, s, if (hasCustomTint) tint else Color(0xFF69F0AE))
+            DigiIconType.ARCHITECT_PEN -> drawArchitectPenIcon(w, h, s, if (hasCustomTint) tint else Color(0xFFFFD54F))
+            DigiIconType.COLD_SLEEP -> drawColdSleepIcon(w, h, s, if (hasCustomTint) tint else Color(0xFF80DEEA))
+            DigiIconType.ARROW_LEFT -> drawArrowLeftIcon(w, h, s, if (hasCustomTint) tint else Color.White)
+            DigiIconType.ARROW_RIGHT -> drawArrowRightIcon(w, h, s, if (hasCustomTint) tint else Color.White)
+            DigiIconType.ARROW_DOWN -> drawArrowDownIcon(w, h, s, if (hasCustomTint) tint else Color.White)
+            DigiIconType.VPET_DEVICE -> drawVpetDeviceIcon(w, h, s, if (hasCustomTint) tint else Color(0xFF00E5FF))
+            DigiIconType.COMM_ANTENNA -> drawCommAntennaIcon(w, h, s, if (hasCustomTint) tint else Color(0xFFFFD54F))
         }
     }
 }
@@ -1067,4 +1085,272 @@ private fun DrawScope.drawWatchIcon(w: Float, h: Float, s: Float, color: Color) 
     drawRect(color.copy(alpha = 0.6f), Offset(w * 0.36f, h * 0.08f), Size(w * 0.28f, h * 0.84f))
     drawCircle(Color(0xFF101820), radius = s * 0.32f, center = Offset(w * 0.50f, h * 0.50f))
     drawCircle(color, radius = s * 0.32f, center = Offset(w * 0.50f, h * 0.50f), style = Stroke(stroke))
+}
+
+private fun DrawScope.drawBeamAntennaIcon(w: Float, h: Float, s: Float, color: Color) {
+    val stroke = (s * 0.09f).coerceAtLeast(1.1f)
+    // Base tripod
+    drawLine(color, Offset(w * 0.22f, h * 0.88f), Offset(w * 0.54f, h * 0.88f), strokeWidth = stroke, cap = StrokeCap.Round)
+    drawLine(color, Offset(w * 0.38f, h * 0.88f), Offset(w * 0.42f, h * 0.64f), strokeWidth = stroke, cap = StrokeCap.Round)
+
+    // Parabolic Dish Arc
+    drawArc(
+        color = color,
+        startAngle = 130f,
+        sweepAngle = 160f,
+        useCenter = false,
+        topLeft = Offset(w * 0.18f, h * 0.38f),
+        size = Size(s * 0.48f, s * 0.48f),
+        style = Stroke(width = stroke * 1.3f, cap = StrokeCap.Round)
+    )
+
+    // Central receiver horn rod
+    drawLine(color, Offset(w * 0.42f, h * 0.62f), Offset(w * 0.60f, h * 0.44f), strokeWidth = stroke, cap = StrokeCap.Round)
+    drawCircle(color, radius = s * 0.05f, center = Offset(w * 0.60f, h * 0.44f))
+
+    // Radiating signal pulse arcs
+    drawArc(
+        color = color,
+        startAngle = -75f,
+        sweepAngle = 60f,
+        useCenter = false,
+        topLeft = Offset(w * 0.46f, h * 0.18f),
+        size = Size(s * 0.36f, s * 0.36f),
+        style = Stroke(width = stroke * 0.9f, cap = StrokeCap.Round)
+    )
+    drawArc(
+        color = color.copy(alpha = 0.7f),
+        startAngle = -75f,
+        sweepAngle = 60f,
+        useCenter = false,
+        topLeft = Offset(w * 0.58f, h * 0.06f),
+        size = Size(s * 0.38f, s * 0.38f),
+        style = Stroke(width = stroke * 0.9f, cap = StrokeCap.Round)
+    )
+}
+
+private fun DrawScope.drawMapCompassIcon(w: Float, h: Float, s: Float, color: Color) {
+    val stroke = (s * 0.08f).coerceAtLeast(1.1f)
+    // 3-panel folded map perimeter
+    val mapPath = Path().apply {
+        moveTo(w * 0.14f, h * 0.24f)
+        lineTo(w * 0.38f, h * 0.16f)
+        lineTo(w * 0.62f, h * 0.24f)
+        lineTo(w * 0.86f, h * 0.16f)
+        lineTo(w * 0.86f, h * 0.78f)
+        lineTo(w * 0.62f, h * 0.86f)
+        lineTo(w * 0.38f, h * 0.78f)
+        lineTo(w * 0.14f, h * 0.86f)
+        close()
+    }
+    drawPath(mapPath, color = color.copy(alpha = 0.15f))
+    drawPath(mapPath, color = color, style = Stroke(width = stroke, join = StrokeJoin.Round))
+
+    // Interior fold lines
+    drawLine(color.copy(alpha = 0.4f), Offset(w * 0.38f, h * 0.16f), Offset(w * 0.38f, h * 0.78f), strokeWidth = stroke * 0.8f)
+    drawLine(color.copy(alpha = 0.4f), Offset(w * 0.62f, h * 0.24f), Offset(w * 0.62f, h * 0.86f), strokeWidth = stroke * 0.8f)
+
+    // Center compass diamond star
+    val starPath = Path().apply {
+        moveTo(w * 0.50f, h * 0.34f)
+        lineTo(w * 0.55f, h * 0.48f)
+        lineTo(w * 0.66f, h * 0.50f)
+        lineTo(w * 0.55f, h * 0.52f)
+        lineTo(w * 0.50f, h * 0.66f)
+        lineTo(w * 0.45f, h * 0.52f)
+        lineTo(w * 0.34f, h * 0.50f)
+        lineTo(w * 0.45f, h * 0.48f)
+        close()
+    }
+    drawPath(starPath, color = color)
+}
+
+private fun DrawScope.drawArchitectPenIcon(w: Float, h: Float, s: Float, color: Color) {
+    val stroke = (s * 0.08f).coerceAtLeast(1.1f)
+    // Drafting pen angled at 45 degrees
+    val nib = Path().apply {
+        moveTo(w * 0.16f, h * 0.84f)
+        lineTo(w * 0.28f, h * 0.80f)
+        lineTo(w * 0.20f, h * 0.72f)
+        close()
+    }
+    drawPath(nib, color = color)
+
+    // Pen barrel
+    val barrel = Path().apply {
+        moveTo(w * 0.26f, h * 0.76f)
+        lineTo(w * 0.66f, h * 0.36f)
+        lineTo(w * 0.76f, h * 0.46f)
+        lineTo(w * 0.36f, h * 0.86f)
+        close()
+    }
+    drawPath(barrel, color = color.copy(alpha = 0.3f))
+    drawPath(barrel, color = color, style = Stroke(width = stroke, join = StrokeJoin.Round))
+
+    // Pen top eraser/cap
+    val cap = Path().apply {
+        moveTo(w * 0.66f, h * 0.36f)
+        lineTo(w * 0.76f, h * 0.26f)
+        lineTo(w * 0.86f, h * 0.36f)
+        lineTo(w * 0.76f, h * 0.46f)
+        close()
+    }
+    drawPath(cap, color = color)
+
+    // Digital sketch arc from pen tip
+    drawArc(
+        color = color.copy(alpha = 0.6f),
+        startAngle = 100f,
+        sweepAngle = 70f,
+        useCenter = false,
+        topLeft = Offset(w * 0.06f, h * 0.64f),
+        size = Size(s * 0.30f, s * 0.30f),
+        style = Stroke(width = stroke * 0.8f, cap = StrokeCap.Round)
+    )
+}
+
+private fun DrawScope.drawColdSleepIcon(w: Float, h: Float, s: Float, color: Color) {
+    val stroke = (s * 0.08f).coerceAtLeast(1.1f)
+    val cx = w * 0.50f
+    val cy = h * 0.50f
+    val radius = s * 0.40f
+
+    // 6 branches (every 60 degrees)
+    for (i in 0 until 6) {
+        val angleRad = (i * 60f) * (Math.PI.toFloat() / 180f)
+        val cosA = cos(angleRad)
+        val sinA = sin(angleRad)
+
+        val endX = cx + radius * cosA
+        val endY = cy + radius * sinA
+
+        // Main branch
+        drawLine(color, Offset(cx, cy), Offset(endX, endY), strokeWidth = stroke, cap = StrokeCap.Round)
+
+        // Chevron V-prongs at 62% distance
+        val midX = cx + (radius * 0.62f) * cosA
+        val midY = cy + (radius * 0.62f) * sinA
+        val prongLen = radius * 0.26f
+
+        val prongAngle1 = angleRad + (45f * Math.PI.toFloat() / 180f)
+        val prongAngle2 = angleRad - (45f * Math.PI.toFloat() / 180f)
+
+        drawLine(
+            color,
+            Offset(midX, midY),
+            Offset(midX - prongLen * cos(prongAngle1), midY - prongLen * sin(prongAngle1)),
+            strokeWidth = stroke * 0.85f,
+            cap = StrokeCap.Round
+        )
+        drawLine(
+            color,
+            Offset(midX, midY),
+            Offset(midX - prongLen * cos(prongAngle2), midY - prongLen * sin(prongAngle2)),
+            strokeWidth = stroke * 0.85f,
+            cap = StrokeCap.Round
+        )
+    }
+
+    // Hexagonal crystal center core
+    drawCircle(color, radius = s * 0.07f, center = Offset(cx, cy))
+}
+
+private fun DrawScope.drawArrowLeftIcon(w: Float, h: Float, s: Float, color: Color) {
+    val path = Path().apply {
+        moveTo(w * 0.68f, h * 0.22f)
+        lineTo(w * 0.28f, h * 0.50f)
+        lineTo(w * 0.68f, h * 0.78f)
+        close()
+    }
+    drawPath(path, color = color)
+}
+
+private fun DrawScope.drawArrowRightIcon(w: Float, h: Float, s: Float, color: Color) {
+    val path = Path().apply {
+        moveTo(w * 0.32f, h * 0.22f)
+        lineTo(w * 0.72f, h * 0.50f)
+        lineTo(w * 0.32f, h * 0.78f)
+        close()
+    }
+    drawPath(path, color = color)
+}
+
+private fun DrawScope.drawArrowDownIcon(w: Float, h: Float, s: Float, color: Color) {
+    val path = Path().apply {
+        moveTo(w * 0.22f, h * 0.36f)
+        lineTo(w * 0.50f, h * 0.68f)
+        lineTo(w * 0.78f, h * 0.36f)
+        close()
+    }
+    drawPath(path, color = color)
+}
+
+private fun DrawScope.drawVpetDeviceIcon(w: Float, h: Float, s: Float, color: Color) {
+    // 1997 Bandai V-Pet brick body
+    drawRoundRect(
+        color = color,
+        topLeft = Offset(w * 0.12f, h * 0.18f),
+        size = Size(w * 0.64f, h * 0.64f),
+        cornerRadius = CornerRadius(s * 0.10f, s * 0.10f)
+    )
+
+    // 3 Side Buttons (A, B, C) on the right edge
+    val btnH = h * 0.10f
+    val btnW = w * 0.10f
+    val btnX = w * 0.78f
+    val btnR = CornerRadius(s * 0.03f, s * 0.03f)
+    drawRoundRect(color, Offset(btnX, h * 0.26f), Size(btnW, btnH), btnR)
+    drawRoundRect(color, Offset(btnX, h * 0.45f), Size(btnW, btnH), btnR)
+    drawRoundRect(color, Offset(btnX, h * 0.64f), Size(btnW, btnH), btnR)
+
+    // Screen frame / cutout
+    drawRoundRect(
+        color = Color(0xFF101820),
+        topLeft = Offset(w * 0.22f, h * 0.28f),
+        size = Size(w * 0.44f, h * 0.44f),
+        cornerRadius = CornerRadius(s * 0.06f, s * 0.06f)
+    )
+
+    // LCD screen inner pixel graphic
+    drawRect(
+        color = color.copy(alpha = 0.85f),
+        topLeft = Offset(w * 0.34f, h * 0.40f),
+        size = Size(w * 0.20f, h * 0.20f)
+    )
+}
+
+private fun DrawScope.drawCommAntennaIcon(w: Float, h: Float, s: Float, color: Color) {
+    val stroke = (s * 0.08f).coerceAtLeast(1.1f)
+
+    // Connector housing block at bottom
+    drawRoundRect(
+        color = color,
+        topLeft = Offset(w * 0.24f, h * 0.54f),
+        size = Size(w * 0.52f, h * 0.34f),
+        cornerRadius = CornerRadius(s * 0.06f, s * 0.06f)
+    )
+
+    // Dual terminal prongs extending upward
+    drawRect(color, Offset(w * 0.34f, h * 0.36f), Size(w * 0.10f, h * 0.20f))
+    drawRect(color, Offset(w * 0.56f, h * 0.36f), Size(w * 0.10f, h * 0.20f))
+
+    // Wireless RF pulses emitting from prongs
+    drawArc(
+        color = color,
+        startAngle = -140f,
+        sweepAngle = 100f,
+        useCenter = false,
+        topLeft = Offset(w * 0.30f, h * 0.14f),
+        size = Size(s * 0.40f, s * 0.28f),
+        style = Stroke(width = stroke, cap = StrokeCap.Round)
+    )
+    drawArc(
+        color = color.copy(alpha = 0.65f),
+        startAngle = -140f,
+        sweepAngle = 100f,
+        useCenter = false,
+        topLeft = Offset(w * 0.20f, h * 0.02f),
+        size = Size(s * 0.60f, s * 0.40f),
+        style = Stroke(width = stroke, cap = StrokeCap.Round)
+    )
 }
