@@ -17,6 +17,54 @@ import kotlin.math.min
 object PetSimulationEngine {
 
     /**
+     * Minimum sleep duration for virtual pets adhering to 1997 classic benchmarks (6 hours / 360 minutes).
+     */
+    const val MIN_SLEEP_HOURS = 6
+    const val MIN_SLEEP_MINUTES = 6 * 60
+
+    /**
+     * Calculates the sleep duration in minutes for given bed and wake times in 24h format.
+     */
+    fun calculateSleepDurationMinutes(bedHour: Int, bedMinute: Int, wakeHour: Int, wakeMinute: Int): Int {
+        val bedTotal = bedHour * 60 + bedMinute
+        val wakeTotal = wakeHour * 60 + wakeMinute
+        return if (wakeTotal > bedTotal) {
+            wakeTotal - bedTotal
+        } else if (wakeTotal < bedTotal) {
+            (1440 - bedTotal) + wakeTotal
+        } else {
+            0
+        }
+    }
+
+    /**
+     * Calculates the sleep duration in minutes for a schedule string formatted as HH:mm_HH:mm.
+     */
+    fun calculateSleepDurationMinutes(schedule: String): Int? {
+        val delimiter = if (schedule.contains("_")) "_" else if (schedule.contains("-")) "-" else return null
+        val parts = schedule.split(delimiter)
+        val bedParts = parts.getOrNull(0)?.trim()?.split(":")
+        val wakeParts = parts.getOrNull(1)?.trim()?.split(":")
+        val bedHour = bedParts?.getOrNull(0)?.toIntOrNull() ?: return null
+        val bedMin = bedParts?.getOrNull(1)?.toIntOrNull() ?: 0
+        val wakeHour = wakeParts?.getOrNull(0)?.toIntOrNull() ?: return null
+        val wakeMin = wakeParts?.getOrNull(1)?.toIntOrNull() ?: 0
+        return calculateSleepDurationMinutes(bedHour, bedMin, wakeHour, wakeMin)
+    }
+
+    /**
+     * Validates whether a custom sleep schedule satisfies the OG V-Pet minimum sleep duration (at least 6 hours).
+     */
+    fun isValidSleepDuration(bedHour: Int, bedMinute: Int, wakeHour: Int, wakeMinute: Int): Boolean {
+        return calculateSleepDurationMinutes(bedHour, bedMinute, wakeHour, wakeMinute) >= MIN_SLEEP_MINUTES
+    }
+
+    fun isValidSleepDuration(schedule: String): Boolean {
+        val duration = calculateSleepDurationMinutes(schedule) ?: return false
+        return duration >= MIN_SLEEP_MINUTES
+    }
+
+    /**
      * Advances the pet simulation to [currentTimestampUtc].
      */
     fun processDelta(

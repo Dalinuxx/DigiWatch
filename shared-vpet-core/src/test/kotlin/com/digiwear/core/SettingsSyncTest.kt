@@ -186,4 +186,46 @@ class SettingsSyncTest {
             com.digiwear.core.engine.PetSimulationEngine.isSleepWindowWithSchedule(stage, 6, 45, customSchedule)
         )
     }
+
+    @Test
+    fun testMinimumSleepDurationValidation() {
+        // Canonical constants verification
+        assertEquals(6, com.digiwear.core.engine.PetSimulationEngine.MIN_SLEEP_HOURS)
+        assertEquals(360, com.digiwear.core.engine.PetSimulationEngine.MIN_SLEEP_MINUTES)
+
+        // Overnight sleep schedule: 22:30 to 07:00 (8h 30m = 510m) -> VALID
+        assertEquals(510, com.digiwear.core.engine.PetSimulationEngine.calculateSleepDurationMinutes(22, 30, 7, 0))
+        assertTrue(com.digiwear.core.engine.PetSimulationEngine.isValidSleepDuration(22, 30, 7, 0))
+        assertEquals(510, com.digiwear.core.engine.PetSimulationEngine.calculateSleepDurationMinutes("22:30_07:00"))
+        assertTrue(com.digiwear.core.engine.PetSimulationEngine.isValidSleepDuration("22:30_07:00"))
+
+        // Exact boundary: 23:00 to 05:00 (exactly 6h 0m = 360m) -> VALID
+        assertEquals(360, com.digiwear.core.engine.PetSimulationEngine.calculateSleepDurationMinutes(23, 0, 5, 0))
+        assertTrue(com.digiwear.core.engine.PetSimulationEngine.isValidSleepDuration(23, 0, 5, 0))
+        assertTrue(com.digiwear.core.engine.PetSimulationEngine.isValidSleepDuration("23:00_05:00"))
+
+        // Just under boundary: 23:00 to 04:55 (5h 55m = 355m) -> INVALID
+        assertEquals(355, com.digiwear.core.engine.PetSimulationEngine.calculateSleepDurationMinutes(23, 0, 4, 55))
+        assertFalse(com.digiwear.core.engine.PetSimulationEngine.isValidSleepDuration(23, 0, 4, 55))
+        assertFalse(com.digiwear.core.engine.PetSimulationEngine.isValidSleepDuration("23:00_04:55"))
+
+        // Same-day sleep schedule: 02:00 to 09:00 (7h = 420m) -> VALID
+        assertEquals(420, com.digiwear.core.engine.PetSimulationEngine.calculateSleepDurationMinutes(2, 0, 9, 0))
+        assertTrue(com.digiwear.core.engine.PetSimulationEngine.isValidSleepDuration(2, 0, 9, 0))
+
+        // Same-day short nap: 13:00 to 15:00 (2h = 120m) -> INVALID
+        assertEquals(120, com.digiwear.core.engine.PetSimulationEngine.calculateSleepDurationMinutes(13, 0, 15, 0))
+        assertFalse(com.digiwear.core.engine.PetSimulationEngine.isValidSleepDuration(13, 0, 15, 0))
+        assertFalse(com.digiwear.core.engine.PetSimulationEngine.isValidSleepDuration("13:00_15:00"))
+
+        // Identical bed and wake times: 08:00 to 08:00 (0m) -> INVALID
+        assertEquals(0, com.digiwear.core.engine.PetSimulationEngine.calculateSleepDurationMinutes(8, 0, 8, 0))
+        assertFalse(com.digiwear.core.engine.PetSimulationEngine.isValidSleepDuration(8, 0, 8, 0))
+
+        // Delimiter support and malformed input handling
+        assertEquals(480, com.digiwear.core.engine.PetSimulationEngine.calculateSleepDurationMinutes("22:00 - 06:00"))
+        assertTrue(com.digiwear.core.engine.PetSimulationEngine.isValidSleepDuration("22:00 - 06:00"))
+        assertEquals(null, com.digiwear.core.engine.PetSimulationEngine.calculateSleepDurationMinutes("INVALID_STRING"))
+        assertFalse(com.digiwear.core.engine.PetSimulationEngine.isValidSleepDuration("INVALID_STRING"))
+    }
 }

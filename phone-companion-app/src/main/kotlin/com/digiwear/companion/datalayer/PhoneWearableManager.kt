@@ -1,6 +1,7 @@
 package com.digiwear.companion.datalayer
 
 import android.content.Context
+import com.digiwear.core.engine.PetSimulationEngine
 import com.digiwear.core.model.PetState
 import com.google.android.gms.tasks.Tasks
 import com.google.android.gms.wearable.Asset
@@ -366,6 +367,12 @@ class PhoneWearableManager(private val context: Context) {
         val nodes = getConnectedWatchNodes()
         if (nodes.isEmpty()) return@withContext false
 
+        val sanitizedSleepSchedule = if (PetSimulationEngine.calculateSleepDurationMinutes(sleepSchedule) != null) {
+            if (PetSimulationEngine.isValidSleepDuration(sleepSchedule)) sleepSchedule else "21:00_07:00"
+        } else {
+            sleepSchedule
+        }
+
         val map = buildMap {
             put("theme", themeId)
             put("vibration", vibrationEnabled.toString())
@@ -379,7 +386,7 @@ class PhoneWearableManager(private val context: Context) {
             }
             put("daily_step_goal", dailyStepGoal.toString())
             put("lcd_contrast_level", contrastLevel)
-            put("sleep_schedule", sleepSchedule)
+            put("sleep_schedule", sanitizedSleepSchedule)
             put("ambient_display_style", ambientStyle)
             put("hazard_alerts_enabled", hazardAlertsEnabled.toString())
             put("clock_format_24h", clockFormat24h.toString())

@@ -73,6 +73,7 @@ import com.digiwear.companion.data.SyncedPetEntity
 import com.digiwear.companion.datalayer.PhoneWearableManager
 import com.digiwear.companion.render.SpriteCanvasRenderer
 import com.digiwear.companion.render.WallpaperProcessor
+import com.digiwear.core.engine.PetSimulationEngine
 import com.digiwear.core.model.BackgroundTheme
 import com.digiwear.core.model.CustomThemeConfig
 import com.digiwear.core.model.LcdPattern
@@ -1682,11 +1683,86 @@ fun SettingsScreen(
                             Text("+", fontSize = 14.sp, fontWeight = FontWeight.Bold, color = Color.White)
                         }
                     }
+
+                    Spacer(modifier = Modifier.height(14.dp))
+
+                    val sleepDurationMinutes = PetSimulationEngine.calculateSleepDurationMinutes(customBedHour, customBedMinute, customWakeHour, customWakeMinute)
+                    val isDurationValid = PetSimulationEngine.isValidSleepDuration(customBedHour, customBedMinute, customWakeHour, customWakeMinute)
+                    val durationHours = sleepDurationMinutes / 60
+                    val durationRemainingMinutes = sleepDurationMinutes % 60
+
+                    // Duration & Minimum Sleep Validation Card (OG V-Pet Canon)
+                    Card(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .border(
+                                width = 1.dp,
+                                color = if (isDurationValid) Color(0xFF00E676) else Color(0xFFFF5252),
+                                shape = RoundedCornerShape(8.dp)
+                            ),
+                        colors = CardDefaults.cardColors(
+                            containerColor = if (isDurationValid) Color(0xFF1B2E24) else Color(0xFF2E1B1B)
+                        ),
+                        shape = RoundedCornerShape(8.dp)
+                    ) {
+                        Column(modifier = Modifier.padding(10.dp)) {
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text(
+                                    text = "DURATION: ${durationHours}h ${durationRemainingMinutes}m",
+                                    fontSize = 10.5.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = if (isDurationValid) Color(0xFF00E676) else Color(0xFFFF5252),
+                                    fontFamily = FontFamily.Monospace
+                                )
+                                Text(
+                                    text = if (isDurationValid) "VALID (≥ 6H)" else "MIN 6H REQUIRED",
+                                    fontSize = 9.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = if (isDurationValid) Color(0xFFB9F6CA) else Color(0xFFFF8A80),
+                                    fontFamily = FontFamily.Monospace
+                                )
+                            }
+                            if (!isDurationValid) {
+                                Spacer(modifier = Modifier.height(6.dp))
+                                Text(
+                                    text = "Authentic virtual pets require at least 6 hours of daily rest to prevent abuse and maintain health.",
+                                    fontSize = 8.5.sp,
+                                    color = Color(0xFFFFCDD2),
+                                    fontFamily = FontFamily.Monospace,
+                                    lineHeight = 11.sp
+                                )
+                                Spacer(modifier = Modifier.height(8.dp))
+                                OutlinedButton(
+                                    onClick = {
+                                        customWakeHour = (customBedHour + 8) % 24
+                                        customWakeMinute = customBedMinute
+                                    },
+                                    modifier = Modifier.fillMaxWidth(),
+                                    shape = RoundedCornerShape(6.dp),
+                                    border = BorderStroke(1.dp, Color(0xFF64FFDA)),
+                                    colors = ButtonDefaults.outlinedButtonColors(contentColor = Color(0xFF64FFDA))
+                                ) {
+                                    Text(
+                                        text = "AUTO-ALIGN TO 8H SLEEP",
+                                        fontSize = 10.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        fontFamily = FontFamily.Monospace
+                                    )
+                                }
+                            }
+                        }
+                    }
                 }
             },
             confirmButton = {
+                val isDurationValid = PetSimulationEngine.isValidSleepDuration(customBedHour, customBedMinute, customWakeHour, customWakeMinute)
                 Button(
                     onClick = {
+                        if (!isDurationValid) return@Button
                         val formatted = String.format(Locale.US, "%02d:%02d_%02d:%02d", customBedHour, customBedMinute, customWakeHour, customWakeMinute)
                         sleepSchedule = formatted
                         showSleepSchedulePicker = false
@@ -1720,10 +1796,20 @@ fun SettingsScreen(
                             syncStatus = if (sent) "Custom sleep schedule $formatted beamed to Smartwatch!" else "Saved schedule locally."
                         }
                     },
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF7E57C2)),
+                    enabled = isDurationValid,
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color(0xFF7E57C2),
+                        disabledContainerColor = Color(0xFF37474F)
+                    ),
                     shape = RoundedCornerShape(6.dp)
                 ) {
-                    Text("APPLY & BEAM", color = Color.White, fontWeight = FontWeight.Bold, fontFamily = FontFamily.Monospace, fontSize = 11.sp)
+                    Text(
+                        text = if (isDurationValid) "APPLY & BEAM" else "MIN 6H REQUIRED",
+                        color = if (isDurationValid) Color.White else Color(0xFF90A4AE),
+                        fontWeight = FontWeight.Bold,
+                        fontFamily = FontFamily.Monospace,
+                        fontSize = 11.sp
+                    )
                 }
             },
             dismissButton = {

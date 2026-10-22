@@ -240,11 +240,16 @@ class PetRepository private constructor(context: Context) {
     }
 
     fun setSleepSchedule(schedule: String) {
-        prefs.edit().putString("sleep_schedule", schedule).apply()
-        _sleepScheduleFlow.value = schedule
-        if (schedule.contains("_") && !isPresetSleepSchedule(schedule)) {
-            prefs.edit().putString("custom_sleep_schedule", schedule).apply()
-            _customSleepScheduleFlow.value = schedule
+        val sanitized = if (PetSimulationEngine.calculateSleepDurationMinutes(schedule) != null) {
+            if (PetSimulationEngine.isValidSleepDuration(schedule)) schedule else "21:00_07:00"
+        } else {
+            schedule
+        }
+        prefs.edit().putString("sleep_schedule", sanitized).apply()
+        _sleepScheduleFlow.value = sanitized
+        if (sanitized.contains("_") && !isPresetSleepSchedule(sanitized)) {
+            prefs.edit().putString("custom_sleep_schedule", sanitized).apply()
+            _customSleepScheduleFlow.value = sanitized
         }
     }
 
