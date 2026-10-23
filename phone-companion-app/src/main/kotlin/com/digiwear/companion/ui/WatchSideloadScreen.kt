@@ -88,6 +88,13 @@ fun WatchSideloadScreen(
     }
     var watchPort by remember { mutableStateOf("5555") }
 
+    var pairingPort by remember { mutableStateOf("") }
+    var pairingCode by remember { mutableStateOf("") }
+    var isPairing by remember { mutableStateOf(false) }
+    var pairingSuccess by remember { mutableStateOf(false) }
+    var pairingError by remember { mutableStateOf<String?>(null) }
+    var isPairingExpanded by remember { mutableStateOf(false) }
+
     var selectedApk by remember { mutableStateOf<WatchApkInfo?>(apkSourceManager.getCachedApk()) }
     var isDownloading by remember { mutableStateOf(false) }
     var downloadProgress by remember { mutableFloatStateOf(0f) }
@@ -392,7 +399,7 @@ fun WatchSideloadScreen(
                         Text(if (isScanningLan) "SCANNING..." else "AUTO-DETECT", fontSize = 10.sp, fontFamily = FontFamily.Monospace)
                     }
 
-                    if (connectionState == SideloadConnectionState.CONNECTED) {
+                    if (connectionState == SideloadConnectionState.CONNECTED || connectionState == SideloadConnectionState.SUCCESS) {
                         OutlinedButton(
                             onClick = { adbManager.disconnect() },
                             border = BorderStroke(1.dp, Color(0xFFE57373)),
@@ -400,6 +407,209 @@ fun WatchSideloadScreen(
                             shape = RoundedCornerShape(6.dp)
                         ) {
                             Text("DISCONNECT", fontSize = 10.sp, fontFamily = FontFamily.Monospace)
+                        }
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(10.dp))
+
+                // --- Dedicated Wear OS 3/4/5 Pairing Card ---
+                Surface(
+                    color = Color(0xFF0F1722),
+                    shape = RoundedCornerShape(8.dp),
+                    border = BorderStroke(
+                        1.dp,
+                        if (pairingSuccess) Color(0xFF00E676) else if (isPairingExpanded) DigiWearPalette.DigiviceCyan else Color(0xFF2A3A4D)
+                    ),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Column(modifier = Modifier.padding(10.dp)) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable { isPairingExpanded = !isPairingExpanded },
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.weight(1f)) {
+                                DigiVectorIcon(
+                                    type = DigiIconType.KEYPAD,
+                                    tint = if (pairingSuccess) Color(0xFF00E676) else DigiWearPalette.DigiviceCyan,
+                                    size = 16.dp
+                                )
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Column {
+                                    Text(
+                                        text = "PAIR WITH 6-DIGIT CODE (WEAR OS 3/4/5)",
+                                        color = if (pairingSuccess) Color(0xFF69F0AE) else Color.White,
+                                        fontSize = 10.5.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        fontFamily = FontFamily.Monospace
+                                    )
+                                    Text(
+                                        text = "Galaxy Watch 4+, Pixel Watch 1/2/3, OnePlus Watch 2",
+                                        color = Color(0xFF90A4AE),
+                                        fontSize = 8.5.sp,
+                                        fontFamily = FontFamily.Monospace
+                                    )
+                                }
+                            }
+
+                            Surface(
+                                color = if (pairingSuccess) Color(0xFF1B5E20) else if (isPairingExpanded) Color(0xFF003737) else Color(0xFF1E293B),
+                                shape = RoundedCornerShape(4.dp),
+                                border = BorderStroke(
+                                    1.dp,
+                                    if (pairingSuccess) Color(0xFF69F0AE) else if (isPairingExpanded) DigiWearPalette.DigiviceCyan else Color(0xFF64748B)
+                                )
+                            ) {
+                                Text(
+                                    text = if (pairingSuccess) "PAIRED!" else if (isPairingExpanded) "COLLAPSE" else "PAIR DEVICE",
+                                    color = if (pairingSuccess) Color(0xFF69F0AE) else if (isPairingExpanded) DigiWearPalette.DigiviceCyan else Color(0xFFB0BEC5),
+                                    fontSize = 8.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    fontFamily = FontFamily.Monospace,
+                                    modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
+                                )
+                            }
+                        }
+
+                        AnimatedVisibility(visible = isPairingExpanded) {
+                            Column(modifier = Modifier.padding(top = 10.dp)) {
+                                Surface(
+                                    color = Color(0xFF060B12),
+                                    shape = RoundedCornerShape(6.dp),
+                                    border = BorderStroke(1.dp, Color(0xFF1E2F44)),
+                                    modifier = Modifier.fillMaxWidth()
+                                ) {
+                                    Text(
+                                        text = "On your watch: Settings > Developer options > Wireless debugging > 'Pair new device'. Enter the pairing port and 6-digit code shown on the watch below:",
+                                        color = Color(0xFF80CBC4),
+                                        fontSize = 9.5.sp,
+                                        fontFamily = FontFamily.Monospace,
+                                        modifier = Modifier.padding(8.dp)
+                                    )
+                                }
+
+                                Spacer(modifier = Modifier.height(10.dp))
+
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    OutlinedTextField(
+                                        value = pairingPort,
+                                        onValueChange = {
+                                            pairingPort = it.filter { ch -> ch.isDigit() }
+                                            pairingSuccess = false
+                                            pairingError = null
+                                        },
+                                        label = { Text("Pairing Port", fontSize = 10.sp, fontFamily = FontFamily.Monospace) },
+                                        placeholder = { Text("38291", fontSize = 10.sp, fontFamily = FontFamily.Monospace) },
+                                        modifier = Modifier.weight(0.42f),
+                                        singleLine = true,
+                                        colors = OutlinedTextFieldDefaults.colors(
+                                            focusedBorderColor = DigiWearPalette.DigiviceCyan,
+                                            unfocusedBorderColor = DigiWearPalette.CardBorder,
+                                            focusedTextColor = Color.White,
+                                            unfocusedTextColor = Color.White
+                                        )
+                                    )
+
+                                    OutlinedTextField(
+                                        value = pairingCode,
+                                        onValueChange = {
+                                            if (it.length <= 6 && it.all { ch -> ch.isDigit() }) {
+                                                pairingCode = it
+                                                pairingSuccess = false
+                                                pairingError = null
+                                            }
+                                        },
+                                        label = { Text("6-Digit Pairing Code", fontSize = 10.sp, fontFamily = FontFamily.Monospace) },
+                                        placeholder = { Text("123456", fontSize = 10.sp, fontFamily = FontFamily.Monospace) },
+                                        modifier = Modifier.weight(0.58f),
+                                        singleLine = true,
+                                        textStyle = androidx.compose.ui.text.TextStyle(
+                                            fontFamily = FontFamily.Monospace,
+                                            fontWeight = FontWeight.Bold,
+                                            fontSize = 13.sp,
+                                            textAlign = TextAlign.Center,
+                                            letterSpacing = 2.sp
+                                        ),
+                                        colors = OutlinedTextFieldDefaults.colors(
+                                            focusedBorderColor = DigiWearPalette.DigiviceCyan,
+                                            unfocusedBorderColor = DigiWearPalette.CardBorder,
+                                            focusedTextColor = Color.White,
+                                            unfocusedTextColor = Color.White
+                                        )
+                                    )
+                                }
+
+                                if (watchIp.isBlank()) {
+                                    Spacer(modifier = Modifier.height(4.dp))
+                                    Text(
+                                        text = "⚠ Enter Watch IP Address above (e.g. 192.168.1.50) before pairing",
+                                        color = Color(0xFFFFB74D),
+                                        fontSize = 8.5.sp,
+                                        fontFamily = FontFamily.Monospace
+                                    )
+                                }
+
+                                Spacer(modifier = Modifier.height(8.dp))
+
+                                Button(
+                                    onClick = {
+                                        val pPort = pairingPort.toIntOrNull() ?: 0
+                                        isPairing = true
+                                        pairingError = null
+                                        pairingSuccess = false
+                                        scope.launch {
+                                            val success = adbManager.pair(watchIp, pPort, pairingCode)
+                                            isPairing = false
+                                            pairingSuccess = success
+                                            if (!success) {
+                                                pairingError = adbManager.lastError.value ?: "Pairing failed"
+                                            }
+                                        }
+                                    },
+                                    enabled = !isPairing && watchIp.isNotBlank() && pairingPort.isNotBlank() && pairingCode.length == 6,
+                                    colors = ButtonDefaults.buttonColors(
+                                        containerColor = if (pairingSuccess) Color(0xFF00E676) else DigiWearPalette.DigiviceCyan,
+                                        contentColor = Color.Black
+                                    ),
+                                    shape = RoundedCornerShape(6.dp),
+                                    modifier = Modifier.fillMaxWidth()
+                                ) {
+                                    if (isPairing) {
+                                        Text("PAIRING...", fontWeight = FontWeight.Black, fontFamily = FontFamily.Monospace, fontSize = 11.sp)
+                                    } else if (pairingSuccess) {
+                                        Text("PAIRED! SWITCH TO CONNECTION PORT ABOVE", fontWeight = FontWeight.Black, fontFamily = FontFamily.Monospace, fontSize = 9.5.sp)
+                                    } else {
+                                        Text("PAIR WITH WATCH", fontWeight = FontWeight.Black, fontFamily = FontFamily.Monospace, fontSize = 11.sp)
+                                    }
+                                }
+
+                                if (pairingSuccess) {
+                                    Spacer(modifier = Modifier.height(6.dp))
+                                    Text(
+                                        text = "✓ Watch successfully paired! Now return to the main 'Wireless debugging' screen on your watch, enter the operational port into 'Port' above, and tap CONNECT.",
+                                        color = Color(0xFF69F0AE),
+                                        fontSize = 9.sp,
+                                        fontFamily = FontFamily.Monospace
+                                    )
+                                }
+
+                                if (pairingError != null && !pairingSuccess) {
+                                    Spacer(modifier = Modifier.height(6.dp))
+                                    Text(
+                                        text = "⚠ $pairingError",
+                                        color = Color(0xFFFF5252),
+                                        fontSize = 9.sp,
+                                        fontFamily = FontFamily.Monospace
+                                    )
+                                }
+                            }
                         }
                     }
                 }
@@ -655,7 +865,7 @@ fun WatchSideloadScreen(
         }
 
         // --- 5. Step 4: Sideload Action Button ---
-        val isReadyToSideload = connectionState == SideloadConnectionState.CONNECTED && selectedApk != null
+        val isReadyToSideload = (connectionState == SideloadConnectionState.CONNECTED || connectionState == SideloadConnectionState.SUCCESS) && selectedApk != null
         val isBusy = connectionState == SideloadConnectionState.TRANSFERRING ||
             connectionState == SideloadConnectionState.INSTALLING ||
             connectionState == SideloadConnectionState.GRANTING_PERMISSIONS
@@ -786,7 +996,7 @@ fun WatchSideloadScreen(
         }
 
         // --- 7. Quick Watch Controls & Diagnostics ---
-        if (connectionState == SideloadConnectionState.CONNECTED) {
+        if (connectionState == SideloadConnectionState.CONNECTED || connectionState == SideloadConnectionState.SUCCESS) {
             Card(
                 colors = CardDefaults.cardColors(containerColor = DigiWearPalette.CardSurface),
                 border = BorderStroke(1.dp, DigiWearPalette.CardBorder),
@@ -869,20 +1079,20 @@ fun WatchSideloadScreen(
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     Text(
-                        text = "1. WEAR OS SMARTWATCH (Pixel Watch, Galaxy Watch):",
+                        text = "1. WEAR OS 3 / 4 / 5 (Pixel Watch, Galaxy Watch 4/5/6/7, OnePlus, Xiaomi):",
                         fontWeight = FontWeight.Bold,
                         color = Color(0xFF00E676),
                         fontSize = 10.sp,
                         fontFamily = FontFamily.Monospace
                     )
                     Text(
-                        text = "• On your watch, open Settings -> System -> About -> Versions.\n" +
-                            "• Tap 'Build Number' 7 times rapidly until 'You are a developer' appears.\n" +
-                            "• Go back to Settings -> Developer Options.\n" +
-                            "• Turn ON 'ADB Debugging' and 'Wireless Debugging' (or Debug over Wi-Fi).\n" +
-                            "• Connect Watch and Phone to the SAME Wi-Fi network.\n" +
-                            "• Enter the IP and Port displayed on the watch into this app and tap CONNECT.\n" +
-                            "• On the watch screen prompt, tap 'Always Allow'!",
+                        text = "• On your watch: Settings -> System -> About -> Versions -> tap 'Build Number' 7 times rapidly until Developer Options unlock.\n" +
+                            "• Settings -> Developer Options -> turn ON 'ADB Debugging' and 'Wireless Debugging'.\n" +
+                            "• Connect Watch and Phone to the SAME Wi-Fi network (or Phone Hotspot).\n" +
+                            "• STEP 1 (PAIRING): Tap 'Wireless Debugging' -> tap 'Pair new device'. Note the 6-digit Wi-Fi pairing code and dynamic pairing port (e.g. 192.168.1.50:38912).\n" +
+                            "• In this app, expand 'PAIR WITH 6-DIGIT CODE (WEAR OS 3/4/5)', enter Watch IP, Pairing Port, and 6-Digit Code, then tap 'PAIR WITH WATCH'.\n" +
+                            "• STEP 2 (CONNECT): Once paired, return to the main Wireless Debugging screen on the watch. Enter the operational Port displayed (e.g. 41235) into 'Port' above and tap 'CONNECT'.\n" +
+                            "• Once connected, select the DigiWear APK and tap 'SIDELOAD DIGIWEAR TO WATCH'.",
                         color = Color.LightGray,
                         fontSize = 9.sp,
                         fontFamily = FontFamily.Monospace
@@ -891,7 +1101,7 @@ fun WatchSideloadScreen(
                     Spacer(modifier = Modifier.height(4.dp))
 
                     Text(
-                        text = "2. STANDALONE AOSP / ANDROID WATCH (Kospet, Lokmat, Lemfo, Zeblaze):",
+                        text = "2. STANDALONE AOSP / LEGACY ANDROID WATCH (Kospet, Lokmat, Lemfo, Zeblaze):",
                         fontWeight = FontWeight.Bold,
                         color = Color(0xFFFFB74D),
                         fontSize = 10.sp,
@@ -901,7 +1111,8 @@ fun WatchSideloadScreen(
                         text = "• Open Settings -> About Watch -> tap 'Build Number' 7 times.\n" +
                             "• Go to Developer Options -> turn ON 'USB Debugging' or 'Wireless Debugging'.\n" +
                             "• Connect watch to Wi-Fi (or your Phone's Wi-Fi Hotspot).\n" +
-                            "• Use port 5555 and tap CONNECT.",
+                            "• Leave Port as 5555 (default unencrypted ADB) and tap 'CONNECT'.\n" +
+                            "• On the watch screen prompt, tap 'Always Allow'.",
                         color = Color.LightGray,
                         fontSize = 9.sp,
                         fontFamily = FontFamily.Monospace

@@ -142,4 +142,130 @@ class WirelessAdbSideloadTest {
         assertEquals("Installation Successful!", SideloadConnectionState.SUCCESS.label)
         assertEquals("Error", SideloadConnectionState.ERROR.label)
     }
+
+    @Test
+    fun testAdbKeyManagerPrivateKeyAndCertificate() {
+        val keyManager = AdbKeyManager(mockContext)
+
+        val privateKey = keyManager.getPrivateKey()
+        assertNotNull("Private key must not be null", privateKey)
+        assertEquals("RSA", privateKey.algorithm)
+
+        val cert = keyManager.getCertificate()
+        assertNotNull("Certificate must not be null", cert)
+        assertTrue("Certificate file adbkey.crt must exist", keyManager.certificateFile.exists())
+        assertTrue("Certificate file adbkey.crt must not be empty", keyManager.certificateFile.length() > 0)
+
+        // Subject DN and Issuer DN check
+        assertTrue("Certificate subject must contain DigiWear-Companion", cert.subjectDN.name.contains("DigiWear-Companion"))
+        assertTrue("Certificate issuer must contain DigiWear-Companion", cert.issuerDN.name.contains("DigiWear-Companion"))
+
+        // Validity check (approx 10 years ~ 3650 days)
+        val validityDays = (cert.notAfter.time - cert.notBefore.time) / (1000L * 60 * 60 * 24)
+        assertTrue("Certificate validity must be approximately 10 years (got $validityDays days)", validityDays in 3640..3660)
+
+        // Verify self-signed
+        val publicKey = keyManager.getPublicKey()
+        cert.verify(publicKey)
+
+        // Persistence check - re-reading gives identical certificate
+        val cert2 = keyManager.getCertificate()
+        assertEquals("Certificate must match persisted file", cert, cert2)
+    }
+
+    @Test
+    fun testDigiWearAdbConnectionManagerConfiguration() {
+        val keyManager = AdbKeyManager(mockContext)
+        val connectionManager = DigiWearAdbConnectionManager(keyManager)
+
+        assertEquals("DigiWear-Companion", connectionManager.getDeviceName())
+        connectionManager.setDeviceName("Custom-Wear-Client")
+        assertEquals("Custom-Wear-Client", connectionManager.getDeviceName())
+
+        assertEquals(20000L, connectionManager.timeout)
+        assertTrue("API level should be >= 26", connectionManager.api >= 26)
+
+        assertNotNull(connectionManager.getPrivateKey())
+        assertNotNull(connectionManager.getCertificate())
+        assertEquals(keyManager.getPrivateKey(), connectionManager.getPrivateKey())
+    }
+
+    @Test
+    fun testWirelessAdbManagerPairInputValidation() = kotlinx.coroutines.runBlocking {
+        val adbManager = WirelessAdbManager(mockContext)
+
+        // Empty IP
+        val emptyIpResult = adbManager.pair("", 38912, "123456")
+        assertFalse(emptyIpResult)
+        assertNotNull(adbManager.lastError.value)
+        assertTrue(adbManager.lastError.value!!.contains("IP address is required", ignoreCase = true))
+
+        // Non-6-digit code
+        val shortCodeResult = adbManager.pair("192.168.1.100", 38912, "1234")
+        assertFalse(shortCodeResult)
+        assertTrue(adbManager.lastError.value!!.contains("6 digits", ignoreCase = true))
+
+        val nonNumericCodeResult = adbManager.pair("192.168.1.100", 38912, "abcdef")
+        assertFalse(nonNumericCodeResult)
+        assertTrue(adbManager.lastError.value!!.contains("6 digits", ignoreCase = true))
+
+        // Invalid port
+        val invalidPortResult = adbManager.pair("192.168.1.100", 0, "123456")
+        assertFalse(invalidPortResult)
+        assertTrue(adbManager.lastError.value!!.contains("port", ignoreCase = true))
+
+        val overflowPortResult = adbManager.pair("192.168.1.100", 70000, "123456")
+        assertFalse(overflowPortResult)
+        assertTrue(adbManager.lastError.value!!.contains("port", ignoreCase = true))
+    }
+
+    @Test
+    fun testInstallApkDisconnectedFailsGracefully() = kotlinx.coroutines.runBlocking {
+        val adbManager = WirelessAdbManager(mockContext)
+        val dummyApk = File(tempFolder.root, "dummy.apk").apply { writeBytes(byteArrayOf(1, 2, 3, 4)) }
+
+        // Test installApk alias
+        val installResult = adbManager.installApk(dummyApk)
+        assertFalse("installApk must fail when not connected", installResult)
+        assertEquals("Watch is not connected", adbManager.lastError.value)
+
+        // Test sideloadApk method
+        val sideloadResult = adbManager.sideloadApk(dummyApk)
+        assertFalse("sideloadApk must fail when not connected", sideloadResult)
+        assertEquals("Watch is not connected", adbManager.lastError.value)
+    }
+
+    @Test
+    fun testDigiWearAdbConnectionManagerInstallApkNonexistentFile() {
+        val keyManager = AdbKeyManager(mockContext)
+        val connectionManager = DigiWearAdbConnectionManager(keyManager)
+        val nonExistent = File(tempFolder.root, "does_not_exist.apk")
+
+        val result = connectionManager.installApk(nonExistent)
+        assertTrue("Result should be failure for nonexistent file", result.isFailure)
+        assertTrue(result.exceptionOrNull()?.message?.contains("does not exist") == true)
+    }
+
+    @Test
+    fun testAdbKeyManagerPemPrivateKeyParsing() {
+        val keyManager = AdbKeyManager(mockContext)
+        val origPrivKey = keyManager.getPrivateKey()
+        assertNotNull(origPrivKey)
+
+        // Convert to PEM format and write back to privateKeyFile
+        val b64 = java.util.Base64.getMimeEncoder(64, "\n".toByteArray()).encodeToString(origPrivKey.encoded)
+        val pem = "-----BEGIN PRIVATE KEY-----\n$b64\n-----END PRIVATE KEY-----\n"
+        keyManager.privateKeyFile.writeText(pem)
+
+        // Re-read private key from PEM
+        val parsedPrivKey = keyManager.getPrivateKey()
+        assertNotNull(parsedPrivKey)
+        assertEquals("RSA", parsedPrivKey.algorithm)
+        assertEquals(origPrivKey, parsedPrivKey)
+
+        // Derived public key must still match
+        val pubKey = keyManager.getPublicKey()
+        assertNotNull(pubKey)
+        assertEquals("RSA", pubKey.algorithm)
+    }
 }

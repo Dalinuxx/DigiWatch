@@ -26,6 +26,12 @@ DigiWear v2.2.0 introduces custom sleep schedule time picking with 24-hour canon
 - **Seamless Wearable Asset Transfer**: Beams wallpaper bytes over Google Play Services Wearable `Asset` API and AOSP LAN socket bridge directly into smartwatch internal storage.
 - **Smart Watch Ambient Dimming**: Seamlessly handles always-on display (AOD) ambient mode transitions on AMOLED smartwatches.
 
+#### 4. Wear OS 3/4/5 Wireless ADB 6-Digit Pairing & TLS 1.3
+- **SPAKE2 Pairing Handshake**: Full support for Android 11+ and Wear OS 3, 4, and 5 Wireless Debugging pairing protocol (`adb pair`) over TLS 1.3 without requiring a PC.
+- **Dedicated Pairing UI**: New expandable cyber card in the Wireless ADB Sideload screen allows inputting the dynamic Pairing Port and 6-digit Wi-Fi Pairing Code displayed on your smartwatch screen (`Settings > Developer options > Wireless debugging > Pair new device`).
+- **On-Device X.509 Certificate Generation**: Generates and persists a 10-year self-signed RSA-2048 certificate using BouncyCastle and Conscrypt for secure mutual TLS (mTLS) authentication.
+- **Robust Sideload Streaming & Staging**: Seamlessly pushes and installs watch packages over TLS streams or staged fallback with zero stdin hang issues, preserving backwards compatibility for legacy AOSP port 5555 smartwatches.
+
 ---
 
 ### Downloads & Assets

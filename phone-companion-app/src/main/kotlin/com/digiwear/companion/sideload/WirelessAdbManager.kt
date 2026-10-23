@@ -4,6 +4,7 @@ import android.content.Context
 import dadb.Dadb
 import dadb.InstallResult
 import dadb.UninstallResult
+import io.github.muntashirakon.adb.AdbPairingRequiredException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -40,6 +41,7 @@ data class ConnectedWatchDetails(
 class WirelessAdbManager(private val context: Context) {
 
     private val keyManager = AdbKeyManager(context)
+    private var activeLibadb: DigiWearAdbConnectionManager? = null
     private var activeDadb: Dadb? = null
 
     private val _connectionState = MutableStateFlow(SideloadConnectionState.IDLE)
@@ -66,10 +68,72 @@ class WirelessAdbManager(private val context: Context) {
 
     fun getPublicKeyFingerprint(): String = keyManager.getPublicKeyFingerprintSha256()
 
-    fun isConnected(): Boolean = activeDadb != null && _connectionState.value == SideloadConnectionState.CONNECTED
+    fun isConnected(): Boolean = (activeLibadb?.isConnected == true || activeDadb != null) &&
+        _connectionState.value != SideloadConnectionState.IDLE &&
+        _connectionState.value != SideloadConnectionState.ERROR &&
+        _connectionState.value != SideloadConnectionState.CONNECTING
+
+    /**
+     * Performs SPAKE2 pairing over TLS 1.3 with a Wear OS 3/4/5 smartwatch (Android 11+).
+     *
+     * @param host Watch IP address.
+     * @param port Dynamic pairing port displayed on the watch's "Pair new device" screen.
+     * @param pairingCode 6-digit Wi-Fi pairing code displayed on the watch screen.
+     */
+    suspend fun pair(host: String, port: Int, pairingCode: String): Boolean = withContext(Dispatchers.IO) {
+        val cleanHost = host.trim()
+        val cleanCode = pairingCode.trim()
+        if (cleanHost.isEmpty()) {
+            _lastError.value = "Watch IP address is required for pairing"
+            log("Pairing Error: Watch IP address is empty")
+            return@withContext false
+        }
+        if (cleanCode.length != 6 || !cleanCode.all { it.isDigit() }) {
+            _lastError.value = "Pairing code must be exactly 6 digits"
+            log("Pairing Error: Pairing code must be a 6-digit number (e.g. 123456)")
+            return@withContext false
+        }
+        if (port <= 0 || port > 65535) {
+            _lastError.value = "Invalid pairing port"
+            log("Pairing Error: Invalid port $port (must be 1-65535)")
+            return@withContext false
+        }
+
+        log("--------------------------------------------------")
+        log("INITIATING SPAKE2 WIRELESS PAIRING (WEAR OS 3/4/5)...")
+        log("Target: $cleanHost:$port | Code: $cleanCode")
+        log("Loading RSA-2048 key & self-signed X.509 certificate...")
+
+        try {
+            val manager = DigiWearAdbConnectionManager(keyManager)
+            log("Transmitting pairing credentials to watch...")
+            val result = manager.pairWatch(cleanHost, port, cleanCode)
+            if (result.isSuccess && result.getOrDefault(false)) {
+                log("SUCCESS: Pairing authenticated!")
+                log("Smartwatch has trusted this companion app's credentials.")
+                log("NEXT STEP: Return to 'Wireless debugging' on your watch, enter the operational port into 'Port' above, and tap CONNECT.")
+                true
+            } else {
+                val err = result.exceptionOrNull()?.message ?: "Pairing request was rejected by the watch."
+                _lastError.value = err
+                log("Pairing rejected: $err")
+                false
+            }
+        } catch (e: Exception) {
+            val err = e.message ?: e.javaClass.simpleName
+            _lastError.value = "Pairing failed: $err"
+            log("SPAKE2 Pairing Error: $err")
+            log("Troubleshooting:")
+            log("1. Ensure watch screen is currently open on 'Pair new device'.")
+            log("2. Verify that the 6-digit code and pairing port match what is shown on watch.")
+            log("3. Ensure phone and watch are connected to the same Wi-Fi / Hotspot.")
+            false
+        }
+    }
 
     /**
      * Connects to a smartwatch listening on [host]:[port] over wireless ADB.
+     * Tries modern TLS 1.3 (Wear OS 3/4/5) first; falls back to legacy unencrypted ADB (AOSP / port 5555).
      */
     suspend fun connect(host: String, port: Int = 5555): Boolean = withContext(Dispatchers.IO) {
         disconnect()
@@ -84,6 +148,53 @@ class WirelessAdbManager(private val context: Context) {
         _lastError.value = null
         log("Initiating Wireless ADB connection to $cleanHost:$port...")
 
+        // 1. Attempt modern TLS 1.3 connection (Wear OS 3/4/5 / Android 11+)
+        try {
+            log("Attempting TLS 1.3 ADB connection (Wear OS 3/4/5)...")
+            val manager = DigiWearAdbConnectionManager(keyManager)
+            _connectionState.value = SideloadConnectionState.AUTHENTICATING
+
+            val connResult = manager.connectWatch(cleanHost, port)
+            if (connResult.isSuccess && manager.isConnected) {
+                activeLibadb = manager
+                log("TLS 1.3 ADB Handshake OK! Querying smartwatch hardware details...")
+                val details = manager.queryDetails()
+                _watchDetails.value = details
+
+                _connectionState.value = SideloadConnectionState.CONNECTED
+                log("SUCCESS: Connected to ${details.model} (${details.manufacturer}) via TLS 1.3")
+                log("Watch OS: Android ${details.androidVersion} (API ${details.sdkVersion}) ${details.wearPlatform}")
+                if (details.isDigiWearInstalled) {
+                    log("Existing DigiWear installation detected: ${details.installedVersionName}")
+                } else {
+                    log("DigiWear is not yet installed on this watch")
+                }
+                return@withContext true
+            } else {
+                val ex = connResult.exceptionOrNull()
+                val isPairingReq = ex is AdbPairingRequiredException ||
+                    ex?.cause is AdbPairingRequiredException ||
+                    ex?.message?.contains("pairing required", ignoreCase = true) == true
+                if (isPairingReq) {
+                    throw (ex as? AdbPairingRequiredException
+                        ?: (ex?.cause as? AdbPairingRequiredException)
+                        ?: AdbPairingRequiredException(ex?.message ?: "Pairing required"))
+                }
+                log("TLS connection could not be established: ${ex?.message ?: "Not accepted"}")
+            }
+        } catch (e: AdbPairingRequiredException) {
+            _connectionState.value = SideloadConnectionState.ERROR
+            val msg = "Watch requires 6-digit pairing code before connecting! Use 'PAIR WITH 6-DIGIT CODE' below first."
+            _lastError.value = msg
+            log("PAIRING REQUIRED: $msg")
+            disconnect()
+            return@withContext false
+        } catch (e: Exception) {
+            log("TLS connection attempt failed (${e.message ?: e.javaClass.simpleName}).")
+        }
+
+        // 2. Attempt legacy unencrypted TCP ADB fallback (dadb)
+        log("Attempting legacy ADB fallback (AOSP / Port 5555)...")
         try {
             val keyPair = keyManager.getOrCreateKeyPair()
             val fp = keyManager.getPublicKeyFingerprintSha256()
@@ -99,25 +210,26 @@ class WirelessAdbManager(private val context: Context) {
             _watchDetails.value = details
 
             _connectionState.value = SideloadConnectionState.CONNECTED
-            log("SUCCESS: Connected to ${details.model} (${details.manufacturer})")
+            log("SUCCESS: Connected to ${details.model} (${details.manufacturer}) via legacy ADB")
             log("Watch OS: Android ${details.androidVersion} (API ${details.sdkVersion}) ${details.wearPlatform}")
             if (details.isDigiWearInstalled) {
                 log("Existing DigiWear installation detected: ${details.installedVersionName}")
             } else {
                 log("DigiWear is not yet installed on this watch")
             }
-            true
+            return@withContext true
         } catch (e: Exception) {
             _connectionState.value = SideloadConnectionState.ERROR
             val err = e.message ?: e.javaClass.simpleName
             _lastError.value = err
             log("Connection failed: $err")
             log("Troubleshooting tips:")
-            log("1. Ensure watch and phone are on the exact same Wi-Fi / Hotspot.")
-            log("2. Ensure 'ADB Debugging' and 'Wireless Debugging' (or Debug over Wi-Fi) are enabled.")
-            log("3. For Wear OS 4+, confirm the random port shown in Wireless Debugging settings.")
+            log("1. For Wear OS 3/4/5 (Pixel Watch, Galaxy Watch 4+): You MUST pair with the 6-digit code first!")
+            log("2. Ensure watch and phone are on the exact same Wi-Fi / Hotspot.")
+            log("3. Ensure 'ADB Debugging' and 'Wireless Debugging' (or Debug over Wi-Fi) are enabled.")
+            log("4. Check that the port matches the dynamic port shown in Wireless Debugging settings.")
             disconnect()
-            false
+            return@withContext false
         }
     }
 
@@ -153,8 +265,25 @@ class WirelessAdbManager(private val context: Context) {
         )
     }
 
+    private fun execShell(cmd: String): String {
+        activeLibadb?.let { return it.execShell(cmd) }
+        activeDadb?.let { return it.shell(cmd).output.trim() }
+        return ""
+    }
+
     /**
-     * Sideloads the target APK file to the connected watch.
+     * Installs the target APK file onto the connected watch.
+     * Alias for [sideloadApk] using the active connection engine.
+     */
+    suspend fun installApk(
+        apkFile: File,
+        grantPermissions: Boolean = true,
+        reinstallKeepData: Boolean = true,
+        autoLaunch: Boolean = true
+    ): Boolean = sideloadApk(apkFile, grantPermissions, reinstallKeepData, autoLaunch)
+
+    /**
+     * Sideloads the target APK file to the connected watch using the active ADB connection engine.
      */
     suspend fun sideloadApk(
         apkFile: File,
@@ -162,8 +291,9 @@ class WirelessAdbManager(private val context: Context) {
         reinstallKeepData: Boolean = true,
         autoLaunch: Boolean = true
     ): Boolean = withContext(Dispatchers.IO) {
+        val libadb = activeLibadb
         val dadb = activeDadb
-        if (dadb == null) {
+        if (libadb == null && dadb == null) {
             _lastError.value = "Watch is not connected"
             log("Cannot sideload: No active ADB connection")
             return@withContext false
@@ -179,75 +309,93 @@ class WirelessAdbManager(private val context: Context) {
         log("--------------------------------------------------")
         log("SIDELOADING: ${apkFile.name} ($sizeMb)")
         log("Target: ${_watchDetails.value?.model ?: "Connected Watch"}")
+        log("Engine: ${if (libadb != null) "TLS 1.3 (Wear OS 3/4/5)" else "Legacy TCP ADB"}")
         log("Options: Reinstall=$reinstallKeepData, GrantPermissions=$grantPermissions, AutoLaunch=$autoLaunch")
 
         _connectionState.value = SideloadConnectionState.TRANSFERRING
+        var installSuccess = false
 
         try {
-            // Attempt standard streaming install
-            log("Streaming APK directly to PackageInstaller session...")
-            val installOptions = mutableListOf<String>()
-            if (reinstallKeepData) {
-                installOptions.add("-r")
-                installOptions.add("-d")
-            }
-            if (grantPermissions) {
-                installOptions.add("-g")
-            }
-
-            _connectionState.value = SideloadConnectionState.INSTALLING
-            var installSuccess = false
-
-            // Try dadb direct install first
-            val installResult: InstallResult = try {
-                dadb.install(apkFile, *installOptions.toTypedArray())
-            } catch (e: Exception) {
-                InstallResult.Failure(e.message ?: "Streaming install failed")
-            }
-
-            if (installResult is InstallResult.Success) {
-                installSuccess = true
-                log("Package installer session committed successfully!")
-            } else {
-                val failureReason = (installResult as InstallResult.Failure).reason
-                log("Direct streaming failed ($failureReason). Falling back to push + pm install...")
-
-                val remotePath = "/data/local/tmp/digiwear_install.apk"
-                _connectionState.value = SideloadConnectionState.TRANSFERRING
-                log("Pushing APK to $remotePath...")
-                dadb.push(apkFile, remotePath)
-                log("Push complete. Executing pm install...")
+            if (libadb != null) {
+                // Install via TLS connection manager
+                _connectionState.value = SideloadConnectionState.INSTALLING
+                log("Streaming APK to PackageInstaller session...")
+                val result = libadb.installApk(apkFile)
+                if (result.isSuccess) {
+                    installSuccess = true
+                    log("Package installer session committed successfully!")
+                } else {
+                    val err = result.exceptionOrNull()?.message ?: "Installation failed"
+                    _lastError.value = err
+                    log("TLS Install Error: $err")
+                }
+            } else if (dadb != null) {
+                // Install via Dadb
+                val installOptions = mutableListOf<String>()
+                if (reinstallKeepData) {
+                    installOptions.add("-r")
+                    installOptions.add("-d")
+                }
+                if (grantPermissions) {
+                    installOptions.add("-g")
+                }
 
                 _connectionState.value = SideloadConnectionState.INSTALLING
-                val flags = if (reinstallKeepData) "-r -d" else ""
-                val grantFlag = if (grantPermissions) "-g" else ""
-                val pmCmd = "pm install $flags $grantFlag $remotePath"
-                log("Running: $pmCmd")
-                var pmOutput = dadb.shell(pmCmd).output.trim()
-                log("pm output: $pmOutput")
-
-                if (!pmOutput.contains("Success", ignoreCase = true)) {
-                    log("Retrying pm install without -g flag in case of platform restrictions...")
-                    pmOutput = dadb.shell("pm install $flags $remotePath").output.trim()
-                    log("pm fallback output: $pmOutput")
+                val installResult: InstallResult = try {
+                    dadb.install(apkFile, *installOptions.toTypedArray())
+                } catch (e: Exception) {
+                    InstallResult.Failure(e.message ?: "Streaming install failed")
                 }
 
-                // Clean up remote temp file
-                dadb.shell("rm -f $remotePath")
-
-                if (pmOutput.contains("Success", ignoreCase = true)) {
+                if (installResult is InstallResult.Success) {
                     installSuccess = true
-                    log("pm install succeeded!")
+                    log("Package installer session committed successfully!")
                 } else {
-                    _connectionState.value = SideloadConnectionState.ERROR
-                    _lastError.value = "pm install failed: $pmOutput"
-                    log("INSTALLATION FAILED: $pmOutput")
-                    return@withContext false
+                    val failureReason = (installResult as InstallResult.Failure).reason
+                    log("Direct streaming failed ($failureReason). Falling back to push + pm install...")
+
+                    val remotePath = "/data/local/tmp/digiwear_install.apk"
+                    _connectionState.value = SideloadConnectionState.TRANSFERRING
+                    log("Pushing APK to $remotePath...")
+                    dadb.push(apkFile, remotePath)
+                    log("Push complete. Executing pm install...")
+
+                    _connectionState.value = SideloadConnectionState.INSTALLING
+                    val flags = if (reinstallKeepData) "-r -d" else ""
+                    val grantFlag = if (grantPermissions) "-g" else ""
+                    val pmCmd = "pm install $flags $grantFlag $remotePath"
+                    log("Running: $pmCmd")
+                    var pmOutput = dadb.shell(pmCmd).output.trim()
+                    log("pm output: $pmOutput")
+
+                    if (!pmOutput.contains("Success", ignoreCase = true)) {
+                        log("Retrying pm install without -g flag in case of platform restrictions...")
+                        pmOutput = dadb.shell("pm install $flags $remotePath").output.trim()
+                        log("pm fallback output: $pmOutput")
+                    }
+
+                    // Clean up remote temp file
+                    dadb.shell("rm -f $remotePath")
+
+                    if (pmOutput.contains("Success", ignoreCase = true)) {
+                        installSuccess = true
+                        log("pm install succeeded!")
+                    } else {
+                        _connectionState.value = SideloadConnectionState.ERROR
+                        _lastError.value = "pm install failed: $pmOutput"
+                        log("INSTALLATION FAILED: $pmOutput")
+                        return@withContext false
+                    }
                 }
+            }
+
+            if (!installSuccess) {
+                _connectionState.value = SideloadConnectionState.ERROR
+                return@withContext false
             }
 
             // Post-install permission grants
-            if (grantPermissions && installSuccess) {
+            if (grantPermissions) {
                 _connectionState.value = SideloadConnectionState.GRANTING_PERMISSIONS
                 log("Ensuring required runtime permissions are granted...")
                 val permissions = listOf(
@@ -256,7 +404,7 @@ class WirelessAdbManager(private val context: Context) {
                     "android.permission.POST_NOTIFICATIONS"
                 )
                 for (perm in permissions) {
-                    val out = dadb.shell("pm grant com.digiwear.wear $perm").output.trim()
+                    val out = execShell("pm grant com.digiwear.wear $perm")
                     if (out.isNotEmpty()) {
                         log("Grant $perm: $out")
                     } else {
@@ -266,13 +414,16 @@ class WirelessAdbManager(private val context: Context) {
             }
 
             // Refresh watch details
-            val updatedDetails = queryWatchDetails(dadb)
-            _watchDetails.value = updatedDetails
+            if (libadb != null) {
+                _watchDetails.value = libadb.queryDetails()
+            } else if (dadb != null) {
+                _watchDetails.value = queryWatchDetails(dadb)
+            }
 
             // Auto-launch if requested
-            if (autoLaunch && installSuccess) {
+            if (autoLaunch) {
                 log("Launching DigiWear on watch (am start)...")
-                val startOutput = dadb.shell("am start -n com.digiwear.wear/.MainActivity").output.trim()
+                val startOutput = execShell("am start -n com.digiwear.wear/.MainActivity")
                 log("Launch: $startOutput")
             }
 
@@ -295,9 +446,9 @@ class WirelessAdbManager(private val context: Context) {
      * Launches the DigiWear app on the watch.
      */
     suspend fun launchOnWatch(): Boolean = withContext(Dispatchers.IO) {
-        val dadb = activeDadb ?: return@withContext false
+        if (!isConnected()) return@withContext false
         log("Executing am start on watch...")
-        val out = dadb.shell("am start -n com.digiwear.wear/.MainActivity").output.trim()
+        val out = execShell("am start -n com.digiwear.wear/.MainActivity")
         log("Launch result: $out")
         out.contains("Starting") || out.contains("Warning: Activity not started")
     }
@@ -306,23 +457,40 @@ class WirelessAdbManager(private val context: Context) {
      * Uninstalls any existing DigiWear package from the watch (resolves signature mismatch issues).
      */
     suspend fun uninstallFromWatch(): Boolean = withContext(Dispatchers.IO) {
-        val dadb = activeDadb ?: return@withContext false
+        val libadb = activeLibadb
+        val dadb = activeDadb
+        if (libadb == null && dadb == null) return@withContext false
+
         log("Uninstalling com.digiwear.wear from watch...")
-        val result = try {
-            dadb.uninstall("com.digiwear.wear")
-        } catch (_: Exception) {
-            null
-        }
-        val success = if (result is UninstallResult.Success) {
-            true
-        } else {
-            val out = dadb.shell("pm uninstall com.digiwear.wear").output.trim()
+        var success = false
+
+        if (libadb != null) {
+            val out = libadb.execShell("pm uninstall com.digiwear.wear")
             log("pm uninstall output: $out")
-            out.contains("Success", ignoreCase = true)
+            success = out.contains("Success", ignoreCase = true)
+            if (success) {
+                _watchDetails.value = libadb.queryDetails()
+            }
+        } else if (dadb != null) {
+            val result = try {
+                dadb.uninstall("com.digiwear.wear")
+            } catch (_: Exception) {
+                null
+            }
+            success = if (result is UninstallResult.Success) {
+                true
+            } else {
+                val out = dadb.shell("pm uninstall com.digiwear.wear").output.trim()
+                log("pm uninstall output: $out")
+                out.contains("Success", ignoreCase = true)
+            }
+            if (success) {
+                _watchDetails.value = queryWatchDetails(dadb)
+            }
         }
+
         if (success) {
             log("com.digiwear.wear uninstalled.")
-            _watchDetails.value = queryWatchDetails(dadb)
         } else {
             log("Uninstall did not find package or failed.")
         }
@@ -333,9 +501,15 @@ class WirelessAdbManager(private val context: Context) {
      * Refreshes the watch's status and installed package info.
      */
     suspend fun refreshWatchStatus() = withContext(Dispatchers.IO) {
-        val dadb = activeDadb ?: return@withContext
+        val libadb = activeLibadb
+        val dadb = activeDadb
+        if (libadb == null && dadb == null) return@withContext
         log("Refreshing watch diagnostic status...")
-        _watchDetails.value = queryWatchDetails(dadb)
+        if (libadb != null) {
+            _watchDetails.value = libadb.queryDetails()
+        } else if (dadb != null) {
+            _watchDetails.value = queryWatchDetails(dadb)
+        }
         log("Status updated.")
     }
 
@@ -344,9 +518,18 @@ class WirelessAdbManager(private val context: Context) {
      */
     fun disconnect() {
         try {
+            activeLibadb?.disconnect()
+        } catch (_: Exception) {}
+        try {
+            activeLibadb?.close()
+        } catch (_: Exception) {}
+        activeLibadb = null
+
+        try {
             activeDadb?.close()
         } catch (_: Exception) {}
         activeDadb = null
+
         _connectionState.value = SideloadConnectionState.IDLE
         _watchDetails.value = null
     }
