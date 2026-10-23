@@ -100,7 +100,6 @@ fun SpriteStudioScreen(
     var selectedSpeciesId by remember { mutableIntStateOf(201) } // Agumon
     var selectedFrameIndex by remember { mutableIntStateOf(0) }
     var previewMode by remember { mutableStateOf("IDLE") } // IDLE, WALK, FEED, SLEEP, ATTACK, STATUS
-    var animFrame by remember { mutableIntStateOf(0) }
     var searchQuery by remember { mutableStateOf("") }
     var selectedStageFilter by remember { mutableStateOf<PetStage?>(null) }
     var syncMessage by remember { mutableStateOf<String?>(null) }
@@ -142,50 +141,6 @@ fun SpriteStudioScreen(
             it.primarySpeciesId == selectedSpeciesId ||
                     it.secondarySpeciesId == selectedSpeciesId ||
                     it.targetSpeciesId == selectedSpeciesId
-        }
-    }
-
-    // Live Animation Loop
-    LaunchedEffect(previewMode) {
-        while (true) {
-            when (previewMode) {
-                "IDLE" -> {
-                    animFrame = 0
-                    delay(500L)
-                    animFrame = 1
-                    delay(500L)
-                }
-                "WALK" -> {
-                    animFrame = 2
-                    delay(350L)
-                    animFrame = 3
-                    delay(350L)
-                }
-                "FEED" -> {
-                    animFrame = 4
-                    delay(400L)
-                    animFrame = 5
-                    delay(600L)
-                }
-                "SLEEP" -> {
-                    animFrame = 6
-                    delay(600L)
-                    animFrame = 7
-                    delay(600L)
-                }
-                "ATTACK" -> {
-                    animFrame = 9
-                    delay(500L)
-                    animFrame = 10
-                    delay(500L)
-                }
-                "STATUS" -> {
-                    animFrame = 8
-                    delay(650L)
-                    animFrame = 11
-                    delay(650L)
-                }
-            }
         }
     }
 
@@ -503,38 +458,13 @@ fun SpriteStudioScreen(
 
                 Spacer(modifier = Modifier.height(10.dp))
 
-                VPetBrickShellFrame(
-                    selectedIconIndex = PREVIEW_MODES.indexOf(previewMode).coerceAtLeast(0),
-                    statusLabel = "FRAME $animFrame • $previewMode",
-                    screenHeight = 140.dp,
-                    onButtonA = {
-                        val nextIdx = (PREVIEW_MODES.indexOf(previewMode) + 1) % PREVIEW_MODES.size
-                        previewMode = PREVIEW_MODES[nextIdx]
-                    },
-                    onButtonB = {
-                        animFrame = (animFrame + 1) % 12
-                        selectedFrameIndex = animFrame
-                    },
-                    onButtonC = {
-                        previewMode = "IDLE"
-                        animFrame = 0
-                    }
-                ) {
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        SpriteCanvasRenderer(
-                            speciesId = selectedSpeciesId,
-                            frame = SpriteFrame.fromIndex(animFrame),
-                            size = 106.dp
-                        )
-                        Text(
-                            text = SPRITE_GRID_FRAMES[animFrame].name.uppercase(),
-                            fontSize = 8.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = Color(0xFF81C784),
-                            fontFamily = FontFamily.Monospace
-                        )
-                    }
-                }
+                StudioSpritePreviewShell(
+                    selectedSpeciesId = selectedSpeciesId,
+                    previewMode = previewMode,
+                    onPreviewModeChange = { previewMode = it },
+                    selectedFrameIndex = selectedFrameIndex,
+                    onFrameIndexChange = { selectedFrameIndex = it }
+                )
 
                 Spacer(modifier = Modifier.height(10.dp))
 
@@ -849,7 +779,6 @@ fun SpriteStudioScreen(
                                         .padding(3.dp)
                                         .clickable {
                                             selectedFrameIndex = frameIndex
-                                            animFrame = frameIndex
                                         },
                                     colors = CardDefaults.cardColors(
                                         containerColor = if (isSelected) Color(0xFF16324A) else DigiWearPalette.CardSurface
@@ -1025,5 +954,98 @@ private fun StageFilterChip(text: String, isSelected: Boolean, onClick: () -> Un
             color = if (isSelected) Color.White else Color.LightGray,
             fontFamily = FontFamily.Monospace
         )
+    }
+}
+
+@Composable
+private fun StudioSpritePreviewShell(
+    selectedSpeciesId: Int,
+    previewMode: String,
+    onPreviewModeChange: (String) -> Unit,
+    selectedFrameIndex: Int,
+    onFrameIndexChange: (Int) -> Unit
+) {
+    var animFrame by remember { mutableIntStateOf(selectedFrameIndex) }
+
+    LaunchedEffect(selectedFrameIndex) {
+        animFrame = selectedFrameIndex
+    }
+
+    LaunchedEffect(previewMode) {
+        while (true) {
+            when (previewMode) {
+                "IDLE" -> {
+                    animFrame = 0
+                    delay(500L)
+                    animFrame = 1
+                    delay(500L)
+                }
+                "WALK" -> {
+                    animFrame = 2
+                    delay(350L)
+                    animFrame = 3
+                    delay(350L)
+                }
+                "FEED" -> {
+                    animFrame = 4
+                    delay(400L)
+                    animFrame = 5
+                    delay(600L)
+                }
+                "SLEEP" -> {
+                    animFrame = 6
+                    delay(600L)
+                    animFrame = 7
+                    delay(600L)
+                }
+                "ATTACK" -> {
+                    animFrame = 9
+                    delay(500L)
+                    animFrame = 10
+                    delay(500L)
+                }
+                "STATUS" -> {
+                    animFrame = 8
+                    delay(650L)
+                    animFrame = 11
+                    delay(650L)
+                }
+            }
+        }
+    }
+
+    VPetBrickShellFrame(
+        selectedIconIndex = PREVIEW_MODES.indexOf(previewMode).coerceAtLeast(0),
+        statusLabel = "FRAME $animFrame • $previewMode",
+        screenHeight = 140.dp,
+        onButtonA = {
+            val nextIdx = (PREVIEW_MODES.indexOf(previewMode) + 1) % PREVIEW_MODES.size
+            onPreviewModeChange(PREVIEW_MODES[nextIdx])
+        },
+        onButtonB = {
+            val nextFrame = (animFrame + 1) % 12
+            animFrame = nextFrame
+            onFrameIndexChange(nextFrame)
+        },
+        onButtonC = {
+            onPreviewModeChange("IDLE")
+            animFrame = 0
+            onFrameIndexChange(0)
+        }
+    ) {
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            SpriteCanvasRenderer(
+                speciesId = selectedSpeciesId,
+                frame = SpriteFrame.fromIndex(animFrame),
+                size = 106.dp
+            )
+            Text(
+                text = SPRITE_GRID_FRAMES[animFrame].name.uppercase(),
+                fontSize = 8.sp,
+                fontWeight = FontWeight.Bold,
+                color = Color(0xFF81C784),
+                fontFamily = FontFamily.Monospace
+            )
+        }
     }
 }

@@ -120,6 +120,14 @@ fun BackgroundCanvas(
                     emptyList()
                 }
 
+                // Precompute corner rivet positions once per size change to avoid 60 Hz allocations
+                val cornerRivets = listOf(
+                    Offset(10f, 10f),
+                    Offset(size.width - 10f, 10f),
+                    Offset(10f, size.height - 10f),
+                    Offset(size.width - 10f, size.height - 10f)
+                )
+
                 onDrawBehind {
                     if (isAmbient || lightsOff) {
                         // OLED Power Saving: Pure pitch black base
@@ -194,12 +202,7 @@ fun BackgroundCanvas(
                                     )
                                 }
                                 val rivetRadius = 2.5f
-                                listOf(
-                                    Offset(10f, 10f),
-                                    Offset(size.width - 10f, 10f),
-                                    Offset(10f, size.height - 10f),
-                                    Offset(size.width - 10f, size.height - 10f)
-                                ).forEach { pt ->
+                                cornerRivets.forEach { pt ->
                                     drawCircle(color = bezelHighlight, radius = rivetRadius, center = pt, style = Stroke(width = 1f))
                                     drawLine(color = bezelHighlight, start = Offset(pt.x - 1.5f, pt.y), end = Offset(pt.x + 1.5f, pt.y), strokeWidth = 0.8f)
                                 }

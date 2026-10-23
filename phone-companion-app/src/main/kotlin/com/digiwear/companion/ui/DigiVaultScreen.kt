@@ -102,8 +102,6 @@ fun DigiVaultScreen(
     var fusionTypeFilter by remember { mutableStateOf<FusionType?>(null) }
     var onlyShowCanFuseNow by remember { mutableStateOf(false) }
 
-    // Sprite animation ticker
-    var frameToggle by remember { mutableStateOf(false) }
     LaunchedEffect(Unit) {
         val latest = db.phoneDao().getLatestSnapshot()
         if (latest != null) {
@@ -122,17 +120,15 @@ fun DigiVaultScreen(
                 victories = latest.victories
             )
         }
-        while (true) {
-            delay(500L)
-            frameToggle = !frameToggle
-        }
     }
 
-    val filteredPets = vaultPets.filter { pet ->
-        val matchesSearch = pet.speciesName.contains(searchQuery, ignoreCase = true) ||
-                pet.customNickname.contains(searchQuery, ignoreCase = true)
-        val matchesStage = selectedStageFilter == null || pet.stageName == selectedStageFilter?.displayName
-        matchesSearch && matchesStage
+    val filteredPets = remember(vaultPets, searchQuery, selectedStageFilter) {
+        vaultPets.filter { pet ->
+            val matchesSearch = pet.speciesName.contains(searchQuery, ignoreCase = true) ||
+                    pet.customNickname.contains(searchQuery, ignoreCase = true)
+            val matchesStage = selectedStageFilter == null || pet.stageName == selectedStageFilter?.displayName
+            matchesSearch && matchesStage
+        }
     }
 
     Column(
@@ -412,7 +408,6 @@ fun DigiVaultScreen(
                             VaultPetCard(
                                 pet = storedPet,
                                 activePet = activePetForDeposit,
-                                frameToggle = frameToggle,
                                 onDeployToWatch = {
                                     scope.launch {
                                         val state = PetState(
@@ -552,24 +547,33 @@ fun DigiVaultScreen(
                 val ownedActiveId = activePetForDeposit?.speciesId
                 val ownedVaultIds = remember(vaultPets) { vaultPets.map { it.speciesId }.toSet() }
 
-                val displayedRecipes = JogressEngine.BASE_RECIPES.filter { recipe ->
-                    val primarySp = PetSpecies.getById(recipe.primarySpeciesId)
-                    val secondarySp = PetSpecies.getById(recipe.secondarySpeciesId)
-                    val targetSp = PetSpecies.getById(recipe.targetSpeciesId)
+                val displayedRecipes = remember(
+                    JogressEngine.BASE_RECIPES,
+                    fusionSearchQuery,
+                    fusionTypeFilter,
+                    onlyShowCanFuseNow,
+                    ownedVaultIds,
+                    ownedActiveId
+                ) {
+                    JogressEngine.BASE_RECIPES.filter { recipe ->
+                        val primarySp = PetSpecies.getById(recipe.primarySpeciesId)
+                        val secondarySp = PetSpecies.getById(recipe.secondarySpeciesId)
+                        val targetSp = PetSpecies.getById(recipe.targetSpeciesId)
 
-                    val matchesSearch = primarySp.name.contains(fusionSearchQuery, ignoreCase = true) ||
-                            secondarySp.name.contains(fusionSearchQuery, ignoreCase = true) ||
-                            targetSp.name.contains(fusionSearchQuery, ignoreCase = true)
+                        val matchesSearch = primarySp.name.contains(fusionSearchQuery, ignoreCase = true) ||
+                                secondarySp.name.contains(fusionSearchQuery, ignoreCase = true) ||
+                                targetSp.name.contains(fusionSearchQuery, ignoreCase = true)
 
-                    val matchesType = fusionTypeFilter == null || recipe.fusionType == fusionTypeFilter
+                        val matchesType = fusionTypeFilter == null || recipe.fusionType == fusionTypeFilter
 
-                    val hasPrimary = (ownedActiveId == recipe.primarySpeciesId) || ownedVaultIds.contains(recipe.primarySpeciesId)
-                    val hasSecondary = (ownedActiveId == recipe.secondarySpeciesId) || ownedVaultIds.contains(recipe.secondarySpeciesId)
-                    val canFuse = hasPrimary && hasSecondary
+                        val hasPrimary = (ownedActiveId == recipe.primarySpeciesId) || ownedVaultIds.contains(recipe.primarySpeciesId)
+                        val hasSecondary = (ownedActiveId == recipe.secondarySpeciesId) || ownedVaultIds.contains(recipe.secondarySpeciesId)
+                        val canFuse = hasPrimary && hasSecondary
 
-                    val matchesCanFuse = !onlyShowCanFuseNow || canFuse
+                        val matchesCanFuse = !onlyShowCanFuseNow || canFuse
 
-                    matchesSearch && matchesType && matchesCanFuse
+                        matchesSearch && matchesType && matchesCanFuse
+                    }
                 }
 
                 if (displayedRecipes.isEmpty()) {
@@ -606,7 +610,10 @@ fun DigiVaultScreen(
                         modifier = Modifier.weight(1f),
                         verticalArrangement = Arrangement.spacedBy(10.dp)
                     ) {
-                        items(displayedRecipes) { recipe ->
+                        items(
+                            displayedRecipes,
+                            key = { "${it.primarySpeciesId}_${it.secondarySpeciesId}_${it.targetSpeciesId}" }
+                        ) { recipe ->
                             val primarySp = PetSpecies.getById(recipe.primarySpeciesId)
                             val secondarySp = PetSpecies.getById(recipe.secondarySpeciesId)
                             val targetSp = PetSpecies.getById(recipe.targetSpeciesId)
@@ -1136,10 +1143,9 @@ fun DigiVaultScreen(
                         Text("=", fontSize = 18.sp, fontWeight = FontWeight.Black, color = Color(0xFF64B5F6))
 
                         Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                            SpriteCanvasRenderer(
+                            AnimatedVaultPetSprite(
                                 speciesId = targetSp.id,
-                                frame = if (frameToggle) SpriteFrame.IDLE_A else SpriteFrame.IDLE_B,
-                                modifier = Modifier.size(52.dp)
+                                size = 52.dp
                             )
                             Text(targetSp.name, fontSize = 11.sp, color = Color(0xFF00E676), fontWeight = FontWeight.Black)
                             Text(targetSp.stage.displayName, fontSize = 8.sp, color = Color(0xFF80CBC4))
@@ -1296,10 +1302,30 @@ private sealed interface FusionExecutionCandidate {
 private data class Quad<A, B, C, D>(val first: A, val second: B, val third: C, val fourth: D)
 
 @Composable
+private fun AnimatedVaultPetSprite(
+    speciesId: Int,
+    size: androidx.compose.ui.unit.Dp,
+    modifier: Modifier = Modifier
+) {
+    var frameToggle by remember { mutableStateOf(false) }
+    LaunchedEffect(speciesId) {
+        while (true) {
+            delay(500L)
+            frameToggle = !frameToggle
+        }
+    }
+    SpriteCanvasRenderer(
+        speciesId = speciesId,
+        frame = if (frameToggle) SpriteFrame.IDLE_A else SpriteFrame.IDLE_B,
+        size = size,
+        modifier = modifier
+    )
+}
+
+@Composable
 private fun VaultPetCard(
     pet: StoredDigimonEntity,
     activePet: PetState?,
-    frameToggle: Boolean,
     onDeployToWatch: () -> Unit,
     onGenerateCommCode: () -> Unit,
     onDelete: () -> Unit,
@@ -1327,10 +1353,9 @@ private fun VaultPetCard(
                         .border(1.5.dp, Color(0x6680CBC4), RoundedCornerShape(10.dp)),
                     contentAlignment = Alignment.Center
                 ) {
-                    SpriteCanvasRenderer(
+                    AnimatedVaultPetSprite(
                         speciesId = pet.speciesId,
-                        frame = if (frameToggle) SpriteFrame.IDLE_A else SpriteFrame.IDLE_B,
-                        modifier = Modifier.size(54.dp)
+                        size = 54.dp
                     )
                 }
 

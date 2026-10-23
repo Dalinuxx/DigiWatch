@@ -51,6 +51,12 @@ class PhoneWearableManager(private val context: Context) {
         runCatching { Wearable.getMessageClient(context) }.getOrNull()
     }
 
+    @Volatile
+    private var lastLanReachabilityTimestampMs: Long = 0L
+
+    @Volatile
+    private var lastReachableIp: String? = null
+
     fun getConfiguredAospWatchIp(): String =
         prefs.getString("aosp_watch_ip", "")?.trim() ?: ""
 
@@ -119,9 +125,18 @@ class PhoneWearableManager(private val context: Context) {
                     writer.println(path)
                     writer.println(payload.replace("\n", " "))
                     writer.flush()
-                    reader.readLine()
+                    val response = reader.readLine()
+                    if (!response.isNullOrBlank() && response != "ERR") {
+                        lastLanReachabilityTimestampMs = System.currentTimeMillis()
+                        lastReachableIp = ip
+                    }
+                    response
                 }
             } catch (_: Exception) {
+                if (lastReachableIp == ip) {
+                    lastReachableIp = null
+                    lastLanReachabilityTimestampMs = 0L
+                }
                 null
             }
         }
@@ -139,21 +154,32 @@ class PhoneWearableManager(private val context: Context) {
         }
 
         // 2. Check configured or auto-discovered AOSP / standard Android watch over Wi-Fi / Hotspot LAN
+        val now = System.currentTimeMillis()
         val configuredIp = getConfiguredAospWatchIp()
         if (configuredIp.isNotEmpty()) {
-            val ping = sendTcpCommandToAospWatch(configuredIp, "/sync/request_settings", "")
-            if (!ping.isNullOrBlank() && ping != "ERR") {
+            val isCached = (now - lastLanReachabilityTimestampMs < 30_000L) && (lastReachableIp == configuredIp)
+            if (isCached) {
                 result.add("$AOSP_NODE_PREFIX$configuredIp")
-            } else if (result.isEmpty()) {
+            } else {
+                val ping = sendTcpCommandToAospWatch(configuredIp, "/sync/request_settings", "")
+                if (!ping.isNullOrBlank() && ping != "ERR") {
+                    result.add("$AOSP_NODE_PREFIX$configuredIp")
+                } else if (result.isEmpty()) {
+                    val discovered = discoverAospWatchOnLan(350)
+                    if (!discovered.isNullOrBlank()) {
+                        result.add("$AOSP_NODE_PREFIX$discovered")
+                    }
+                }
+            }
+        } else if (result.isEmpty()) {
+            val isCached = (now - lastLanReachabilityTimestampMs < 30_000L) && !lastReachableIp.isNullOrBlank()
+            if (isCached && lastReachableIp != null) {
+                result.add("$AOSP_NODE_PREFIX$lastReachableIp")
+            } else {
                 val discovered = discoverAospWatchOnLan(350)
                 if (!discovered.isNullOrBlank()) {
                     result.add("$AOSP_NODE_PREFIX$discovered")
                 }
-            }
-        } else if (result.isEmpty()) {
-            val discovered = discoverAospWatchOnLan(350)
-            if (!discovered.isNullOrBlank()) {
-                result.add("$AOSP_NODE_PREFIX$discovered")
             }
         }
 

@@ -144,28 +144,32 @@ class WatchApkSourceManager(private val context: Context) {
                 redirectCount++
             }
 
-            if (finalConnection.responseCode !in 200..299) {
-                error("HTTP Download failed with status ${finalConnection.responseCode}: ${finalConnection.responseMessage}")
-            }
-
-            val totalBytes = finalConnection.contentLengthLong
             val targetFile = File(cacheDir, DOWNLOADED_FILENAME)
             if (targetFile.exists()) targetFile.delete()
 
-            var downloadedBytes = 0L
-            finalConnection.inputStream.use { input ->
-                FileOutputStream(targetFile).use { output ->
-                    val buffer = ByteArray(32768)
-                    var read: Int
-                    while (input.read(buffer).also { read = it } != -1) {
-                        output.write(buffer, 0, read)
-                        downloadedBytes += read
-                        onProgress(downloadedBytes, totalBytes)
-                    }
-                    output.flush()
+            try {
+                if (finalConnection.responseCode !in 200..299) {
+                    error("HTTP Download failed with status ${finalConnection.responseCode}: ${finalConnection.responseMessage}")
                 }
+
+                val totalBytes = finalConnection.contentLengthLong
+
+                var downloadedBytes = 0L
+                finalConnection.inputStream.use { input ->
+                    FileOutputStream(targetFile).use { output ->
+                        val buffer = ByteArray(32768)
+                        var read: Int
+                        while (input.read(buffer).also { read = it } != -1) {
+                            output.write(buffer, 0, read)
+                            downloadedBytes += read
+                            onProgress(downloadedBytes, totalBytes)
+                        }
+                        output.flush()
+                    }
+                }
+            } finally {
+                finalConnection.disconnect()
             }
-            finalConnection.disconnect()
 
             val actualSize = targetFile.length()
             if (actualSize <= 0) error("Downloaded file is empty")

@@ -30,6 +30,7 @@ import androidx.compose.ui.unit.sp
 import androidx.wear.compose.material.Button
 import androidx.wear.compose.material.ButtonDefaults
 import androidx.wear.compose.foundation.lazy.ScalingLazyColumn
+import androidx.wear.compose.foundation.lazy.items
 import androidx.wear.compose.foundation.lazy.rememberScalingLazyListState
 import androidx.wear.compose.material.Text
 import androidx.compose.runtime.LaunchedEffect
@@ -553,8 +554,7 @@ fun AdventureScreen(
                     textAlign = TextAlign.Center
                 )
             }
-            items(builtInSagas.size) { idx ->
-                val saga = builtInSagas[idx]
+            items(builtInSagas, key = { it.campaignId }) { saga ->
                 val isActive = saga.campaignId.equals(story.campaignId, ignoreCase = true)
                 val sagaRecord = if (isActive) {
                     SagaProgressRecord(
@@ -679,8 +679,8 @@ fun AdventureScreen(
                 )
             }
 
-            items(story.nodes.size) { idx ->
-                val node = story.nodes[idx]
+            items(story.nodes, key = { it.nodeIndex }) { node ->
+                val idx = story.nodes.indexOf(node)
                 val isCurrent = idx == currentNodeIndex
                 val isUnlocked = idx <= progress.highestUnlockedNodeIndex
                 val isCleared = idx < progress.highestUnlockedNodeIndex || (idx == progress.highestUnlockedNodeIndex && progress.isCompleted)

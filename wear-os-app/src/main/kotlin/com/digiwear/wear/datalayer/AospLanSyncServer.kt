@@ -59,7 +59,10 @@ object AospLanSyncServer {
         if (tcpJob?.isActive != true) {
             tcpJob = scope.launch {
                 try {
-                    val server = ServerSocket(TCP_PORT).apply { reuseAddress = true }
+                    val server = ServerSocket().apply {
+                        reuseAddress = true
+                        bind(java.net.InetSocketAddress(TCP_PORT))
+                    }
                     serverSocket = server
                     while (isActive && !server.isClosed) {
                         val client = try {
@@ -77,9 +80,10 @@ object AospLanSyncServer {
         if (udpJob?.isActive != true) {
             udpJob = scope.launch {
                 try {
-                    val socket = DatagramSocket(UDP_DISCOVERY_PORT).apply {
-                        broadcast = true
+                    val socket = DatagramSocket(null).apply {
                         reuseAddress = true
+                        broadcast = true
+                        bind(java.net.InetSocketAddress(UDP_DISCOVERY_PORT))
                     }
                     udpSocket = socket
                     val buf = ByteArray(256)
@@ -109,6 +113,7 @@ object AospLanSyncServer {
         }
     }
 
+    @Synchronized
     fun stop() {
         try {
             serverSocket?.close()
@@ -116,8 +121,40 @@ object AospLanSyncServer {
         try {
             udpSocket?.close()
         } catch (_: Exception) {}
+        serverSocket = null
+        udpSocket = null
         tcpJob?.cancel()
         udpJob?.cancel()
+        tcpJob = null
+        udpJob = null
+    }
+
+    fun isConnectedToCharger(context: Context): Boolean {
+        return try {
+            val filter = android.content.IntentFilter(android.content.Intent.ACTION_BATTERY_CHANGED)
+            val batteryStatus = context.applicationContext.registerReceiver(null, filter)
+            val status = batteryStatus?.getIntExtra(android.os.BatteryManager.EXTRA_STATUS, -1) ?: -1
+            status == android.os.BatteryManager.BATTERY_STATUS_CHARGING || status == android.os.BatteryManager.BATTERY_STATUS_FULL
+        } catch (_: Exception) {
+            false
+        }
+    }
+
+    /**
+     * Pauses or stops the LAN server during ambient mode or onStop when not connected to a charger,
+     * allowing the watch Wi-Fi chipset to enter low-power DTIM sleep.
+     */
+    fun pauseIfUnplugged(context: Context) {
+        if (!isConnectedToCharger(context)) {
+            stop()
+        }
+    }
+
+    /**
+     * Resumes the LAN server upon waking or connecting to charger.
+     */
+    fun resumeIfNeeded(context: Context) {
+        start(context)
     }
 
     private suspend fun handleClient(context: Context, socket: Socket) {

@@ -138,22 +138,6 @@ fun PetDashboardScreen(
         }
     }
 
-    // Sprite animation ticker
-    var frameToggle by remember { mutableStateOf(false) }
-    LaunchedEffect(Unit) {
-        while (true) {
-            delay(500L)
-            frameToggle = !frameToggle
-        }
-    }
-
-    val activeSpriteFrame = when (shellPreviewStance) {
-        1 -> if (frameToggle) SpriteFrame.WALK_A else SpriteFrame.WALK_B
-        2 -> if (frameToggle) SpriteFrame.fromIndex(4) else SpriteFrame.fromIndex(5)
-        3 -> if (frameToggle) SpriteFrame.ATTACK_CHARGE else SpriteFrame.ATTACK_RELEASE
-        else -> if (frameToggle) SpriteFrame.IDLE_A else SpriteFrame.IDLE_B
-    }
-
     val stanceNames = listOf("IDLE", "WALK", "HAPPY", "ATTACK")
 
     Box(modifier = Modifier.fillMaxSize()) {
@@ -457,9 +441,9 @@ fun PetDashboardScreen(
                             .clickable { showPartnerCutIn = true },
                         contentAlignment = Alignment.Center
                     ) {
-                        SpriteCanvasRenderer(
+                        AnimatedPetSprite(
                             speciesId = currentPet.speciesId,
-                            frame = activeSpriteFrame,
+                            stance = shellPreviewStance,
                             size = 112.dp
                         )
                     }
@@ -862,4 +846,32 @@ private fun TelemetryTile(
         Spacer(modifier = Modifier.height(2.dp))
         Text(text = value, fontSize = 11.sp, fontWeight = FontWeight.Bold, color = valueColor, fontFamily = FontFamily.Monospace)
     }
+}
+
+@Composable
+private fun AnimatedPetSprite(
+    speciesId: Int,
+    stance: Int,
+    size: androidx.compose.ui.unit.Dp,
+    modifier: Modifier = Modifier
+) {
+    var frameToggle by remember { mutableStateOf(false) }
+    LaunchedEffect(Unit) {
+        while (true) {
+            delay(500L)
+            frameToggle = !frameToggle
+        }
+    }
+    val frame = when (stance) {
+        1 -> if (frameToggle) SpriteFrame.WALK_A else SpriteFrame.WALK_B
+        2 -> if (frameToggle) SpriteFrame.fromIndex(4) else SpriteFrame.fromIndex(5)
+        3 -> if (frameToggle) SpriteFrame.ATTACK_CHARGE else SpriteFrame.ATTACK_RELEASE
+        else -> if (frameToggle) SpriteFrame.IDLE_A else SpriteFrame.IDLE_B
+    }
+    SpriteCanvasRenderer(
+        speciesId = speciesId,
+        frame = frame,
+        size = size,
+        modifier = modifier
+    )
 }

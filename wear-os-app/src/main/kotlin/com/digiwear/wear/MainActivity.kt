@@ -76,9 +76,11 @@ class MainActivity : ComponentActivity() {
                 activity = this,
                 onEnterAmbient = {
                     stepTracker.onEnterAmbient()
+                    com.digiwear.wear.datalayer.AospLanSyncServer.pauseIfUnplugged(applicationContext)
                 },
                 onExitAmbient = {
                     stepTracker.onExitAmbient()
+                    com.digiwear.wear.datalayer.AospLanSyncServer.resumeIfNeeded(applicationContext)
                 },
                 onAmbientTick = {
                     activityScope.launch(Dispatchers.IO) {
@@ -118,6 +120,11 @@ class MainActivity : ComponentActivity() {
         }
     }
 
+    override fun onStart() {
+        super.onStart()
+        com.digiwear.wear.datalayer.AospLanSyncServer.resumeIfNeeded(applicationContext)
+    }
+
     override fun onResume() {
         super.onResume()
         stepTracker.startListening()
@@ -136,6 +143,11 @@ class MainActivity : ComponentActivity() {
         super.onPause()
         stepTracker.stopListening()
         NfcDuelManager.disableReaderMode(this)
+    }
+
+    override fun onStop() {
+        super.onStop()
+        com.digiwear.wear.datalayer.AospLanSyncServer.pauseIfUnplugged(applicationContext)
     }
 
     override fun onNewIntent(intent: Intent) {

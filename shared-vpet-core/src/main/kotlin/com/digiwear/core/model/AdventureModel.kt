@@ -46,7 +46,9 @@ data class CampaignNode(
     val actTitle: String = "",
     @SerialName("sub_area")
     val subArea: String = ""
-)
+) {
+    val nodeIndex: Int get() = nodeId
+}
 
 @Serializable
 data class CampaignStory(

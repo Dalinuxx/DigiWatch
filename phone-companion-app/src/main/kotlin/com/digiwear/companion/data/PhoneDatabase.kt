@@ -9,6 +9,9 @@ import androidx.room.Query
 import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.room.Transaction
+import androidx.room.migration.Migration
+import androidx.sqlite.db.SupportSQLiteDatabase
+import com.digiwear.companion.BuildConfig
 import kotlinx.coroutines.flow.Flow
 
 @Dao
@@ -98,6 +101,90 @@ interface PhoneDao {
     }
 }
 
+val MIGRATION_1_2 = object : Migration(1, 2) {
+    override fun migrate(db: SupportSQLiteDatabase) {
+        db.execSQL("""
+            CREATE TABLE IF NOT EXISTS custom_campaigns (
+                campaignId TEXT NOT NULL PRIMARY KEY,
+                title TEXT NOT NULL,
+                jsonContent TEXT NOT NULL,
+                updatedAtUtc INTEGER NOT NULL
+            )
+        """.trimIndent())
+        db.execSQL("""
+            CREATE TABLE IF NOT EXISTS digi_vault (
+                id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                speciesId INTEGER NOT NULL,
+                speciesName TEXT NOT NULL,
+                customNickname TEXT NOT NULL,
+                stageName TEXT NOT NULL,
+                attributeName TEXT NOT NULL,
+                currentHp INTEGER NOT NULL,
+                maxHp INTEGER NOT NULL,
+                hunger INTEGER NOT NULL,
+                strength INTEGER NOT NULL,
+                weight INTEGER NOT NULL,
+                ageSeconds INTEGER NOT NULL,
+                careMistakes INTEGER NOT NULL,
+                effort INTEGER NOT NULL,
+                overfeedCount INTEGER NOT NULL,
+                totalBattles INTEGER NOT NULL,
+                victories INTEGER NOT NULL,
+                wasteCount INTEGER NOT NULL,
+                isInjured INTEGER NOT NULL,
+                generation INTEGER NOT NULL,
+                lifespanDays INTEGER NOT NULL,
+                traitedEggBonus INTEGER NOT NULL,
+                vitalPoints INTEGER NOT NULL,
+                storedTimestampUtc INTEGER NOT NULL,
+                notes TEXT NOT NULL
+            )
+        """.trimIndent())
+    }
+}
+
+val MIGRATION_2_3 = object : Migration(2, 3) {
+    override fun migrate(db: SupportSQLiteDatabase) {
+        db.execSQL("""
+            CREATE TABLE IF NOT EXISTS companion_memorial_graveyard (
+                id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                speciesId INTEGER NOT NULL,
+                speciesName TEXT NOT NULL,
+                customNickname TEXT NOT NULL,
+                generation INTEGER NOT NULL,
+                finalStage TEXT NOT NULL,
+                ageDays INTEGER NOT NULL,
+                battlesWon INTEGER NOT NULL,
+                battlesTotal INTEGER NOT NULL,
+                causeOfDeath TEXT NOT NULL,
+                epitaph TEXT NOT NULL,
+                timestampUtc INTEGER NOT NULL,
+                traitedEggBonusGiven INTEGER NOT NULL
+            )
+        """.trimIndent())
+    }
+}
+
+val MIGRATION_3_4 = object : Migration(3, 4) {
+    override fun migrate(db: SupportSQLiteDatabase) {
+        db.execSQL("""
+            CREATE TABLE IF NOT EXISTS discovered_species (
+                speciesId INTEGER NOT NULL PRIMARY KEY,
+                discoveredTimestampUtc INTEGER NOT NULL,
+                timesRaised INTEGER NOT NULL,
+                timesDefeated INTEGER NOT NULL
+            )
+        """.trimIndent())
+    }
+}
+
+val MIGRATION_4_5 = object : Migration(4, 5) {
+    override fun migrate(db: SupportSQLiteDatabase) {
+        db.execSQL("CREATE INDEX IF NOT EXISTS index_digi_vault_storedTimestampUtc ON digi_vault(storedTimestampUtc)")
+        db.execSQL("CREATE INDEX IF NOT EXISTS index_companion_memorial_graveyard_timestampUtc ON companion_memorial_graveyard(timestampUtc)")
+    }
+}
+
 @Database(
     entities = [
         SyncedPetEntity::class,
@@ -106,7 +193,7 @@ interface PhoneDao {
         CompanionMemorialEntity::class,
         DiscoveredSpeciesEntity::class
     ],
-    version = 4,
+    version = 5,
     exportSchema = false
 )
 abstract class PhoneDatabase : RoomDatabase() {
@@ -123,7 +210,12 @@ abstract class PhoneDatabase : RoomDatabase() {
                     PhoneDatabase::class.java,
                     "digiwear_companion.db"
                 )
-                    .fallbackToDestructiveMigration()
+                    .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5)
+                    .apply {
+                        if (BuildConfig.DEBUG) {
+                            fallbackToDestructiveMigration()
+                        }
+                    }
                     .build().also { instance = it }
             }
         }

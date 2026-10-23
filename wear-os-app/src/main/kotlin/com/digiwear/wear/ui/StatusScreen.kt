@@ -34,6 +34,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.wear.compose.foundation.lazy.ScalingLazyColumn
+import androidx.wear.compose.foundation.lazy.items
 import androidx.wear.compose.foundation.lazy.rememberScalingLazyListState
 import androidx.wear.compose.material.Button
 import androidx.wear.compose.material.ButtonDefaults
@@ -779,8 +780,7 @@ fun StatusScreen(
                             }
                         }
                     } else {
-                        items(memorials.size) { idx ->
-                            val m = memorials[idx]
+                        items(memorials, key = { it.id }) { m ->
                             Column(
                                 modifier = Modifier
                                     .fillMaxWidth()

@@ -46,7 +46,14 @@ class PetRepository private constructor(context: Context) {
         appContext,
         DigiWearDatabase::class.java,
         "digiwear_wear.db"
-    ).addMigrations(MIGRATION_3_4).fallbackToDestructiveMigration().build()
+    )
+        .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4)
+        .apply {
+            if (com.digiwear.wear.BuildConfig.DEBUG) {
+                fallbackToDestructiveMigration()
+            }
+        }
+        .build()
 
     private val dao = db.petDao()
 

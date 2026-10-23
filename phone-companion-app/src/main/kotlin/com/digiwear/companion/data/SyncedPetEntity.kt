@@ -1,6 +1,7 @@
 package com.digiwear.companion.data
 
 import androidx.room.Entity
+import androidx.room.Index
 import androidx.room.PrimaryKey
 import kotlinx.serialization.Serializable
 
@@ -113,7 +114,10 @@ data class SyncedPetEntity(
 }
 
 @Serializable
-@Entity(tableName = "companion_memorial_graveyard")
+@Entity(
+    tableName = "companion_memorial_graveyard",
+    indices = [Index(value = ["timestampUtc"])]
+)
 data class CompanionMemorialEntity(
     @PrimaryKey(autoGenerate = true)
     val id: Long = 0,
@@ -179,7 +183,10 @@ data class CustomCampaignEntity(
 )
 
 @Serializable
-@Entity(tableName = "digi_vault")
+@Entity(
+    tableName = "digi_vault",
+    indices = [Index(value = ["storedTimestampUtc"])]
+)
 data class StoredDigimonEntity(
     @PrimaryKey(autoGenerate = true)
     val id: Long = 0,

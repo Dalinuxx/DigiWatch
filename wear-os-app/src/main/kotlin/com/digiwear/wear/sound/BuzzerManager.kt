@@ -39,7 +39,11 @@ class BuzzerManager {
         }
     }
 
+    @Volatile
+    private var synthInitialized = false
+
     private val synth: PureSquareWaveSynth by lazy(LazyThreadSafetyMode.SYNCHRONIZED) {
+        synthInitialized = true
         PureSquareWaveSynth()
     }
 
@@ -355,7 +359,9 @@ class BuzzerManager {
 
     fun release() {
         scope.cancel()
-        synth.release()
+        if (synthInitialized) {
+            synth.release()
+        }
         if (toneGeneratorInitialized) {
             try {
                 toneGenerator?.release()

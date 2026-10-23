@@ -21,6 +21,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
@@ -41,6 +42,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -76,6 +78,12 @@ fun WatchSideloadScreen(
 
     val adbManager = remember { WirelessAdbManager(context) }
     val apkSourceManager = remember { WatchApkSourceManager(context) }
+
+    DisposableEffect(adbManager) {
+        onDispose {
+            adbManager.disconnect()
+        }
+    }
 
     val connectionState by adbManager.connectionState.collectAsState()
     val watchDetails by adbManager.watchDetails.collectAsState()
@@ -973,7 +981,7 @@ fun WatchSideloadScreen(
                         )
                     } else {
                         LazyColumn(state = listState) {
-                            items(consoleLogs) { logEntry ->
+                            itemsIndexed(consoleLogs, key = { index, _ -> index }) { _, logEntry ->
                                 Text(
                                     text = logEntry,
                                     color = if (logEntry.contains("SUCCESS", true) || logEntry.contains("OK", true)) {

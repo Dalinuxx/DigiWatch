@@ -11,6 +11,47 @@ import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
 import kotlinx.coroutines.flow.Flow
 
+val MIGRATION_1_2 = object : Migration(1, 2) {
+    override fun migrate(db: SupportSQLiteDatabase) {
+        db.execSQL("""
+            CREATE TABLE IF NOT EXISTS adventure_state (
+                id INTEGER PRIMARY KEY NOT NULL,
+                campaignId TEXT NOT NULL,
+                currentNodeIndex INTEGER NOT NULL,
+                accumulatedStepsCurrentNode INTEGER NOT NULL,
+                totalAdventureSteps INTEGER NOT NULL,
+                clearedFlagsCsv TEXT NOT NULL,
+                isCompleted INTEGER NOT NULL,
+                unlockedEggsCsv TEXT NOT NULL,
+                collectedItemsCsv TEXT NOT NULL,
+                unlockedCampaignsCsv TEXT NOT NULL
+            )
+        """.trimIndent())
+    }
+}
+
+val MIGRATION_2_3 = object : Migration(2, 3) {
+    override fun migrate(db: SupportSQLiteDatabase) {
+        db.execSQL("""
+            CREATE TABLE IF NOT EXISTS memorial_graveyard (
+                id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                speciesId INTEGER NOT NULL,
+                speciesName TEXT NOT NULL,
+                customNickname TEXT NOT NULL,
+                generation INTEGER NOT NULL,
+                finalStage TEXT NOT NULL,
+                ageDays INTEGER NOT NULL,
+                battlesWon INTEGER NOT NULL,
+                battlesTotal INTEGER NOT NULL,
+                causeOfDeath TEXT NOT NULL,
+                epitaph TEXT NOT NULL,
+                timestampUtc INTEGER NOT NULL,
+                traitedEggBonusGiven INTEGER NOT NULL
+            )
+        """.trimIndent())
+    }
+}
+
 val MIGRATION_3_4 = object : Migration(3, 4) {
     override fun migrate(db: SupportSQLiteDatabase) {
         db.execSQL("ALTER TABLE adventure_state ADD COLUMN highestUnlockedNodeIndex INTEGER NOT NULL DEFAULT 0")

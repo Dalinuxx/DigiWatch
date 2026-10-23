@@ -32,6 +32,13 @@ class StepTrackerManager(
     private var lastAccelStepTimestampMs: Long = 0L
 
     @Volatile
+    private var lastHardwareStepCount: Int = -1
+
+    init {
+        lastHardwareStepCount = prefs.getInt("last_hardware_step_count", -1)
+    }
+
+    @Volatile
     private var isAmbient: Boolean = false
 
     @Volatile
@@ -79,6 +86,9 @@ class StepTrackerManager(
 
     fun stopListening() {
         flushPendingSteps()
+        if (lastHardwareStepCount >= 0) {
+            prefs.edit().putInt("last_hardware_step_count", lastHardwareStepCount).apply()
+        }
         sensorManager.unregisterListener(this)
     }
 
@@ -125,6 +135,9 @@ class StepTrackerManager(
     }
 
     fun flushPendingSteps() {
+        if (lastHardwareStepCount >= 0) {
+            prefs.edit().putInt("last_hardware_step_count", lastHardwareStepCount).apply()
+        }
         val stepsToFlush = synchronized(this) {
             val s = pendingSteps
             pendingSteps = 0
@@ -182,17 +195,17 @@ class StepTrackerManager(
             Sensor.TYPE_STEP_COUNTER -> {
                 if (isOffBody) return
                 val rawSteps = event.values[0].toInt()
-                val lastSavedSteps = prefs.getInt("last_hardware_step_count", -1)
+                val lastSavedSteps = lastHardwareStepCount
 
                 // First boot or hardware counter reset after device reboot
                 if (lastSavedSteps < 0 || rawSteps < lastSavedSteps) {
-                    prefs.edit().putInt("last_hardware_step_count", rawSteps).apply()
+                    lastHardwareStepCount = rawSteps
                     return
                 }
 
                 val deltaSteps = (rawSteps - lastSavedSteps).coerceAtMost(50_000)
                 if (deltaSteps > 0) {
-                    prefs.edit().putInt("last_hardware_step_count", rawSteps).apply()
+                    lastHardwareStepCount = rawSteps
                     recordStepsDelta(deltaSteps)
                 }
             }
