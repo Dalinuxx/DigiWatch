@@ -201,7 +201,7 @@ fun PetDashboardScreen(
                         Spacer(modifier = Modifier.height(14.dp))
 
                         Text(
-                            text = "WELCOME, DIGITAL TAMER!",
+                            text = "WELCOME, TAMER!",
                             fontSize = 13.sp,
                             fontWeight = FontWeight.Black,
                             color = Color.White,
