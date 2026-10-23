@@ -207,6 +207,7 @@ object AospLanSyncServer {
                         map["clock_format_24h"]?.let { repo.setClockFormat24h(it.toBoolean()) }
                         map["lifespan_canonical_enabled"]?.let { repo.setLifespanCanonicalEnabled(it.toBoolean()) }
                         map["combat_injuries_enabled"]?.let { repo.setCombatInjuriesEnabled(it.toBoolean()) }
+                        map["soundpack"]?.let { repo.setSoundpack(com.digiwear.core.model.SoundpackProfile.fromId(it)) }
                         "OK"
                     } catch (_: Exception) {
                         "ERR"
@@ -229,7 +230,7 @@ object AospLanSyncServer {
                             }
                             else -> repo.getPetState()
                         }
-                        if (action == "FEED_MEAL" || action == "FEED" || action == "CLEAN_WASTE" || action == "CLEAN") {
+                        if (action == "FEED_MEAL" || action == "FEED" || action == "CLEAN_WASTE" || action == "CLEAN" || action == "TOGGLE_LIGHTS") {
                             DigiWearComplicationService.requestUpdate(context)
                             DigiWearTileService.requestUpdate(context)
                         }

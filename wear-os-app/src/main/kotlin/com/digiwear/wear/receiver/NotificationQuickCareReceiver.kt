@@ -17,12 +17,14 @@ import kotlinx.coroutines.launch
 enum class QuickCareAction {
     FEED,
     CLEAN,
+    LIGHTS,
     UNKNOWN;
 
     companion object {
         fun fromAction(action: String?): QuickCareAction = when (action) {
             NotificationQuickCareReceiver.ACTION_QUICK_FEED -> FEED
             NotificationQuickCareReceiver.ACTION_QUICK_CLEAN -> CLEAN
+            NotificationQuickCareReceiver.ACTION_QUICK_LIGHTS -> LIGHTS
             else -> UNKNOWN
         }
     }
@@ -54,6 +56,7 @@ class NotificationQuickCareReceiver : BroadcastReceiver() {
                 val updatedState = when (careAction) {
                     QuickCareAction.FEED -> repo.feedMeal()
                     QuickCareAction.CLEAN -> repo.cleanWaste()
+                    QuickCareAction.LIGHTS -> repo.toggleLights()
                     QuickCareAction.UNKNOWN -> return@launch
                 }
 
@@ -85,6 +88,7 @@ class NotificationQuickCareReceiver : BroadcastReceiver() {
     companion object {
         const val ACTION_QUICK_FEED = "com.digiwear.wear.action.QUICK_FEED"
         const val ACTION_QUICK_CLEAN = "com.digiwear.wear.action.QUICK_CLEAN"
+        const val ACTION_QUICK_LIGHTS = "com.digiwear.wear.action.QUICK_LIGHTS"
         const val NOTIFICATION_ID_ATTENTION = 1001
 
         /**

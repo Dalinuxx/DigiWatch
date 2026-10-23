@@ -1,0 +1,182 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="300dp"
+    android:height="300dp"
+    android:viewportWidth="300"
+    android:viewportHeight="300">
+
+    <!-- Outer Bezel -->
+    <path
+        android:fillColor="#1A2016"
+        android:pathData="M 150,150 m -148,0 a 148,148 0 1,0 296,0 a 148,148 0 1,0 -296,0" />
+
+    <!-- Outer Ring Accent -->
+    <path
+        android:fillColor="#2D3826"
+        android:pathData="M 150,150 m -142,0 a 142,142 0 1,0 284,0 a 142,142 0 1,0 -284,0" />
+
+    <!-- LCD Screen Face (Classic V-Pet Tint) -->
+    <path
+        android:fillColor="#9FB388"
+        android:pathData="M 150,150 m -134,0 a 134,134 0 1,0 268,0 a 134,134 0 1,0 -268,0" />
+
+    <!-- LCD Inner Frame Line -->
+    <path
+        android:strokeColor="#242B1A"
+        android:strokeWidth="2"
+        android:strokeAlpha="0.5"
+        android:fillColor="#00000000"
+        android:pathData="M 150,150 m -122,0 a 122,122 0 1,0 244,0 a 122,122 0 1,0 -244,0" />
+
+    <!-- Top Status: Step & Battery Indicators -->
+    <!-- Battery outline & bolt -->
+    <path
+        android:fillColor="#242B1A"
+        android:pathData="M 64,56 h 20 v 10 h -20 z M 84,59 h 3 v 4 h -3 z" />
+    <path
+        android:fillColor="#9FB388"
+        android:pathData="M 66,58 h 16 v 6 h -16 z" />
+    <path
+        android:fillColor="#242B1A"
+        android:pathData="M 68,59 h 10 v 4 h -10 z" />
+
+    <!-- Title / Partner Stage -->
+    <path
+        android:fillColor="#242B1A"
+        android:pathData="M 130,56 h 40 v 3 h -40 z M 146,59 h 8 v 9 h -8 z" />
+
+    <!-- Steps goal bar outline -->
+    <path
+        android:fillColor="#242B1A"
+        android:pathData="M 205,58 h 30 v 6 h -30 z" />
+    <path
+        android:fillColor="#9FB388"
+        android:pathData="M 207,60 h 26 v 2 h -26 z" />
+    <path
+        android:fillColor="#242B1A"
+        android:pathData="M 207,60 h 16 v 2 h -16 z" />
+
+    <!-- Ghost 88:88 LCD Segments (Shadow) -->
+    <!-- 8 -->
+    <path
+        android:fillColor="#869970"
+        android:fillAlpha="0.35"
+        android:pathData="M 80,88 h 22 v 30 h -22 z M 84,92 h 14 v 8 h -14 z M 84,104 h 14 v 10 h -14 z" />
+    <!-- 8 -->
+    <path
+        android:fillColor="#869970"
+        android:fillAlpha="0.35"
+        android:pathData="M 108,88 h 22 v 30 h -22 z M 112,92 h 14 v 8 h -14 z M 112,104 h 14 v 10 h -14 z" />
+    <!-- Colon -->
+    <path
+        android:fillColor="#869970"
+        android:fillAlpha="0.35"
+        android:pathData="M 137,95 h 4 v 4 h -4 z M 137,107 h 4 v 4 h -4 z" />
+    <!-- 8 -->
+    <path
+        android:fillColor="#869970"
+        android:fillAlpha="0.35"
+        android:pathData="M 148,88 h 22 v 30 h -22 z M 152,92 h 14 v 8 h -14 z M 152,104 h 14 v 10 h -14 z" />
+    <!-- 8 -->
+    <path
+        android:fillColor="#869970"
+        android:fillAlpha="0.35"
+        android:pathData="M 176,88 h 22 v 30 h -22 z M 180,92 h 14 v 8 h -14 z M 180,104 h 14 v 10 h -14 z" />
+
+    <!-- Active Time: 10:08 -->
+    <!-- '1' -->
+    <path
+        android:fillColor="#1B2113"
+        android:pathData="M 96,88 h 6 v 30 h -6 z" />
+    <!-- '0' -->
+    <path
+        android:fillColor="#1B2113"
+        android:pathData="M 108,88 h 22 v 30 h -22 z M 114,94 h 10 v 18 h -10 z" />
+    <!-- Colon -->
+    <path
+        android:fillColor="#1B2113"
+        android:pathData="M 137,95 h 4 v 4 h -4 z M 137,107 h 4 v 4 h -4 z" />
+    <!-- '0' -->
+    <path
+        android:fillColor="#1B2113"
+        android:pathData="M 148,88 h 22 v 30 h -22 z M 154,94 h 10 v 18 h -10 z" />
+    <!-- '8' -->
+    <path
+        android:fillColor="#1B2113"
+        android:pathData="M 176,88 h 22 v 30 h -22 z M 182,93 h 10 v 7 h -10 z M 182,105 h 10 v 8 h -10 z" />
+
+    <!-- Pixel Partner Sprite (Agumon silhouette pixel grid) -->
+    <!-- Head & Body blocks -->
+    <path
+        android:fillColor="#1B2113"
+        android:pathData="M 126,140 h 48 v 48 h -48 z" />
+    <!-- Snout -->
+    <path
+        android:fillColor="#1B2113"
+        android:pathData="M 112,148 h 16 v 20 h -16 z" />
+    <!-- Eye negative space -->
+    <path
+        android:fillColor="#9FB388"
+        android:pathData="M 136,146 h 8 v 10 h -8 z" />
+    <!-- Eye pupil -->
+    <path
+        android:fillColor="#1B2113"
+        android:pathData="M 138,148 h 4 v 6 h -4 z" />
+    <!-- Mouth cutout -->
+    <path
+        android:fillColor="#9FB388"
+        android:pathData="M 112,160 h 18 v 4 h -18 z" />
+    <!-- Arm/Claw -->
+    <path
+        android:fillColor="#1B2113"
+        android:pathData="M 116,168 h 14 v 12 h -14 z" />
+    <!-- Tail -->
+    <path
+        android:fillColor="#1B2113"
+        android:pathData="M 174,166 h 16 v 14 h -16 z M 184,160 h 10 v 8 h -10 z" />
+    <!-- Feet -->
+    <path
+        android:fillColor="#1B2113"
+        android:pathData="M 124,188 h 16 v 14 h -16 z M 154,188 h 16 v 14 h -16 z" />
+
+    <!-- Floating Joy Emote Heart -->
+    <path
+        android:fillColor="#1B2113"
+        android:pathData="M 150,132 c -3,-5 -10,-4 -10,1 c 0,4 10,9 10,9 c 0,0 10,-5 10,-9 c 0,-5 -7,-6 -10,-1 z" />
+
+    <!-- Hunger Hearts (4 hearts) -->
+    <path
+        android:fillColor="#1B2113"
+        android:pathData="M 85,218 c -2,-3 -6,-2 -6,1 c 0,3 6,6 6,6 c 0,0 6,-3 6,-6 c 0,-3 -4,-4 -6,-1 z" />
+    <path
+        android:fillColor="#1B2113"
+        android:pathData="M 99,218 c -2,-3 -6,-2 -6,1 c 0,3 6,6 6,6 c 0,0 6,-3 6,-6 c 0,-3 -4,-4 -6,-1 z" />
+    <path
+        android:fillColor="#1B2113"
+        android:pathData="M 113,218 c -2,-3 -6,-2 -6,1 c 0,3 6,6 6,6 c 0,0 6,-3 6,-6 c 0,-3 -4,-4 -6,-1 z" />
+    <path
+        android:strokeColor="#1B2113"
+        android:strokeWidth="1.5"
+        android:fillColor="#00000000"
+        android:pathData="M 127,218 c -2,-3 -6,-2 -6,1 c 0,3 6,6 6,6 c 0,0 6,-3 6,-6 c 0,-3 -4,-4 -6,-1 z" />
+
+    <!-- Strength Hearts (4 hearts) -->
+    <path
+        android:fillColor="#1B2113"
+        android:pathData="M 165,218 c -2,-3 -6,-2 -6,1 c 0,3 6,6 6,6 c 0,0 6,-3 6,-6 c 0,-3 -4,-4 -6,-1 z" />
+    <path
+        android:fillColor="#1B2113"
+        android:pathData="M 179,218 c -2,-3 -6,-2 -6,1 c 0,3 6,6 6,6 c 0,0 6,-3 6,-6 c 0,-3 -4,-4 -6,-1 z" />
+    <path
+        android:fillColor="#1B2113"
+        android:pathData="M 193,218 c -2,-3 -6,-2 -6,1 c 0,3 6,6 6,6 c 0,0 6,-3 6,-6 c 0,-3 -4,-4 -6,-1 z" />
+    <path
+        android:fillColor="#1B2113"
+        android:pathData="M 207,218 c -2,-3 -6,-2 -6,1 c 0,3 6,6 6,6 c 0,0 6,-3 6,-6 c 0,-3 -4,-4 -6,-1 z" />
+
+    <!-- Bottom Info Bar -->
+    <path
+        android:fillColor="#242B1A"
+        android:pathData="M 100,240 h 100 v 4 h -100 z" />
+
+</vector>

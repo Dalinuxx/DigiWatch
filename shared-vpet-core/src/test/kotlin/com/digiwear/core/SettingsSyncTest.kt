@@ -39,7 +39,8 @@ class SettingsSyncTest {
             "hazard_alerts_enabled",
             "clock_format_24h",
             "lifespan_canonical_enabled",
-            "combat_injuries_enabled"
+            "combat_injuries_enabled",
+            "soundpack"
         )
 
         val sampleSettings = mapOf(
@@ -58,10 +59,11 @@ class SettingsSyncTest {
             "hazard_alerts_enabled" to "true",
             "clock_format_24h" to "false",
             "lifespan_canonical_enabled" to "true",
-            "combat_injuries_enabled" to "true"
+            "combat_injuries_enabled" to "true",
+            "soundpack" to "ORIGINAL_1997"
         )
 
-        assertEquals("Settings map must have all 16 required keys", requiredKeys, sampleSettings.keys)
+        assertEquals("Settings map must have all 17 required keys", requiredKeys, sampleSettings.keys)
 
         // Verify parsing logic
         assertEquals(BackgroundTheme.CLASSIC_VPET_LCD, BackgroundTheme.fromId(sampleSettings["theme"]!!))
@@ -80,6 +82,20 @@ class SettingsSyncTest {
         assertTrue(!sampleSettings["clock_format_24h"]!!.toBoolean())
         assertTrue(sampleSettings["lifespan_canonical_enabled"]!!.toBoolean())
         assertTrue(sampleSettings["combat_injuries_enabled"]!!.toBoolean())
+        assertEquals(com.digiwear.core.model.SoundpackProfile.ORIGINAL_1997, com.digiwear.core.model.SoundpackProfile.fromId(sampleSettings["soundpack"]))
+    }
+
+    @Test
+    fun testSoundpackProfileIntegrity() {
+        val profiles = com.digiwear.core.model.SoundpackProfile.entries
+        assertEquals(3, profiles.size)
+        profiles.forEach { profile ->
+            assertTrue(profile.id.isNotBlank())
+            assertTrue(profile.displayName.isNotBlank())
+            assertEquals(profile, com.digiwear.core.model.SoundpackProfile.fromId(profile.id))
+        }
+        assertEquals(com.digiwear.core.model.SoundpackProfile.ORIGINAL_1997, com.digiwear.core.model.SoundpackProfile.fromId(null))
+        assertEquals(com.digiwear.core.model.SoundpackProfile.ORIGINAL_1997, com.digiwear.core.model.SoundpackProfile.fromId("unknown_id"))
     }
 
     @Test

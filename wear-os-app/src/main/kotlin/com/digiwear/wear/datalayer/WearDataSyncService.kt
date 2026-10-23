@@ -116,6 +116,9 @@ class WearDataSyncService : WearableListenerService() {
                         map["combat_injuries_enabled"]?.let { injStr ->
                             repo.setCombatInjuriesEnabled(injStr.toBoolean())
                         }
+                        map["soundpack"]?.let { spStr ->
+                            repo.setSoundpack(com.digiwear.core.model.SoundpackProfile.fromId(spStr))
+                        }
                     } catch (_: Exception) {}
                 }
             }
@@ -137,7 +140,7 @@ class WearDataSyncService : WearableListenerService() {
                             }
                             else -> repo.getPetState()
                         }
-                        if (action == "FEED_MEAL" || action == "FEED" || action == "CLEAN_WASTE" || action == "CLEAN") {
+                        if (action == "FEED_MEAL" || action == "FEED" || action == "CLEAN_WASTE" || action == "CLEAN" || action == "TOGGLE_LIGHTS") {
                             DigiWearComplicationService.requestUpdate(applicationContext)
                             DigiWearTileService.requestUpdate(applicationContext)
                         }

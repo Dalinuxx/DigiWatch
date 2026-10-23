@@ -6,6 +6,7 @@ import android.media.AudioFormat
 import android.media.AudioManager
 import android.media.AudioTrack
 import android.media.ToneGenerator
+import com.digiwear.core.model.SoundpackProfile
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -15,9 +16,13 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 /**
- * Authentic 1997 Bandai Piezo Buzzer Sound Engine for Phone Companion.
- * Produces pure 1-bit / 8-bit square-wave PCM chiptunes using a synthesized AudioTrack pipeline,
- * accurately matching the physical piezoelectric buzzer of 1997 Digital Monster, Pendulum, and Color LCDs.
+ * Authentic Soundpack Audio Engine for Phone Companion.
+ * Supports multiple soundpack profiles:
+ * - [SoundpackProfile.ORIGINAL_1997]: Faithful 2.048 kHz square-wave piezo beeps and death siren.
+ * - [SoundpackProfile.DIGIVICE_1999]: Classic tri-tone anime/digivice chimes.
+ * - [SoundpackProfile.CHIPTUNE_RETRO]: Polyphonic 8-bit procedural synthesizer.
+ *
+ * Produces pure 1-bit / 8-bit square-wave PCM chiptunes using a synthesized AudioTrack pipeline.
  * Gracefully falls back to ToneGenerator if AudioTrack hardware buffers are unavailable.
  * Respects user settings and is muted by default.
  */
@@ -28,6 +33,10 @@ class BuzzerManager(context: Context) {
     var isEnabled: Boolean
         get() = prefs.getBoolean("retro_sound_enabled", false)
         set(value) = prefs.edit().putBoolean("retro_sound_enabled", value).apply()
+
+    var soundpack: SoundpackProfile
+        get() = SoundpackProfile.fromId(prefs.getString("soundpack_profile", SoundpackProfile.ORIGINAL_1997.id))
+        set(value) = prefs.edit().putString("soundpack_profile", value.id).apply()
 
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
 
@@ -52,40 +61,108 @@ class BuzzerManager(context: Context) {
     }
 
     /**
-     * Iconic Bandai 4-beep attention call sequence (pip-pip-pip-pip).
+     * Attention call sequence (pip-pip-pip-pip or anime chime).
      */
     fun playAttentionBeep() {
         if (!isEnabled) return
         scope.launch {
-            if (synth.isAvailable) {
-                for (i in 0 until 4) {
-                    synth.playTone(2400f, 70)
-                    synth.playSilence(60)
+            when (soundpack) {
+                SoundpackProfile.ORIGINAL_1997 -> {
+                    if (synth.isAvailable) {
+                        for (i in 0 until 4) {
+                            synth.playTone(2048f, 65)
+                            synth.playSilence(55)
+                        }
+                    } else {
+                        val gen = toneGenerator ?: return@launch
+                        for (i in 0 until 4) {
+                            try {
+                                gen.startTone(ToneGenerator.TONE_PROP_BEEP, 65)
+                            } catch (_: Exception) {}
+                            delay(120L)
+                        }
+                    }
                 }
-            } else {
-                val gen = toneGenerator ?: return@launch
-                for (i in 0 until 4) {
-                    try {
-                        gen.startTone(ToneGenerator.TONE_PROP_BEEP, 75)
-                    } catch (_: Exception) {}
-                    delay(130L)
+                SoundpackProfile.DIGIVICE_1999 -> {
+                    if (synth.isAvailable) {
+                        synth.playTone(1046.5f, 80)
+                        synth.playTone(1318.5f, 80)
+                        synth.playTone(1567.9f, 140)
+                    } else {
+                        val gen = toneGenerator ?: return@launch
+                        try {
+                            gen.startTone(ToneGenerator.TONE_PROP_BEEP, 80)
+                            delay(100L)
+                            gen.startTone(ToneGenerator.TONE_PROP_BEEP2, 80)
+                            delay(100L)
+                            gen.startTone(ToneGenerator.TONE_PROP_PROMPT, 140)
+                        } catch (_: Exception) {}
+                    }
+                }
+                SoundpackProfile.CHIPTUNE_RETRO -> {
+                    if (synth.isAvailable) {
+                        for (i in 0 until 4) {
+                            synth.playTone(2400f, 70)
+                            synth.playSilence(60)
+                        }
+                    } else {
+                        val gen = toneGenerator ?: return@launch
+                        for (i in 0 until 4) {
+                            try {
+                                gen.startTone(ToneGenerator.TONE_PROP_BEEP, 75)
+                            } catch (_: Exception) {}
+                            delay(130L)
+                        }
+                    }
                 }
             }
         }
     }
 
     /**
-     * Tactile bandai stem button click chirp (18ms).
+     * Tactile button click chirp.
      */
     fun playButtonBeep() {
         if (!isEnabled) return
         scope.launch {
-            if (synth.isAvailable) {
-                synth.playTone(3200f, 18)
-            } else {
-                try {
-                    toneGenerator?.startTone(ToneGenerator.TONE_CDMA_KEYPAD_VOLUME_KEY_LITE, 20)
-                } catch (_: Exception) {}
+            playButtonBeepSuspend()
+        }
+    }
+
+    /**
+     * Suspending tactile button click chirp.
+     */
+    suspend fun playButtonBeepSuspend() {
+        if (!isEnabled) return
+        withContext(Dispatchers.Default) {
+            when (soundpack) {
+                SoundpackProfile.ORIGINAL_1997 -> {
+                    if (synth.isAvailable) {
+                        synth.playTone(2048f, 18)
+                    } else {
+                        try {
+                            toneGenerator?.startTone(ToneGenerator.TONE_CDMA_KEYPAD_VOLUME_KEY_LITE, 18)
+                        } catch (_: Exception) {}
+                    }
+                }
+                SoundpackProfile.DIGIVICE_1999 -> {
+                    if (synth.isAvailable) {
+                        synth.playTone(3136f, 22)
+                    } else {
+                        try {
+                            toneGenerator?.startTone(ToneGenerator.TONE_PROP_ACK, 20)
+                        } catch (_: Exception) {}
+                    }
+                }
+                SoundpackProfile.CHIPTUNE_RETRO -> {
+                    if (synth.isAvailable) {
+                        synth.playTone(3200f, 18)
+                    } else {
+                        try {
+                            toneGenerator?.startTone(ToneGenerator.TONE_CDMA_KEYPAD_VOLUME_KEY_LITE, 20)
+                        } catch (_: Exception) {}
+                    }
+                }
             }
         }
     }
@@ -96,57 +173,144 @@ class BuzzerManager(context: Context) {
     fun playAttackImpactTone() {
         if (!isEnabled) return
         scope.launch {
-            if (synth.isAvailable) {
-                synth.playTone(1400f, 40)
-                synth.playTone(800f, 60)
-            } else {
-                try {
-                    toneGenerator?.startTone(ToneGenerator.TONE_PROP_BEEP2, 100)
-                } catch (_: Exception) {}
+            when (soundpack) {
+                SoundpackProfile.ORIGINAL_1997 -> {
+                    if (synth.isAvailable) {
+                        synth.playTone(2048f, 30)
+                        synth.playSilence(15)
+                        synth.playTone(1024f, 45)
+                    } else {
+                        try {
+                            toneGenerator?.startTone(ToneGenerator.TONE_PROP_BEEP2, 75)
+                        } catch (_: Exception) {}
+                    }
+                }
+                SoundpackProfile.DIGIVICE_1999 -> {
+                    if (synth.isAvailable) {
+                        synth.playTone(1760f, 40)
+                        synth.playTone(2637f, 70)
+                    } else {
+                        try {
+                            toneGenerator?.startTone(ToneGenerator.TONE_PROP_PROMPT, 100)
+                        } catch (_: Exception) {}
+                    }
+                }
+                SoundpackProfile.CHIPTUNE_RETRO -> {
+                    if (synth.isAvailable) {
+                        synth.playTone(1400f, 40)
+                        synth.playTone(800f, 60)
+                    } else {
+                        try {
+                            toneGenerator?.startTone(ToneGenerator.TONE_PROP_BEEP2, 100)
+                        } catch (_: Exception) {}
+                    }
+                }
             }
         }
     }
 
     /**
-     * Dramatic battle encounter alarm siren for wild scans and boss clashes.
+     * Encounter alarm siren / chime.
      */
     fun playEncounterAlarm() {
         if (!isEnabled) return
         scope.launch {
-            if (synth.isAvailable) {
-                for (i in 0 until 3) {
-                    synth.playTone(3000f, 80)
-                    synth.playTone(2200f, 80)
-                }
-            } else {
-                val gen = toneGenerator ?: return@launch
-                try {
-                    for (i in 0 until 3) {
-                        gen.startTone(ToneGenerator.TONE_CDMA_EMERGENCY_RINGBACK, 120)
-                        delay(140L)
+            when (soundpack) {
+                SoundpackProfile.ORIGINAL_1997 -> {
+                    if (synth.isAvailable) {
+                        for (i in 0 until 3) {
+                            synth.playTone(2048f, 75)
+                            synth.playTone(1536f, 75)
+                        }
+                    } else {
+                        val gen = toneGenerator ?: return@launch
+                        try {
+                            for (i in 0 until 3) {
+                                gen.startTone(ToneGenerator.TONE_CDMA_EMERGENCY_RINGBACK, 120)
+                                delay(140L)
+                            }
+                        } catch (_: Exception) {}
                     }
-                } catch (_: Exception) {}
+                }
+                SoundpackProfile.DIGIVICE_1999 -> {
+                    if (synth.isAvailable) {
+                        val chime = listOf(784f to 60, 1046.5f to 60, 1318.5f to 60, 1567.9f to 100)
+                        for (cycle in 0 until 2) {
+                            for ((f, d) in chime) {
+                                synth.playTone(f, d)
+                            }
+                            synth.playSilence(40)
+                        }
+                    } else {
+                        val gen = toneGenerator ?: return@launch
+                        try {
+                            gen.startTone(ToneGenerator.TONE_CDMA_ALERT_NETWORK_LITE, 250)
+                        } catch (_: Exception) {}
+                    }
+                }
+                SoundpackProfile.CHIPTUNE_RETRO -> {
+                    if (synth.isAvailable) {
+                        for (i in 0 until 3) {
+                            synth.playTone(3000f, 80)
+                            synth.playTone(2200f, 80)
+                        }
+                    } else {
+                        val gen = toneGenerator ?: return@launch
+                        try {
+                            for (i in 0 until 3) {
+                                gen.startTone(ToneGenerator.TONE_CDMA_EMERGENCY_RINGBACK, 120)
+                                delay(140L)
+                            }
+                        } catch (_: Exception) {}
+                    }
+                }
             }
         }
     }
 
     /**
-     * Dramatic double-impact chord for Critical Hit cut-ins and boss encounters.
+     * Critical Hit cut-in tone.
      */
     fun playCriticalCutInTone() {
         if (!isEnabled) return
         scope.launch {
-            if (synth.isAvailable) {
-                synth.playTone(3600f, 100)
-                synth.playSilence(20)
-                synth.playTone(2800f, 150)
-            } else {
-                val gen = toneGenerator ?: return@launch
-                try {
-                    gen.startTone(ToneGenerator.TONE_CDMA_HIGH_L, 120)
-                    delay(140L)
-                    gen.startTone(ToneGenerator.TONE_PROP_PROMPT, 180)
-                } catch (_: Exception) {}
+            when (soundpack) {
+                SoundpackProfile.ORIGINAL_1997 -> {
+                    if (synth.isAvailable) {
+                        synth.playTone(2048f, 90)
+                        synth.playSilence(25)
+                        synth.playTone(2048f, 160)
+                    } else {
+                        try {
+                            toneGenerator?.startTone(ToneGenerator.TONE_CDMA_HIGH_L, 120)
+                        } catch (_: Exception) {}
+                    }
+                }
+                SoundpackProfile.DIGIVICE_1999 -> {
+                    if (synth.isAvailable) {
+                        synth.playTone(2637f, 90)
+                        synth.playSilence(20)
+                        synth.playTone(3951f, 160)
+                    } else {
+                        try {
+                            toneGenerator?.startTone(ToneGenerator.TONE_PROP_PROMPT, 180)
+                        } catch (_: Exception) {}
+                    }
+                }
+                SoundpackProfile.CHIPTUNE_RETRO -> {
+                    if (synth.isAvailable) {
+                        synth.playTone(3600f, 100)
+                        synth.playSilence(20)
+                        synth.playTone(2800f, 150)
+                    } else {
+                        val gen = toneGenerator ?: return@launch
+                        try {
+                            gen.startTone(ToneGenerator.TONE_CDMA_HIGH_L, 120)
+                            delay(140L)
+                            gen.startTone(ToneGenerator.TONE_PROP_PROMPT, 180)
+                        } catch (_: Exception) {}
+                    }
+                }
             }
         }
     }
@@ -157,12 +321,34 @@ class BuzzerManager(context: Context) {
     fun playQteClickTone() {
         if (!isEnabled) return
         scope.launch {
-            if (synth.isAvailable) {
-                synth.playTone(2800f, 35)
-            } else {
-                try {
-                    toneGenerator?.startTone(ToneGenerator.TONE_PROP_ACK, 40)
-                } catch (_: Exception) {}
+            when (soundpack) {
+                SoundpackProfile.ORIGINAL_1997 -> {
+                    if (synth.isAvailable) {
+                        synth.playTone(2048f, 25)
+                    } else {
+                        try {
+                            toneGenerator?.startTone(ToneGenerator.TONE_PROP_ACK, 30)
+                        } catch (_: Exception) {}
+                    }
+                }
+                SoundpackProfile.DIGIVICE_1999 -> {
+                    if (synth.isAvailable) {
+                        synth.playTone(2793f, 30)
+                    } else {
+                        try {
+                            toneGenerator?.startTone(ToneGenerator.TONE_PROP_ACK, 35)
+                        } catch (_: Exception) {}
+                    }
+                }
+                SoundpackProfile.CHIPTUNE_RETRO -> {
+                    if (synth.isAvailable) {
+                        synth.playTone(2800f, 35)
+                    } else {
+                        try {
+                            toneGenerator?.startTone(ToneGenerator.TONE_PROP_ACK, 40)
+                        } catch (_: Exception) {}
+                    }
+                }
             }
         }
     }
@@ -173,15 +359,43 @@ class BuzzerManager(context: Context) {
     fun playEvolutionGlitchTone() {
         if (!isEnabled) return
         scope.launch {
-            if (synth.isAvailable) {
-                for (i in 0 until 4) {
-                    synth.playTone(1800f, 20)
-                    synth.playTone(3200f, 20)
+            when (soundpack) {
+                SoundpackProfile.ORIGINAL_1997 -> {
+                    if (synth.isAvailable) {
+                        for (i in 0 until 4) {
+                            synth.playTone(2048f, 20)
+                            synth.playTone(1024f, 20)
+                        }
+                    } else {
+                        try {
+                            toneGenerator?.startTone(ToneGenerator.TONE_CDMA_NETWORK_USA_RINGBACK, 80)
+                        } catch (_: Exception) {}
+                    }
                 }
-            } else {
-                try {
-                    toneGenerator?.startTone(ToneGenerator.TONE_CDMA_NETWORK_USA_RINGBACK, 80)
-                } catch (_: Exception) {}
+                SoundpackProfile.DIGIVICE_1999 -> {
+                    if (synth.isAvailable) {
+                        val notes = listOf(1318f, 1568f, 2093f, 2637f)
+                        for (n in notes) {
+                            synth.playTone(n, 25)
+                        }
+                    } else {
+                        try {
+                            toneGenerator?.startTone(ToneGenerator.TONE_CDMA_NETWORK_USA_RINGBACK, 80)
+                        } catch (_: Exception) {}
+                    }
+                }
+                SoundpackProfile.CHIPTUNE_RETRO -> {
+                    if (synth.isAvailable) {
+                        for (i in 0 until 4) {
+                            synth.playTone(1800f, 20)
+                            synth.playTone(3200f, 20)
+                        }
+                    } else {
+                        try {
+                            toneGenerator?.startTone(ToneGenerator.TONE_CDMA_NETWORK_USA_RINGBACK, 80)
+                        } catch (_: Exception) {}
+                    }
+                }
             }
         }
     }
@@ -192,14 +406,51 @@ class BuzzerManager(context: Context) {
     fun playFlushTone() {
         if (!isEnabled) return
         scope.launch {
-            if (synth.isAvailable) {
-                synth.playTone(1600f, 50)
-                synth.playTone(1200f, 50)
-                synth.playTone(900f, 60)
-            } else {
-                try {
-                    toneGenerator?.startTone(ToneGenerator.TONE_CDMA_CALL_SIGNAL_ISDN_NORMAL, 160)
-                } catch (_: Exception) {}
+            playFlushToneSuspend()
+        }
+    }
+
+    /**
+     * Suspending sweeping water flush wave tone.
+     */
+    suspend fun playFlushToneSuspend() {
+        if (!isEnabled) return
+        withContext(Dispatchers.Default) {
+            when (soundpack) {
+                SoundpackProfile.ORIGINAL_1997 -> {
+                    if (synth.isAvailable) {
+                        for (i in 0 until 5) {
+                            synth.playTone(2048f, 25)
+                            synth.playSilence(15)
+                        }
+                    } else {
+                        try {
+                            toneGenerator?.startTone(ToneGenerator.TONE_CDMA_CALL_SIGNAL_ISDN_NORMAL, 150)
+                        } catch (_: Exception) {}
+                    }
+                }
+                SoundpackProfile.DIGIVICE_1999 -> {
+                    if (synth.isAvailable) {
+                        synth.playTone(2093f, 50)
+                        synth.playTone(1760f, 50)
+                        synth.playTone(1396f, 70)
+                    } else {
+                        try {
+                            toneGenerator?.startTone(ToneGenerator.TONE_CDMA_CALL_SIGNAL_ISDN_NORMAL, 160)
+                        } catch (_: Exception) {}
+                    }
+                }
+                SoundpackProfile.CHIPTUNE_RETRO -> {
+                    if (synth.isAvailable) {
+                        synth.playTone(1600f, 50)
+                        synth.playTone(1200f, 50)
+                        synth.playTone(900f, 60)
+                    } else {
+                        try {
+                            toneGenerator?.startTone(ToneGenerator.TONE_CDMA_CALL_SIGNAL_ISDN_NORMAL, 160)
+                        } catch (_: Exception) {}
+                    }
+                }
             }
         }
     }
@@ -210,132 +461,320 @@ class BuzzerManager(context: Context) {
     fun playHealTone() {
         if (!isEnabled) return
         scope.launch {
-            if (synth.isAvailable) {
-                synth.playTone(2093f, 80)
-                synth.playSilence(20)
-                synth.playTone(3136f, 140)
-            } else {
-                val gen = toneGenerator ?: return@launch
-                try {
-                    gen.startTone(ToneGenerator.TONE_PROP_BEEP2, 90)
-                    delay(100L)
-                    gen.startTone(ToneGenerator.TONE_PROP_PROMPT, 150)
-                } catch (_: Exception) {}
+            when (soundpack) {
+                SoundpackProfile.ORIGINAL_1997 -> {
+                    if (synth.isAvailable) {
+                        synth.playTone(2048f, 60)
+                        synth.playSilence(40)
+                        synth.playTone(2048f, 120)
+                    } else {
+                        try {
+                            toneGenerator?.startTone(ToneGenerator.TONE_PROP_BEEP2, 120)
+                        } catch (_: Exception) {}
+                    }
+                }
+                SoundpackProfile.DIGIVICE_1999 -> {
+                    if (synth.isAvailable) {
+                        synth.playTone(1318f, 70)
+                        synth.playTone(1760f, 70)
+                        synth.playTone(2637f, 150)
+                    } else {
+                        val gen = toneGenerator ?: return@launch
+                        try {
+                            gen.startTone(ToneGenerator.TONE_PROP_BEEP2, 90)
+                            delay(100L)
+                            gen.startTone(ToneGenerator.TONE_PROP_PROMPT, 150)
+                        } catch (_: Exception) {}
+                    }
+                }
+                SoundpackProfile.CHIPTUNE_RETRO -> {
+                    if (synth.isAvailable) {
+                        synth.playTone(2093f, 80)
+                        synth.playSilence(20)
+                        synth.playTone(3136f, 140)
+                    } else {
+                        val gen = toneGenerator ?: return@launch
+                        try {
+                            gen.startTone(ToneGenerator.TONE_PROP_BEEP2, 90)
+                            delay(100L)
+                            gen.startTone(ToneGenerator.TONE_PROP_PROMPT, 150)
+                        } catch (_: Exception) {}
+                    }
+                }
             }
         }
     }
 
     /**
-     * Ascending 4-tone victory fanfare.
+     * Victory fanfare.
      */
     fun playVictoryFanfare() {
         if (!isEnabled) return
         scope.launch {
-            if (synth.isAvailable) {
-                val notes = listOf(2093f to 80, 2637f to 80, 3136f to 100, 4186f to 250)
-                for ((f, d) in notes) {
-                    synth.playTone(f, d)
-                    synth.playSilence(25)
+            when (soundpack) {
+                SoundpackProfile.ORIGINAL_1997 -> {
+                    if (synth.isAvailable) {
+                        val pulses = listOf(60 to 40, 60 to 40, 60 to 60, 220 to 50)
+                        for ((t, s) in pulses) {
+                            synth.playTone(2048f, t)
+                            synth.playSilence(s)
+                        }
+                    } else {
+                        val gen = toneGenerator ?: return@launch
+                        try {
+                            gen.startTone(ToneGenerator.TONE_CDMA_ALERT_NETWORK_LITE, 250)
+                        } catch (_: Exception) {}
+                    }
                 }
-            } else {
-                val gen = toneGenerator ?: return@launch
-                val tones = listOf(
-                    ToneGenerator.TONE_PROP_BEEP to 80L,
-                    ToneGenerator.TONE_PROP_BEEP2 to 80L,
-                    ToneGenerator.TONE_PROP_PROMPT to 120L,
-                    ToneGenerator.TONE_CDMA_ALERT_NETWORK_LITE to 250L
-                )
-                for ((tone, duration) in tones) {
-                    try {
-                        gen.startTone(tone, duration.toInt())
-                    } catch (_: Exception) {}
-                    delay(duration + 30L)
+                SoundpackProfile.DIGIVICE_1999 -> {
+                    if (synth.isAvailable) {
+                        val notes = listOf(1046.5f to 80, 1318.5f to 80, 1567.9f to 100, 2093f to 250)
+                        for ((f, d) in notes) {
+                            synth.playTone(f, d)
+                            synth.playSilence(20)
+                        }
+                    } else {
+                        val gen = toneGenerator ?: return@launch
+                        try {
+                            gen.startTone(ToneGenerator.TONE_CDMA_ALERT_NETWORK_LITE, 250)
+                        } catch (_: Exception) {}
+                    }
+                }
+                SoundpackProfile.CHIPTUNE_RETRO -> {
+                    if (synth.isAvailable) {
+                        val notes = listOf(2093f to 80, 2637f to 80, 3136f to 100, 4186f to 250)
+                        for ((f, d) in notes) {
+                            synth.playTone(f, d)
+                            synth.playSilence(25)
+                        }
+                    } else {
+                        val gen = toneGenerator ?: return@launch
+                        val tones = listOf(
+                            ToneGenerator.TONE_PROP_BEEP to 80L,
+                            ToneGenerator.TONE_PROP_BEEP2 to 80L,
+                            ToneGenerator.TONE_PROP_PROMPT to 120L,
+                            ToneGenerator.TONE_CDMA_ALERT_NETWORK_LITE to 250L
+                        )
+                        for ((tone, duration) in tones) {
+                            try {
+                                gen.startTone(tone, duration.toInt())
+                            } catch (_: Exception) {}
+                            delay(duration + 30L)
+                        }
+                    }
                 }
             }
         }
     }
 
     /**
-     * Descending 4-tone defeat jingle.
+     * Defeat jingle.
      */
     fun playDefeatJingle() {
         if (!isEnabled) return
         scope.launch {
-            if (synth.isAvailable) {
-                val notes = listOf(3136f to 90, 2637f to 90, 2093f to 100, 1568f to 200)
-                for ((f, d) in notes) {
-                    synth.playTone(f, d)
-                    synth.playSilence(25)
+            when (soundpack) {
+                SoundpackProfile.ORIGINAL_1997 -> {
+                    if (synth.isAvailable) {
+                        synth.playTone(2048f, 120)
+                        synth.playSilence(60)
+                        synth.playTone(1024f, 250)
+                    } else {
+                        try {
+                            toneGenerator?.startTone(ToneGenerator.TONE_CDMA_ABBR_ALERT, 220)
+                        } catch (_: Exception) {}
+                    }
                 }
-            } else {
-                val gen = toneGenerator ?: return@launch
-                val tones = listOf(
-                    ToneGenerator.TONE_PROP_PROMPT to 90L,
-                    ToneGenerator.TONE_PROP_BEEP2 to 90L,
-                    ToneGenerator.TONE_PROP_BEEP to 110L,
-                    ToneGenerator.TONE_CDMA_ABBR_ALERT to 220L
-                )
-                for ((tone, duration) in tones) {
-                    try {
-                        gen.startTone(tone, duration.toInt())
-                    } catch (_: Exception) {}
-                    delay(duration + 25L)
+                SoundpackProfile.DIGIVICE_1999 -> {
+                    if (synth.isAvailable) {
+                        val notes = listOf(1567.9f to 90, 1318.5f to 90, 1046.5f to 110, 784f to 220)
+                        for ((f, d) in notes) {
+                            synth.playTone(f, d)
+                            synth.playSilence(20)
+                        }
+                    } else {
+                        try {
+                            toneGenerator?.startTone(ToneGenerator.TONE_CDMA_ABBR_ALERT, 220)
+                        } catch (_: Exception) {}
+                    }
+                }
+                SoundpackProfile.CHIPTUNE_RETRO -> {
+                    if (synth.isAvailable) {
+                        val notes = listOf(3136f to 90, 2637f to 90, 2093f to 100, 1568f to 200)
+                        for ((f, d) in notes) {
+                            synth.playTone(f, d)
+                            synth.playSilence(25)
+                        }
+                    } else {
+                        val gen = toneGenerator ?: return@launch
+                        val tones = listOf(
+                            ToneGenerator.TONE_PROP_PROMPT to 90L,
+                            ToneGenerator.TONE_PROP_BEEP2 to 90L,
+                            ToneGenerator.TONE_PROP_BEEP to 110L,
+                            ToneGenerator.TONE_CDMA_ABBR_ALERT to 220L
+                        )
+                        for ((tone, duration) in tones) {
+                            try {
+                                gen.startTone(tone, duration.toInt())
+                            } catch (_: Exception) {}
+                            delay(duration + 25L)
+                        }
+                    }
                 }
             }
         }
     }
 
     /**
-     * Authentic Bandai Piezo Buzzer Evolution Alarm.
+     * Somber death siren when partner departs.
+     */
+    fun playDeathSiren() {
+        if (!isEnabled) return
+        scope.launch {
+            when (soundpack) {
+                SoundpackProfile.ORIGINAL_1997 -> {
+                    if (synth.isAvailable) {
+                        synth.playTone(2048f, 200)
+                        synth.playSilence(100)
+                        synth.playTone(1024f, 600)
+                    } else {
+                        try {
+                            toneGenerator?.startTone(ToneGenerator.TONE_CDMA_EMERGENCY_RINGBACK, 500)
+                        } catch (_: Exception) {}
+                    }
+                }
+                SoundpackProfile.DIGIVICE_1999 -> {
+                    if (synth.isAvailable) {
+                        synth.playTone(1318f, 150)
+                        synth.playTone(1174f, 150)
+                        synth.playTone(987f, 400)
+                    } else {
+                        try {
+                            toneGenerator?.startTone(ToneGenerator.TONE_CDMA_ABBR_ALERT, 400)
+                        } catch (_: Exception) {}
+                    }
+                }
+                SoundpackProfile.CHIPTUNE_RETRO -> {
+                    if (synth.isAvailable) {
+                        synth.playTone(880f, 150)
+                        synth.playTone(660f, 150)
+                        synth.playTone(440f, 450)
+                    } else {
+                        try {
+                            toneGenerator?.startTone(ToneGenerator.TONE_CDMA_ABBR_ALERT, 450)
+                        } catch (_: Exception) {}
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * Evolution Alarm sequence.
      */
     suspend fun playEvolutionAlert() {
         if (!isEnabled) return
         withContext(Dispatchers.Default) {
-            if (synth.isAvailable) {
-                // Phase 1: 6-beep burst
-                for (i in 0 until 6) {
-                    synth.playTone(2400f, 60)
-                    synth.playSilence(50)
-                }
-                // Phase 2: Digital glitch flutter
-                for (i in 0 until 4) {
-                    synth.playTone(1800f, 20)
-                    synth.playTone(3200f, 20)
-                }
-                synth.playSilence(40)
-                // Phase 3: Ascending victory fanfare
-                val fanfare = listOf(2093f to 80, 2637f to 80, 3136f to 120, 4186f to 250)
-                for ((f, d) in fanfare) {
-                    synth.playTone(f, d)
-                    synth.playSilence(30)
-                }
-            } else {
-                val gen = toneGenerator ?: return@withContext
-                try {
-                    for (i in 0 until 6) {
+            when (soundpack) {
+                SoundpackProfile.ORIGINAL_1997 -> {
+                    if (synth.isAvailable) {
+                        for (i in 0 until 6) {
+                            synth.playTone(2048f, 50)
+                            synth.playSilence(40)
+                        }
+                        for (i in 0 until 4) {
+                            synth.playTone(2048f, 25)
+                            synth.playTone(1024f, 25)
+                        }
+                        synth.playSilence(40)
+                        val fanfare = listOf(70 to 30, 70 to 30, 120 to 40, 250 to 50)
+                        for ((d, s) in fanfare) {
+                            synth.playTone(2048f, d)
+                            synth.playSilence(s)
+                        }
+                    } else {
+                        val gen = toneGenerator ?: return@withContext
                         try {
-                            gen.startTone(ToneGenerator.TONE_PROP_BEEP, 60)
+                            for (i in 0 until 6) {
+                                gen.startTone(ToneGenerator.TONE_PROP_BEEP, 50)
+                                delay(90L)
+                            }
+                            gen.startTone(ToneGenerator.TONE_CDMA_ALERT_NETWORK_LITE, 250)
                         } catch (_: Exception) {}
-                        delay(110L)
                     }
-                    delay(40L)
-                    try {
-                        gen.startTone(ToneGenerator.TONE_CDMA_NETWORK_USA_RINGBACK, 120)
-                    } catch (_: Exception) {}
-                    delay(160L)
-                    val fanfare = listOf(
-                        ToneGenerator.TONE_PROP_BEEP to 80L,
-                        ToneGenerator.TONE_PROP_BEEP2 to 80L,
-                        ToneGenerator.TONE_PROP_PROMPT to 120L,
-                        ToneGenerator.TONE_CDMA_ALERT_NETWORK_LITE to 250L
-                    )
-                    for ((tone, duration) in fanfare) {
+                }
+                SoundpackProfile.DIGIVICE_1999 -> {
+                    if (synth.isAvailable) {
+                        synth.playTone(1046.5f, 70)
+                        synth.playTone(1318.5f, 70)
+                        synth.playTone(1567.9f, 90)
+                        synth.playSilence(40)
+                        val scale = listOf(1046.5f, 1174.7f, 1318.5f, 1567.9f, 1760.0f, 2093.0f)
+                        for (f in scale) {
+                            synth.playTone(f, 35)
+                        }
+                        synth.playSilence(40)
+                        val fanfare = listOf(2093.0f to 90, 2637.0f to 90, 3136.0f to 220)
+                        for ((f, d) in fanfare) {
+                            synth.playTone(f, d)
+                            synth.playSilence(25)
+                        }
+                    } else {
+                        val gen = toneGenerator ?: return@withContext
                         try {
-                            gen.startTone(tone, duration.toInt())
+                            gen.startTone(ToneGenerator.TONE_PROP_BEEP, 70)
+                            delay(90L)
+                            gen.startTone(ToneGenerator.TONE_PROP_PROMPT, 120)
+                            delay(140L)
+                            gen.startTone(ToneGenerator.TONE_CDMA_ALERT_NETWORK_LITE, 250)
                         } catch (_: Exception) {}
-                        delay(duration + 30L)
                     }
-                } catch (_: Exception) {}
+                }
+                SoundpackProfile.CHIPTUNE_RETRO -> {
+                    if (synth.isAvailable) {
+                        for (i in 0 until 6) {
+                            synth.playTone(2400f, 60)
+                            synth.playSilence(50)
+                        }
+                        for (i in 0 until 4) {
+                            synth.playTone(1800f, 20)
+                            synth.playTone(3200f, 20)
+                        }
+                        synth.playSilence(40)
+                        val fanfare = listOf(2093f to 80, 2637f to 80, 3136f to 120, 4186f to 250)
+                        for ((f, d) in fanfare) {
+                            synth.playTone(f, d)
+                            synth.playSilence(30)
+                        }
+                    } else {
+                        val gen = toneGenerator ?: return@withContext
+                        try {
+                            for (i in 0 until 6) {
+                                try {
+                                    gen.startTone(ToneGenerator.TONE_PROP_BEEP, 60)
+                                } catch (_: Exception) {}
+                                delay(110L)
+                            }
+                            delay(40L)
+                            try {
+                                gen.startTone(ToneGenerator.TONE_CDMA_NETWORK_USA_RINGBACK, 120)
+                            } catch (_: Exception) {}
+                            delay(160L)
+                            val fanfare = listOf(
+                                ToneGenerator.TONE_PROP_BEEP to 80L,
+                                ToneGenerator.TONE_PROP_BEEP2 to 80L,
+                                ToneGenerator.TONE_PROP_PROMPT to 120L,
+                                ToneGenerator.TONE_CDMA_ALERT_NETWORK_LITE to 250L
+                            )
+                            for ((tone, duration) in fanfare) {
+                                try {
+                                    gen.startTone(tone, duration.toInt())
+                                } catch (_: Exception) {}
+                                delay(duration + 30L)
+                            }
+                        } catch (_: Exception) {}
+                    }
+                }
             }
         }
     }
@@ -400,22 +839,25 @@ class BuzzerManager(context: Context) {
         val isAvailable: Boolean
             get() = track?.playState == AudioTrack.PLAYSTATE_PLAYING
 
+        @Synchronized
         fun playTone(freqHz: Float, durationMs: Int, volume: Short = 16000) {
             val t = track ?: return
             val totalSamples = (sampleRate * (durationMs / 1000f)).toInt()
             if (totalSamples <= 0) return
-            val period = (sampleRate / freqHz).coerceAtLeast(2f)
-            val halfPeriod = period / 2f
+            val phaseStep = freqHz / sampleRate
+            var phase = 0f
             val buffer = ShortArray(totalSamples)
             for (i in 0 until totalSamples) {
-                val phase = i % period.toInt()
-                buffer[i] = if (phase < halfPeriod) volume else (-volume).toShort()
+                buffer[i] = if (phase < 0.5f) volume else (-volume).toShort()
+                phase += phaseStep
+                if (phase >= 1f) phase -= 1f
             }
             try {
                 t.write(buffer, 0, buffer.size)
             } catch (_: Exception) {}
         }
 
+        @Synchronized
         fun playSilence(durationMs: Int) {
             val t = track ?: return
             val totalSamples = (sampleRate * (durationMs / 1000f)).toInt()
@@ -426,6 +868,7 @@ class BuzzerManager(context: Context) {
             } catch (_: Exception) {}
         }
 
+        @Synchronized
         fun release() {
             try {
                 track?.stop()

@@ -25,6 +25,10 @@ class NotificationQuickCareReceiverAdversarialTest {
             QuickCareAction.CLEAN,
             QuickCareAction.fromAction("com.digiwear.wear.action.QUICK_CLEAN")
         )
+        assertEquals(
+            QuickCareAction.LIGHTS,
+            QuickCareAction.fromAction("com.digiwear.wear.action.QUICK_LIGHTS")
+        )
     }
 
     @Test

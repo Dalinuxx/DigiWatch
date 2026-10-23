@@ -38,6 +38,7 @@
 -dontwarn androidx.wear.watchface.**
 -keep class com.digiwear.wear.tile.** { *; }
 -keep class com.digiwear.wear.complication.** { *; }
+-keep class com.digiwear.wear.watchface.** { *; }
 
 # WorkManager Workers
 -keep class androidx.work.** { *; }

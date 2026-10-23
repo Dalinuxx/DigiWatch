@@ -39,6 +39,7 @@ import androidx.wear.compose.material.ButtonDefaults
 import androidx.wear.compose.material.Text
 import com.digiwear.core.model.BackgroundTheme
 import com.digiwear.core.model.PetSpecies
+import com.digiwear.core.model.SoundpackProfile
 import com.digiwear.wear.data.PetRepository
 import com.digiwear.wear.haptic.HapticManager
 import com.digiwear.wear.input.HardwareInputManager
@@ -63,6 +64,7 @@ fun SettingsScreen(
     val buttonPlacement by repository.buttonPlacementFlow.collectAsState(initial = "RIGHT")
     val isPendulumShakeMode by repository.pendulumShakeModeFlow.collectAsState(initial = false)
     val isSoundEnabled by repository.soundEnabledFlow.collectAsState(initial = false)
+    val currentSoundpack by repository.soundpackFlow.collectAsState(initial = SoundpackProfile.ORIGINAL_1997)
     val nfcBridgeMode by repository.nfcBridgeModeFlow.collectAsState(initial = "NFC_DUEL")
     val displayShapeOverride by repository.displayShapeOverrideFlow.collectAsState(initial = "AUTO")
     val dailyStepGoal by repository.dailyStepGoalFlow.collectAsState(initial = 5000)
@@ -337,6 +339,64 @@ fun SettingsScreen(
                         text = if (isSoundEnabled) "ON" else "OFF",
                         fontSize = 8.5.sp,
                         fontWeight = FontWeight.Bold
+                    )
+                }
+            }
+        }
+
+        // ==========================================
+        // 4b. Authentic Soundpack Profile Selector
+        // ==========================================
+        item {
+            Spacer(modifier = Modifier.height(6.dp))
+            val soundpacks = SoundpackProfile.entries
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = displayConfig.horizontalPadding),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = "SOUNDPACK PROFILE",
+                        fontSize = 9.sp,
+                        color = Color.White,
+                        fontFamily = FontFamily.Monospace
+                    )
+                    Text(
+                        text = currentSoundpack.displayName,
+                        fontSize = 7.5.sp,
+                        color = Color(0xFFFFD54F)
+                    )
+                }
+                Button(
+                    onClick = {
+                        val idx = soundpacks.indexOf(currentSoundpack).coerceAtLeast(0)
+                        val next = soundpacks[(idx + 1) % soundpacks.size]
+                        repository.setSoundpack(next)
+                        if (isVibrationEnabled) hapticManager.playStepMilestone()
+                        if (isSoundEnabled) {
+                            hapticManager.buzzerManager?.let { bm ->
+                                bm.soundpack = next
+                                bm.playButtonBeep()
+                            }
+                        }
+                    },
+                    modifier = Modifier
+                        .size(width = 62.dp, height = 30.dp)
+                        .border(1.5.dp, Color(0xFF00E5FF), CircleShape),
+                    colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFF00695C))
+                ) {
+                    Text(
+                        text = when (currentSoundpack) {
+                            SoundpackProfile.ORIGINAL_1997 -> "1997"
+                            SoundpackProfile.DIGIVICE_1999 -> "1999"
+                            SoundpackProfile.CHIPTUNE_RETRO -> "CHIP"
+                        },
+                        fontSize = 8.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.White
                     )
                 }
             }

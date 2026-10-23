@@ -62,8 +62,17 @@ class MainActivity : ComponentActivity() {
         repository = PetRepository.getInstance(applicationContext)
         hapticManager = HapticManager(this)
         buzzerManager = com.digiwear.wear.sound.BuzzerManager()
+        buzzerManager.isEnabled = repository.soundEnabledFlow.value
+        buzzerManager.soundpack = repository.soundpackFlow.value
         hapticManager.buzzerManager = buzzerManager
         stepTracker = StepTrackerManager(this, repository, hapticManager, activityScope)
+
+        activityScope.launch {
+            repository.soundEnabledFlow.collect { buzzerManager.isEnabled = it }
+        }
+        activityScope.launch {
+            repository.soundpackFlow.collect { buzzerManager.soundpack = it }
+        }
 
         // Start AOSP Wi-Fi / Hotspot LAN Sync Bridge & UDP Discovery Responder
         com.digiwear.wear.datalayer.AospLanSyncServer.start(applicationContext)

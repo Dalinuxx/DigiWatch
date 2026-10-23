@@ -54,7 +54,11 @@ class PetDecayWorker(
                     triggerEvolutionVibrationAlert()
                 }
                 if (prefs.getBoolean("sound_enabled", false)) {
-                    val buzzer = BuzzerManager().apply { isEnabled = true }
+                    val sp = com.digiwear.core.model.SoundpackProfile.fromId(prefs.getString("soundpack", null))
+                    val buzzer = BuzzerManager().apply {
+                        isEnabled = true
+                        soundpack = sp
+                    }
                     try {
                         buzzer.playEvolutionAlert()
                     } catch (_: Exception) {
@@ -77,7 +81,11 @@ class PetDecayWorker(
                     triggerVibrationAlert()
                 }
                 if (prefs.getBoolean("sound_enabled", false)) {
-                    val buzzer = BuzzerManager().apply { isEnabled = true }
+                    val sp = com.digiwear.core.model.SoundpackProfile.fromId(prefs.getString("soundpack", null))
+                    val buzzer = BuzzerManager().apply {
+                        isEnabled = true
+                        soundpack = sp
+                    }
                     try {
                         buzzer.playAttentionBeepSuspend()
                     } catch (_: Exception) {

@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.concurrent.futures.ResolvableFuture
 import androidx.wear.protolayout.ActionBuilders
 import androidx.wear.protolayout.ColorBuilders.argb
+import androidx.wear.protolayout.DimensionBuilders.dp
 import androidx.wear.protolayout.DimensionBuilders.expand
 import androidx.wear.protolayout.DimensionBuilders.sp
 import androidx.wear.protolayout.LayoutElementBuilders
@@ -25,8 +26,11 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 
 /**
- * Glanceable Wear OS Tile for instant wrist access to active partner status,
- * hunger/strength hearts, and today's adventure steps.
+ * Glanceable and Interactive Wear OS Tile for instant wrist access to active partner status,
+ * hunger/strength hearts, adventure steps, and 1-tap quick care actions:
+ * - [ FEED ]: Feeds meal or vitamin straight from the tile.
+ * - [ CLEAN ]: Flushes waste and resets poop hazards.
+ * - [ LIGHTS ]: Toggles sleep schedule / waking state lights.
  */
 class DigiWearTileService : TileService() {
 
@@ -55,6 +59,7 @@ class DigiWearTileService : TileService() {
                     hunger = pet.hunger,
                     strength = pet.strength,
                     weight = pet.weight,
+                    isSleeping = pet.isSleeping,
                     activeSector = activeNode?.name ?: "File Island",
                     currentSteps = progress.accumulatedStepsCurrentNode,
                     targetSteps = activeNode?.requiredSteps ?: 1000
@@ -100,11 +105,13 @@ class DigiWearTileService : TileService() {
         hunger: Int,
         strength: Int,
         weight: Int,
+        isSleeping: Boolean,
         activeSector: String,
         currentSteps: Int,
         targetSteps: Int
     ): LayoutElementBuilders.Layout {
-        val launchIntent = ActionBuilders.LaunchAction.Builder()
+        // App launch action for general navigation
+        val launchAppIntent = ActionBuilders.LaunchAction.Builder()
             .setAndroidActivity(
                 ActionBuilders.AndroidActivity.Builder()
                     .setPackageName(context.packageName)
@@ -113,11 +120,11 @@ class DigiWearTileService : TileService() {
             )
             .build()
 
-        val clickModifier = ModifiersBuilders.Modifiers.Builder()
+        val openAppModifier = ModifiersBuilders.Modifiers.Builder()
             .setClickable(
                 ModifiersBuilders.Clickable.Builder()
-                    .setOnClick(launchIntent)
-                    .setId("open_app")
+                    .setOnClick(launchAppIntent)
+                    .setId("open_app_header")
                     .build()
             )
             .build()
@@ -125,36 +132,46 @@ class DigiWearTileService : TileService() {
         val column = LayoutElementBuilders.Column.Builder()
             .setWidth(expand())
             .setHeight(expand())
-            .setModifiers(clickModifier)
             .setHorizontalAlignment(LayoutElementBuilders.HORIZONTAL_ALIGN_CENTER)
 
-        // Top Header
-        column.addContent(
-            LayoutElementBuilders.Text.Builder()
-                .setText("DIGIWEAR V-PET")
-                .setFontStyle(
-                    LayoutElementBuilders.FontStyle.Builder()
-                        .setSize(sp(10f))
-                        .setColor(argb(0xFF00E5FF.toInt()))
-                        .build()
-                )
-                .build()
-        )
+        // 1. Top Header (Clickable to open full app)
+        val headerBox = LayoutElementBuilders.Box.Builder()
+            .setModifiers(openAppModifier)
+            .setHorizontalAlignment(LayoutElementBuilders.HORIZONTAL_ALIGN_CENTER)
+            .addContent(
+                LayoutElementBuilders.Column.Builder()
+                    .setHorizontalAlignment(LayoutElementBuilders.HORIZONTAL_ALIGN_CENTER)
+                    .addContent(
+                        LayoutElementBuilders.Text.Builder()
+                            .setText("DIGIWEAR V-PET")
+                            .setFontStyle(
+                                LayoutElementBuilders.FontStyle.Builder()
+                                    .setSize(sp(10f))
+                                    .setColor(argb(0xFF00E5FF.toInt()))
+                                    .build()
+                            )
+                            .build()
+                    )
+                    .addContent(
+                        LayoutElementBuilders.Text.Builder()
+                            .setText("$speciesName • $stageName")
+                            .setFontStyle(
+                                LayoutElementBuilders.FontStyle.Builder()
+                                    .setSize(sp(13f))
+                                    .setColor(argb(0xFFFFFFFF.toInt()))
+                                    .build()
+                            )
+                            .build()
+                    )
+                    .build()
+            )
+            .build()
+        column.addContent(headerBox)
 
-        // Species Name & Stage
-        column.addContent(
-            LayoutElementBuilders.Text.Builder()
-                .setText("$speciesName • $stageName")
-                .setFontStyle(
-                    LayoutElementBuilders.FontStyle.Builder()
-                        .setSize(sp(14f))
-                        .setColor(argb(0xFFFFFFFF.toInt()))
-                        .build()
-                )
-                .build()
-        )
+        // Spacer
+        column.addContent(LayoutElementBuilders.Spacer.Builder().setHeight(dp(2f)).build())
 
-        // Physiological Meters (LCD Block Bar Style)
+        // 2. Physiological Meters (LCD Block Bar Style)
         val hVal = hunger.coerceIn(0, 4)
         val sVal = strength.coerceIn(0, 4)
         val hungerBar = "HGR [" + "#".repeat(hVal) + "-".repeat(4 - hVal) + "]"
@@ -165,33 +182,83 @@ class DigiWearTileService : TileService() {
                 .setText("$hungerBar  $strengthBar")
                 .setFontStyle(
                     LayoutElementBuilders.FontStyle.Builder()
-                        .setSize(sp(11f))
+                        .setSize(sp(10.5f))
                         .setColor(argb(0xFFFFD54F.toInt()))
                         .build()
                 )
                 .build()
         )
 
-        // Weight
+        // Weight & Sleep status
+        val statusLine = if (isSleeping) "Weight: ${weight}g [ZZZ]" else "Weight: ${weight}g • $activeSector"
         column.addContent(
             LayoutElementBuilders.Text.Builder()
-                .setText("Weight: ${weight}g")
+                .setText(statusLine)
                 .setFontStyle(
                     LayoutElementBuilders.FontStyle.Builder()
-                        .setSize(sp(10f))
+                        .setSize(sp(9f))
                         .setColor(argb(0xFFB0BEC5.toInt()))
                         .build()
                 )
                 .build()
         )
 
-        // Adventure Progress
+        // Spacer before Quick Care Action Buttons
+        column.addContent(LayoutElementBuilders.Spacer.Builder().setHeight(dp(4f)).build())
+
+        // 3. Interactive Quick Care Buttons Row: [ FEED ] [ CLEAN ] [ LIGHTS ]
+        val buttonRow = LayoutElementBuilders.Row.Builder()
+            .setVerticalAlignment(LayoutElementBuilders.VERTICAL_ALIGN_CENTER)
+
+        buttonRow.addContent(
+            buildActionButton(
+                context = context,
+                label = "FEED",
+                actionExtra = TileQuickCareActivity.ACTION_FEED,
+                bgColor = 0xFF1B5E20.toInt(),
+                textColor = 0xFFE8F5E9.toInt(),
+                clickableId = "tile_action_feed"
+            )
+        )
+
+        buttonRow.addContent(LayoutElementBuilders.Spacer.Builder().setWidth(dp(4f)).build())
+
+        buttonRow.addContent(
+            buildActionButton(
+                context = context,
+                label = "CLEAN",
+                actionExtra = TileQuickCareActivity.ACTION_CLEAN,
+                bgColor = 0xFF006064.toInt(),
+                textColor = 0xFFE0F7FA.toInt(),
+                clickableId = "tile_action_clean"
+            )
+        )
+
+        buttonRow.addContent(LayoutElementBuilders.Spacer.Builder().setWidth(dp(4f)).build())
+
+        buttonRow.addContent(
+            buildActionButton(
+                context = context,
+                label = "LIGHTS",
+                actionExtra = TileQuickCareActivity.ACTION_LIGHTS,
+                bgColor = 0xFF4A148C.toInt(),
+                textColor = 0xFFEDE7F6.toInt(),
+                clickableId = "tile_action_lights"
+            )
+        )
+
+        column.addContent(buttonRow.build())
+
+        // Spacer
+        column.addContent(LayoutElementBuilders.Spacer.Builder().setHeight(dp(4f)).build())
+
+        // 4. Adventure Progress & Open Cue
         column.addContent(
             LayoutElementBuilders.Text.Builder()
                 .setText("Adv: $currentSteps / $targetSteps steps")
                 .setFontStyle(
                     LayoutElementBuilders.FontStyle.Builder()
-                        .setSize(sp(11f))
+                        .setSize(sp(10f))
                         .setColor(argb(0xFF00E676.toInt()))
                         .build()
                 )
@@ -200,10 +267,10 @@ class DigiWearTileService : TileService() {
 
         column.addContent(
             LayoutElementBuilders.Text.Builder()
-                .setText("TAP TO OPEN")
+                .setText("TAP TITLE TO OPEN")
                 .setFontStyle(
                     LayoutElementBuilders.FontStyle.Builder()
-                        .setSize(sp(8f))
+                        .setSize(sp(7.5f))
                         .setColor(argb(0xFF80D8FF.toInt()))
                         .build()
                 )
@@ -213,8 +280,72 @@ class DigiWearTileService : TileService() {
         return LayoutElementBuilders.Layout.Builder().setRoot(column.build()).build()
     }
 
+    private fun buildActionButton(
+        context: Context,
+        label: String,
+        actionExtra: String,
+        bgColor: Int,
+        textColor: Int,
+        clickableId: String
+    ): LayoutElementBuilders.LayoutElement {
+        val launchIntent = ActionBuilders.LaunchAction.Builder()
+            .setAndroidActivity(
+                ActionBuilders.AndroidActivity.Builder()
+                    .setPackageName(context.packageName)
+                    .setClassName(TileQuickCareActivity::class.java.name)
+                    .addKeyToExtraMapping(
+                        TileQuickCareActivity.EXTRA_CARE_ACTION,
+                        ActionBuilders.AndroidStringExtra.Builder().setValue(actionExtra).build()
+                    )
+                    .build()
+            )
+            .build()
+
+        val buttonModifier = ModifiersBuilders.Modifiers.Builder()
+            .setClickable(
+                ModifiersBuilders.Clickable.Builder()
+                    .setOnClick(launchIntent)
+                    .setId(clickableId)
+                    .build()
+            )
+            .setBackground(
+                ModifiersBuilders.Background.Builder()
+                    .setColor(argb(bgColor))
+                    .setCorner(ModifiersBuilders.Corner.Builder().setRadius(dp(12f)).build())
+                    .build()
+            )
+            .setPadding(
+                ModifiersBuilders.Padding.Builder()
+                    .setStart(dp(6f))
+                    .setEnd(dp(6f))
+                    .setTop(dp(4f))
+                    .setBottom(dp(4f))
+                    .build()
+            )
+            .build()
+
+        return LayoutElementBuilders.Box.Builder()
+            .setWidth(dp(52f))
+            .setHeight(dp(26f))
+            .setModifiers(buttonModifier)
+            .setHorizontalAlignment(LayoutElementBuilders.HORIZONTAL_ALIGN_CENTER)
+            .setVerticalAlignment(LayoutElementBuilders.VERTICAL_ALIGN_CENTER)
+            .addContent(
+                LayoutElementBuilders.Text.Builder()
+                    .setText(label)
+                    .setFontStyle(
+                        LayoutElementBuilders.FontStyle.Builder()
+                            .setSize(sp(10f))
+                            .setColor(argb(textColor))
+                            .build()
+                    )
+                    .build()
+            )
+            .build()
+    }
+
     companion object {
-        private const val RESOURCES_VERSION = "1"
+        private const val RESOURCES_VERSION = "2"
 
         fun requestUpdate(context: Context) {
             try {

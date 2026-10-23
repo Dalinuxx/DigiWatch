@@ -22,6 +22,7 @@
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
 
     <application
         android:allowBackup="true"
@@ -58,6 +59,14 @@
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
+ 
+        <activity
+            android:name=".tile.TileQuickCareActivity"
+            android:exported="true"
+            android:theme="@android:style/Theme.Translucent.NoTitleBar"
+            android:taskAffinity=""
+            android:excludeFromRecents="true"
+            android:noHistory="true" />
 
         <service
             android:name=".datalayer.WearDataSyncService"
@@ -98,12 +107,36 @@
                 android:value="300" />
         </service>
 
+        <service
+            android:name=".watchface.DigiWatchFaceService"
+            android:exported="true"
+            android:label="@string/watch_face_name"
+            android:permission="android.permission.BIND_WALLPAPER">
+            <intent-filter>
+                <action android:name="android.service.wallpaper.WallpaperService" />
+                <category android:name="com.google.android.wearable.watchface.category.WATCH_FACE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.service.wallpaper"
+                android:resource="@xml/watch_face" />
+            <meta-data
+                android:name="com.google.android.wearable.watchface.preview"
+                android:resource="@drawable/preview_watchface" />
+            <meta-data
+                android:name="com.google.android.wearable.watchface.preview_circular"
+                android:resource="@drawable/preview_watchface" />
+            <meta-data
+                android:name="com.google.android.wearable.watchface.wearableConfigurationAction"
+                android:value="androidx.wear.watchface.editor.action.WATCH_FACE_EDITOR" />
+        </service>
+
         <receiver
             android:name=".receiver.NotificationQuickCareReceiver"
             android:exported="false">
             <intent-filter>
                 <action android:name="com.digiwear.wear.action.QUICK_FEED" />
                 <action android:name="com.digiwear.wear.action.QUICK_CLEAN" />
+                <action android:name="com.digiwear.wear.action.QUICK_LIGHTS" />
             </intent-filter>
         </receiver>
 

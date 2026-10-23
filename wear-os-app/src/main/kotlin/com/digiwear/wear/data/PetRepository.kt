@@ -36,6 +36,7 @@ import java.time.ZoneId
 import java.util.concurrent.TimeUnit
 
 import com.digiwear.core.model.CustomThemeConfig
+import com.digiwear.core.model.SoundpackProfile
 
 class PetRepository private constructor(context: Context) {
 
@@ -106,6 +107,11 @@ class PetRepository private constructor(context: Context) {
         prefs.getBoolean("sound_enabled", false)
     )
     val soundEnabledFlow: StateFlow<Boolean> = _soundEnabledFlow.asStateFlow()
+
+    private val _soundpackFlow = MutableStateFlow(
+        SoundpackProfile.fromId(prefs.getString("soundpack", SoundpackProfile.ORIGINAL_1997.id))
+    )
+    val soundpackFlow: StateFlow<SoundpackProfile> = _soundpackFlow.asStateFlow()
 
     private val _nfcBridgeModeFlow = MutableStateFlow(
         prefs.getString("nfc_bridge_mode", "NFC_DUEL") ?: "NFC_DUEL"
@@ -285,6 +291,11 @@ class PetRepository private constructor(context: Context) {
         _combatInjuriesEnabledFlow.value = enabled
     }
 
+    fun setSoundpack(soundpack: SoundpackProfile) {
+        prefs.edit().putString("soundpack", soundpack.id).apply()
+        _soundpackFlow.value = soundpack
+    }
+
     fun getSettingsMap(): Map<String, String> = mapOf(
         "theme" to if (_themeFlow.value == BackgroundTheme.CUSTOM_MATRIX && _customThemeConfigFlow.value != null) {
             _customThemeConfigFlow.value!!.toThemeId()
@@ -305,7 +316,8 @@ class PetRepository private constructor(context: Context) {
         "hazard_alerts_enabled" to _hazardAlertsFlow.value.toString(),
         "clock_format_24h" to _clockFormatFlow.value.toString(),
         "lifespan_canonical_enabled" to _lifespanCanonicalEnabledFlow.value.toString(),
-        "combat_injuries_enabled" to _combatInjuriesEnabledFlow.value.toString()
+        "combat_injuries_enabled" to _combatInjuriesEnabledFlow.value.toString(),
+        "soundpack" to _soundpackFlow.value.id
     )
 
     fun setBeamedCommCode(code: String?) {

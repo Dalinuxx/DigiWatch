@@ -388,7 +388,8 @@ class PhoneWearableManager(private val context: Context) {
         hazardAlertsEnabled: Boolean = true,
         clockFormat24h: Boolean = false,
         lifespanCanonicalEnabled: Boolean = true,
-        combatInjuriesEnabled: Boolean = true
+        combatInjuriesEnabled: Boolean = true,
+        soundpack: String = "ORIGINAL_1997"
     ): Boolean = withContext(Dispatchers.IO) {
         val nodes = getConnectedWatchNodes()
         if (nodes.isEmpty()) return@withContext false
@@ -418,6 +419,7 @@ class PhoneWearableManager(private val context: Context) {
             put("clock_format_24h", clockFormat24h.toString())
             put("lifespan_canonical_enabled", lifespanCanonicalEnabled.toString())
             put("combat_injuries_enabled", combatInjuriesEnabled.toString())
+            put("soundpack", soundpack)
         }
         val jsonStr = json.encodeToString(map)
         runCatching { prefs.edit().putString("cached_watch_settings", jsonStr).apply() }

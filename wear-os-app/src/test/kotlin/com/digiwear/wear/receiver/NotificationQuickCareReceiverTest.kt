@@ -28,6 +28,11 @@ class NotificationQuickCareReceiverTest {
             QuickCareAction.CLEAN,
             QuickCareAction.fromAction(NotificationQuickCareReceiver.ACTION_QUICK_CLEAN)
         )
+        assertEquals(
+            "ACTION_QUICK_LIGHTS must map to QuickCareAction.LIGHTS",
+            QuickCareAction.LIGHTS,
+            QuickCareAction.fromAction(NotificationQuickCareReceiver.ACTION_QUICK_LIGHTS)
+        )
     }
 
     @Test
@@ -141,6 +146,7 @@ class NotificationQuickCareReceiverTest {
     fun testConstantsIntegrity() {
         assertEquals("com.digiwear.wear.action.QUICK_FEED", NotificationQuickCareReceiver.ACTION_QUICK_FEED)
         assertEquals("com.digiwear.wear.action.QUICK_CLEAN", NotificationQuickCareReceiver.ACTION_QUICK_CLEAN)
+        assertEquals("com.digiwear.wear.action.QUICK_LIGHTS", NotificationQuickCareReceiver.ACTION_QUICK_LIGHTS)
         assertEquals(1001, NotificationQuickCareReceiver.NOTIFICATION_ID_ATTENTION)
         assertEquals(PetDecayWorker.NOTIFICATION_ID_ATTENTION, NotificationQuickCareReceiver.NOTIFICATION_ID_ATTENTION)
     }

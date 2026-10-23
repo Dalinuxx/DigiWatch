@@ -77,6 +77,7 @@ import com.digiwear.core.engine.PetSimulationEngine
 import com.digiwear.core.model.BackgroundTheme
 import com.digiwear.core.model.CustomThemeConfig
 import com.digiwear.core.model.LcdPattern
+import com.digiwear.core.model.SoundpackProfile
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.util.Locale
@@ -108,6 +109,7 @@ fun SettingsScreen(
     var selectedTheme by remember { mutableStateOf(BackgroundTheme.CLASSIC_VPET_LCD) }
     var vibrationEnabled by remember { mutableStateOf(true) }
     var soundEnabled by remember { mutableStateOf(false) }
+    var soundpack by remember { mutableStateOf(buzzerManager.soundpack) }
     var threeButtonMode by remember { mutableStateOf(true) }
     var buttonPlacement by remember { mutableStateOf("RIGHT") }
     var pendulumShakeMode by remember { mutableStateOf(false) }
@@ -169,7 +171,8 @@ fun SettingsScreen(
                         hazardAlertsEnabled = hazardAlertsEnabled,
                         clockFormat24h = clockFormat24h,
                         lifespanCanonicalEnabled = lifespanCanonicalEnabled,
-                        combatInjuriesEnabled = combatInjuriesEnabled
+                        combatInjuriesEnabled = combatInjuriesEnabled,
+                        soundpack = soundpack.id
                     )
                     syncStatus = if (sentAsset || sentSettings) "Wallpaper imported & beamed to Smartwatch!" else "Wallpaper saved locally on Phone."
                 } else {
@@ -203,6 +206,11 @@ fun SettingsScreen(
         watchSettings["vpet_button_placement"]?.let { buttonPlacement = it }
         watchSettings["pendulum_shake_mode"]?.let { pendulumShakeMode = it.toBoolean() }
         watchSettings["sound_enabled"]?.let { soundEnabled = it.toBoolean(); buzzerManager.isEnabled = it.toBoolean() }
+        watchSettings["soundpack"]?.let {
+            val sp = SoundpackProfile.fromId(it)
+            soundpack = sp
+            buzzerManager.soundpack = sp
+        }
         watchSettings["nfc_bridge_mode"]?.let { nfcBridgeMode = it }
         watchSettings["display_shape_override"]?.let { displayShapeOverride = it }
         watchSettings["daily_step_goal"]?.toIntOrNull()?.let { dailyStepGoal = it }
@@ -861,7 +869,8 @@ fun SettingsScreen(
                                             hazardAlertsEnabled = hazardAlertsEnabled,
                                             clockFormat24h = clockFormat24h,
                                             lifespanCanonicalEnabled = lifespanCanonicalEnabled,
-                                            combatInjuriesEnabled = combatInjuriesEnabled
+                                            combatInjuriesEnabled = combatInjuriesEnabled,
+                                            soundpack = soundpack.id
                                         )
                                         syncStatus = if (sent) "Custom matrix theme beamed to Smartwatch!" else "Custom theme saved locally."
                                     }
@@ -957,7 +966,8 @@ fun SettingsScreen(
                                                     hazardAlertsEnabled = hazardAlertsEnabled,
                                                     clockFormat24h = clockFormat24h,
                                                     lifespanCanonicalEnabled = lifespanCanonicalEnabled,
-                                                    combatInjuriesEnabled = combatInjuriesEnabled
+                                                    combatInjuriesEnabled = combatInjuriesEnabled,
+                                                    soundpack = soundpack.id
                                                 )
                                                 syncStatus = if (sentAsset || sentSettings) "Wallpaper beamed to Smartwatch!" else "Wallpaper saved locally."
                                             }
@@ -993,6 +1003,70 @@ fun SettingsScreen(
                         buzzerManager.isEnabled = it
                     }
                 )
+
+                // Authentic Soundpack Profile Selector
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 6.dp)
+                ) {
+                    Text(
+                        text = "AUTHENTIC SOUNDPACK PROFILE",
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.White,
+                        fontFamily = FontFamily.Monospace
+                    )
+                    Text(
+                        text = soundpack.description,
+                        fontSize = 9.sp,
+                        color = DigiWearPalette.CrestGold,
+                        modifier = Modifier.padding(top = 2.dp, bottom = 6.dp)
+                    )
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        SoundpackProfile.entries.forEach { profile ->
+                            val isSelected = soundpack == profile
+                            OutlinedButton(
+                                onClick = {
+                                    soundpack = profile
+                                    buzzerManager.soundpack = profile
+                                    if (soundEnabled) buzzerManager.playButtonBeep()
+                                },
+                                modifier = Modifier.weight(1f),
+                                shape = RoundedCornerShape(8.dp),
+                                border = BorderStroke(
+                                    1.dp,
+                                    if (isSelected) DigiWearPalette.DigiviceCyan else Color(0xFF37474F)
+                                ),
+                                colors = ButtonDefaults.outlinedButtonColors(
+                                    containerColor = if (isSelected) Color(0xFF00363A) else Color(0xFF1A262C)
+                                )
+                            ) {
+                                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                    Text(
+                                        text = when (profile) {
+                                            SoundpackProfile.ORIGINAL_1997 -> "1997 PIEZO"
+                                            SoundpackProfile.DIGIVICE_1999 -> "1999 CHIMES"
+                                            SoundpackProfile.CHIPTUNE_RETRO -> "8-BIT SYNTH"
+                                        },
+                                        fontSize = 8.5.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        fontFamily = FontFamily.Monospace,
+                                        color = if (isSelected) DigiWearPalette.DigiviceCyan else Color.White
+                                    )
+                                    Text(
+                                        text = profile.subtitle,
+                                        fontSize = 7.sp,
+                                        color = if (isSelected) Color(0xFF80DEEA) else Color(0xFF90A4AE)
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
 
                 SettingSwitchRow(
                     title = "3-BUTTON LCD CONTROLS",
@@ -1336,7 +1410,8 @@ fun SettingsScreen(
                                 hazardAlertsEnabled = hazardAlertsEnabled,
                                 clockFormat24h = clockFormat24h,
                                 lifespanCanonicalEnabled = lifespanCanonicalEnabled,
-                                combatInjuriesEnabled = combatInjuriesEnabled
+                                combatInjuriesEnabled = combatInjuriesEnabled,
+                                soundpack = soundpack.id
                             )
                             syncStatus = if (sent) "Successfully beamed settings to Smartwatch!" else "Settings saved locally on Phone."
                         }
@@ -1791,7 +1866,8 @@ fun SettingsScreen(
                                 hazardAlertsEnabled = hazardAlertsEnabled,
                                 clockFormat24h = clockFormat24h,
                                 lifespanCanonicalEnabled = lifespanCanonicalEnabled,
-                                combatInjuriesEnabled = combatInjuriesEnabled
+                                combatInjuriesEnabled = combatInjuriesEnabled,
+                                soundpack = soundpack.id
                             )
                             syncStatus = if (sent) "Custom sleep schedule $formatted beamed to Smartwatch!" else "Saved schedule locally."
                         }
