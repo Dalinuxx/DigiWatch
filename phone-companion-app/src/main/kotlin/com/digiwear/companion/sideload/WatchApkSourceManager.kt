@@ -37,7 +37,9 @@ class WatchApkSourceManager(private val context: Context) {
 
     companion object {
         const val DEFAULT_RELEASE_DOWNLOAD_URL =
-            "https://github.com/vpet-project/DigiWatch/releases/latest/download/DigiWear-WearOS-release.apk"
+            "https://github.com/Dalinuxx/DigiWear/releases/latest/download/DigiWear-WearOS-release.apk"
+        const val AOSP_RELEASE_DOWNLOAD_URL =
+            "https://github.com/Dalinuxx/DigiWear/releases/latest/download/digiwear-aosp-standard-watch-release.apk"
         private const val CACHE_DIR_NAME = "sideload_apk"
         private const val PICKED_FILENAME = "picked_watch.apk"
         private const val DOWNLOADED_FILENAME = "downloaded_watch.apk"
