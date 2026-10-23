@@ -187,6 +187,14 @@ class PetRepository private constructor(context: Context) {
         }
     }
 
+    fun setBackgroundTheme(theme: BackgroundTheme) {
+        setTheme(theme)
+    }
+
+    fun setCustomThemeConfig(config: CustomThemeConfig) {
+        setThemeId(config.toThemeId())
+    }
+
     fun setThemeId(themeId: String) {
         val effectiveThemeId = if (themeId == BackgroundTheme.CUSTOM_MATRIX.id && _customThemeConfigFlow.value != null) {
             _customThemeConfigFlow.value!!.toThemeId()

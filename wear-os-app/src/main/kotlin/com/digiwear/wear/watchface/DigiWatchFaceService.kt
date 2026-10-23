@@ -1,5 +1,6 @@
 package com.digiwear.wear.watchface
 
+import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
@@ -13,10 +14,13 @@ import android.graphics.RectF
 import android.graphics.Typeface
 import android.os.BatteryManager
 import android.view.SurfaceHolder
+import androidx.wear.watchface.CanvasComplication
+import androidx.wear.watchface.CanvasComplicationFactory
 import androidx.wear.watchface.CanvasType
 import androidx.wear.watchface.ComplicationSlot
 import androidx.wear.watchface.ComplicationSlotsManager
 import androidx.wear.watchface.DrawMode
+import androidx.wear.watchface.RenderParameters
 import androidx.wear.watchface.Renderer
 import androidx.wear.watchface.TapEvent
 import androidx.wear.watchface.TapType
@@ -24,9 +28,26 @@ import androidx.wear.watchface.WatchFace
 import androidx.wear.watchface.WatchFaceService
 import androidx.wear.watchface.WatchFaceType
 import androidx.wear.watchface.WatchState
+import androidx.wear.watchface.complications.ComplicationSlotBounds
+import androidx.wear.watchface.complications.DefaultComplicationDataSourcePolicy
+import androidx.wear.watchface.complications.SystemDataSources
+import androidx.wear.watchface.complications.data.ComplicationData
+import androidx.wear.watchface.complications.data.ComplicationType
+import androidx.wear.watchface.complications.data.EmptyComplicationData
+import androidx.wear.watchface.complications.data.GoalProgressComplicationData
+import androidx.wear.watchface.complications.data.LongTextComplicationData
+import androidx.wear.watchface.complications.data.MonochromaticImageComplicationData
+import androidx.wear.watchface.complications.data.NoDataComplicationData
+import androidx.wear.watchface.complications.data.PhotoImageComplicationData
+import androidx.wear.watchface.complications.data.PlainComplicationText
+import androidx.wear.watchface.complications.data.RangedValueComplicationData
+import androidx.wear.watchface.complications.data.ShortTextComplicationData
+import androidx.wear.watchface.complications.data.SmallImageComplicationData
+import androidx.wear.watchface.complications.data.WeightedElementsComplicationData
 import androidx.wear.watchface.style.CurrentUserStyleRepository
 import com.digiwear.core.model.BackgroundTheme
 import com.digiwear.core.model.CustomThemeConfig
+import com.digiwear.core.model.LcdPattern
 import com.digiwear.core.model.PetSpecies
 import com.digiwear.core.model.PetState
 import com.digiwear.core.model.SpriteFrame
@@ -79,6 +100,93 @@ class DigiWatchFaceService : WatchFaceService() {
         super.onDestroy()
     }
 
+    override fun createComplicationSlotsManager(
+        currentUserStyleRepository: CurrentUserStyleRepository
+    ): ComplicationSlotsManager {
+        val defaultCanvasComplicationFactory = CanvasComplicationFactory { watchState, invalidateCallback ->
+            RetroLcdCanvasComplication(
+                context = applicationContext,
+                watchState = watchState,
+                invalidateCallback = invalidateCallback,
+                colorProvider = {
+                    val repo = PetRepository.getInstance(applicationContext)
+                    val theme = BackgroundTheme.fromId(repo.themeIdFlow.value)
+                    val custom = repo.customThemeConfigFlow.value
+                    val isCustom = theme == BackgroundTheme.CUSTOM_MATRIX && custom != null
+                    val isOled = (theme == BackgroundTheme.OLED_MINIMAL) || (isCustom && custom!!.primaryColorHex == 0xFF000000L)
+                    val darkColor = when {
+                        isOled -> Color.WHITE
+                        isCustom -> custom!!.secondaryColorHex.toInt()
+                        else -> theme.secondaryColorHex.toInt()
+                    }
+                    val gridColor = when {
+                        isOled -> Color.DKGRAY
+                        isCustom -> custom!!.gridColorHex.toInt()
+                        else -> theme.gridColorHex.toInt()
+                    }
+                    Pair(darkColor, gridColor)
+                }
+            )
+        }
+
+        val supportedTypes = listOf(
+            ComplicationType.SHORT_TEXT,
+            ComplicationType.RANGED_VALUE,
+            ComplicationType.MONOCHROMATIC_IMAGE,
+            ComplicationType.SMALL_IMAGE
+        )
+
+        // Slot Top (100): Date / Day of Week or Empty
+        val topSlot = ComplicationSlot.createRoundRectComplicationSlotBuilder(
+            id = SLOT_TOP_ID,
+            canvasComplicationFactory = defaultCanvasComplicationFactory,
+            supportedTypes = supportedTypes,
+            defaultDataSourcePolicy = DefaultComplicationDataSourcePolicy(
+                SystemDataSources.DATA_SOURCE_DAY_AND_DATE,
+                ComplicationType.SHORT_TEXT
+            ),
+            bounds = ComplicationSlotBounds(RectF(0.24f, 0.05f, 0.76f, 0.17f))
+        ).build()
+
+        // Slot Bottom (101): Step counter / Goal Progress
+        val bottomSlot = ComplicationSlot.createRoundRectComplicationSlotBuilder(
+            id = SLOT_BOTTOM_ID,
+            canvasComplicationFactory = defaultCanvasComplicationFactory,
+            supportedTypes = supportedTypes,
+            defaultDataSourcePolicy = DefaultComplicationDataSourcePolicy(
+                SystemDataSources.DATA_SOURCE_STEP_COUNT,
+                ComplicationType.SHORT_TEXT
+            ),
+            bounds = ComplicationSlotBounds(RectF(0.22f, 0.83f, 0.78f, 0.95f))
+        ).build()
+
+        // Slot Left (102): Heart rate / Steps
+        val leftSlot = ComplicationSlot.createRoundRectComplicationSlotBuilder(
+            id = SLOT_LEFT_ID,
+            canvasComplicationFactory = defaultCanvasComplicationFactory,
+            supportedTypes = supportedTypes,
+            defaultDataSourcePolicy = DefaultComplicationDataSourcePolicy(),
+            bounds = ComplicationSlotBounds(RectF(0.04f, 0.40f, 0.28f, 0.62f))
+        ).build()
+
+        // Slot Right (103): Battery percentage or user choice
+        val rightSlot = ComplicationSlot.createRoundRectComplicationSlotBuilder(
+            id = SLOT_RIGHT_ID,
+            canvasComplicationFactory = defaultCanvasComplicationFactory,
+            supportedTypes = supportedTypes,
+            defaultDataSourcePolicy = DefaultComplicationDataSourcePolicy(
+                SystemDataSources.DATA_SOURCE_WATCH_BATTERY,
+                ComplicationType.SHORT_TEXT
+            ),
+            bounds = ComplicationSlotBounds(RectF(0.72f, 0.40f, 0.96f, 0.62f))
+        ).build()
+
+        return ComplicationSlotsManager(
+            listOf(topSlot, bottomSlot, leftSlot, rightSlot),
+            currentUserStyleRepository
+        )
+    }
+
     override suspend fun createWatchFace(
         surfaceHolder: SurfaceHolder,
         watchState: WatchState,
@@ -98,6 +206,7 @@ class DigiWatchFaceService : WatchFaceService() {
             surfaceHolder = surfaceHolder,
             currentUserStyleRepository = currentUserStyleRepository,
             watchState = watchState,
+            complicationSlotsManager = complicationSlotsManager,
             repository = repository,
             hapticManager = hapticManager,
             buzzerManager = bm
@@ -170,7 +279,17 @@ class DigiWatchFaceService : WatchFaceService() {
             }
         }
 
-        // Tap listener: single tap = partner bounce, double tap = launch MainActivity
+        // Observe complication updates to trigger redraws
+        for (slot in complicationSlotsManager.complicationSlots.values) {
+            serviceScope.launch {
+                slot.complicationData.collect {
+                    renderer.invalidate()
+                }
+            }
+        }
+
+        // Tap listener: tapping complication slots triggers tapAction / provider,
+        // while tapping outside retains single-tap partner bounce and double-tap app launch
         watchFace.setTapListener(object : WatchFace.TapListener {
             override fun onTapEvent(tapType: Int, tapEvent: TapEvent, complicationSlot: ComplicationSlot?) {
                 // Ignore taps when screen is sleeping / ambient to prevent unintentional wake reactions
@@ -179,6 +298,16 @@ class DigiWatchFaceService : WatchFaceService() {
                 }
 
                 if (tapType == TapType.UP) {
+                    if (complicationSlot != null && complicationSlot.enabled && hasDisplayableData(complicationSlot.complicationData.value)) {
+                        val tapAction = getTapAction(complicationSlot.complicationData.value)
+                        if (tapAction != null) {
+                            try {
+                                tapAction.send()
+                            } catch (_: Exception) {}
+                        }
+                        return
+                    }
+
                     val now = System.currentTimeMillis()
                     if (now - lastTapTimestampMs < DOUBLE_TAP_THRESHOLD_MS) {
                         // Double Tap: Launch MainActivity
@@ -202,6 +331,37 @@ class DigiWatchFaceService : WatchFaceService() {
 
     companion object {
         private const val DOUBLE_TAP_THRESHOLD_MS = 380L
+        const val SLOT_TOP_ID = 100
+        const val SLOT_BOTTOM_ID = 101
+        const val SLOT_LEFT_ID = 102
+        const val SLOT_RIGHT_ID = 103
+
+        fun hasDisplayableData(data: ComplicationData?): Boolean {
+            if (data == null) return false
+            if (data is NoDataComplicationData || data is EmptyComplicationData) return false
+            return when (data.type) {
+                ComplicationType.NO_DATA,
+                ComplicationType.EMPTY,
+                ComplicationType.NOT_CONFIGURED,
+                ComplicationType.NO_PERMISSION -> false
+                else -> true
+            }
+        }
+
+        fun getTapAction(data: ComplicationData?): PendingIntent? {
+            if (data == null) return null
+            return when (data) {
+                is ShortTextComplicationData -> data.tapAction
+                is RangedValueComplicationData -> data.tapAction
+                is MonochromaticImageComplicationData -> data.tapAction
+                is SmallImageComplicationData -> data.tapAction
+                is LongTextComplicationData -> data.tapAction
+                is PhotoImageComplicationData -> data.tapAction
+                is GoalProgressComplicationData -> data.tapAction
+                is WeightedElementsComplicationData -> data.tapAction
+                else -> null
+            }
+        }
     }
 }
 
@@ -217,6 +377,7 @@ class DigiCanvasRenderer(
     surfaceHolder: SurfaceHolder,
     currentUserStyleRepository: CurrentUserStyleRepository,
     watchState: WatchState,
+    private val complicationSlotsManager: ComplicationSlotsManager,
     private val repository: PetRepository,
     private val hapticManager: HapticManager,
     private val buzzerManager: BuzzerManager
@@ -358,7 +519,11 @@ class DigiCanvasRenderer(
         zonedDateTime: ZonedDateTime,
         sharedAssets: DigiSharedAssets
     ) {
-        // Highlight layer unused for standalone digital face
+        for (slot in complicationSlotsManager.complicationSlots.values) {
+            if (slot.enabled) {
+                slot.renderHighlightLayer(canvas, zonedDateTime, renderParameters)
+            }
+        }
     }
 
     override fun render(
@@ -377,6 +542,13 @@ class DigiCanvasRenderer(
             renderAmbientMode(canvas, bounds, zonedDateTime, centerX, centerY, w, h)
         } else {
             renderInteractiveMode(canvas, bounds, zonedDateTime, centerX, centerY, w, h)
+        }
+
+        // Render complication slots directly on canvas matching retro LCD styling
+        for (slot in complicationSlotsManager.complicationSlots.values) {
+            if (slot.enabled) {
+                slot.render(canvas, zonedDateTime, renderParameters)
+            }
         }
     }
 
@@ -444,11 +616,16 @@ class DigiCanvasRenderer(
         }
         canvas.drawText(statusText, centerX, centerY + h * 0.28f, textPaint)
 
-        // Minimal battery / steps
-        val batteryPct = getBatteryPercentage(context)
-        textPaint.color = Color.DKGRAY
-        textPaint.textSize = w * 0.045f
-        canvas.drawText("${currentSteps}st • ${batteryPct}%", centerX, centerY + h * 0.38f, textPaint)
+        // Minimal battery / steps (omitted when bottom complication slot is populated)
+        val hasBottomSlotData = DigiWatchFaceService.hasDisplayableData(
+            complicationSlotsManager[DigiWatchFaceService.SLOT_BOTTOM_ID]?.complicationData?.value
+        )
+        if (!hasBottomSlotData) {
+            val batteryPct = getBatteryPercentage(context)
+            textPaint.color = Color.DKGRAY
+            textPaint.textSize = w * 0.045f
+            canvas.drawText("${currentSteps}st • ${batteryPct}%", centerX, centerY + h * 0.38f, textPaint)
+        }
     }
 
     private fun renderInteractiveMode(
@@ -464,28 +641,80 @@ class DigiCanvasRenderer(
         val isBouncing = now < bounceUntilTimestampMs
         val species = PetSpecies.getById(petState.speciesId)
 
-        // Derive palette with Custom LCD Theme support
+        // Derive palette with Custom LCD Theme support and OLED contrast safety
         val isCustom = activeTheme == BackgroundTheme.CUSTOM_MATRIX && customThemeConfig != null
         val baseLcdColor = if (isCustom) customThemeConfig!!.primaryColorHex.toInt() else activeTheme.primaryColorHex.toInt()
-        val darkPixelColor = if (isCustom) customThemeConfig!!.secondaryColorHex.toInt() else activeTheme.secondaryColorHex.toInt()
-        val gridDotColor = if (isCustom) customThemeConfig!!.gridColorHex.toInt() else activeTheme.gridColorHex.toInt()
+        val isOled = (activeTheme == BackgroundTheme.OLED_MINIMAL) || (baseLcdColor == Color.BLACK)
+
+        val rawDarkPixelColor = if (isCustom) customThemeConfig!!.secondaryColorHex.toInt() else activeTheme.secondaryColorHex.toInt()
+        val rawGridColor = if (isCustom) customThemeConfig!!.gridColorHex.toInt() else activeTheme.gridColorHex.toInt()
+
+        val darkPixelColor = if (isOled) Color.WHITE else rawDarkPixelColor
+        val gridDotColor = if (isOled) Color.DKGRAY else rawGridColor
 
         // 1. Fill Screen with LCD theme primary tint
         bgPaint.color = baseLcdColor
         canvas.drawRect(bounds, bgPaint)
 
-        // 2. Subtle LCD Dot Matrix Grid Overlay
-        dotPaint.color = gridDotColor
-        dotPaint.alpha = 45
-        val dotSpacing = 10f
-        var x = 5f
-        while (x < w) {
-            var y = 5f
-            while (y < h) {
-                canvas.drawCircle(x, y, 1.2f, dotPaint)
-                y += dotSpacing
+        // 2. LCD Matrix Pattern Overlay (DOT_MATRIX, GRID, SCANLINES, OLED)
+        val activePattern = if (isCustom) {
+            customThemeConfig?.pattern ?: LcdPattern.DOT_MATRIX
+        } else if (isOled) {
+            LcdPattern.OLED
+        } else {
+            LcdPattern.DOT_MATRIX
+        }
+
+        when (activePattern) {
+            LcdPattern.DOT_MATRIX -> {
+                dotPaint.color = gridDotColor
+                dotPaint.alpha = if (isOled) 30 else 45
+                dotPaint.style = Paint.Style.FILL
+                val dotSpacing = 10f
+                var x = 5f
+                while (x < w) {
+                    var y = 5f
+                    while (y < h) {
+                        canvas.drawCircle(x, y, 1.2f, dotPaint)
+                        y += dotSpacing
+                    }
+                    x += dotSpacing
+                }
             }
-            x += dotSpacing
+            LcdPattern.GRID -> {
+                dotPaint.color = gridDotColor
+                dotPaint.alpha = if (isOled) 25 else 35
+                dotPaint.strokeWidth = 1f
+                dotPaint.style = Paint.Style.STROKE
+                val gridSpacing = 12f
+                var gx = gridSpacing
+                while (gx < w) {
+                    canvas.drawLine(gx, 0f, gx, h, dotPaint)
+                    gx += gridSpacing
+                }
+                var gy = gridSpacing
+                while (gy < h) {
+                    canvas.drawLine(0f, gy, w, gy, dotPaint)
+                    gy += gridSpacing
+                }
+                dotPaint.style = Paint.Style.FILL
+            }
+            LcdPattern.SCANLINES -> {
+                dotPaint.color = gridDotColor
+                dotPaint.alpha = if (isOled) 30 else 40
+                dotPaint.strokeWidth = 1.2f
+                dotPaint.style = Paint.Style.STROKE
+                val scanlineSpacing = 4f
+                var sy = 2f
+                while (sy < h) {
+                    canvas.drawLine(0f, sy, w, sy, dotPaint)
+                    sy += scanlineSpacing
+                }
+                dotPaint.style = Paint.Style.FILL
+            }
+            LcdPattern.OLED -> {
+                // Pure solid backlight, no pattern overlay
+            }
         }
 
         // 3. Inner LCD Screen Bezel Frame
@@ -505,9 +734,14 @@ class DigiCanvasRenderer(
         textPaint.textAlign = Paint.Align.RIGHT
         canvas.drawText("${currentSteps}/${dailyStepGoal}st", w - bezelMargin - 8f, bezelMargin + 18f, textPaint)
 
-        textPaint.textAlign = Paint.Align.CENTER
-        textPaint.textSize = w * 0.046f
-        canvas.drawText(species.name.uppercase(), centerX, bezelMargin + 18f, textPaint)
+        val hasTopSlotData = DigiWatchFaceService.hasDisplayableData(
+            complicationSlotsManager[DigiWatchFaceService.SLOT_TOP_ID]?.complicationData?.value
+        )
+        if (!hasTopSlotData) {
+            textPaint.textAlign = Paint.Align.CENTER
+            textPaint.textSize = w * 0.046f
+            canvas.drawText(species.name.uppercase(), centerX, bezelMargin + 18f, textPaint)
+        }
 
         // 5. Authentic 7-Segment Retro LCD Digital Clock with Ghost Segments
         val timeStr = if (is24hFormat) timeFormatter24.format(zonedDateTime) else timeFormatter12.format(zonedDateTime)
@@ -572,15 +806,20 @@ class DigiCanvasRenderer(
         drawHeartRow(canvas, centerX - w * 0.22f, metersY, "HGR", petState.hunger.coerceIn(0, 4), darkPixelColor, gridDotColor)
         drawHeartRow(canvas, centerX + w * 0.04f, metersY, "STR", petState.strength.coerceIn(0, 4), darkPixelColor, gridDotColor)
 
-        // 8. Bottom Information Line
-        val bottomY = h - bezelMargin - 10f
-        textPaint.textSize = w * 0.04f
-        val bottomText = if (petState.isSleeping) {
-            "ZZZ • LIGHTS ${if (petState.lightsOff) "OFF" else "ON"}"
-        } else {
-            "${species.stage.displayName} • ${petState.weight}g"
+        // 8. Bottom Information Line (drawn when bottom complication slot is empty)
+        val hasBottomSlotData = DigiWatchFaceService.hasDisplayableData(
+            complicationSlotsManager[DigiWatchFaceService.SLOT_BOTTOM_ID]?.complicationData?.value
+        )
+        if (!hasBottomSlotData) {
+            val bottomY = h - bezelMargin - 10f
+            textPaint.textSize = w * 0.04f
+            val bottomText = if (petState.isSleeping) {
+                "ZZZ • LIGHTS ${if (petState.lightsOff) "OFF" else "ON"}"
+            } else {
+                "${species.stage.displayName} • ${petState.weight}g"
+            }
+            canvas.drawText(bottomText, centerX, bottomY, textPaint)
         }
-        canvas.drawText(bottomText, centerX, bottomY, textPaint)
     }
 
     /**
@@ -774,6 +1013,243 @@ class DigiCanvasRenderer(
                 }
             } catch (_: Exception) {
                 100
+            }
+        }
+    }
+}
+
+/**
+ * Retro LCD Complication Renderer.
+ *
+ * Implements AndroidX CanvasComplication rendering complications directly onto the watch face canvas:
+ * - Short Text: Retro monospace typography, optional monochromatic icon, framed by subtle 1px LCD bezel.
+ * - Ranged Value: Monospace value label plus retro segmented LCD gauge bar with ghost/shadow blocks.
+ * - Monochromatic / Small Image: Scaled and tinted with the active LCD palette or ambient wireframe.
+ * - Ambient Mode: Dimmed wireframe rendering with zero fill and low OPR to prevent OLED display burn-in.
+ */
+class RetroLcdCanvasComplication(
+    private val context: Context,
+    private val watchState: WatchState,
+    private val invalidateCallback: CanvasComplication.InvalidateCallback,
+    private val colorProvider: () -> Pair<Int, Int> // (darkPixelColor, gridDotColor)
+) : CanvasComplication {
+
+    private var complicationData: ComplicationData = NoDataComplicationData()
+
+    private val textPaint = Paint().apply {
+        typeface = Typeface.MONOSPACE
+        isAntiAlias = true
+        textAlign = Paint.Align.CENTER
+    }
+
+    private val framePaint = Paint().apply {
+        style = Paint.Style.STROKE
+        strokeWidth = 1.2f
+        isAntiAlias = false
+    }
+
+    private val barPaint = Paint().apply {
+        style = Paint.Style.FILL
+        isAntiAlias = false
+    }
+
+    override fun loadData(complicationData: ComplicationData, loadNow: Boolean) {
+        this.complicationData = complicationData
+        if (loadNow) {
+            invalidateCallback.onInvalidate()
+        }
+    }
+
+    override fun getData(): ComplicationData = complicationData
+
+    override fun drawHighlight(
+        canvas: Canvas,
+        bounds: Rect,
+        boundsType: Int,
+        zonedDateTime: ZonedDateTime,
+        color: Int
+    ) {
+        val highlightPaint = Paint().apply {
+            style = Paint.Style.STROKE
+            strokeWidth = 2f
+            this.color = color
+            isAntiAlias = false
+        }
+        canvas.drawRoundRect(RectF(bounds), 4f, 4f, highlightPaint)
+    }
+
+    override fun render(
+        canvas: Canvas,
+        bounds: Rect,
+        zonedDateTime: ZonedDateTime,
+        renderParameters: RenderParameters,
+        slotId: Int
+    ) {
+        val data = complicationData
+        if (!DigiWatchFaceService.hasDisplayableData(data)) return
+
+        val isAmbient = renderParameters.drawMode == DrawMode.AMBIENT
+        val (darkColor, gridColor) = colorProvider()
+        val primaryColor = if (isAmbient) Color.WHITE else darkColor
+        val shadowColor = if (isAmbient) Color.TRANSPARENT else gridColor
+
+        val instant = zonedDateTime.toInstant()
+        val rectF = RectF(bounds)
+
+        // Draw subtle retro LCD slot frame outline (1px rounded rect)
+        framePaint.color = primaryColor
+        framePaint.alpha = if (isAmbient) 80 else 110
+        canvas.drawRoundRect(rectF, 4f, 4f, framePaint)
+
+        when (data) {
+            is ShortTextComplicationData -> {
+                val text = data.text.getTextAt(context.resources, instant)?.toString() ?: ""
+                val title = data.title?.getTextAt(context.resources, instant)?.toString()
+                val iconDrawable = data.monochromaticImage?.image?.loadDrawable(context)
+                    ?: data.smallImage?.image?.loadDrawable(context)
+
+                val hasIcon = iconDrawable != null
+                val hasTitle = !title.isNullOrEmpty()
+
+                if (hasIcon) {
+                    val iconSize = (bounds.height() * 0.48f).toInt().coerceAtLeast(8)
+                    val iconLeft = bounds.left + 4
+                    val iconTop = bounds.centerY() - (iconSize / 2)
+                    iconDrawable.setBounds(iconLeft, iconTop, iconLeft + iconSize, iconTop + iconSize)
+                    if (isAmbient || data.monochromaticImage != null) {
+                        iconDrawable.setTint(primaryColor)
+                    }
+                    iconDrawable.draw(canvas)
+
+                    textPaint.color = primaryColor
+                    textPaint.textAlign = Paint.Align.LEFT
+                    textPaint.textSize = (bounds.height() * 0.40f).coerceIn(8f, 13f)
+                    val textX = (iconLeft + iconSize + 4).toFloat()
+                    val textY = bounds.centerY() + (textPaint.textSize * 0.35f)
+                    canvas.drawText(text.uppercase(), textX, textY, textPaint)
+                    textPaint.textAlign = Paint.Align.CENTER
+                } else if (hasTitle) {
+                    textPaint.color = primaryColor
+                    textPaint.textAlign = Paint.Align.CENTER
+                    textPaint.textSize = (bounds.height() * 0.28f).coerceIn(7f, 10f)
+                    val titleY = bounds.top + bounds.height() * 0.38f
+                    canvas.drawText(title!!.uppercase(), bounds.exactCenterX(), titleY, textPaint)
+
+                    textPaint.textSize = (bounds.height() * 0.42f).coerceIn(8f, 13f)
+                    val textY = bounds.top + bounds.height() * 0.82f
+                    canvas.drawText(text.uppercase(), bounds.exactCenterX(), textY, textPaint)
+                } else {
+                    textPaint.color = primaryColor
+                    textPaint.textAlign = Paint.Align.CENTER
+                    textPaint.textSize = (bounds.height() * 0.46f).coerceIn(8f, 14f)
+                    val textY = bounds.centerY() + (textPaint.textSize * 0.35f)
+                    canvas.drawText(text.uppercase(), bounds.exactCenterX(), textY, textPaint)
+                }
+            }
+
+            is RangedValueComplicationData -> {
+                val value = data.value
+                val min = data.min
+                val max = data.max
+                val ratio = if (max > min && !value.isNaN() && !value.isInfinite()) {
+                    ((value - min) / (max - min)).coerceIn(0f, 1f)
+                } else 0f
+                val text = data.text?.getTextAt(context.resources, instant)?.toString()
+                    ?: data.title?.getTextAt(context.resources, instant)?.toString()
+                    ?: "${(ratio * 100).toInt()}%"
+
+                val iconDrawable = data.monochromaticImage?.image?.loadDrawable(context)
+
+                // Top: Monospace label with optional icon
+                textPaint.color = primaryColor
+                textPaint.textSize = (bounds.height() * 0.35f).coerceIn(7f, 12f)
+                val textY = bounds.top + bounds.height() * 0.40f
+
+                if (iconDrawable != null) {
+                    val iconSize = (bounds.height() * 0.32f).toInt().coerceAtLeast(8)
+                    val textW = textPaint.measureText(text.uppercase())
+                    val totalContentW = iconSize + 4f + textW
+                    val startX = bounds.exactCenterX() - (totalContentW / 2f)
+                    val iconTop = (textY - iconSize * 0.85f).toInt()
+                    iconDrawable.setBounds(startX.toInt(), iconTop, (startX + iconSize).toInt(), iconTop + iconSize)
+                    iconDrawable.setTint(primaryColor)
+                    iconDrawable.draw(canvas)
+
+                    textPaint.textAlign = Paint.Align.LEFT
+                    canvas.drawText(text.uppercase(), startX + iconSize + 4f, textY, textPaint)
+                    textPaint.textAlign = Paint.Align.CENTER
+                } else {
+                    textPaint.textAlign = Paint.Align.CENTER
+                    canvas.drawText(text.uppercase(), bounds.exactCenterX(), textY, textPaint)
+                }
+
+                // Bottom: Retro LCD Segmented Gauge Bar (6 discrete blocks)
+                val barMarginH = 6f
+                val barTop = bounds.top + bounds.height() * 0.56f
+                val barBottom = bounds.bottom - 4f
+                val totalBarW = bounds.width() - (barMarginH * 2)
+                val segments = 6
+                val segSpacing = 2f
+                val segWidth = (totalBarW - (segSpacing * (segments - 1))) / segments
+                val filledSegments = (ratio * segments).toInt().coerceIn(0, segments)
+
+                for (i in 0 until segments) {
+                    val sLeft = bounds.left + barMarginH + i * (segWidth + segSpacing)
+                    val sRight = sLeft + segWidth
+                    if (i < filledSegments) {
+                        barPaint.color = primaryColor
+                        barPaint.alpha = 255
+                        barPaint.style = Paint.Style.FILL
+                        canvas.drawRect(sLeft, barTop, sRight, barBottom, barPaint)
+                    } else if (!isAmbient && shadowColor != Color.TRANSPARENT) {
+                        barPaint.color = shadowColor
+                        barPaint.alpha = 50
+                        barPaint.style = Paint.Style.FILL
+                        canvas.drawRect(sLeft, barTop, sRight, barBottom, barPaint)
+                    } else if (isAmbient) {
+                        barPaint.color = primaryColor
+                        barPaint.alpha = 40
+                        barPaint.style = Paint.Style.STROKE
+                        barPaint.strokeWidth = 1f
+                        canvas.drawRect(sLeft, barTop, sRight, barBottom, barPaint)
+                    }
+                }
+            }
+
+            is MonochromaticImageComplicationData -> {
+                val iconDrawable = data.monochromaticImage.image.loadDrawable(context)
+                if (iconDrawable != null) {
+                    val size = (minOf(bounds.width(), bounds.height()) * 0.62f).toInt()
+                    val left = bounds.centerX() - (size / 2)
+                    val top = bounds.centerY() - (size / 2)
+                    iconDrawable.setBounds(left, top, left + size, top + size)
+                    iconDrawable.setTint(primaryColor)
+                    iconDrawable.draw(canvas)
+                }
+            }
+
+            is SmallImageComplicationData -> {
+                val iconDrawable = data.smallImage.image.loadDrawable(context)
+                if (iconDrawable != null) {
+                    val size = (minOf(bounds.width(), bounds.height()) * 0.62f).toInt()
+                    val left = bounds.centerX() - (size / 2)
+                    val top = bounds.centerY() - (size / 2)
+                    iconDrawable.setBounds(left, top, left + size, top + size)
+                    if (isAmbient) {
+                        iconDrawable.setTint(primaryColor)
+                    }
+                    iconDrawable.draw(canvas)
+                }
+            }
+
+            else -> {
+                val text = (data as? PlainComplicationText)?.toString() ?: ""
+                if (text.isNotEmpty()) {
+                    textPaint.color = primaryColor
+                    textPaint.textAlign = Paint.Align.CENTER
+                    textPaint.textSize = (bounds.height() * 0.38f).coerceIn(8f, 13f)
+                    canvas.drawText(text.uppercase(), bounds.exactCenterX(), bounds.centerY() + 4f, textPaint)
+                }
             }
         }
     }

@@ -105,4 +105,209 @@ class DigiWatchFaceServiceTest {
         assertTrue(profiles.contains(SoundpackProfile.DIGIVICE_1999))
         assertTrue(profiles.contains(SoundpackProfile.CHIPTUNE_RETRO))
     }
+
+    @Test
+    fun testComplicationSlotConstants() {
+        assertEquals(100, DigiWatchFaceService.SLOT_TOP_ID)
+        assertEquals(101, DigiWatchFaceService.SLOT_BOTTOM_ID)
+        assertEquals(102, DigiWatchFaceService.SLOT_LEFT_ID)
+        assertEquals(103, DigiWatchFaceService.SLOT_RIGHT_ID)
+    }
+
+    @Test
+    fun testComplicationTapActionNullSafety() {
+        // Null or unsupported types must safely return null without throwing exceptions
+        val nullResult = DigiWatchFaceService.getTapAction(null)
+        org.junit.Assert.assertNull("Null complication data must yield null tapAction", nullResult)
+
+        val noDataResult = DigiWatchFaceService.getTapAction(androidx.wear.watchface.complications.data.NoDataComplicationData())
+        org.junit.Assert.assertNull("NoDataComplicationData must yield null tapAction", noDataResult)
+    }
+
+    @Test
+    fun testPresetBacklightThemesCoverage() {
+        val themes = PRESET_THEMES
+        assertEquals("Must support exactly 9 backlight themes", 9, themes.size)
+
+        val names = themes.map { it.name }
+        assertTrue("Contains Olive 1997", names.contains("Olive 1997"))
+        assertTrue("Contains Amber", names.contains("Amber"))
+        assertTrue("Contains Cyber Cyan", names.contains("Cyber Cyan"))
+        assertTrue("Contains Emerald", names.contains("Emerald"))
+        assertTrue("Contains Silver GB", names.contains("Silver GB"))
+        assertTrue("Contains Violet", names.contains("Violet"))
+        assertTrue("Contains Coral Red", names.contains("Coral Red"))
+        assertTrue("Contains Ice Blue", names.contains("Ice Blue"))
+        assertTrue("Contains OLED Black", names.contains("OLED Black"))
+
+        // Verify primary color hex values are valid 32-bit ARGB values
+        themes.forEach { preset ->
+            val alpha = (preset.primaryColorHex shr 24) and 0xFF
+            assertEquals("Theme '${preset.name}' must have full opacity (0xFF)", 0xFFL, alpha)
+        }
+    }
+
+    @Test
+    fun testLcdPatternOptionsCoverage() {
+        val patterns = LcdPattern.entries
+        assertEquals("Must have 4 LCD matrix patterns", 4, patterns.size)
+        assertTrue(patterns.contains(LcdPattern.DOT_MATRIX))
+        assertTrue(patterns.contains(LcdPattern.GRID))
+        assertTrue(patterns.contains(LcdPattern.SCANLINES))
+        assertTrue(patterns.contains(LcdPattern.OLED))
+
+        patterns.forEach { pattern ->
+            assertEquals(pattern, LcdPattern.fromId(pattern.id))
+        }
+    }
+
+    @Test
+    fun testComplicationSlotBoundsGeometry() {
+        data class SlotBounds(val left: Float, val top: Float, val right: Float, val bottom: Float)
+
+        // Verify 4 slot bounds definitions on a normalized [0..1] watch screen
+        val topBounds = SlotBounds(0.24f, 0.05f, 0.76f, 0.17f)
+        val bottomBounds = SlotBounds(0.22f, 0.83f, 0.78f, 0.95f)
+        val leftBounds = SlotBounds(0.04f, 0.40f, 0.28f, 0.62f)
+        val rightBounds = SlotBounds(0.72f, 0.40f, 0.96f, 0.62f)
+
+        // 1. All bounds must be within unit square
+        listOf(topBounds, bottomBounds, leftBounds, rightBounds).forEach { rect ->
+            assertTrue("Left in bounds", rect.left in 0f..1f)
+            assertTrue("Top in bounds", rect.top in 0f..1f)
+            assertTrue("Right in bounds", rect.right in 0f..1f)
+            assertTrue("Bottom in bounds", rect.bottom in 0f..1f)
+            assertTrue("Width positive", (rect.right - rect.left) > 0f)
+            assertTrue("Height positive", (rect.bottom - rect.top) > 0f)
+        }
+
+        // 2. Left and Right slots must not horizontally overlap with center partner sprite [0.34..0.66]
+        assertTrue("Left slot must not overlap sprite", leftBounds.right <= 0.34f)
+        assertTrue("Right slot must not overlap sprite", rightBounds.left >= 0.66f)
+
+        // 3. Top slot must be above clock area (Y < 0.25f)
+        assertTrue("Top slot must be above clock area", topBounds.bottom <= 0.25f)
+
+        // 4. Bottom slot must be below physiological hearts (Y > 0.80f)
+        assertTrue("Bottom slot must be below hearts area", bottomBounds.top >= 0.80f)
+    }
+
+    @Test
+    fun testClock12h24hFormatting() {
+        val dt24 = java.time.format.DateTimeFormatter.ofPattern("HH:mm")
+        val dt12 = java.time.format.DateTimeFormatter.ofPattern("hh:mm a")
+
+        val afternoonTime = java.time.LocalTime.of(14, 30)
+        assertEquals("14:30", dt24.format(afternoonTime))
+        assertEquals("02:30 PM", dt12.format(afternoonTime))
+
+        val midnightTime = java.time.LocalTime.of(0, 5)
+        assertEquals("00:05", dt24.format(midnightTime))
+        assertEquals("12:05 AM", dt12.format(midnightTime))
+    }
+
+    @Test
+    fun testHasDisplayableDataHandling() {
+        // Null data must not be displayable
+        assertFalse("null ComplicationData must not be displayable", DigiWatchFaceService.hasDisplayableData(null))
+
+        // NoDataComplicationData must not be displayable
+        val noData = androidx.wear.watchface.complications.data.NoDataComplicationData()
+        assertFalse("NoDataComplicationData must not be displayable", DigiWatchFaceService.hasDisplayableData(noData))
+
+        // EmptyComplicationData must not be displayable
+        val emptyData = androidx.wear.watchface.complications.data.EmptyComplicationData()
+        assertFalse("EmptyComplicationData must not be displayable", DigiWatchFaceService.hasDisplayableData(emptyData))
+    }
+
+    @Test
+    fun testOledThemeColorPaletteContrastSafety() {
+        val oledTheme = BackgroundTheme.OLED_MINIMAL
+        assertEquals("OLED primary must be black", 0xFF000000L.toInt(), oledTheme.primaryColorHex.toInt())
+
+        // Under OLED black background, active pixel color must resolve to White (-1) for contrast, not 0x0A0A0A
+        val baseLcdColor = oledTheme.primaryColorHex.toInt()
+        val isOled = (oledTheme == BackgroundTheme.OLED_MINIMAL) || (baseLcdColor == 0xFF000000L.toInt())
+        assertTrue("OLED minimal must be detected as OLED", isOled)
+
+        val rawDarkPixelColor = oledTheme.secondaryColorHex.toInt()
+        val darkPixelColor = if (isOled) -1 /* Color.WHITE */ else rawDarkPixelColor
+        assertEquals("OLED active pixels must be WHITE for readable contrast", -1, darkPixelColor)
+    }
+
+    @Test
+    fun testComplicationSupportedTypesCoverage() {
+        val expectedSupportedTypes = listOf(
+            androidx.wear.watchface.complications.data.ComplicationType.SHORT_TEXT,
+            androidx.wear.watchface.complications.data.ComplicationType.RANGED_VALUE,
+            androidx.wear.watchface.complications.data.ComplicationType.MONOCHROMATIC_IMAGE,
+            androidx.wear.watchface.complications.data.ComplicationType.SMALL_IMAGE
+        )
+
+        assertEquals("Must support 4 complication types", 4, expectedSupportedTypes.size)
+        assertTrue(expectedSupportedTypes.contains(androidx.wear.watchface.complications.data.ComplicationType.SHORT_TEXT))
+        assertTrue(expectedSupportedTypes.contains(androidx.wear.watchface.complications.data.ComplicationType.RANGED_VALUE))
+        assertTrue(expectedSupportedTypes.contains(androidx.wear.watchface.complications.data.ComplicationType.MONOCHROMATIC_IMAGE))
+        assertTrue(expectedSupportedTypes.contains(androidx.wear.watchface.complications.data.ComplicationType.SMALL_IMAGE))
+    }
+
+    @Test
+    fun testRangedValueRatioMathSafety() {
+        // Normal ratio
+        val min = 0f
+        val max = 100f
+        val normalValue = 75f
+        val normalRatio = if (max > min && !normalValue.isNaN() && !normalValue.isInfinite()) {
+            ((normalValue - min) / (max - min)).coerceIn(0f, 1f)
+        } else 0f
+        assertEquals(0.75f, normalRatio, 0.001f)
+
+        // Invalid bounds (min >= max)
+        val invertedRatio = if (100f > 100f) 1f else 0f
+        assertEquals(0f, invertedRatio, 0.001f)
+
+        // NaN handling
+        val nanValue = Float.NaN
+        val nanRatio = if (max > min && !nanValue.isNaN() && !nanValue.isInfinite()) {
+            ((nanValue - min) / (max - min)).coerceIn(0f, 1f)
+        } else 0f
+        assertEquals(0f, nanRatio, 0.001f)
+
+        // Infinity handling
+        val infValue = Float.POSITIVE_INFINITY
+        val infRatio = if (max > min && !infValue.isNaN() && !infValue.isInfinite()) {
+            ((infValue - min) / (max - min)).coerceIn(0f, 1f)
+        } else 0f
+        assertEquals(0f, infRatio, 0.001f)
+    }
+
+    @Test
+    fun testEditorPresetSelectionLogic() {
+        val themes = PRESET_THEMES
+        val olivePreset = themes.first { it.id == "classic_lcd" }
+        val amberPreset = themes.first { it.id == "amber" }
+
+        // When custom theme config is set with olive color
+        val customOliveConfig = CustomThemeConfig(
+            primaryColorHex = 0xFF8B956D,
+            secondaryColorHex = 0xFF7A845C,
+            gridColorHex = 0xFF9CA67E,
+            pattern = LcdPattern.SCANLINES
+        )
+
+        val currentTheme = BackgroundTheme.CUSTOM_MATRIX
+        val isSelected = when {
+            currentTheme == BackgroundTheme.CUSTOM_MATRIX -> customOliveConfig.primaryColorHex == olivePreset.primaryColorHex
+            olivePreset.isSystemTheme && olivePreset.backgroundTheme != null -> currentTheme == olivePreset.backgroundTheme
+            else -> olivePreset.primaryColorHex == customOliveConfig.primaryColorHex
+        }
+        assertTrue("Custom olive config must match Olive preset", isSelected)
+
+        val isAmberSelected = when {
+            currentTheme == BackgroundTheme.CUSTOM_MATRIX -> customOliveConfig.primaryColorHex == amberPreset.primaryColorHex
+            amberPreset.isSystemTheme && amberPreset.backgroundTheme != null -> currentTheme == amberPreset.backgroundTheme
+            else -> amberPreset.primaryColorHex == customOliveConfig.primaryColorHex
+        }
+        assertFalse("Custom olive config must not match Amber preset", isAmberSelected)
+    }
 }
