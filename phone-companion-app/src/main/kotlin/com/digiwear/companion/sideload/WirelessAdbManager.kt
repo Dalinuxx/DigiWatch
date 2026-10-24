@@ -6,11 +6,15 @@ import dadb.InstallResult
 import dadb.UninstallResult
 import io.github.muntashirakon.adb.AdbPairingRequiredException
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.withContext
 import java.io.File
+import java.net.InetSocketAddress
+import java.net.Socket
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -18,7 +22,7 @@ import java.util.Locale
 enum class SideloadConnectionState(val label: String) {
     IDLE("Disconnected"),
     CONNECTING("Connecting to Watch..."),
-    AUTHENTICATING("Authenticating (Check Watch Screen)..."),
+    AUTHENTICATING("Connecting to Watch..."),
     CONNECTED("Connected to Watch"),
     TRANSFERRING("Streaming APK to Watch..."),
     INSTALLING("Installing Package (-r -d -g)..."),
@@ -43,6 +47,9 @@ class WirelessAdbManager(private val context: Context) {
     private val keyManager = AdbKeyManager(context)
     private var activeLibadb: DigiWearAdbConnectionManager? = null
     private var activeDadb: Dadb? = null
+
+    var activePort: Int = 0
+        private set
 
     private val _connectionState = MutableStateFlow(SideloadConnectionState.IDLE)
     val connectionState: StateFlow<SideloadConnectionState> = _connectionState.asStateFlow()
@@ -174,6 +181,7 @@ class WirelessAdbManager(private val context: Context) {
             val connResult = manager.connectWatch(cleanHost, port)
             if (connResult.isSuccess && manager.isConnected) {
                 activeLibadb = manager
+                activePort = port
                 log("TLS 1.3 ADB Handshake OK! Querying smartwatch hardware details...")
                 val details = manager.queryDetails()
                 _watchDetails.value = details
@@ -201,7 +209,7 @@ class WirelessAdbManager(private val context: Context) {
             }
         } catch (e: AdbPairingRequiredException) {
             _connectionState.value = SideloadConnectionState.ERROR
-            val msg = "Watch requires 6-digit pairing code before connecting! Use 'PAIR WITH 6-DIGIT CODE' below first."
+            val msg = "Watch requires 6-digit pairing code before connecting! Use 'PAIR & CONNECT' below first."
             _lastError.value = msg
             log("PAIRING REQUIRED: $msg")
             disconnect()
@@ -216,11 +224,12 @@ class WirelessAdbManager(private val context: Context) {
             val keyPair = keyManager.getOrCreateKeyPair()
             val fp = keyManager.getPublicKeyFingerprintSha256()
             log("Using RSA-2048 key (SHA-256: $fp)")
-            log("Waiting for watch authorization. If prompted on your watch screen, tap 'Always Allow'!")
+            log("Connecting to watch...")
 
             _connectionState.value = SideloadConnectionState.AUTHENTICATING
             val dadb = Dadb.create(cleanHost, port, keyPair)
             activeDadb = dadb
+            activePort = port
 
             log("ADB Handshake OK! Querying smartwatch hardware details...")
             val details = queryWatchDetails(dadb)
@@ -251,54 +260,133 @@ class WirelessAdbManager(private val context: Context) {
     }
 
     /**
-     * Automatically discovers the smartwatch over mDNS (_adb-tls-connect._tcp / _adb._tcp)
-     * and establishes an ADB connection without requiring manual operational port entry.
+     * Connects directly via TLS 1.3 without falling back to legacy dadb.
+     * Used for modern Wear OS 3/4/5 watches to avoid hanging or false "Always Allow" prompts.
      */
-    suspend fun autoConnect(context: Context, targetHost: String? = null): Boolean = withContext(Dispatchers.IO) {
+    suspend fun connectTlsOnly(host: String, port: Int): Boolean = withContext(Dispatchers.IO) {
+        val cleanHost = host.trim()
+        if (cleanHost.isEmpty() || port <= 0) return@withContext false
+
         disconnect()
         _connectionState.value = SideloadConnectionState.CONNECTING
         _lastError.value = null
-        log("Auto-discovering watch via mDNS (_adb-tls-connect._tcp)...")
 
-        // 1. Try modern TLS 1.3 / TCP mDNS auto-discovery
         try {
             val manager = DigiWearAdbConnectionManager(keyManager)
-            _connectionState.value = SideloadConnectionState.AUTHENTICATING
-
-            val result = manager.autoConnectWatch(context, 3500L)
-            if (result.isSuccess && manager.isConnected) {
-                val host = manager.hostAddress
-                if (targetHost.isNullOrBlank() || host == targetHost) {
-                    activeLibadb = manager
-                    log("mDNS Handshake OK! Connected to $host via TLS 1.3")
-                    val details = manager.queryDetails()
-                    _watchDetails.value = details
-                    _connectionState.value = SideloadConnectionState.CONNECTED
-                    log("SUCCESS: Connected to ${details.model} (${details.manufacturer})")
-                    return@withContext true
-                } else {
-                    log("Discovered device at $host (target: $targetHost), closing...")
-                    manager.disconnect()
-                }
+            val connResult = manager.connectWatch(cleanHost, port)
+            if (connResult.isSuccess && manager.isConnected) {
+                activeLibadb = manager
+                activePort = port
+                val details = manager.queryDetails()
+                _watchDetails.value = details
+                _connectionState.value = SideloadConnectionState.CONNECTED
+                log("SUCCESS: Connected to ${details.model} (${details.manufacturer}) via TLS 1.3 on port $port")
+                return@withContext true
             }
-        } catch (e: Exception) {
-            log("mDNS auto-connect probe: ${e.message ?: e.javaClass.simpleName}")
+        } catch (_: Exception) {}
+
+        _connectionState.value = SideloadConnectionState.IDLE
+        false
+    }
+
+    /**
+     * Automatically discovers the operational ADB port on the smartwatch after pairing,
+     * probing adjacent ephemeral ports, mDNS, and standard Wear OS ranges.
+     */
+    suspend fun autoDiscoverAndConnect(
+        context: Context,
+        host: String,
+        nearPort: Int = 0
+    ): Boolean = withContext(Dispatchers.IO) {
+        val cleanHost = host.trim()
+        if (cleanHost.isEmpty()) return@withContext false
+
+        log("Auto-discovering smartwatch ADB session on $cleanHost...")
+        _connectionState.value = SideloadConnectionState.CONNECTING
+
+        // 1. Priority: Fast-probe adjacent ephemeral ports around the pairing port
+        if (nearPort in 1024..65535) {
+            val adjacentList = mutableListOf<Int>()
+            for (offset in 1..200) {
+                val down = nearPort - offset
+                val up = nearPort + offset
+                if (down in 1024..65535) adjacentList.add(down)
+                if (up in 1024..65535) adjacentList.add(up)
+            }
+            log("Probing ephemeral ports near pairing port $nearPort...")
+            val foundAdj = findOpenPort(cleanHost, adjacentList, timeoutMs = 120, batchSize = 25)
+            if (foundAdj != null) {
+                log("Found active port $foundAdj on $cleanHost! Establishing TLS session...")
+                if (connectTlsOnly(cleanHost, foundAdj)) return@withContext true
+            }
         }
 
-        // 2. If targetHost is specified and mDNS didn't connect, probe common operational ports
-        if (!targetHost.isNullOrBlank()) {
-            val cleanHost = targetHost.trim()
-            log("Probing operational ports on $cleanHost...")
-            val portsToTry = listOf(5555, 33401, 37000, 38000, 40000, 42000)
-            for (p in portsToTry) {
-                if (connect(cleanHost, p)) {
-                    return@withContext true
-                }
+        // 2. Try mDNS discovery in background
+        try {
+            val manager = DigiWearAdbConnectionManager(keyManager)
+            val mdnsResult = manager.autoConnectWatch(context, 1500L)
+            if (mdnsResult.isSuccess && manager.isConnected) {
+                activeLibadb = manager
+                val details = manager.queryDetails()
+                _watchDetails.value = details
+                _connectionState.value = SideloadConnectionState.CONNECTED
+                activePort = runCatching { manager.hostAddress.substringAfter(":", "").toIntOrNull() ?: 5555 }.getOrDefault(5555)
+                log("SUCCESS: Connected to ${details.model} via mDNS TLS 1.3")
+                return@withContext true
             }
+        } catch (_: Exception) {}
+
+        // 3. Probe common Wear OS ports
+        val commonPorts = listOf(5555, 33401, 37000, 38000, 40000, 41235, 42000, 43210, 44000)
+        log("Probing common Wear OS operational ports...")
+        val foundCommon = findOpenPort(cleanHost, commonPorts, timeoutMs = 150, batchSize = 10)
+        if (foundCommon != null) {
+            log("Found active port $foundCommon on $cleanHost! Establishing TLS session...")
+            if (connectTlsOnly(cleanHost, foundCommon)) return@withContext true
+        }
+
+        // 4. Broader scan across Wear OS ephemeral range (32768..45000)
+        log("Scanning Wear OS port range (32768..45000)...")
+        val rangePorts = (32768..45000).filter { it != nearPort }
+        val foundRange = findOpenPort(cleanHost, rangePorts, timeoutMs = 70, batchSize = 50)
+        if (foundRange != null) {
+            log("Found active port $foundRange on $cleanHost! Establishing TLS session...")
+            if (connectTlsOnly(cleanHost, foundRange)) return@withContext true
         }
 
         _connectionState.value = SideloadConnectionState.IDLE
         false
+    }
+
+    private suspend fun findOpenPort(
+        host: String,
+        ports: List<Int>,
+        timeoutMs: Int = 100,
+        batchSize: Int = 25
+    ): Int? = withContext(Dispatchers.IO) {
+        for (chunk in ports.chunked(batchSize)) {
+            val open = chunk.map { p ->
+                async {
+                    var s: Socket? = null
+                    try {
+                        s = Socket()
+                        s.connect(InetSocketAddress(host, p), timeoutMs)
+                        p
+                    } catch (_: Throwable) {
+                        null
+                    } finally {
+                        try { s?.close() } catch (_: Throwable) {}
+                    }
+                }
+            }.awaitAll().firstOrNull { it != null }
+
+            if (open != null) return@withContext open
+        }
+        null
+    }
+
+    suspend fun autoConnect(context: Context, targetHost: String? = null): Boolean {
+        return autoDiscoverAndConnect(context, targetHost ?: "", nearPort = 0)
     }
 
     private fun queryWatchDetails(dadb: Dadb): ConnectedWatchDetails {
@@ -585,6 +673,7 @@ class WirelessAdbManager(private val context: Context) {
      * Disconnects the active ADB session.
      */
     fun disconnect() {
+        activePort = 0
         try {
             activeLibadb?.disconnect()
         } catch (_: Exception) {}

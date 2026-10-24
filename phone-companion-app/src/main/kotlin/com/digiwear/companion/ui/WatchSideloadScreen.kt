@@ -278,7 +278,7 @@ fun WatchSideloadScreen(
                     val (badgeText, badgeBg, badgeFg) = when (connectionState) {
                         SideloadConnectionState.IDLE -> Triple("DISCONNECTED", Color(0xFF263238), Color(0xFF90A4AE))
                         SideloadConnectionState.CONNECTING -> Triple("CONNECTING...", Color(0xFF3E2723), Color(0xFFFFB74D))
-                        SideloadConnectionState.AUTHENTICATING -> Triple("CHECK WATCH!", Color(0xFF0D47A1), Color(0xFF40C4FF))
+                        SideloadConnectionState.AUTHENTICATING -> Triple("CONNECTING...", Color(0xFF0D47A1), Color(0xFF40C4FF))
                         SideloadConnectionState.CONNECTED -> Triple("CONNECTED", Color(0xFF1B5E20), Color(0xFF69F0AE))
                         SideloadConnectionState.TRANSFERRING -> Triple("STREAMING...", Color(0xFF1B5E20), Color(0xFF69F0AE))
                         SideloadConnectionState.INSTALLING -> Triple("INSTALLING...", Color(0xFF1B5E20), Color(0xFF69F0AE))
@@ -484,7 +484,7 @@ fun WatchSideloadScreen(
                                 Spacer(modifier = Modifier.width(8.dp))
                                 Column {
                                     Text(
-                                        text = "PAIR WITH 6-DIGIT CODE (WEAR OS 3/4/5)",
+                                        text = "PAIR & CONNECT WITH 6-DIGIT CODE (WEAR OS 3/4/5)",
                                         color = if (pairingSuccess) Color(0xFF69F0AE) else Color.White,
                                         fontSize = 10.5.sp,
                                         fontWeight = FontWeight.Bold,
@@ -508,7 +508,7 @@ fun WatchSideloadScreen(
                                 )
                             ) {
                                 Text(
-                                    text = if (pairingSuccess) "PAIRED!" else if (isPairingExpanded) "COLLAPSE" else "PAIR DEVICE",
+                                    text = if (connectionState == SideloadConnectionState.CONNECTED) "CONNECTED" else if (pairingSuccess) "PAIRED!" else if (isPairingExpanded) "COLLAPSE" else "PAIR DEVICE",
                                     color = if (pairingSuccess) Color(0xFF69F0AE) else if (isPairingExpanded) DigiWearPalette.DigiviceCyan else Color(0xFFB0BEC5),
                                     fontSize = 8.sp,
                                     fontWeight = FontWeight.Bold,
@@ -681,29 +681,32 @@ fun WatchSideloadScreen(
                                         pairingError = null
                                         pairingSuccess = false
                                         scope.launch {
+                                            adbManager.log("Initiating Wear OS pairing with $watchIp:$pPort...")
                                             val success = adbManager.pair(watchIp, pPort, pairingCode)
-                                            isPairing = false
-                                            pairingSuccess = success
                                             if (success) {
+                                                pairingSuccess = true
                                                 wearableManager.setConfiguredAospWatchIp(watchIp)
-                                                adbManager.log("Watch paired! Automatically establishing connection...")
+                                                adbManager.log("Pairing authenticated! Auto-discovering watch session...")
+
                                                 val opPort = watchPort.toIntOrNull() ?: 0
                                                 var connected = false
                                                 if (opPort > 0 && opPort != pPort && opPort != 5555) {
-                                                    connected = adbManager.connect(watchIp, opPort)
+                                                    connected = adbManager.connectTlsOnly(watchIp, opPort)
                                                 }
                                                 if (!connected) {
-                                                    connected = adbManager.autoConnect(context, watchIp)
-                                                }
-                                                if (!connected && opPort == 5555) {
-                                                    connected = adbManager.connect(watchIp, 5555)
+                                                    connected = adbManager.autoDiscoverAndConnect(context, watchIp, nearPort = pPort)
                                                 }
                                                 if (connected) {
-                                                    adbManager.log("✓ Smartwatch connected! Sideload button ungreyed below.")
+                                                    val ap = adbManager.activePort
+                                                    if (ap > 0) watchPort = ap.toString()
+                                                    adbManager.log("✓ Smartwatch paired & connected! Sideload button ungreyed below.")
+                                                } else {
+                                                    adbManager.log("Paired! Auto-discovery continuing in background...")
                                                 }
                                             } else {
                                                 pairingError = adbManager.lastError.value ?: "Pairing failed"
                                             }
+                                            isPairing = false
                                         }
                                     },
                                     enabled = !isPairing && watchIp.isNotBlank() && pairingPort.isNotBlank() && pairingCode.length == 6,
@@ -715,13 +718,13 @@ fun WatchSideloadScreen(
                                     modifier = Modifier.fillMaxWidth()
                                 ) {
                                     if (isPairing) {
-                                        Text("PAIRING...", fontWeight = FontWeight.Black, fontFamily = FontFamily.Monospace, fontSize = 11.sp)
+                                        Text("PAIRING & CONNECTING...", fontWeight = FontWeight.Black, fontFamily = FontFamily.Monospace, fontSize = 11.sp)
                                     } else if (connectionState == SideloadConnectionState.CONNECTED) {
                                         Text("PAIRED & CONNECTED", fontWeight = FontWeight.Black, fontFamily = FontFamily.Monospace, fontSize = 11.sp)
                                     } else if (pairingSuccess) {
                                         Text("PAIRED! CONNECTING...", fontWeight = FontWeight.Black, fontFamily = FontFamily.Monospace, fontSize = 11.sp)
                                     } else {
-                                        Text("PAIR WITH WATCH", fontWeight = FontWeight.Black, fontFamily = FontFamily.Monospace, fontSize = 11.sp)
+                                        Text("PAIR & CONNECT WITH WATCH", fontWeight = FontWeight.Black, fontFamily = FontFamily.Monospace, fontSize = 11.sp)
                                     }
                                 }
 
@@ -1279,10 +1282,10 @@ fun WatchSideloadScreen(
                         text = "• On your watch: Settings -> System -> About -> Versions -> tap 'Build Number' 7 times rapidly until Developer Options unlock.\n" +
                             "• Settings -> Developer Options -> turn ON 'ADB Debugging' and 'Wireless Debugging'.\n" +
                             "• Connect Watch and Phone to the SAME Wi-Fi network (or Phone Hotspot).\n" +
-                            "• STEP 1 (PAIRING): Tap 'Wireless Debugging' -> tap 'Pair new device'. Note the 6-digit Wi-Fi pairing code and dynamic pairing port (e.g. 192.168.1.50:38912).\n" +
-                            "• In this app, expand 'PAIR WITH 6-DIGIT CODE (WEAR OS 3/4/5)', enter Watch IP, Pairing Port, and 6-Digit Code, then tap 'PAIR WITH WATCH'.\n" +
-                            "• STEP 2 (CONNECT): Once paired, return to the main Wireless Debugging screen on the watch. Enter the operational Port displayed (e.g. 41235) into 'Port' above and tap 'CONNECT'.\n" +
-                            "• Once connected, select the DigiWear APK and tap 'SIDELOAD DIGIWEAR TO WATCH'.",
+                            "• STEP 1 (PAIR & CONNECT): Tap 'Wireless Debugging' -> tap 'Pair new device'. Note the 6-digit Wi-Fi pairing code, IP, and pairing port (e.g. 192.168.1.50:38912).\n" +
+                            "• In this app, expand 'PAIR & CONNECT', enter the IP, Pairing Port, and 6-Digit PIN, then tap 'PAIR & CONNECT WITH WATCH'.\n" +
+                            "• The app automatically pairs, connects to the watch session, and ungreys the sideload button!\n" +
+                            "• STEP 2 (SIDELOAD): Tap 'SIDELOAD DIGIWEAR' below to install or update the app on your watch.",
                         color = Color.LightGray,
                         fontSize = 9.sp,
                         fontFamily = FontFamily.Monospace
