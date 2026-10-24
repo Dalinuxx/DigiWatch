@@ -1,6 +1,7 @@
 package com.digiwear.companion.sideload
 
 import android.content.Context
+import android.net.wifi.WifiManager
 import dadb.Dadb
 import dadb.InstallResult
 import dadb.UninstallResult
@@ -307,9 +308,84 @@ class WirelessAdbManager(private val context: Context) {
         false
     }
 
+    private var multicastLock: WifiManager.MulticastLock? = null
+
+    private fun acquireMulticastLock() {
+        try {
+            if (multicastLock == null) {
+                val wifi = context.applicationContext.getSystemService(Context.WIFI_SERVICE) as? WifiManager
+                multicastLock = wifi?.createMulticastLock("DigiWearAdbMdns")?.apply {
+                    setReferenceCounted(false)
+                }
+            }
+            multicastLock?.acquire()
+        } catch (_: Exception) {}
+    }
+
+    private fun releaseMulticastLock() {
+        try {
+            multicastLock?.release()
+        } catch (_: Exception) {}
+    }
+
     /**
-     * Automatically discovers the operational ADB port on the smartwatch via mDNS
-     * (_adb-tls-connect._tcp) and establishes a TLS 1.3 session.
+     * Fast-probes the smartwatch for the active Wear OS ADB port across the standard
+     * ephemeral range and verifies connection by performing TLS 1.3 handshake.
+     */
+    suspend fun scanForAdbPort(
+        host: String,
+        startPort: Int = 36000,
+        endPort: Int = 46000,
+        timeoutMs: Int = 90,
+        concurrency: Int = 100
+    ): Int? = withContext(Dispatchers.IO) {
+        val cleanHost = host.trim()
+        if (cleanHost.isEmpty()) return@withContext null
+
+        log("Probing watch ($cleanHost) for active Wear OS ADB port ($startPort..$endPort)...")
+        val ports = (startPort..endPort).toList()
+
+        for (chunk in ports.chunked(concurrency)) {
+            val candidatePorts = chunk.map { port ->
+                async {
+                    var s: Socket? = null
+                    try {
+                        s = Socket()
+                        s.connect(InetSocketAddress(cleanHost, port), timeoutMs)
+                        port
+                    } catch (_: Throwable) {
+                        null
+                    } finally {
+                        try { s?.close() } catch (_: Throwable) {}
+                    }
+                }
+            }.awaitAll().filterNotNull()
+
+            for (openPort in candidatePorts) {
+                log("Found open socket on port $openPort on $cleanHost. Verifying TLS 1.3 ADB handshake...")
+                val testManager = DigiWearAdbConnectionManager(keyManager)
+                val testResult = testManager.connectWatch(cleanHost, openPort)
+                if (testResult.isSuccess && testManager.isConnected) {
+                    log("SUCCESS: Verified Wear OS ADB TLS session on port $openPort!")
+                    activeLibadb = testManager
+                    activePort = openPort
+                    val details = testManager.queryDetails()
+                    _watchDetails.value = details
+                    _connectionState.value = SideloadConnectionState.CONNECTED
+                    return@withContext openPort
+                } else {
+                    log("Port $openPort is not an ADB TLS service. Continuing scan...")
+                }
+            }
+        }
+        null
+    }
+
+    /**
+     * Automatically discovers the operational ADB port on the smartwatch via:
+     * 1. Direct TLS if port is provided
+     * 2. MulticastLock-enabled mDNS discovery (_adb-tls-connect._tcp)
+     * 3. Fast LAN port scan verifying TLS 1.3 handshake
      */
     suspend fun autoDiscoverAndConnect(
         context: Context,
@@ -322,25 +398,7 @@ class WirelessAdbManager(private val context: Context) {
         log("Discovering Wear OS ADB service on $cleanHost...")
         _connectionState.value = SideloadConnectionState.CONNECTING
 
-        // 1. First priority: mDNS discovery of Wear OS TLS service
-        try {
-            log("Searching local network via mDNS (_adb-tls-connect._tcp)...")
-            val manager = DigiWearAdbConnectionManager(keyManager)
-            val mdnsResult = manager.autoConnectWatch(context, 3500L)
-            if (mdnsResult.isSuccess && manager.isConnected) {
-                activeLibadb = manager
-                val details = manager.queryDetails()
-                _watchDetails.value = details
-                _connectionState.value = SideloadConnectionState.CONNECTED
-                activePort = runCatching { manager.hostAddress.substringAfter(":", "").toIntOrNull() ?: 0 }.getOrDefault(0)
-                log("SUCCESS: Connected to ${details.model} (${details.manufacturer}) via mDNS TLS 1.3 on port $activePort")
-                return@withContext true
-            }
-        } catch (e: Exception) {
-            log("mDNS search notice: ${e.message ?: "No service found"}")
-        }
-
-        // 2. If a specific port was provided, attempt direct TLS 1.3 connection
+        // 1. Direct TLS if a specific port was provided
         if (nearPort in 1024..65535) {
             log("Attempting direct TLS 1.3 connection to $cleanHost:$nearPort...")
             if (connectTlsOnly(cleanHost, nearPort)) {
@@ -348,8 +406,43 @@ class WirelessAdbManager(private val context: Context) {
             }
         }
 
+        // 2. MulticastLock-enabled mDNS discovery of Wear OS TLS service
+        acquireMulticastLock()
+        try {
+            log("Searching local network via mDNS (_adb-tls-connect._tcp)...")
+            val manager = DigiWearAdbConnectionManager(keyManager)
+            val mdnsResult = manager.autoConnectWatch(context, 2500L)
+            if (mdnsResult.isSuccess && manager.isConnected) {
+                activeLibadb = manager
+                val details = manager.queryDetails()
+                _watchDetails.value = details
+                _connectionState.value = SideloadConnectionState.CONNECTED
+                activePort = runCatching { manager.hostAddress.substringAfter(":", "").toIntOrNull() ?: 0 }.getOrDefault(0)
+                log("SUCCESS: Connected to ${details.model} (${details.manufacturer}) via mDNS on port $activePort")
+                return@withContext true
+            }
+        } catch (e: Exception) {
+            log("mDNS search notice: ${e.message ?: "No service found"}")
+        } finally {
+            releaseMulticastLock()
+        }
+
+        // 3. Fast LAN port scan across primary Wear OS ephemeral range (36000..46000)
+        val discoveredPort = scanForAdbPort(cleanHost, startPort = 36000, endPort = 46000)
+        if (discoveredPort != null) {
+            return@withContext true
+        }
+
+        // 4. Secondary fallback scan across lower range (32768..35999) if not found
+        val secondaryPort = scanForAdbPort(cleanHost, startPort = 32768, endPort = 35999)
+        if (secondaryPort != null) {
+            return@withContext true
+        }
+
         _connectionState.value = SideloadConnectionState.IDLE
-        log("Could not auto-detect watch port. Please enter the Port displayed on your watch screen under Wireless Debugging.")
+        val msg = "Could not automatically detect watch port on $cleanHost. Please enter the Port displayed on your watch screen under Wireless Debugging."
+        _lastError.value = msg
+        log(msg)
         false
     }
 

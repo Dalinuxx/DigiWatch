@@ -554,32 +554,63 @@ fun WatchSideloadScreen(
 
                                 Spacer(modifier = Modifier.height(8.dp))
 
-                                OutlinedTextField(
-                                    value = watchIp,
-                                    onValueChange = { input ->
-                                        val trimmed = input.trim()
-                                        if (trimmed.contains(":")) {
-                                            val parts = trimmed.split(":")
-                                            watchIp = parts[0].trim()
-                                            val p = parts.getOrNull(1)?.filter { it.isDigit() } ?: ""
-                                            if (p.isNotEmpty()) pairingPort = p
-                                        } else {
-                                            watchIp = trimmed
-                                        }
-                                        pairingSuccess = false
-                                        pairingError = null
-                                    },
-                                    label = { Text("Watch IP Address", fontSize = 10.sp, fontFamily = FontFamily.Monospace) },
-                                    placeholder = { Text("192.168.0.42", fontSize = 10.sp, fontFamily = FontFamily.Monospace) },
+                                Row(
                                     modifier = Modifier.fillMaxWidth(),
-                                    singleLine = true,
-                                    colors = OutlinedTextFieldDefaults.colors(
-                                        focusedBorderColor = DigiWearPalette.DigiviceCyan,
-                                        unfocusedBorderColor = DigiWearPalette.CardBorder,
-                                        focusedTextColor = Color.White,
-                                        unfocusedTextColor = Color.White
+                                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    OutlinedTextField(
+                                        value = watchIp,
+                                        onValueChange = { input ->
+                                            val trimmed = input.trim()
+                                            if (trimmed.contains(":")) {
+                                                val parts = trimmed.split(":")
+                                                watchIp = parts[0].trim()
+                                                val p = parts.getOrNull(1)?.filter { it.isDigit() } ?: ""
+                                                if (p.isNotEmpty()) watchPort = p
+                                            } else {
+                                                watchIp = trimmed
+                                            }
+                                            pairingSuccess = false
+                                            pairingError = null
+                                        },
+                                        label = { Text("Watch IP Address", fontSize = 10.sp, fontFamily = FontFamily.Monospace) },
+                                        placeholder = { Text("192.168.0.42", fontSize = 10.sp, fontFamily = FontFamily.Monospace) },
+                                        modifier = Modifier.weight(1f),
+                                        singleLine = true,
+                                        colors = OutlinedTextFieldDefaults.colors(
+                                            focusedBorderColor = DigiWearPalette.DigiviceCyan,
+                                            unfocusedBorderColor = DigiWearPalette.CardBorder,
+                                            focusedTextColor = Color.White,
+                                            unfocusedTextColor = Color.White
+                                        )
                                     )
-                                )
+
+                                    OutlinedTextField(
+                                        value = watchPort,
+                                        onValueChange = { input ->
+                                            val trimmed = input.trim()
+                                            if (trimmed.contains(":")) {
+                                                val parts = trimmed.split(":")
+                                                val ip = parts[0].trim()
+                                                if (ip.isNotEmpty()) watchIp = ip
+                                                watchPort = parts.getOrNull(1)?.filter { it.isDigit() } ?: ""
+                                            } else {
+                                                watchPort = trimmed.filter { it.isDigit() }
+                                            }
+                                        },
+                                        label = { Text("Wireless Port", fontSize = 10.sp, fontFamily = FontFamily.Monospace) },
+                                        placeholder = { Text("e.g. 41235", fontSize = 10.sp, fontFamily = FontFamily.Monospace) },
+                                        modifier = Modifier.width(105.dp),
+                                        singleLine = true,
+                                        colors = OutlinedTextFieldDefaults.colors(
+                                            focusedBorderColor = DigiWearPalette.DigiviceCyan,
+                                            unfocusedBorderColor = DigiWearPalette.CardBorder,
+                                            focusedTextColor = Color.White,
+                                            unfocusedTextColor = Color.White
+                                        )
+                                    )
+                                }
 
                                 Spacer(modifier = Modifier.height(6.dp))
 
@@ -729,7 +760,7 @@ fun WatchSideloadScreen(
                                     } else if (connectionState == SideloadConnectionState.CONNECTED) {
                                         Text("PAIRED & CONNECTED", fontWeight = FontWeight.Black, fontFamily = FontFamily.Monospace, fontSize = 11.sp)
                                     } else if (pairingSuccess) {
-                                        Text("PAIRED! CONNECTING...", fontWeight = FontWeight.Black, fontFamily = FontFamily.Monospace, fontSize = 11.sp)
+                                        Text("PAIRED! READY TO SIDELOAD", fontWeight = FontWeight.Black, fontFamily = FontFamily.Monospace, fontSize = 11.sp)
                                     } else {
                                         Text("PAIR & CONNECT WITH WATCH", fontWeight = FontWeight.Black, fontFamily = FontFamily.Monospace, fontSize = 11.sp)
                                     }
@@ -739,9 +770,9 @@ fun WatchSideloadScreen(
                                     Spacer(modifier = Modifier.height(6.dp))
                                     Text(
                                         text = if (connectionState == SideloadConnectionState.CONNECTED) {
-                                            "✓ Watch paired and connected! Sideload button ungreyed below."
+                                            "✓ Watch paired & connected! Tap 'SIDELOAD DIGIWEAR' below."
                                         } else {
-                                            "✓ Watch paired! Auto-connecting to smartwatch..."
+                                            "✓ Watch paired! Tap 'CONNECT & SIDELOAD' below."
                                         },
                                         color = Color(0xFF69F0AE),
                                         fontSize = 9.sp,
