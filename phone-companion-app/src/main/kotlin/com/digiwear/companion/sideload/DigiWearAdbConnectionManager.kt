@@ -104,8 +104,8 @@ class DigiWearAdbConnectionManager(
     /**
      * Installs an APK onto the connected smartwatch.
      *
-     * Attempts direct streaming to the package manager (`pm install -r -d -g -S <size>`),
-     * falling back to staging in `/data/local/tmp/app.apk` and running `pm install`.
+     * Stages the APK to /data/local/tmp/digiwear_install.apk, executes pm install over shell,
+     * and automatically removes the staged file upon completion.
      *
      * @param file Local APK file.
      * @param onProgress Optional progress callback emitting a float between 0.0 and 1.0.
@@ -118,47 +118,25 @@ class DigiWearAdbConnectionManager(
 
             val totalLength = file.length()
 
-            // 1. Attempt direct PackageInstaller streaming session
-            var resultOutput = tryStreamSession(
+            // Primary: Stage to /data/local/tmp/digiwear_install.apk and execute pm install.
+            // This is the most reliable, rock-solid method across all Wear OS versions (Pixel, Samsung Galaxy Watch 4/5/6/7, etc.)
+            val resultOutput = tryStageAndInstall(file, totalLength, onProgress)
+            if (resultOutput.contains("Success", ignoreCase = true)) {
+                return@runCatching resultOutput
+            }
+
+            // Fallback: Direct stream session if staging produced a non-success output
+            val streamOutput = tryStreamSession(
                 execCmd = "exec:pm install -r -d -g -S $totalLength",
                 file = file,
                 totalLength = totalLength,
                 onProgress = onProgress
             )
-
-            if (resultOutput.contains("Success", ignoreCase = true)) {
-                return@runCatching resultOutput
+            if (streamOutput.contains("Success", ignoreCase = true)) {
+                return@runCatching streamOutput
             }
 
-            // Retry streaming without -g in case platform restricts grant permissions
-            resultOutput = tryStreamSession(
-                execCmd = "exec:pm install -r -d -S $totalLength",
-                file = file,
-                totalLength = totalLength,
-                onProgress = onProgress
-            )
-            if (resultOutput.contains("Success", ignoreCase = true)) {
-                return@runCatching resultOutput
-            }
-
-            // Retry with cmd package install (supported on modern Android)
-            resultOutput = tryStreamSession(
-                execCmd = "exec:cmd package install -r -d -g -S $totalLength",
-                file = file,
-                totalLength = totalLength,
-                onProgress = onProgress
-            )
-            if (resultOutput.contains("Success", ignoreCase = true)) {
-                return@runCatching resultOutput
-            }
-
-            // 2. Fallback: Stage to /data/local/tmp/app.apk and run pm install
-            resultOutput = tryStageAndInstall(file, totalLength, onProgress)
-            if (resultOutput.contains("Success", ignoreCase = true)) {
-                return@runCatching resultOutput
-            }
-
-            throw IllegalStateException("Installation failed: $resultOutput")
+            throw IllegalStateException("Installation failed: $resultOutput (Fallback: $streamOutput)")
         }
     }
 
@@ -205,11 +183,10 @@ class DigiWearAdbConnectionManager(
         totalLength: Long,
         onProgress: ((Float) -> Unit)?
     ): String {
-        val tmpPath = "/data/local/tmp/app.apk"
-        val stageCmd = "exec:sh -c \"cat > $tmpPath && pm install -r -d -g $tmpPath && rm -f $tmpPath\""
+        val tmpPath = "/data/local/tmp/digiwear_install.apk"
 
         return try {
-            // First stage the APK file by streaming to cat > /data/local/tmp/app.apk and closing stream to signal EOF
+            // First stage the APK file by streaming to cat > /data/local/tmp/digiwear_install.apk and closing stream to signal EOF
             val uploadStream = openStream("exec:sh -c \"cat > $tmpPath\"")
             try {
                 val outStream = uploadStream.openOutputStream()
@@ -240,17 +217,6 @@ class DigiWearAdbConnectionManager(
             execShell("rm -f $tmpPath")
             output
         } catch (e: Exception) {
-            // Fallback to direct stageCmd execution
-            try {
-                val stream = openStream(stageCmd)
-                try {
-                    val outStream = stream.openOutputStream()
-                    file.inputStream().use { input -> input.copyTo(outStream) }
-                    outStream.flush()
-                } finally {
-                    try { stream.close() } catch (_: Exception) {}
-                }
-            } catch (_: Exception) {}
             "Stage install error: ${e.message}"
         }
     }

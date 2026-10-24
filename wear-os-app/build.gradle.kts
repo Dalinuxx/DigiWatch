@@ -14,8 +14,8 @@ android {
         applicationId = "com.digiwear.wear"
         minSdk = 28
         targetSdk = 34
-        versionCode = 8
-        versionName = "2.4.3"
+        versionCode = 9
+        versionName = "2.4.4"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }

@@ -337,13 +337,14 @@ class WirelessAdbManager(private val context: Context) {
         startPort: Int = 36000,
         endPort: Int = 46000,
         timeoutMs: Int = 90,
-        concurrency: Int = 100
+        concurrency: Int = 100,
+        skipPort: Int = 0
     ): Int? = withContext(Dispatchers.IO) {
         val cleanHost = host.trim()
         if (cleanHost.isEmpty()) return@withContext null
 
         log("Probing watch ($cleanHost) for active Wear OS ADB port ($startPort..$endPort)...")
-        val ports = (startPort..endPort).toList()
+        val ports = (startPort..endPort).filter { it != skipPort }
 
         for (chunk in ports.chunked(concurrency)) {
             val candidatePorts = chunk.map { port ->
@@ -362,6 +363,7 @@ class WirelessAdbManager(private val context: Context) {
             }.awaitAll().filterNotNull()
 
             for (openPort in candidatePorts) {
+                if (openPort == skipPort) continue
                 log("Found open socket on port $openPort on $cleanHost. Verifying TLS 1.3 ADB handshake...")
                 val testManager = DigiWearAdbConnectionManager(keyManager)
                 val testResult = testManager.connectWatch(cleanHost, openPort)
@@ -390,7 +392,8 @@ class WirelessAdbManager(private val context: Context) {
     suspend fun autoDiscoverAndConnect(
         context: Context,
         host: String,
-        nearPort: Int = 0
+        nearPort: Int = 0,
+        skipPort: Int = 0
     ): Boolean = withContext(Dispatchers.IO) {
         val cleanHost = host.trim()
         if (cleanHost.isEmpty()) return@withContext false
@@ -399,7 +402,7 @@ class WirelessAdbManager(private val context: Context) {
         _connectionState.value = SideloadConnectionState.CONNECTING
 
         // 1. Direct TLS if a specific port was provided
-        if (nearPort in 1024..65535) {
+        if (nearPort in 1024..65535 && nearPort != skipPort) {
             log("Attempting direct TLS 1.3 connection to $cleanHost:$nearPort...")
             if (connectTlsOnly(cleanHost, nearPort)) {
                 return@withContext true
@@ -428,13 +431,13 @@ class WirelessAdbManager(private val context: Context) {
         }
 
         // 3. Fast LAN port scan across primary Wear OS ephemeral range (36000..46000)
-        val discoveredPort = scanForAdbPort(cleanHost, startPort = 36000, endPort = 46000)
+        val discoveredPort = scanForAdbPort(cleanHost, startPort = 36000, endPort = 46000, skipPort = skipPort)
         if (discoveredPort != null) {
             return@withContext true
         }
 
         // 4. Secondary fallback scan across lower range (32768..35999) if not found
-        val secondaryPort = scanForAdbPort(cleanHost, startPort = 32768, endPort = 35999)
+        val secondaryPort = scanForAdbPort(cleanHost, startPort = 32768, endPort = 35999, skipPort = skipPort)
         if (secondaryPort != null) {
             return@withContext true
         }

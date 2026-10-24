@@ -54,7 +54,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -556,7 +558,6 @@ fun WatchSideloadScreen(
 
                                 Row(
                                     modifier = Modifier.fillMaxWidth(),
-                                    horizontalArrangement = Arrangement.spacedBy(8.dp),
                                     verticalAlignment = Alignment.CenterVertically
                                 ) {
                                     OutlinedTextField(
@@ -567,7 +568,7 @@ fun WatchSideloadScreen(
                                                 val parts = trimmed.split(":")
                                                 watchIp = parts[0].trim()
                                                 val p = parts.getOrNull(1)?.filter { it.isDigit() } ?: ""
-                                                if (p.isNotEmpty()) watchPort = p
+                                                if (p.isNotEmpty()) pairingPort = p
                                             } else {
                                                 watchIp = trimmed
                                             }
@@ -576,32 +577,7 @@ fun WatchSideloadScreen(
                                         },
                                         label = { Text("Watch IP Address", fontSize = 10.sp, fontFamily = FontFamily.Monospace) },
                                         placeholder = { Text("192.168.0.42", fontSize = 10.sp, fontFamily = FontFamily.Monospace) },
-                                        modifier = Modifier.weight(1f),
-                                        singleLine = true,
-                                        colors = OutlinedTextFieldDefaults.colors(
-                                            focusedBorderColor = DigiWearPalette.DigiviceCyan,
-                                            unfocusedBorderColor = DigiWearPalette.CardBorder,
-                                            focusedTextColor = Color.White,
-                                            unfocusedTextColor = Color.White
-                                        )
-                                    )
-
-                                    OutlinedTextField(
-                                        value = watchPort,
-                                        onValueChange = { input ->
-                                            val trimmed = input.trim()
-                                            if (trimmed.contains(":")) {
-                                                val parts = trimmed.split(":")
-                                                val ip = parts[0].trim()
-                                                if (ip.isNotEmpty()) watchIp = ip
-                                                watchPort = parts.getOrNull(1)?.filter { it.isDigit() } ?: ""
-                                            } else {
-                                                watchPort = trimmed.filter { it.isDigit() }
-                                            }
-                                        },
-                                        label = { Text("Wireless Port", fontSize = 10.sp, fontFamily = FontFamily.Monospace) },
-                                        placeholder = { Text("e.g. 41235", fontSize = 10.sp, fontFamily = FontFamily.Monospace) },
-                                        modifier = Modifier.width(105.dp),
+                                        modifier = Modifier.fillMaxWidth(),
                                         singleLine = true,
                                         colors = OutlinedTextFieldDefaults.colors(
                                             focusedBorderColor = DigiWearPalette.DigiviceCyan,
@@ -634,9 +610,9 @@ fun WatchSideloadScreen(
                                             pairingSuccess = false
                                             pairingError = null
                                         },
-                                        label = { Text("Pairing Port", fontSize = 10.sp, fontFamily = FontFamily.Monospace) },
-                                        placeholder = { Text("38841", fontSize = 10.sp, fontFamily = FontFamily.Monospace) },
-                                        modifier = Modifier.weight(0.42f),
+                                        label = { Text("Pairing Port (from watch popup)", fontSize = 10.sp, fontFamily = FontFamily.Monospace) },
+                                        placeholder = { Text("e.g. 38841", fontSize = 10.sp, fontFamily = FontFamily.Monospace) },
+                                        modifier = Modifier.weight(0.48f),
                                         singleLine = true,
                                         colors = OutlinedTextFieldDefaults.colors(
                                             focusedBorderColor = DigiWearPalette.DigiviceCyan,
@@ -655,9 +631,9 @@ fun WatchSideloadScreen(
                                                 pairingError = null
                                             }
                                         },
-                                        label = { Text("6-Digit Pairing Code", fontSize = 10.sp, fontFamily = FontFamily.Monospace) },
+                                        label = { Text("6-Digit PIN", fontSize = 10.sp, fontFamily = FontFamily.Monospace) },
                                         placeholder = { Text("173601", fontSize = 10.sp, fontFamily = FontFamily.Monospace) },
-                                        modifier = Modifier.weight(0.58f),
+                                        modifier = Modifier.weight(0.52f),
                                         singleLine = true,
                                         textStyle = androidx.compose.ui.text.TextStyle(
                                             fontFamily = FontFamily.Monospace,
@@ -732,12 +708,29 @@ fun WatchSideloadScreen(
                                                     connected = adbManager.connectTlsOnly(watchIp, opPort)
                                                 }
                                                 if (!connected) {
-                                                    connected = adbManager.autoDiscoverAndConnect(context, watchIp)
+                                                    connected = adbManager.autoDiscoverAndConnect(context, watchIp, skipPort = pPort)
                                                 }
                                                 if (connected) {
                                                     val ap = adbManager.activePort
                                                     if (ap > 0) watchPort = ap.toString()
-                                                    adbManager.log("✓ Smartwatch paired & connected! Ready to sideload below.")
+                                                    adbManager.log("✓ Smartwatch paired & connected! Initiating sideload...")
+
+                                                    // Auto-sideload if APK is ready
+                                                    var apkToInstall = selectedApk
+                                                    if (apkToInstall == null) {
+                                                        apkToInstall = apkSourceManager.getCachedApk() ?: apkSourceManager.getEmbeddedAssetApk()
+                                                        if (apkToInstall != null) selectedApk = apkToInstall
+                                                    }
+                                                    if (apkToInstall != null) {
+                                                        adbManager.sideloadApk(
+                                                            apkFile = apkToInstall.file,
+                                                            grantPermissions = grantPermissions,
+                                                            reinstallKeepData = reinstallKeepData,
+                                                            autoLaunch = autoLaunch
+                                                        )
+                                                    } else {
+                                                        adbManager.log("Ready to install! Tap 'SIDELOAD DIGIWEAR' below.")
+                                                    }
                                                 } else {
                                                     adbManager.log("✓ Paired successfully! You can now tap 'CONNECT & SIDELOAD' below.")
                                                 }
@@ -756,23 +749,29 @@ fun WatchSideloadScreen(
                                     modifier = Modifier.fillMaxWidth()
                                 ) {
                                     if (isPairing) {
-                                        Text("PAIRING & CONNECTING...", fontWeight = FontWeight.Black, fontFamily = FontFamily.Monospace, fontSize = 11.sp)
+                                        Text("PAIRING & SIDELOADING...", fontWeight = FontWeight.Black, fontFamily = FontFamily.Monospace, fontSize = 11.sp)
+                                    } else if (connectionState == SideloadConnectionState.INSTALLING) {
+                                        Text("INSTALLING TO WATCH...", fontWeight = FontWeight.Black, fontFamily = FontFamily.Monospace, fontSize = 11.sp)
+                                    } else if (connectionState == SideloadConnectionState.TRANSFERRING) {
+                                        Text("STREAMING APK TO WATCH...", fontWeight = FontWeight.Black, fontFamily = FontFamily.Monospace, fontSize = 11.sp)
+                                    } else if (connectionState == SideloadConnectionState.SUCCESS) {
+                                        Text("✓ INSTALLED & READY", fontWeight = FontWeight.Black, fontFamily = FontFamily.Monospace, fontSize = 11.sp)
                                     } else if (connectionState == SideloadConnectionState.CONNECTED) {
                                         Text("PAIRED & CONNECTED", fontWeight = FontWeight.Black, fontFamily = FontFamily.Monospace, fontSize = 11.sp)
-                                    } else if (pairingSuccess) {
-                                        Text("PAIRED! READY TO SIDELOAD", fontWeight = FontWeight.Black, fontFamily = FontFamily.Monospace, fontSize = 11.sp)
                                     } else {
-                                        Text("PAIR & CONNECT WITH WATCH", fontWeight = FontWeight.Black, fontFamily = FontFamily.Monospace, fontSize = 11.sp)
+                                        Text("PAIR & SIDELOAD TO WATCH", fontWeight = FontWeight.Black, fontFamily = FontFamily.Monospace, fontSize = 11.sp)
                                     }
                                 }
 
                                 if (pairingSuccess) {
                                     Spacer(modifier = Modifier.height(6.dp))
                                     Text(
-                                        text = if (connectionState == SideloadConnectionState.CONNECTED) {
-                                            "✓ Watch paired & connected! Tap 'SIDELOAD DIGIWEAR' below."
+                                        text = if (connectionState == SideloadConnectionState.SUCCESS) {
+                                            "✓ Installation complete! DigiWear is now running on your watch."
+                                        } else if (connectionState == SideloadConnectionState.CONNECTED) {
+                                            "✓ Watch connected! Ready to sideload below."
                                         } else {
-                                            "✓ Watch paired! Tap 'CONNECT & SIDELOAD' below."
+                                            "✓ Watch paired! Connecting..."
                                         },
                                         color = Color(0xFF69F0AE),
                                         fontSize = 9.sp,
@@ -1176,6 +1175,16 @@ fun WatchSideloadScreen(
         }
 
         // --- 6. Live ADB Console Logs Window ---
+        var isTerminalExpanded by remember { mutableStateOf(false) }
+        val clipboardManager = LocalClipboardManager.current
+        var copiedLogs by remember { mutableStateOf(false) }
+        LaunchedEffect(copiedLogs) {
+            if (copiedLogs) {
+                kotlinx.coroutines.delay(2000)
+                copiedLogs = false
+            }
+        }
+
         Card(
             colors = CardDefaults.cardColors(containerColor = Color(0xFF080C12)),
             border = BorderStroke(1.dp, Color(0xFF1E2C3D)),
@@ -1199,8 +1208,37 @@ fun WatchSideloadScreen(
                         )
                     }
 
-                    TextButton(onClick = { adbManager.clearLogs() }) {
-                        Text("CLEAR", color = Color(0xFF78909C), fontSize = 9.sp, fontFamily = FontFamily.Monospace)
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        TextButton(
+                            onClick = {
+                                if (consoleLogs.isNotEmpty()) {
+                                    val full = consoleLogs.joinToString("\n")
+                                    clipboardManager.setText(AnnotatedString(full))
+                                    copiedLogs = true
+                                }
+                            }
+                        ) {
+                            Text(
+                                text = if (copiedLogs) "✓ COPIED!" else "COPY",
+                                color = if (copiedLogs) Color(0xFF00E676) else DigiWearPalette.DigiviceCyan,
+                                fontSize = 9.sp,
+                                fontFamily = FontFamily.Monospace,
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
+
+                        TextButton(onClick = { isTerminalExpanded = !isTerminalExpanded }) {
+                            Text(
+                                text = if (isTerminalExpanded) "COLLAPSE" else "EXPAND",
+                                color = Color(0xFFB0BEC5),
+                                fontSize = 9.sp,
+                                fontFamily = FontFamily.Monospace
+                            )
+                        }
+
+                        TextButton(onClick = { adbManager.clearLogs() }) {
+                            Text("CLEAR", color = Color(0xFF78909C), fontSize = 9.sp, fontFamily = FontFamily.Monospace)
+                        }
                     }
                 }
 
@@ -1216,7 +1254,7 @@ fun WatchSideloadScreen(
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .heightIn(min = 120.dp, max = 220.dp)
+                        .height(if (isTerminalExpanded) 300.dp else 130.dp)
                         .background(Color(0xFF05080D))
                         .padding(8.dp)
                 ) {
@@ -1312,6 +1350,9 @@ fun WatchSideloadScreen(
                 }
             }
         }
+
+        // Bottom spacing so that diagnostics & controls are never clipped by navigation bars
+        Spacer(modifier = Modifier.height(72.dp))
     }
 
     // --- Wireless Debugging Setup Guide Dialog ---
