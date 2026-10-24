@@ -82,7 +82,7 @@ data class PetSpecies(
                     evolutionRules = listOf(
                         EvolutionRule(targetSpeciesId = 126, minAgeSeconds = 3600L, minCareMistakes = 0, maxCareMistakes = 0, minEffort = 3), // Minomon
                         EvolutionRule(targetSpeciesId = 116, minAgeSeconds = 3600L, minCareMistakes = 0, maxCareMistakes = 1, minEffort = 2), // Viximon
-                        EvolutionRule(targetSpeciesId = 1115, minAgeSeconds = 3600L, minCareMistakes = 0, maxCareMistakes = 2, minEffort = 0), // Minomon Color
+                        EvolutionRule(targetSpeciesId = 1115, minAgeSeconds = 3600L, minCareMistakes = 0, maxCareMistakes = 2, minEffort = 0), // Budmon
                         EvolutionRule(targetSpeciesId = 108, minAgeSeconds = 3600L) // 1 hr -> Tanemon
                     )
                 ),

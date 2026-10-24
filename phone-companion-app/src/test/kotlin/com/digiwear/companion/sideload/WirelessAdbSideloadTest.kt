@@ -268,4 +268,15 @@ class WirelessAdbSideloadTest {
         assertNotNull(pubKey)
         assertEquals("RSA", pubKey.algorithm)
     }
+
+    @Test
+    fun testIpAndPortStringParsing() {
+        val input = "192.168.0.42:38841"
+        assertTrue(input.contains(":"))
+        val parts = input.split(":")
+        val ip = parts[0].trim()
+        val port = parts[1].filter { it.isDigit() }
+        assertEquals("192.168.0.42", ip)
+        assertEquals("38841", port)
+    }
 }

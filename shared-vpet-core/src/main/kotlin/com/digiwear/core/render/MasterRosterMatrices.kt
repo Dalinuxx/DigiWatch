@@ -3151,7 +3151,7 @@ object MasterRosterMatrices {
         "................"
     )
 
-    // [ID 1112] Caprimon Color (BABY_II)
+    // [ID 1112] Caprimon (BABY_II)
     val CAPRIMON_COLOR_ROM = arrayOf(
         ".#..............",
         ".SS.............",
@@ -3171,7 +3171,7 @@ object MasterRosterMatrices {
         "................"
     )
 
-    // [ID 1113] Bubbmon Color (BABY_I)
+    // [ID 1113] Bubbmon (BABY_I)
     val BUBBMON_COLOR_ROM = arrayOf(
         "................",
         "......BBBB......",
@@ -3191,7 +3191,7 @@ object MasterRosterMatrices {
         "................"
     )
 
-    // [ID 1114] Mochimon Color (BABY_II)
+    // [ID 1114] Mochimon (BABY_II)
     val MOCHIMON_COLOR_ROM = arrayOf(
         "................",
         "................",
@@ -3211,7 +3211,7 @@ object MasterRosterMatrices {
         "................"
     )
 
-    // [ID 1115] Minomon Color (BABY_II)
+    // [ID 1115] Budmon (BABY_II)
     val MINOMON_COLOR_ROM = arrayOf(
         "................",
         "................",
@@ -3711,7 +3711,7 @@ object MasterRosterMatrices {
         "...BBBB..BBBB..."
     )
 
-    // [ID 1224] Plotmon Color (CHILD)
+    // [ID 1224] Plotmon (CHILD)
     val PLOTMON_COLOR_ROM = arrayOf(
         "................",
         "................",
@@ -7462,10 +7462,10 @@ object MasterRosterMatrices {
             1109 -> SpritePalette(SpritePalette.rgb(245, 220, 45), SpritePalette.rgb(45, 48, 55), SpritePalette.rgb(45, 215, 235), SpritePalette.rgb(225, 45, 45)) // Bibimon
             1110 -> SpritePalette(SpritePalette.rgb(86, 176, 236), SpritePalette.rgb(46, 122, 196), SpritePalette.rgb(248, 248, 246), SpritePalette.rgb(42, 92, 182)) // Wanyamon
             1111 -> SpritePalette(SpritePalette.rgb(166, 172, 182), SpritePalette.rgb(112, 116, 126), SpritePalette.rgb(246, 246, 252), SpritePalette.rgb(236, 42, 42)) // Choromon
-            1112 -> SpritePalette(SpritePalette.rgb(82, 85, 156), SpritePalette.rgb(197, 215, 239), SpritePalette.rgb(173, 182, 189), SpritePalette.rgb(0, 0, 0)) // Caprimon Color
-            1113 -> SpritePalette(SpritePalette.rgb(192, 246, 216), SpritePalette.rgb(132, 216, 186), SpritePalette.rgb(96, 182, 152), SpritePalette.rgb(26, 56, 42)) // Bubbmon Color
-            1114 -> SpritePalette(SpritePalette.rgb(239, 190, 197), SpritePalette.rgb(247, 215, 214), SpritePalette.rgb(49, 0, 0), SpritePalette.rgb(49, 0, 0)) // Mochimon Color
-            1115 -> SpritePalette(SpritePalette.rgb(169, 209, 153), SpritePalette.rgb(194, 222, 163), SpritePalette.rgb(208, 136, 93), SpritePalette.rgb(0, 0, 0)) // Minomon Color
+            1112 -> SpritePalette(SpritePalette.rgb(82, 85, 156), SpritePalette.rgb(197, 215, 239), SpritePalette.rgb(173, 182, 189), SpritePalette.rgb(0, 0, 0)) // Caprimon
+            1113 -> SpritePalette(SpritePalette.rgb(192, 246, 216), SpritePalette.rgb(132, 216, 186), SpritePalette.rgb(96, 182, 152), SpritePalette.rgb(26, 56, 42)) // Bubbmon
+            1114 -> SpritePalette(SpritePalette.rgb(239, 190, 197), SpritePalette.rgb(247, 215, 214), SpritePalette.rgb(49, 0, 0), SpritePalette.rgb(49, 0, 0)) // Mochimon
+            1115 -> SpritePalette(SpritePalette.rgb(169, 209, 153), SpritePalette.rgb(194, 222, 163), SpritePalette.rgb(208, 136, 93), SpritePalette.rgb(0, 0, 0)) // Budmon
             1116 -> SpritePalette(SpritePalette.rgb(92, 196, 82), SpritePalette.rgb(56, 142, 52), SpritePalette.rgb(246, 196, 52), SpritePalette.rgb(232, 46, 46)) // Babydmon
             1201 -> SpritePalette(SpritePalette.rgb(245, 140, 30), SpritePalette.rgb(205, 100, 20), SpritePalette.rgb(50, 175, 230), SpritePalette.rgb(40, 140, 220)) // Agumon X
             1202 -> SpritePalette(SpritePalette.rgb(56, 60, 68), SpritePalette.rgb(36, 38, 44), SpritePalette.rgb(226, 36, 46), SpritePalette.rgb(250, 202, 42)) // Agumon (Black) X
@@ -7490,7 +7490,7 @@ object MasterRosterMatrices {
             1221 -> SpritePalette(SpritePalette.rgb(246, 240, 222), SpritePalette.rgb(86, 62, 126), SpritePalette.rgb(250, 216, 46), SpritePalette.rgb(42, 146, 226)) // Herissmon
             1222 -> SpritePalette(SpritePalette.rgb(96, 186, 242), SpritePalette.rgb(176, 156, 226), SpritePalette.rgb(250, 212, 52), SpritePalette.rgb(52, 112, 216)) // Morphomon
             1223 -> SpritePalette(SpritePalette.rgb(85, 135, 215), SpritePalette.rgb(225, 235, 250), SpritePalette.rgb(225, 45, 55), SpritePalette.rgb(250, 210, 50)) // Strabimon
-            1224 -> SpritePalette(SpritePalette.rgb(248, 242, 222), SpritePalette.rgb(192, 136, 82), SpritePalette.rgb(186, 196, 212), SpritePalette.rgb(46, 132, 212)) // Plotmon Color
+            1224 -> SpritePalette(SpritePalette.rgb(248, 242, 222), SpritePalette.rgb(192, 136, 82), SpritePalette.rgb(186, 196, 212), SpritePalette.rgb(46, 132, 212)) // Plotmon
             1225 -> SpritePalette(SpritePalette.rgb(240, 225, 180), SpritePalette.rgb(175, 110, 50), SpritePalette.rgb(230, 85, 115), SpritePalette.rgb(65, 160, 80)) // Bokomon
             1301 -> SpritePalette(SpritePalette.rgb(235, 85, 30), SpritePalette.rgb(250, 200, 50), SpritePalette.rgb(235, 232, 220), SpritePalette.rgb(225, 35, 35)) // Darklizamon
             1302 -> SpritePalette(SpritePalette.rgb(41, 101, 181), SpritePalette.rgb(123, 130, 123), SpritePalette.rgb(255, 251, 206), SpritePalette.rgb(8, 4, 33)) // Deltamon

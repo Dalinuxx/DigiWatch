@@ -327,7 +327,17 @@ fun WatchSideloadScreen(
                 ) {
                     OutlinedTextField(
                         value = watchIp,
-                        onValueChange = { watchIp = it },
+                        onValueChange = { input ->
+                            val trimmed = input.trim()
+                            if (trimmed.contains(":")) {
+                                val parts = trimmed.split(":")
+                                watchIp = parts[0].trim()
+                                val p = parts.getOrNull(1)?.filter { it.isDigit() } ?: ""
+                                if (p.isNotEmpty()) watchPort = p
+                            } else {
+                                watchIp = trimmed
+                            }
+                        },
                         label = { Text("Watch IP Address", fontSize = 10.sp, fontFamily = FontFamily.Monospace) },
                         placeholder = { Text("192.168.1.50", fontSize = 10.sp, fontFamily = FontFamily.Monospace) },
                         modifier = Modifier.weight(1f),
@@ -342,7 +352,17 @@ fun WatchSideloadScreen(
 
                     OutlinedTextField(
                         value = watchPort,
-                        onValueChange = { watchPort = it },
+                        onValueChange = { input ->
+                            val trimmed = input.trim()
+                            if (trimmed.contains(":")) {
+                                val parts = trimmed.split(":")
+                                val ip = parts[0].trim()
+                                if (ip.isNotEmpty()) watchIp = ip
+                                watchPort = parts.getOrNull(1)?.filter { it.isDigit() } ?: ""
+                            } else {
+                                watchPort = trimmed.filter { it.isDigit() }
+                            }
+                        },
                         label = { Text("Port", fontSize = 10.sp, fontFamily = FontFamily.Monospace) },
                         placeholder = { Text("5555", fontSize = 10.sp, fontFamily = FontFamily.Monospace) },
                         modifier = Modifier.width(90.dp),
@@ -490,16 +510,55 @@ fun WatchSideloadScreen(
                                     border = BorderStroke(1.dp, Color(0xFF1E2F44)),
                                     modifier = Modifier.fillMaxWidth()
                                 ) {
-                                    Text(
-                                        text = "On your watch: Settings > Developer options > Wireless debugging > 'Pair new device'. Enter the pairing port and 6-digit code shown on the watch below:",
-                                        color = Color(0xFF80CBC4),
-                                        fontSize = 9.5.sp,
-                                        fontFamily = FontFamily.Monospace,
-                                        modifier = Modifier.padding(8.dp)
-                                    )
+                                    Column(modifier = Modifier.padding(8.dp)) {
+                                        Text(
+                                            text = "On your watch: Settings > Developer options > Wireless debugging > 'Pair new device'.",
+                                            color = Color(0xFF80CBC4),
+                                            fontSize = 9.5.sp,
+                                            fontWeight = FontWeight.Bold,
+                                            fontFamily = FontFamily.Monospace
+                                        )
+                                        Spacer(modifier = Modifier.height(2.dp))
+                                        Text(
+                                            text = "IMPORTANT: Keep the watch screen awake while pairing (Android kills the pairing port if the screen dims). Enter the IP, Pairing Port, and 6-Digit PIN shown on the watch below:",
+                                            color = Color(0xFFB0BEC5),
+                                            fontSize = 8.5.sp,
+                                            fontFamily = FontFamily.Monospace,
+                                            lineHeight = 11.sp
+                                        )
+                                    }
                                 }
 
-                                Spacer(modifier = Modifier.height(10.dp))
+                                Spacer(modifier = Modifier.height(8.dp))
+
+                                OutlinedTextField(
+                                    value = watchIp,
+                                    onValueChange = { input ->
+                                        val trimmed = input.trim()
+                                        if (trimmed.contains(":")) {
+                                            val parts = trimmed.split(":")
+                                            watchIp = parts[0].trim()
+                                            val p = parts.getOrNull(1)?.filter { it.isDigit() } ?: ""
+                                            if (p.isNotEmpty()) pairingPort = p
+                                        } else {
+                                            watchIp = trimmed
+                                        }
+                                        pairingSuccess = false
+                                        pairingError = null
+                                    },
+                                    label = { Text("Watch IP Address", fontSize = 10.sp, fontFamily = FontFamily.Monospace) },
+                                    placeholder = { Text("192.168.0.42", fontSize = 10.sp, fontFamily = FontFamily.Monospace) },
+                                    modifier = Modifier.fillMaxWidth(),
+                                    singleLine = true,
+                                    colors = OutlinedTextFieldDefaults.colors(
+                                        focusedBorderColor = DigiWearPalette.DigiviceCyan,
+                                        unfocusedBorderColor = DigiWearPalette.CardBorder,
+                                        focusedTextColor = Color.White,
+                                        unfocusedTextColor = Color.White
+                                    )
+                                )
+
+                                Spacer(modifier = Modifier.height(6.dp))
 
                                 Row(
                                     modifier = Modifier.fillMaxWidth(),
@@ -508,13 +567,21 @@ fun WatchSideloadScreen(
                                 ) {
                                     OutlinedTextField(
                                         value = pairingPort,
-                                        onValueChange = {
-                                            pairingPort = it.filter { ch -> ch.isDigit() }
+                                        onValueChange = { input ->
+                                            val trimmed = input.trim()
+                                            if (trimmed.contains(":")) {
+                                                val parts = trimmed.split(":")
+                                                val ip = parts[0].trim()
+                                                if (ip.isNotEmpty()) watchIp = ip
+                                                pairingPort = parts.getOrNull(1)?.filter { it.isDigit() } ?: ""
+                                            } else {
+                                                pairingPort = trimmed.filter { ch -> ch.isDigit() }
+                                            }
                                             pairingSuccess = false
                                             pairingError = null
                                         },
                                         label = { Text("Pairing Port", fontSize = 10.sp, fontFamily = FontFamily.Monospace) },
-                                        placeholder = { Text("38291", fontSize = 10.sp, fontFamily = FontFamily.Monospace) },
+                                        placeholder = { Text("38841", fontSize = 10.sp, fontFamily = FontFamily.Monospace) },
                                         modifier = Modifier.weight(0.42f),
                                         singleLine = true,
                                         colors = OutlinedTextFieldDefaults.colors(
@@ -535,7 +602,7 @@ fun WatchSideloadScreen(
                                             }
                                         },
                                         label = { Text("6-Digit Pairing Code", fontSize = 10.sp, fontFamily = FontFamily.Monospace) },
-                                        placeholder = { Text("123456", fontSize = 10.sp, fontFamily = FontFamily.Monospace) },
+                                        placeholder = { Text("173601", fontSize = 10.sp, fontFamily = FontFamily.Monospace) },
                                         modifier = Modifier.weight(0.58f),
                                         singleLine = true,
                                         textStyle = androidx.compose.ui.text.TextStyle(
@@ -554,10 +621,35 @@ fun WatchSideloadScreen(
                                     )
                                 }
 
+                                if (watchIp.isNotBlank() && pairingPort.isNotBlank()) {
+                                    Spacer(modifier = Modifier.height(6.dp))
+                                    Surface(
+                                        color = Color(0xFF0A192F),
+                                        shape = RoundedCornerShape(4.dp),
+                                        border = BorderStroke(1.dp, Color(0xFF1E3A5F)),
+                                        modifier = Modifier.fillMaxWidth()
+                                    ) {
+                                        Row(
+                                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                                            verticalAlignment = Alignment.CenterVertically
+                                        ) {
+                                            DigiVectorIcon(type = DigiIconType.WATCH, size = 12.dp, tint = DigiWearPalette.DigiviceCyan)
+                                            Spacer(modifier = Modifier.width(6.dp))
+                                            Text(
+                                                text = "Pairing Target: $watchIp:$pairingPort",
+                                                color = DigiWearPalette.DigiviceCyan,
+                                                fontSize = 9.sp,
+                                                fontFamily = FontFamily.Monospace,
+                                                fontWeight = FontWeight.Bold
+                                            )
+                                        }
+                                    }
+                                }
+
                                 if (watchIp.isBlank()) {
                                     Spacer(modifier = Modifier.height(4.dp))
                                     Text(
-                                        text = "⚠ Enter Watch IP Address above (e.g. 192.168.1.50) before pairing",
+                                        text = "⚠ Enter Watch IP Address (e.g. 192.168.0.42) before pairing",
                                         color = Color(0xFFFFB74D),
                                         fontSize = 8.5.sp,
                                         fontFamily = FontFamily.Monospace
@@ -610,12 +702,21 @@ fun WatchSideloadScreen(
 
                                 if (pairingError != null && !pairingSuccess) {
                                     Spacer(modifier = Modifier.height(6.dp))
-                                    Text(
-                                        text = "⚠ $pairingError",
-                                        color = Color(0xFFFF5252),
-                                        fontSize = 9.sp,
-                                        fontFamily = FontFamily.Monospace
-                                    )
+                                    Surface(
+                                        color = Color(0xFF260808),
+                                        shape = RoundedCornerShape(4.dp),
+                                        border = BorderStroke(1.dp, Color(0xFF5C1D1D)),
+                                        modifier = Modifier.fillMaxWidth()
+                                    ) {
+                                        Text(
+                                            text = "▲ $pairingError",
+                                            color = Color(0xFFFF5252),
+                                            fontSize = 9.sp,
+                                            fontFamily = FontFamily.Monospace,
+                                            modifier = Modifier.padding(6.dp),
+                                            lineHeight = 12.sp
+                                        )
+                                    }
                                 }
                             }
                         }

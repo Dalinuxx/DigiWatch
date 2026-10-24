@@ -1164,23 +1164,31 @@ fun SettingsScreen(
                 Text(text = "BUTTON RAIL PLACEMENT:", fontSize = 10.sp, fontWeight = FontWeight.Bold, color = Color(0xFF80CBC4), fontFamily = FontFamily.Monospace)
                 Spacer(modifier = Modifier.height(4.dp))
                 Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    listOf("RIGHT" to "RIGHT (BANDAI OG)", "LEFT" to "LEFT").forEach { (placeId, label) ->
-                        val active = buttonPlacement == placeId
+                    listOf(
+                        "RIGHT" to "RIGHT (OG)",
+                        "LEFT" to "LEFT",
+                        "OFF" to "OFF (TOUCH)"
+                    ).forEach { (placeId, label) ->
+                        val active = if (placeId == "OFF") !threeButtonMode || buttonPlacement == "OFF" else (threeButtonMode && buttonPlacement == placeId)
                         Box(
                             modifier = Modifier
                                 .weight(1f)
                                 .background(if (active) Color(0xFF00695C) else DigiWearPalette.CardInner, RoundedCornerShape(8.dp))
                                 .border(if (active) 1.5.dp else 1.dp, if (active) Color(0xFF64FFDA) else Color(0xFF37474F), RoundedCornerShape(8.dp))
-                                .clickable { buttonPlacement = placeId }
+                                .clickable {
+                                    buttonPlacement = placeId
+                                    threeButtonMode = (placeId != "OFF")
+                                }
                                 .padding(vertical = 8.dp),
                             contentAlignment = Alignment.Center
                         ) {
                             Text(
                                 text = label,
-                                fontSize = 9.5.sp,
+                                fontSize = 9.sp,
                                 fontWeight = if (active) FontWeight.Bold else FontWeight.Medium,
                                 color = if (active) Color.White else Color(0xFFB0BEC5),
-                                fontFamily = FontFamily.Monospace
+                                fontFamily = FontFamily.Monospace,
+                                maxLines = 1
                             )
                         }
                     }

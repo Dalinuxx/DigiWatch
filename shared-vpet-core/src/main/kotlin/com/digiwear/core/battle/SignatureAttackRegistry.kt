@@ -59,10 +59,10 @@ object SignatureAttackRegistry {
         1109 to "Static Bubble",       // Bibimon
         1110 to "Smile Fang",          // Wanyamon
         1111 to "Jamming Powder",      // Choromon
-        1112 to "Howlingertz",         // Caprimon Color
-        1113 to "Sticky Bubbles",      // Bubbmon Color
-        1114 to "Elastic Bubbles",     // Mochimon Color
-        1115 to "Pinecone",            // Minomon Color
+        1112 to "Howlingertz",         // Caprimon
+        1113 to "Sticky Bubbles",      // Bubbmon
+        1114 to "Elastic Bubbles",     // Mochimon
+        1115 to "Poison Thorns",       // Budmon
         1116 to "Hot Gas",             // Babydmon
 
         // ==========================================
@@ -151,7 +151,7 @@ object SignatureAttackRegistry {
         1221 to "Lightning Fur",       // Herissmon
         1222 to "Rinrin Therapy",      // Morphomon
         1223 to "Licht Nagel",         // Strabimon
-        1224 to "Puppy Howling",       // Plotmon Color
+        1224 to "Puppy Howling",       // Plotmon
         1225 to "Escape Book",         // Bokomon
 
         // ==========================================

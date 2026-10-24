@@ -114,17 +114,34 @@ class WirelessAdbManager(private val context: Context) {
                 log("NEXT STEP: Return to 'Wireless debugging' on your watch, enter the operational port into 'Port' above, and tap CONNECT.")
                 true
             } else {
-                val err = result.exceptionOrNull()?.message ?: "Pairing request was rejected by the watch."
-                _lastError.value = err
-                log("Pairing rejected: $err")
+                val ex = result.exceptionOrNull()
+                val rawErr = ex?.message ?: "Pairing request was rejected by the watch."
+                val isPeerInfoErr = rawErr.contains("peer info", ignoreCase = true)
+                val userMsg = if (isPeerInfoErr) {
+                    "Could not exchange peer info: Pairing dialog expired or timed out on watch. Keep watch screen awake on 'Pair new device' and check that the 6-digit PIN and pairing port match."
+                } else {
+                    rawErr
+                }
+                _lastError.value = userMsg
+                log("Pairing failed: $userMsg")
+                if (isPeerInfoErr) {
+                    log("CRITICAL NOTE: Wear OS invalidates the pairing port and 6-digit code the moment the watch display dims or sleeps.")
+                    log("Please wake the watch, tap 'Pair new device' again, and enter the updated port & code.")
+                }
                 false
             }
         } catch (e: Exception) {
-            val err = e.message ?: e.javaClass.simpleName
-            _lastError.value = "Pairing failed: $err"
-            log("SPAKE2 Pairing Error: $err")
+            val rawErr = e.message ?: e.javaClass.simpleName
+            val isPeerInfoErr = rawErr.contains("peer info", ignoreCase = true)
+            val userMsg = if (isPeerInfoErr) {
+                "Could not exchange peer info: Pairing dialog expired or timed out on watch. Keep watch screen awake on 'Pair new device' and check that the 6-digit PIN and pairing port match."
+            } else {
+                "Pairing failed: $rawErr"
+            }
+            _lastError.value = userMsg
+            log("SPAKE2 Pairing Error: $userMsg")
             log("Troubleshooting:")
-            log("1. Ensure watch screen is currently open on 'Pair new device'.")
+            log("1. Ensure watch display stays awake on 'Pair new device' (do not let screen dim/sleep).")
             log("2. Verify that the 6-digit code and pairing port match what is shown on watch.")
             log("3. Ensure phone and watch are connected to the same Wi-Fi / Hotspot.")
             false

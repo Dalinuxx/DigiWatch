@@ -79,4 +79,27 @@ class ExpandedRosterTest {
             assertEquals(r, JogressEngine.findFusionRecipe(r.primarySpeciesId, r.secondarySpeciesId))
         }
     }
+
+    @Test
+    fun noSpeciesRetainLegacyColorSuffix() {
+        val colorSpecies = PetSpecies.SPECIES_REGISTRY.values.filter { it.name.contains(" Color") }
+        assertTrue("No species should retain ' Color' in their name: $colorSpecies", colorSpecies.isEmpty())
+
+        assertEquals("Budmon", PetSpecies.getById(1115).name)
+        assertEquals("Bubbmon", PetSpecies.getById(1113).name)
+        assertEquals("Caprimon", PetSpecies.getById(1112).name)
+        assertEquals("Mochimon", PetSpecies.getById(1114).name)
+        assertEquals("Plotmon", PetSpecies.getById(1224).name)
+    }
+
+    @Test
+    fun yuramonEvolutionsAreCanonAndDistinct() {
+        val yuramon = PetSpecies.getById(107)
+        val targets = yuramon.evolutionRules.map { it.targetSpeciesId }.toSet()
+        assertTrue("Yuramon should evolve to Tanemon (108)", targets.contains(108))
+        assertTrue("Yuramon should evolve to Viximon (116)", targets.contains(116))
+        assertTrue("Yuramon should evolve to Minomon (126)", targets.contains(126))
+        assertTrue("Yuramon should evolve to Budmon (1115)", targets.contains(1115))
+        assertEquals(4, targets.size)
+    }
 }

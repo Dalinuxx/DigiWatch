@@ -739,47 +739,6 @@ fun PetDashboardScreen(
                         }
                     }
                 }
-
-                Spacer(modifier = Modifier.height(14.dp))
-
-                // Purposeful Navigation Quick-Cards
-                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Card(
-                        modifier = Modifier
-                            .weight(1f)
-                            .clickable { onNavigateToVault?.invoke() },
-                        colors = CardDefaults.cardColors(containerColor = Color(0xFF161C24)),
-                        border = BorderStroke(1.dp, Color(0xFFAB47BC)),
-                        shape = RoundedCornerShape(12.dp)
-                    ) {
-                        Column(modifier = Modifier.padding(10.dp)) {
-                            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                                DigiVectorIcon(type = DigiIconType.DNA_HELIX, size = 12.dp, tint = Color(0xFFEA80FC))
-                                Text("FUSION LAB", fontSize = 10.sp, fontWeight = FontWeight.Bold, color = Color(0xFFEA80FC), fontFamily = FontFamily.Monospace)
-                            }
-                            Spacer(modifier = Modifier.height(2.dp))
-                            Text("85 DNA Jogress & DigiXros recipes under VAULT tab", fontSize = 8.5.sp, color = Color.Gray, lineHeight = 11.sp)
-                        }
-                    }
-
-                    Card(
-                        modifier = Modifier
-                            .weight(1f)
-                            .clickable { onNavigateToSettings?.invoke() },
-                        colors = CardDefaults.cardColors(containerColor = Color(0xFF161C24)),
-                        border = BorderStroke(1.dp, DigiWearPalette.DigiviceCyan),
-                        shape = RoundedCornerShape(12.dp)
-                    ) {
-                        Column(modifier = Modifier.padding(10.dp)) {
-                            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                                DigiVectorIcon(type = DigiIconType.SETTINGS_GEAR, tint = DigiWearPalette.DigiviceCyan, size = 12.dp)
-                                Text("WATCH SETTINGS", fontSize = 10.sp, fontWeight = FontWeight.Bold, color = DigiWearPalette.DigiviceCyan, fontFamily = FontFamily.Monospace)
-                            }
-                            Spacer(modifier = Modifier.height(2.dp))
-                            Text("Buttons, haptics, buzzer & wireless ADB sideload", fontSize = 8.5.sp, color = Color.Gray, lineHeight = 11.sp)
-                        }
-                    }
-                }
             }
         }
     }

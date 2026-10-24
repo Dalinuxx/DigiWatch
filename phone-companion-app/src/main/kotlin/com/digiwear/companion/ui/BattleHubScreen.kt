@@ -28,6 +28,7 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -49,6 +50,7 @@ import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.digiwear.companion.NfcBattleBridge
@@ -867,13 +869,18 @@ fun BattleHubScreen(
                             }
 
                             Button(
-                                onClick = { ownSeed = Random.nextInt(0xFFFF) },
+                                onClick = {
+                                    ownSeed = Random.nextInt(0xFFFF)
+                                    val hex = Integer.toHexString(ownSeed).uppercase()
+                                    Toast.makeText(context, "Battle PRNG Seed: 0x$hex (Randomized combat variance)", Toast.LENGTH_SHORT).show()
+                                },
                                 modifier = Modifier.weight(1f),
-                                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF37474F))
+                                contentPadding = PaddingValues(horizontal = 4.dp, vertical = 6.dp),
+                                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF263238))
                             ) {
-                                DigiVectorIcon(type = DigiIconType.SCAN, size = 14.dp, tint = Color.White)
-                                Spacer(modifier = Modifier.width(4.dp))
-                                Text("Seed", fontSize = 10.sp, fontFamily = FontFamily.Monospace)
+                                DigiVectorIcon(type = DigiIconType.BOLT, size = 13.dp, tint = Color(0xFFFFD54F))
+                                Spacer(modifier = Modifier.width(3.dp))
+                                Text("REROLL SEED", fontSize = 8.5.sp, fontWeight = FontWeight.Bold, fontFamily = FontFamily.Monospace, maxLines = 1)
                             }
                         }
 
@@ -944,7 +951,10 @@ fun BattleHubScreen(
                                     horizontalArrangement = Arrangement.SpaceBetween,
                                     verticalAlignment = Alignment.CenterVertically
                                 ) {
-                                    Row(verticalAlignment = Alignment.CenterVertically) {
+                                    Row(
+                                        modifier = Modifier.weight(1f).padding(end = 6.dp),
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
                                         Box(
                                             modifier = Modifier
                                                 .size(8.dp)
@@ -952,20 +962,30 @@ fun BattleHubScreen(
                                         )
                                         Spacer(modifier = Modifier.width(6.dp))
                                         Text(
-                                            text = "MODE 1: NFC TAP-TO-DUEL (WATCH / PHONE P2P)",
+                                            text = "MODE 1: NFC TAP-TO-DUEL",
                                             fontSize = 11.sp,
                                             fontWeight = FontWeight.Bold,
                                             color = Color(0xFF00E676),
-                                            fontFamily = FontFamily.Monospace
+                                            fontFamily = FontFamily.Monospace,
+                                            maxLines = 1,
+                                            overflow = TextOverflow.Ellipsis
                                         )
                                     }
-                                    Text(
-                                        text = if (NfcDuelManager.isNfcEnabled(context)) "NFC READY" else "NFC OFF",
-                                        fontSize = 9.sp,
-                                        fontWeight = FontWeight.Bold,
-                                        color = if (NfcDuelManager.isNfcEnabled(context)) Color(0xFF00E676) else Color.Red,
-                                        fontFamily = FontFamily.Monospace
-                                    )
+                                    val isNfcReady = NfcDuelManager.isNfcEnabled(context)
+                                    Surface(
+                                        color = if (isNfcReady) Color(0xFF1B5E20) else Color(0xFF3E2723),
+                                        shape = RoundedCornerShape(4.dp),
+                                        border = BorderStroke(1.dp, if (isNfcReady) Color(0xFF00E676) else Color.Red)
+                                    ) {
+                                        Text(
+                                            text = if (isNfcReady) "NFC READY" else "NFC OFF",
+                                            fontSize = 8.5.sp,
+                                            fontWeight = FontWeight.Bold,
+                                            color = if (isNfcReady) Color(0xFF00E676) else Color.Red,
+                                            fontFamily = FontFamily.Monospace,
+                                            modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
+                                        )
+                                    }
                                 }
                                 Spacer(modifier = Modifier.height(6.dp))
                                 Text(
@@ -1418,9 +1438,10 @@ fun BattleHubScreen(
                                     inputCode = CommCodeCodec.formatWithHyphens(devimonCode)
                                     decodedOpponent = try { CommCodeCodec.decodeAuto(devimonCode) } catch (_: Exception) { null }
                                 },
-                                modifier = Modifier.weight(1f)
+                                modifier = Modifier.weight(0.9f),
+                                contentPadding = PaddingValues(horizontal = 4.dp, vertical = 6.dp)
                             ) {
-                                Text("Devimon", fontSize = 10.sp, fontFamily = FontFamily.Monospace)
+                                Text("Devimon", fontSize = 9.sp, fontFamily = FontFamily.Monospace, maxLines = 1)
                             }
 
                             OutlinedButton(
@@ -1437,21 +1458,23 @@ fun BattleHubScreen(
                                     inputCode = CommCodeCodec.formatWithHyphens(metalGaruruCode)
                                     decodedOpponent = try { CommCodeCodec.decodeAuto(metalGaruruCode) } catch (_: Exception) { null }
                                 },
-                                modifier = Modifier.weight(1f)
+                                modifier = Modifier.weight(1.35f),
+                                contentPadding = PaddingValues(horizontal = 4.dp, vertical = 6.dp)
                             ) {
-                                Text("MetalGaruru", fontSize = 10.sp, fontFamily = FontFamily.Monospace)
+                                Text("MetalGarurumon", fontSize = 8.5.sp, fontFamily = FontFamily.Monospace, maxLines = 1)
                             }
 
                             Button(
                                 onClick = {
                                     launchAnimatedBattle(inputCode, selectedBattleMode, selectedEnvironment)
                                 },
-                                modifier = Modifier.weight(1.2f),
+                                modifier = Modifier.weight(0.95f),
+                                contentPadding = PaddingValues(horizontal = 4.dp, vertical = 6.dp),
                                 colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFD32F2F))
                             ) {
-                                DigiVectorIcon(type = DigiIconType.BATTLE, size = 14.dp, tint = Color.White)
+                                DigiVectorIcon(type = DigiIconType.BATTLE, size = 13.dp, tint = Color.White)
                                 Spacer(modifier = Modifier.width(2.dp))
-                                Text("FIGHT!", fontSize = 10.sp, fontWeight = FontWeight.Black, fontFamily = FontFamily.Monospace)
+                                Text("FIGHT!", fontSize = 9.5.sp, fontWeight = FontWeight.Black, fontFamily = FontFamily.Monospace, maxLines = 1)
                             }
                         }
 
@@ -1758,7 +1781,7 @@ fun BattleHubScreen(
                         BitFieldRow("028 - 031", "Attribute (4-bit)", ownSpecies.attribute.displayName)
                         BitFieldRow("032 - 047", "Base Power (16-bit)", "${ownSpecies.basePower} PWR")
                         BitFieldRow("080 - 095", "PRNG Seed (16-bit)", "0x${Integer.toHexString(ownSeed).uppercase()}")
-                        BitFieldRow("112 - 127", "HMAC-16 Hash (16-bit)", "Cryptographic Tamper-Proof")
+                        BitFieldRow("112 - 127", "HMAC-16 Checksum", "Tamper-Proof")
                     }
                 }
             }
@@ -1841,10 +1864,10 @@ private fun BitFieldRow(bits: String, name: String, value: String) {
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 2.dp),
-        horizontalArrangement = Arrangement.SpaceBetween
+        verticalAlignment = Alignment.CenterVertically
     ) {
-        Text(text = "Bits $bits", fontSize = 10.sp, color = Color.Gray, fontFamily = FontFamily.Monospace)
-        Text(text = name, fontSize = 10.sp, color = Color.LightGray)
-        Text(text = value, fontSize = 10.sp, fontWeight = FontWeight.Bold, color = Color.White, fontFamily = FontFamily.Monospace)
+        Text(text = "Bits $bits", modifier = Modifier.weight(0.32f), fontSize = 9.5.sp, color = Color.Gray, fontFamily = FontFamily.Monospace, maxLines = 1)
+        Text(text = name, modifier = Modifier.weight(0.40f), fontSize = 9.5.sp, color = Color.LightGray, maxLines = 1)
+        Text(text = value, modifier = Modifier.weight(0.28f), textAlign = androidx.compose.ui.text.style.TextAlign.End, fontSize = 9.5.sp, fontWeight = FontWeight.Bold, color = Color.White, fontFamily = FontFamily.Monospace, maxLines = 1)
     }
 }

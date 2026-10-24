@@ -393,7 +393,7 @@ object ExpandedRoster {
             sp(1106, "Algomon Baby I", PetStage.BABY_I, F, 50, 10, 5, egg(1107)),
             sp(1108, "Dokimon", PetStage.BABY_I, F, 50, 10, 5, egg2(1109, 1110)),
             sp(1111, "Choromon", PetStage.BABY_I, F, 50, 10, 5, egg2(1112, 1114)),
-            sp(1113, "Bubbmon Color", PetStage.BABY_I, F, 50, 10, 5, egg2(1115, 1114)),
+            sp(1113, "Bubbmon", PetStage.BABY_I, F, 50, 10, 5, egg2(1115, 1114)),
             // ---------------- BABY_II (500 Roster Expansion) ----------------
             sp(1102, "Kakkinmon", PetStage.BABY_II, F, 70, 15, 10, hatch4(252, 1220, 1218, 1205)),
             sp(1103, "Sakuttomon", PetStage.BABY_II, F, 70, 15, 10, hatch4(261, 1218, 1216, 1225)),
@@ -401,9 +401,9 @@ object ExpandedRoster {
             sp(1107, "Algomon Baby II", PetStage.BABY_II, F, 70, 15, 10, hatch2(1212, 1211)),
             sp(1109, "Bibimon", PetStage.BABY_II, F, 70, 15, 10, hatch4(251, 1221, 1207, 1210)),
             sp(1110, "Wanyamon", PetStage.BABY_II, F, 70, 15, 10, hatch4(263, 1203, 1202, 1223)),
-            sp(1112, "Caprimon Color", PetStage.BABY_II, F, 70, 15, 10, hatch3(1219, 1213, 1214)),
-            sp(1114, "Mochimon Color", PetStage.BABY_II, F, 70, 15, 10, hatch2(1215, 1206)),
-            sp(1115, "Minomon Color", PetStage.BABY_II, F, 70, 15, 10, hatch2(1208, 1222)),
+            sp(1112, "Caprimon", PetStage.BABY_II, F, 70, 15, 10, hatch3(1219, 1213, 1214)),
+            sp(1114, "Mochimon", PetStage.BABY_II, F, 70, 15, 10, hatch2(1215, 1206)),
+            sp(1115, "Budmon", PetStage.BABY_II, F, 70, 15, 10, hatch2(1208, 1222)),
             sp(1116, "Babydmon", PetStage.BABY_II, F, 70, 15, 10, hatch3(1209, 1224, 1204)),
             // ---------------- CHILD (500 Roster Expansion) ----------------
             sp(1201, "Agumon X", PetStage.CHILD, VA, 190, 35, 16, grow3(1310, 1330, 1301)),
@@ -439,7 +439,7 @@ object ExpandedRoster {
                 EvolutionRule(targetSpeciesId = 1315, minAgeSeconds = DAY, minCareMistakes = 3, maxCareMistakes = 4),
                 EvolutionRule(targetSpeciesId = 1317, minAgeSeconds = DAY, minCareMistakes = 5, maxCareMistakes = 999)
             )),
-            sp(1224, "Plotmon Color", PetStage.CHILD, VA, 185, 33, 16, grow3(1321, 1306, 1307)),
+            sp(1224, "Plotmon", PetStage.CHILD, VA, 185, 33, 16, grow3(1321, 1306, 1307)),
             sp(1225, "Bokomon", PetStage.CHILD, F, 160, 25, 14, grow3(1324, 1328, 1312)),
             // ---------------- ADULT (500 Roster Expansion) ----------------
             sp(1301, "Darklizamon", PetStage.ADULT, VI, 340, 78, 28, mature(1418, 1424)),
