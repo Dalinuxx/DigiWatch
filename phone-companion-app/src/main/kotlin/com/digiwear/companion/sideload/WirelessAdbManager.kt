@@ -64,6 +64,9 @@ class WirelessAdbManager(private val context: Context) {
     private val _lastError = MutableStateFlow<String?>(null)
     val lastError: StateFlow<String?> = _lastError.asStateFlow()
 
+    private val _transferProgress = MutableStateFlow(0f)
+    val transferProgress: StateFlow<Float> = _transferProgress.asStateFlow()
+
     fun log(message: String) {
         val time = SimpleDateFormat("HH:mm:ss", Locale.US).format(Date())
         val entry = "[$time] $message"
@@ -540,7 +543,9 @@ class WirelessAdbManager(private val context: Context) {
                 // Install via TLS connection manager
                 _connectionState.value = SideloadConnectionState.INSTALLING
                 log("Streaming APK to PackageInstaller session...")
-                var result = libadb.installApk(apkFile)
+                var result = libadb.installApk(apkFile) { progress ->
+                    _transferProgress.value = progress
+                }
 
                 // If stream was closed due to exhausted slots, reconnect with a clean socket session and retry
                 if (result.isFailure && result.exceptionOrNull()?.message?.contains("Stream closed", ignoreCase = true) == true) {
@@ -553,7 +558,9 @@ class WirelessAdbManager(private val context: Context) {
                         if (reconn.isSuccess && freshManager.isConnected) {
                             activeLibadb = freshManager
                             log("Connected clean! Retrying PackageInstaller stream...")
-                            result = freshManager.installApk(apkFile)
+                            result = freshManager.installApk(apkFile) { progress ->
+                                _transferProgress.value = progress
+                            }
                         }
                     }
                 }
