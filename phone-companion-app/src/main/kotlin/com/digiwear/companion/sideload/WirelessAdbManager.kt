@@ -159,7 +159,7 @@ class WirelessAdbManager(private val context: Context) {
      * Connects to a smartwatch listening on [host]:[port] over wireless ADB.
      * Tries modern TLS 1.3 (Wear OS 3/4/5) first; falls back to legacy unencrypted ADB (AOSP / port 5555).
      */
-    suspend fun connect(host: String, port: Int = 5555): Boolean = withContext(Dispatchers.IO) {
+    suspend fun connect(host: String, port: Int = 0): Boolean = withContext(Dispatchers.IO) {
         disconnect()
         val cleanHost = host.trim()
         if (cleanHost.isEmpty()) {
@@ -168,13 +168,18 @@ class WirelessAdbManager(private val context: Context) {
             return@withContext false
         }
 
+        if (port <= 0) {
+            log("No port specified. Initiating mDNS discovery on $cleanHost...")
+            return@withContext autoDiscoverAndConnect(context, cleanHost)
+        }
+
         _connectionState.value = SideloadConnectionState.CONNECTING
         _lastError.value = null
         log("Initiating Wireless ADB connection to $cleanHost:$port...")
 
         // 1. Attempt modern TLS 1.3 connection (Wear OS 3/4/5 / Android 11+)
         try {
-            log("Attempting TLS 1.3 ADB connection (Wear OS 3/4/5)...")
+            log("Attempting TLS 1.3 ADB connection to $cleanHost:$port...")
             val manager = DigiWearAdbConnectionManager(keyManager)
             _connectionState.value = SideloadConnectionState.AUTHENTICATING
 
@@ -205,58 +210,62 @@ class WirelessAdbManager(private val context: Context) {
                         ?: (ex?.cause as? AdbPairingRequiredException)
                         ?: AdbPairingRequiredException(ex?.message ?: "Pairing required"))
                 }
-                log("TLS connection could not be established: ${ex?.message ?: "Not accepted"}")
+                log("TLS connection to port $port not accepted: ${ex?.message ?: "Refused"}")
             }
         } catch (e: AdbPairingRequiredException) {
             _connectionState.value = SideloadConnectionState.ERROR
-            val msg = "Watch requires 6-digit pairing code before connecting! Use 'PAIR & CONNECT' below first."
+            val msg = "Watch requires 6-digit pairing code before connecting! Use 'PAIR NEW DEVICE' below first."
             _lastError.value = msg
             log("PAIRING REQUIRED: $msg")
             disconnect()
             return@withContext false
         } catch (e: Exception) {
-            log("TLS connection attempt failed (${e.message ?: e.javaClass.simpleName}).")
+            log("TLS connection attempt failed: ${e.message ?: e.javaClass.simpleName}")
         }
 
-        // 2. Attempt legacy unencrypted TCP ADB fallback (dadb)
-        log("Attempting legacy ADB fallback (AOSP / Port 5555)...")
-        try {
-            val keyPair = keyManager.getOrCreateKeyPair()
-            val fp = keyManager.getPublicKeyFingerprintSha256()
-            log("Using RSA-2048 key (SHA-256: $fp)")
-            log("Connecting to watch...")
+        // 2. Attempt legacy unencrypted TCP ADB fallback (dadb) if port is 5555
+        if (port == 5555) {
+            log("Attempting legacy ADB fallback (AOSP / Port 5555)...")
+            try {
+                val keyPair = keyManager.getOrCreateKeyPair()
+                val fp = keyManager.getPublicKeyFingerprintSha256()
+                log("Using RSA-2048 key (SHA-256: $fp)")
+                log("Connecting to watch...")
 
-            _connectionState.value = SideloadConnectionState.AUTHENTICATING
-            val dadb = Dadb.create(cleanHost, port, keyPair)
-            activeDadb = dadb
-            activePort = port
+                _connectionState.value = SideloadConnectionState.AUTHENTICATING
+                val dadb = Dadb.create(cleanHost, port, keyPair)
+                activeDadb = dadb
+                activePort = port
 
-            log("ADB Handshake OK! Querying smartwatch hardware details...")
-            val details = queryWatchDetails(dadb)
-            _watchDetails.value = details
+                log("ADB Handshake OK! Querying smartwatch hardware details...")
+                val details = queryWatchDetails(dadb)
+                _watchDetails.value = details
 
-            _connectionState.value = SideloadConnectionState.CONNECTED
-            log("SUCCESS: Connected to ${details.model} (${details.manufacturer}) via legacy ADB")
-            log("Watch OS: Android ${details.androidVersion} (API ${details.sdkVersion}) ${details.wearPlatform}")
-            if (details.isDigiWearInstalled) {
-                log("Existing DigiWear installation detected: ${details.installedVersionName}")
-            } else {
-                log("DigiWear is not yet installed on this watch")
+                _connectionState.value = SideloadConnectionState.CONNECTED
+                log("SUCCESS: Connected to ${details.model} (${details.manufacturer}) via legacy ADB")
+                log("Watch OS: Android ${details.androidVersion} (API ${details.sdkVersion}) ${details.wearPlatform}")
+                if (details.isDigiWearInstalled) {
+                    log("Existing DigiWear installation detected: ${details.installedVersionName}")
+                } else {
+                    log("DigiWear is not yet installed on this watch")
+                }
+                return@withContext true
+            } catch (e: Exception) {
+                _connectionState.value = SideloadConnectionState.ERROR
+                val err = e.message ?: e.javaClass.simpleName
+                _lastError.value = err
+                log("Connection failed: $err")
+                disconnect()
+                return@withContext false
             }
-            return@withContext true
-        } catch (e: Exception) {
-            _connectionState.value = SideloadConnectionState.ERROR
-            val err = e.message ?: e.javaClass.simpleName
-            _lastError.value = err
-            log("Connection failed: $err")
-            log("Troubleshooting tips:")
-            log("1. For Wear OS 3/4/5 (Pixel Watch, Galaxy Watch 4+): You MUST pair with the 6-digit code first!")
-            log("2. Ensure watch and phone are on the exact same Wi-Fi / Hotspot.")
-            log("3. Ensure 'ADB Debugging' and 'Wireless Debugging' (or Debug over Wi-Fi) are enabled.")
-            log("4. Check that the port matches the dynamic port shown in Wireless Debugging settings.")
-            disconnect()
-            return@withContext false
         }
+
+        _connectionState.value = SideloadConnectionState.ERROR
+        val failMsg = "Could not connect to watch at $cleanHost:$port. Please verify IP & Port."
+        _lastError.value = failMsg
+        log("Connection failed: $failMsg")
+        disconnect()
+        return@withContext false
     }
 
     /**
@@ -282,16 +291,25 @@ class WirelessAdbManager(private val context: Context) {
                 _connectionState.value = SideloadConnectionState.CONNECTED
                 log("SUCCESS: Connected to ${details.model} (${details.manufacturer}) via TLS 1.3 on port $port")
                 return@withContext true
+            } else {
+                val ex = connResult.exceptionOrNull()
+                val err = ex?.message ?: "Handshake refused"
+                log("TLS 1.3 direct connection to $cleanHost:$port failed: $err")
+                _lastError.value = err
             }
-        } catch (_: Exception) {}
+        } catch (e: Exception) {
+            val err = e.message ?: e.javaClass.simpleName
+            log("TLS 1.3 direct connection to $cleanHost:$port error: $err")
+            _lastError.value = err
+        }
 
         _connectionState.value = SideloadConnectionState.IDLE
         false
     }
 
     /**
-     * Automatically discovers the operational ADB port on the smartwatch after pairing,
-     * probing adjacent ephemeral ports, mDNS, and standard Wear OS ranges.
+     * Automatically discovers the operational ADB port on the smartwatch via mDNS
+     * (_adb-tls-connect._tcp) and establishes a TLS 1.3 session.
      */
     suspend fun autoDiscoverAndConnect(
         context: Context,
@@ -301,88 +319,38 @@ class WirelessAdbManager(private val context: Context) {
         val cleanHost = host.trim()
         if (cleanHost.isEmpty()) return@withContext false
 
-        log("Auto-discovering smartwatch ADB session on $cleanHost...")
+        log("Discovering Wear OS ADB service on $cleanHost...")
         _connectionState.value = SideloadConnectionState.CONNECTING
 
-        // 1. Priority: Fast-probe adjacent ephemeral ports around the pairing port
-        if (nearPort in 1024..65535) {
-            val adjacentList = mutableListOf<Int>()
-            for (offset in 1..200) {
-                val down = nearPort - offset
-                val up = nearPort + offset
-                if (down in 1024..65535) adjacentList.add(down)
-                if (up in 1024..65535) adjacentList.add(up)
-            }
-            log("Probing ephemeral ports near pairing port $nearPort...")
-            val foundAdj = findOpenPort(cleanHost, adjacentList, timeoutMs = 120, batchSize = 25)
-            if (foundAdj != null) {
-                log("Found active port $foundAdj on $cleanHost! Establishing TLS session...")
-                if (connectTlsOnly(cleanHost, foundAdj)) return@withContext true
-            }
-        }
-
-        // 2. Try mDNS discovery in background
+        // 1. First priority: mDNS discovery of Wear OS TLS service
         try {
+            log("Searching local network via mDNS (_adb-tls-connect._tcp)...")
             val manager = DigiWearAdbConnectionManager(keyManager)
-            val mdnsResult = manager.autoConnectWatch(context, 1500L)
+            val mdnsResult = manager.autoConnectWatch(context, 3500L)
             if (mdnsResult.isSuccess && manager.isConnected) {
                 activeLibadb = manager
                 val details = manager.queryDetails()
                 _watchDetails.value = details
                 _connectionState.value = SideloadConnectionState.CONNECTED
-                activePort = runCatching { manager.hostAddress.substringAfter(":", "").toIntOrNull() ?: 5555 }.getOrDefault(5555)
-                log("SUCCESS: Connected to ${details.model} via mDNS TLS 1.3")
+                activePort = runCatching { manager.hostAddress.substringAfter(":", "").toIntOrNull() ?: 0 }.getOrDefault(0)
+                log("SUCCESS: Connected to ${details.model} (${details.manufacturer}) via mDNS TLS 1.3 on port $activePort")
                 return@withContext true
             }
-        } catch (_: Exception) {}
-
-        // 3. Probe common Wear OS ports
-        val commonPorts = listOf(5555, 33401, 37000, 38000, 40000, 41235, 42000, 43210, 44000)
-        log("Probing common Wear OS operational ports...")
-        val foundCommon = findOpenPort(cleanHost, commonPorts, timeoutMs = 150, batchSize = 10)
-        if (foundCommon != null) {
-            log("Found active port $foundCommon on $cleanHost! Establishing TLS session...")
-            if (connectTlsOnly(cleanHost, foundCommon)) return@withContext true
+        } catch (e: Exception) {
+            log("mDNS search notice: ${e.message ?: "No service found"}")
         }
 
-        // 4. Broader scan across Wear OS ephemeral range (32768..45000)
-        log("Scanning Wear OS port range (32768..45000)...")
-        val rangePorts = (32768..45000).filter { it != nearPort }
-        val foundRange = findOpenPort(cleanHost, rangePorts, timeoutMs = 70, batchSize = 50)
-        if (foundRange != null) {
-            log("Found active port $foundRange on $cleanHost! Establishing TLS session...")
-            if (connectTlsOnly(cleanHost, foundRange)) return@withContext true
+        // 2. If a specific port was provided, attempt direct TLS 1.3 connection
+        if (nearPort in 1024..65535) {
+            log("Attempting direct TLS 1.3 connection to $cleanHost:$nearPort...")
+            if (connectTlsOnly(cleanHost, nearPort)) {
+                return@withContext true
+            }
         }
 
         _connectionState.value = SideloadConnectionState.IDLE
+        log("Could not auto-detect watch port. Please enter the Port displayed on your watch screen under Wireless Debugging.")
         false
-    }
-
-    private suspend fun findOpenPort(
-        host: String,
-        ports: List<Int>,
-        timeoutMs: Int = 100,
-        batchSize: Int = 25
-    ): Int? = withContext(Dispatchers.IO) {
-        for (chunk in ports.chunked(batchSize)) {
-            val open = chunk.map { p ->
-                async {
-                    var s: Socket? = null
-                    try {
-                        s = Socket()
-                        s.connect(InetSocketAddress(host, p), timeoutMs)
-                        p
-                    } catch (_: Throwable) {
-                        null
-                    } finally {
-                        try { s?.close() } catch (_: Throwable) {}
-                    }
-                }
-            }.awaitAll().firstOrNull { it != null }
-
-            if (open != null) return@withContext open
-        }
-        null
     }
 
     suspend fun autoConnect(context: Context, targetHost: String? = null): Boolean {

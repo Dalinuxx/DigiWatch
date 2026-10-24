@@ -849,11 +849,14 @@ fun BattleHubScreen(
                                     clipboardManager.setText(AnnotatedString(generatedCode))
                                     Toast.makeText(context, "128-Bit Base32 Code copied!", Toast.LENGTH_SHORT).show()
                                 },
+                                border = BorderStroke(1.dp, DigiWearPalette.DigiviceCyan),
+                                colors = ButtonDefaults.outlinedButtonColors(contentColor = DigiWearPalette.DigiviceCyan),
+                                shape = RoundedCornerShape(6.dp),
                                 modifier = Modifier.weight(1f)
                             ) {
-                                DigiVectorIcon(type = DigiIconType.COPY, size = 14.dp, tint = Color.White)
+                                DigiVectorIcon(type = DigiIconType.COPY, size = 14.dp, tint = DigiWearPalette.DigiviceCyan)
                                 Spacer(modifier = Modifier.width(4.dp))
-                                Text("Base32", fontSize = 10.sp, fontFamily = FontFamily.Monospace)
+                                Text("Base32", fontSize = 10.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
                             }
 
                             OutlinedButton(
@@ -861,11 +864,14 @@ fun BattleHubScreen(
                                     clipboardManager.setText(AnnotatedString(generatedDigiRom))
                                     Toast.makeText(context, "0nl1ne DigiROM copied!", Toast.LENGTH_SHORT).show()
                                 },
+                                border = BorderStroke(1.dp, DigiWearPalette.DigiviceCyan),
+                                colors = ButtonDefaults.outlinedButtonColors(contentColor = DigiWearPalette.DigiviceCyan),
+                                shape = RoundedCornerShape(6.dp),
                                 modifier = Modifier.weight(1f)
                             ) {
-                                DigiVectorIcon(type = DigiIconType.COPY, size = 14.dp, tint = Color.White)
+                                DigiVectorIcon(type = DigiIconType.COPY, size = 14.dp, tint = DigiWearPalette.DigiviceCyan)
                                 Spacer(modifier = Modifier.width(4.dp))
-                                Text("DigiROM", fontSize = 10.sp, fontFamily = FontFamily.Monospace)
+                                Text("DigiROM", fontSize = 10.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
                             }
 
                             OutlinedButton(
@@ -874,11 +880,14 @@ fun BattleHubScreen(
                                     val hex = Integer.toHexString(ownSeed).uppercase()
                                     Toast.makeText(context, "Battle PRNG Seed: 0x$hex (Randomized combat variance)", Toast.LENGTH_SHORT).show()
                                 },
+                                border = BorderStroke(1.dp, DigiWearPalette.DigiviceCyan),
+                                colors = ButtonDefaults.outlinedButtonColors(contentColor = DigiWearPalette.DigiviceCyan),
+                                shape = RoundedCornerShape(6.dp),
                                 modifier = Modifier.weight(1f)
                             ) {
-                                DigiVectorIcon(type = DigiIconType.BOLT, size = 14.dp, tint = Color.White)
+                                DigiVectorIcon(type = DigiIconType.BOLT, size = 14.dp, tint = DigiWearPalette.DigiviceCyan)
                                 Spacer(modifier = Modifier.width(4.dp))
-                                Text("Seed", fontSize = 10.sp, fontFamily = FontFamily.Monospace)
+                                Text("Seed", fontSize = 10.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
                             }
                         }
 
@@ -903,6 +912,9 @@ fun BattleHubScreen(
                                         }
                                     }
                                 },
+                                border = BorderStroke(1.dp, DigiWearPalette.DigiviceCyan),
+                                colors = ButtonDefaults.outlinedButtonColors(contentColor = DigiWearPalette.DigiviceCyan),
+                                shape = RoundedCornerShape(6.dp),
                                 modifier = Modifier.weight(1f)
                             ) {
                                 Text("PULL FROM WATCH", fontSize = 10.sp, fontWeight = FontWeight.Bold, fontFamily = FontFamily.Monospace)

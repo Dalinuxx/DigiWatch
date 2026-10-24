@@ -94,7 +94,7 @@ fun WatchSideloadScreen(
         val configured = wearableManager.getConfiguredAospWatchIp()
         mutableStateOf(if (configured.isNotEmpty()) configured else "")
     }
-    var watchPort by remember { mutableStateOf("5555") }
+    var watchPort by remember { mutableStateOf("") }
 
     var pairingPort by remember { mutableStateOf("") }
     var pairingCode by remember { mutableStateOf("") }
@@ -380,8 +380,8 @@ fun WatchSideloadScreen(
                             }
                         },
                         label = { Text("Port", fontSize = 10.sp, fontFamily = FontFamily.Monospace) },
-                        placeholder = { Text("5555", fontSize = 10.sp, fontFamily = FontFamily.Monospace) },
-                        modifier = Modifier.width(90.dp),
+                        placeholder = { Text("e.g. 41235", fontSize = 10.sp, fontFamily = FontFamily.Monospace) },
+                        modifier = Modifier.width(105.dp),
                         singleLine = true,
                         colors = OutlinedTextFieldDefaults.colors(
                             focusedBorderColor = DigiWearPalette.DigiviceCyan,
@@ -401,13 +401,20 @@ fun WatchSideloadScreen(
                 ) {
                     Button(
                         onClick = {
-                            val port = watchPort.toIntOrNull() ?: 5555
+                            val port = watchPort.toIntOrNull() ?: 0
                             wearableManager.setConfiguredAospWatchIp(watchIp)
                             scope.launch {
-                                adbManager.connect(watchIp, port)
+                                if (port > 0) {
+                                    adbManager.connect(watchIp, port)
+                                } else {
+                                    val ok = adbManager.autoDiscoverAndConnect(context, watchIp)
+                                    if (ok && adbManager.activePort > 0) {
+                                        watchPort = adbManager.activePort.toString()
+                                    }
+                                }
                             }
                         },
-                        enabled = connectionState == SideloadConnectionState.IDLE || connectionState == SideloadConnectionState.ERROR,
+                        enabled = watchIp.isNotBlank() && (connectionState == SideloadConnectionState.IDLE || connectionState == SideloadConnectionState.ERROR),
                         colors = ButtonDefaults.buttonColors(
                             containerColor = DigiWearPalette.DigiviceCyan,
                             contentColor = Color.Black
@@ -686,22 +693,22 @@ fun WatchSideloadScreen(
                                             if (success) {
                                                 pairingSuccess = true
                                                 wearableManager.setConfiguredAospWatchIp(watchIp)
-                                                adbManager.log("Pairing authenticated! Auto-discovering watch session...")
+                                                adbManager.log("✓ Pairing approved! DigiWear-Companion is trusted on watch.")
 
                                                 val opPort = watchPort.toIntOrNull() ?: 0
                                                 var connected = false
-                                                if (opPort > 0 && opPort != pPort && opPort != 5555) {
+                                                if (opPort > 0 && opPort != pPort) {
                                                     connected = adbManager.connectTlsOnly(watchIp, opPort)
                                                 }
                                                 if (!connected) {
-                                                    connected = adbManager.autoDiscoverAndConnect(context, watchIp, nearPort = pPort)
+                                                    connected = adbManager.autoDiscoverAndConnect(context, watchIp)
                                                 }
                                                 if (connected) {
                                                     val ap = adbManager.activePort
                                                     if (ap > 0) watchPort = ap.toString()
-                                                    adbManager.log("✓ Smartwatch paired & connected! Sideload button ungreyed below.")
+                                                    adbManager.log("✓ Smartwatch paired & connected! Ready to sideload below.")
                                                 } else {
-                                                    adbManager.log("Paired! Auto-discovery continuing in background...")
+                                                    adbManager.log("✓ Paired successfully! You can now tap 'CONNECT & SIDELOAD' below.")
                                                 }
                                             } else {
                                                 pairingError = adbManager.lastError.value ?: "Pairing failed"
@@ -1020,10 +1027,33 @@ fun WatchSideloadScreen(
         val isBusy = connectionState == SideloadConnectionState.TRANSFERRING ||
             connectionState == SideloadConnectionState.INSTALLING ||
             connectionState == SideloadConnectionState.GRANTING_PERMISSIONS
+        val canSideload = watchIp.isNotBlank() && !isBusy && !isDownloading
 
         Button(
             onClick = {
                 scope.launch {
+                    // Step 1: Connect to watch if not already connected
+                    if (!isConnectedToWatch) {
+                        val opPort = watchPort.toIntOrNull() ?: 0
+                        var connected = false
+                        if (opPort > 0) {
+                            adbManager.log("Connecting directly to $watchIp:$opPort...")
+                            connected = adbManager.connect(watchIp, opPort)
+                        }
+                        if (!connected) {
+                            adbManager.log("Attempting mDNS discovery on $watchIp...")
+                            connected = adbManager.autoDiscoverAndConnect(context, watchIp)
+                            if (connected && adbManager.activePort > 0) {
+                                watchPort = adbManager.activePort.toString()
+                            }
+                        }
+                        if (!connected && !adbManager.isConnected()) {
+                            adbManager.log("Could not establish connection to $watchIp. Please verify the IP and Port displayed on your watch screen.")
+                            return@launch
+                        }
+                    }
+
+                    // Step 2: Download APK if not cached
                     var apkToInstall = selectedApk
                     if (apkToInstall == null) {
                         isDownloading = true
@@ -1050,6 +1080,7 @@ fun WatchSideloadScreen(
                         isDownloading = false
                     }
 
+                    // Step 3: Stream and install on watch
                     val finalApk = apkToInstall
                     if (finalApk != null) {
                         adbManager.sideloadApk(
@@ -1061,7 +1092,7 @@ fun WatchSideloadScreen(
                     }
                 }
             },
-            enabled = isConnectedToWatch && !isBusy && !isDownloading,
+            enabled = canSideload,
             colors = ButtonDefaults.buttonColors(
                 containerColor = Color(0xFF00E676),
                 disabledContainerColor = Color(0xFF1E2E28),
@@ -1083,6 +1114,7 @@ fun WatchSideloadScreen(
                     text = when {
                         isBusy -> "SIDELOADING IN PROGRESS..."
                         isDownloading -> "DOWNLOADING RELEASE APK..."
+                        !isConnectedToWatch -> if (selectedApk == null) "CONNECT, DOWNLOAD & SIDELOAD" else "CONNECT & SIDELOAD TO WATCH"
                         selectedApk == null -> "DOWNLOAD & SIDELOAD DIGIWEAR"
                         else -> "SIDELOAD DIGIWEAR TO WATCH"
                     },
@@ -1096,9 +1128,9 @@ fun WatchSideloadScreen(
         if (!isConnectedToWatch) {
             Spacer(modifier = Modifier.height(2.dp))
             Text(
-                text = "▲ Pair or connect watch in Step 1 to enable sideloading",
-                color = Color(0xFF78909C),
-                fontSize = 9.sp,
+                text = if (watchIp.isBlank()) "▲ Enter Watch IP in Step 1 to enable sideloading" else "▲ Tapping above will automatically connect to $watchIp and install DigiWear",
+                color = Color(0xFF80CBC4),
+                fontSize = 8.5.sp,
                 fontFamily = FontFamily.Monospace,
                 modifier = Modifier.align(Alignment.CenterHorizontally)
             )
