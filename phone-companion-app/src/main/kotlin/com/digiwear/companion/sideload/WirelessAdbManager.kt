@@ -111,7 +111,7 @@ class WirelessAdbManager(private val context: Context) {
             if (result.isSuccess && result.getOrDefault(false)) {
                 log("SUCCESS: Pairing authenticated!")
                 log("Smartwatch has trusted this companion app's credentials.")
-                log("NEXT STEP: Return to 'Wireless debugging' on your watch, enter the operational port into 'Port' above, and tap CONNECT.")
+                log("Pairing complete. Establishing ADB session with watch...")
                 true
             } else {
                 val ex = result.exceptionOrNull()
@@ -248,6 +248,57 @@ class WirelessAdbManager(private val context: Context) {
             disconnect()
             return@withContext false
         }
+    }
+
+    /**
+     * Automatically discovers the smartwatch over mDNS (_adb-tls-connect._tcp / _adb._tcp)
+     * and establishes an ADB connection without requiring manual operational port entry.
+     */
+    suspend fun autoConnect(context: Context, targetHost: String? = null): Boolean = withContext(Dispatchers.IO) {
+        disconnect()
+        _connectionState.value = SideloadConnectionState.CONNECTING
+        _lastError.value = null
+        log("Auto-discovering watch via mDNS (_adb-tls-connect._tcp)...")
+
+        // 1. Try modern TLS 1.3 / TCP mDNS auto-discovery
+        try {
+            val manager = DigiWearAdbConnectionManager(keyManager)
+            _connectionState.value = SideloadConnectionState.AUTHENTICATING
+
+            val result = manager.autoConnectWatch(context, 3500L)
+            if (result.isSuccess && manager.isConnected) {
+                val host = manager.hostAddress
+                if (targetHost.isNullOrBlank() || host == targetHost) {
+                    activeLibadb = manager
+                    log("mDNS Handshake OK! Connected to $host via TLS 1.3")
+                    val details = manager.queryDetails()
+                    _watchDetails.value = details
+                    _connectionState.value = SideloadConnectionState.CONNECTED
+                    log("SUCCESS: Connected to ${details.model} (${details.manufacturer})")
+                    return@withContext true
+                } else {
+                    log("Discovered device at $host (target: $targetHost), closing...")
+                    manager.disconnect()
+                }
+            }
+        } catch (e: Exception) {
+            log("mDNS auto-connect probe: ${e.message ?: e.javaClass.simpleName}")
+        }
+
+        // 2. If targetHost is specified and mDNS didn't connect, probe common operational ports
+        if (!targetHost.isNullOrBlank()) {
+            val cleanHost = targetHost.trim()
+            log("Probing operational ports on $cleanHost...")
+            val portsToTry = listOf(5555, 33401, 37000, 38000, 40000, 42000)
+            for (p in portsToTry) {
+                if (connect(cleanHost, p)) {
+                    return@withContext true
+                }
+            }
+        }
+
+        _connectionState.value = SideloadConnectionState.IDLE
+        false
     }
 
     private fun queryWatchDetails(dadb: Dadb): ConnectedWatchDetails {

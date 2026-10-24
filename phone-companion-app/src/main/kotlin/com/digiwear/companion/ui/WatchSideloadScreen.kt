@@ -133,13 +133,29 @@ fun WatchSideloadScreen(
         }
     }
 
-    // Auto-detect asset APK if available on startup
+    // Auto-detect cached or asset APK if available on startup
     LaunchedEffect(Unit) {
         if (selectedApk == null) {
-            val assetApk = apkSourceManager.getEmbeddedAssetApk()
-            if (assetApk != null) {
-                selectedApk = assetApk
-                adbManager.log("Detected pre-packaged APK in assets: ${assetApk.displayName}")
+            val cached = apkSourceManager.getCachedApk()
+            if (cached != null) {
+                selectedApk = cached
+                adbManager.log("Detected cached watch APK: ${cached.displayName}")
+            } else {
+                val assetApk = apkSourceManager.getEmbeddedAssetApk()
+                if (assetApk != null) {
+                    selectedApk = assetApk
+                    adbManager.log("Detected pre-packaged APK in assets: ${assetApk.displayName}")
+                }
+            }
+        }
+    }
+
+    LaunchedEffect(connectionState) {
+        if ((connectionState == SideloadConnectionState.CONNECTED || connectionState == SideloadConnectionState.SUCCESS) && selectedApk == null) {
+            val cached = apkSourceManager.getCachedApk()
+            if (cached != null) {
+                selectedApk = cached
+                adbManager.log("Loaded cached watch APK: ${cached.displayName}")
             }
         }
     }
@@ -668,7 +684,24 @@ fun WatchSideloadScreen(
                                             val success = adbManager.pair(watchIp, pPort, pairingCode)
                                             isPairing = false
                                             pairingSuccess = success
-                                            if (!success) {
+                                            if (success) {
+                                                wearableManager.setConfiguredAospWatchIp(watchIp)
+                                                adbManager.log("Watch paired! Automatically establishing connection...")
+                                                val opPort = watchPort.toIntOrNull() ?: 0
+                                                var connected = false
+                                                if (opPort > 0 && opPort != pPort && opPort != 5555) {
+                                                    connected = adbManager.connect(watchIp, opPort)
+                                                }
+                                                if (!connected) {
+                                                    connected = adbManager.autoConnect(context, watchIp)
+                                                }
+                                                if (!connected && opPort == 5555) {
+                                                    connected = adbManager.connect(watchIp, 5555)
+                                                }
+                                                if (connected) {
+                                                    adbManager.log("✓ Smartwatch connected! Sideload button ungreyed below.")
+                                                }
+                                            } else {
                                                 pairingError = adbManager.lastError.value ?: "Pairing failed"
                                             }
                                         }
@@ -683,8 +716,10 @@ fun WatchSideloadScreen(
                                 ) {
                                     if (isPairing) {
                                         Text("PAIRING...", fontWeight = FontWeight.Black, fontFamily = FontFamily.Monospace, fontSize = 11.sp)
+                                    } else if (connectionState == SideloadConnectionState.CONNECTED) {
+                                        Text("PAIRED & CONNECTED", fontWeight = FontWeight.Black, fontFamily = FontFamily.Monospace, fontSize = 11.sp)
                                     } else if (pairingSuccess) {
-                                        Text("PAIRED! SWITCH TO CONNECTION PORT ABOVE", fontWeight = FontWeight.Black, fontFamily = FontFamily.Monospace, fontSize = 9.5.sp)
+                                        Text("PAIRED! CONNECTING...", fontWeight = FontWeight.Black, fontFamily = FontFamily.Monospace, fontSize = 11.sp)
                                     } else {
                                         Text("PAIR WITH WATCH", fontWeight = FontWeight.Black, fontFamily = FontFamily.Monospace, fontSize = 11.sp)
                                     }
@@ -693,7 +728,11 @@ fun WatchSideloadScreen(
                                 if (pairingSuccess) {
                                     Spacer(modifier = Modifier.height(6.dp))
                                     Text(
-                                        text = "✓ Watch successfully paired! Now return to the main 'Wireless debugging' screen on your watch, enter the operational port into 'Port' above, and tap CONNECT.",
+                                        text = if (connectionState == SideloadConnectionState.CONNECTED) {
+                                            "✓ Watch paired and connected! Sideload button ungreyed below."
+                                        } else {
+                                            "✓ Watch paired! Auto-connecting to smartwatch..."
+                                        },
                                         color = Color(0xFF69F0AE),
                                         fontSize = 9.sp,
                                         fontFamily = FontFamily.Monospace
@@ -974,18 +1013,44 @@ fun WatchSideloadScreen(
         }
 
         // --- 5. Step 4: Sideload Action Button ---
-        val isReadyToSideload = (connectionState == SideloadConnectionState.CONNECTED || connectionState == SideloadConnectionState.SUCCESS) && selectedApk != null
+        val isConnectedToWatch = connectionState == SideloadConnectionState.CONNECTED || connectionState == SideloadConnectionState.SUCCESS
         val isBusy = connectionState == SideloadConnectionState.TRANSFERRING ||
             connectionState == SideloadConnectionState.INSTALLING ||
             connectionState == SideloadConnectionState.GRANTING_PERMISSIONS
 
         Button(
             onClick = {
-                val apkToInstall = selectedApk
-                if (apkToInstall != null) {
-                    scope.launch {
+                scope.launch {
+                    var apkToInstall = selectedApk
+                    if (apkToInstall == null) {
+                        isDownloading = true
+                        downloadProgress = 0f
+                        downloadStatusText = "Downloading latest release APK from GitHub..."
+                        adbManager.log("Downloading DigiWear watch release APK from GitHub...")
+                        val dlResult = apkSourceManager.downloadReleaseApk { downloaded, total ->
+                            if (total > 0) {
+                                downloadProgress = downloaded.toFloat() / total.toFloat()
+                                val mbDown = downloaded / (1024.0 * 1024.0)
+                                val mbTotal = total / (1024.0 * 1024.0)
+                                downloadStatusText = String.format(java.util.Locale.US, "%.1f / %.1f MB (%.0f%%)", mbDown, mbTotal, downloadProgress * 100f)
+                            }
+                        }
+                        dlResult.onSuccess { info ->
+                            selectedApk = info
+                            apkToInstall = info
+                            downloadStatusText = "Download complete!"
+                            adbManager.log("Download complete: ${info.displayName} (${info.sizeFormatted})")
+                        }.onFailure { err ->
+                            downloadStatusText = "Download failed: ${err.message}"
+                            adbManager.log("Download failed: ${err.message}")
+                        }
+                        isDownloading = false
+                    }
+
+                    val finalApk = apkToInstall
+                    if (finalApk != null) {
                         adbManager.sideloadApk(
-                            apkFile = apkToInstall.file,
+                            apkFile = finalApk.file,
                             grantPermissions = grantPermissions,
                             reinstallKeepData = reinstallKeepData,
                             autoLaunch = autoLaunch
@@ -993,7 +1058,7 @@ fun WatchSideloadScreen(
                     }
                 }
             },
-            enabled = isReadyToSideload && !isBusy,
+            enabled = isConnectedToWatch && !isBusy && !isDownloading,
             colors = ButtonDefaults.buttonColors(
                 containerColor = Color(0xFF00E676),
                 disabledContainerColor = Color(0xFF1E2E28),
@@ -1007,17 +1072,33 @@ fun WatchSideloadScreen(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.Center
             ) {
-                if (!isBusy) {
+                if (!isBusy && !isDownloading) {
                     DigiVectorIcon(type = DigiIconType.BOLT, size = 16.dp, tint = Color.Black)
                     Spacer(modifier = Modifier.width(6.dp))
                 }
                 Text(
-                    text = if (isBusy) "SIDELOADING IN PROGRESS..." else "SIDELOAD DIGIWEAR TO WATCH",
+                    text = when {
+                        isBusy -> "SIDELOADING IN PROGRESS..."
+                        isDownloading -> "DOWNLOADING RELEASE APK..."
+                        selectedApk == null -> "DOWNLOAD & SIDELOAD DIGIWEAR"
+                        else -> "SIDELOAD DIGIWEAR TO WATCH"
+                    },
                     fontWeight = FontWeight.Black,
                     fontFamily = FontFamily.Monospace,
                     fontSize = 12.sp
                 )
             }
+        }
+
+        if (!isConnectedToWatch) {
+            Spacer(modifier = Modifier.height(2.dp))
+            Text(
+                text = "▲ Pair or connect watch in Step 1 to enable sideloading",
+                color = Color(0xFF78909C),
+                fontSize = 9.sp,
+                fontFamily = FontFamily.Monospace,
+                modifier = Modifier.align(Alignment.CenterHorizontally)
+            )
         }
 
         if (isBusy) {

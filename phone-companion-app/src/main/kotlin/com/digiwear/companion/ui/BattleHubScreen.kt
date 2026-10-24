@@ -868,19 +868,17 @@ fun BattleHubScreen(
                                 Text("DigiROM", fontSize = 10.sp, fontFamily = FontFamily.Monospace)
                             }
 
-                            Button(
+                            OutlinedButton(
                                 onClick = {
                                     ownSeed = Random.nextInt(0xFFFF)
                                     val hex = Integer.toHexString(ownSeed).uppercase()
                                     Toast.makeText(context, "Battle PRNG Seed: 0x$hex (Randomized combat variance)", Toast.LENGTH_SHORT).show()
                                 },
-                                modifier = Modifier.weight(1f),
-                                contentPadding = PaddingValues(horizontal = 4.dp, vertical = 6.dp),
-                                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF263238))
+                                modifier = Modifier.weight(1f)
                             ) {
-                                DigiVectorIcon(type = DigiIconType.BOLT, size = 13.dp, tint = Color(0xFFFFD54F))
-                                Spacer(modifier = Modifier.width(3.dp))
-                                Text("REROLL SEED", fontSize = 8.5.sp, fontWeight = FontWeight.Bold, fontFamily = FontFamily.Monospace, maxLines = 1)
+                                DigiVectorIcon(type = DigiIconType.BOLT, size = 14.dp, tint = Color.White)
+                                Spacer(modifier = Modifier.width(4.dp))
+                                Text("Seed", fontSize = 10.sp, fontFamily = FontFamily.Monospace)
                             }
                         }
 

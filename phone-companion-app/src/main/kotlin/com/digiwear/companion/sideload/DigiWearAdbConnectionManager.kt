@@ -68,6 +68,19 @@ class DigiWearAdbConnectionManager(
     }
 
     /**
+     * Automatically discovers the smartwatch over mDNS (_adb-tls-connect._tcp and _adb._tcp)
+     * and establishes an ADB TLS 1.3 or TCP connection.
+     *
+     * @param context Application context for NsdManager.
+     * @param timeoutMs Maximum discovery wait time in milliseconds (default 4000ms).
+     */
+    fun autoConnectWatch(context: android.content.Context, timeoutMs: Long = 4000L): Result<Boolean> {
+        return runCatching {
+            autoConnect(context, timeoutMs)
+        }
+    }
+
+    /**
      * Executes an arbitrary shell command on the connected smartwatch and returns its standard output.
      */
     fun execShell(command: String): String {
