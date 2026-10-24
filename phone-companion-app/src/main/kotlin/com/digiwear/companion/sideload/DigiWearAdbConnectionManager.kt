@@ -29,7 +29,7 @@ class DigiWearAdbConnectionManager(
         }
         setApi(api)
         setDeviceName("DigiWear-Companion")
-        setTimeout(20, TimeUnit.SECONDS)
+        setTimeout(180, TimeUnit.SECONDS)
     }
 
     fun setDeviceName(name: String) {
@@ -104,8 +104,8 @@ class DigiWearAdbConnectionManager(
     /**
      * Installs an APK onto the connected smartwatch.
      *
-     * Stages the APK to /data/local/tmp/digiwear_install.apk, executes pm install over shell,
-     * and automatically removes the staged file upon completion.
+     * Tries the official PackageInstaller session (install-create -> install-write -> install-commit),
+     * falling back to staging in /data/local/tmp/digiwear_install.apk, and finally direct streaming.
      *
      * @param file Local APK file.
      * @param onProgress Optional progress callback emitting a float between 0.0 and 1.0.
@@ -118,14 +118,19 @@ class DigiWearAdbConnectionManager(
 
             val totalLength = file.length()
 
-            // Primary: Stage to /data/local/tmp/digiwear_install.apk and execute pm install.
-            // This is the most reliable, rock-solid method across all Wear OS versions (Pixel, Samsung Galaxy Watch 4/5/6/7, etc.)
-            val resultOutput = tryStageAndInstall(file, totalLength, onProgress)
-            if (resultOutput.contains("Success", ignoreCase = true)) {
-                return@runCatching resultOutput
+            // 1. Try standard Android PackageInstaller session (install-create -> install-write -> install-commit)
+            val sessionOutput = tryPackageInstallerSession(file, totalLength, onProgress)
+            if (sessionOutput.contains("Success", ignoreCase = true)) {
+                return@runCatching sessionOutput
             }
 
-            // Fallback: Direct stream session if staging produced a non-success output
+            // 2. Fallback: Stage to /data/local/tmp/digiwear_install.apk and execute pm install
+            val stageOutput = tryStageAndInstall(file, totalLength, onProgress)
+            if (stageOutput.contains("Success", ignoreCase = true)) {
+                return@runCatching stageOutput
+            }
+
+            // 3. Fallback: Direct stream session if staging produced a non-success output
             val streamOutput = tryStreamSession(
                 execCmd = "exec:pm install -r -d -g -S $totalLength",
                 file = file,
@@ -136,7 +141,43 @@ class DigiWearAdbConnectionManager(
                 return@runCatching streamOutput
             }
 
-            throw IllegalStateException("Installation failed: $resultOutput (Fallback: $streamOutput)")
+            throw IllegalStateException("Installation failed: $sessionOutput | $stageOutput | $streamOutput")
+        }
+    }
+
+    private fun tryPackageInstallerSession(
+        file: File,
+        totalLength: Long,
+        onProgress: ((Float) -> Unit)?
+    ): String {
+        return try {
+            val createCmd = "pm install-create -r -d -g -S $totalLength"
+            val createOut = execShell(createCmd).trim()
+            val sessionId = Regex("\\[(\\d+)\\]").find(createOut)?.groupValues?.get(1)
+                ?: return "Failed to create install session: $createOut"
+
+            val writeStream = openStream("exec:pm install-write -S $totalLength $sessionId 0_base.apk -")
+            try {
+                val outStream = writeStream.openOutputStream()
+                file.inputStream().use { input ->
+                    val buffer = ByteArray(64 * 1024)
+                    var totalWritten = 0L
+                    var read: Int
+                    while (input.read(buffer).also { read = it } != -1) {
+                        outStream.write(buffer, 0, read)
+                        totalWritten += read
+                        onProgress?.invoke(totalWritten.toFloat() / totalLength.toFloat())
+                    }
+                    outStream.flush()
+                }
+            } finally {
+                try { writeStream.close() } catch (_: Exception) {}
+            }
+
+            val commitOut = execShell("pm install-commit $sessionId")
+            commitOut
+        } catch (e: Exception) {
+            "PackageInstaller session error: ${e.message}"
         }
     }
 
@@ -186,6 +227,7 @@ class DigiWearAdbConnectionManager(
         val tmpPath = "/data/local/tmp/digiwear_install.apk"
 
         return try {
+            execShell("rm -f $tmpPath")
             // First stage the APK file by streaming to cat > /data/local/tmp/digiwear_install.apk and closing stream to signal EOF
             val uploadStream = openStream("exec:sh -c \"cat > $tmpPath\"")
             try {
@@ -222,28 +264,36 @@ class DigiWearAdbConnectionManager(
     }
 
     /**
-     * Queries connected watch hardware, OS, and package details over ADB shell.
+     * Queries connected watch hardware, OS, and package details over a SINGLE consolidated ADB shell command
+     * to avoid opening and tearing down multiple streams in rapid succession (which exhausts adbd stream slots).
      */
     fun queryDetails(): ConnectedWatchDetails {
-        val model = runCatching { execShell("getprop ro.product.model") }.getOrDefault("Android Watch").ifEmpty { "Android Watch" }
-        val manufacturer = runCatching { execShell("getprop ro.product.manufacturer") }.getOrDefault("Generic").ifEmpty { "Generic" }
-        val androidVer = runCatching { execShell("getprop ro.build.version.release") }.getOrDefault("Unknown").ifEmpty { "Unknown" }
-        val sdkVer = runCatching { execShell("getprop ro.build.version.sdk").toIntOrNull() ?: 0 }.getOrDefault(0)
+        val delimiter = "===DW_DATA==="
+        val combinedCmd = "echo '$delimiter'; " +
+            "getprop ro.product.model; echo '$delimiter'; " +
+            "getprop ro.product.manufacturer; echo '$delimiter'; " +
+            "getprop ro.build.version.release; echo '$delimiter'; " +
+            "getprop ro.build.version.sdk; echo '$delimiter'; " +
+            "getprop ro.wearable.platform.version; echo '$delimiter'; " +
+            "pm list packages com.digiwear.wear; echo '$delimiter'; " +
+            "dumpsys battery | grep -i level"
 
-        val wearVer = runCatching {
-            val v = execShell("getprop ro.wearable.platform.version")
-            if (v.isNotEmpty()) v else execShell("getprop ro.build.version.wear")
-        }.getOrDefault("")
+        val rawOutput = runCatching { execShell(combinedCmd) }.getOrDefault("")
+        val parts = rawOutput.split(delimiter).map { it.trim() }
 
-        val pkgCheck = runCatching { execShell("pm list packages com.digiwear.wear") }.getOrDefault("")
-        val isInstalled = pkgCheck.contains("package:com.digiwear.wear")
+        val model = parts.getOrNull(1)?.ifEmpty { "Android Watch" } ?: "Android Watch"
+        val manufacturer = parts.getOrNull(2)?.ifEmpty { "Generic" } ?: "Generic"
+        val androidVer = parts.getOrNull(3)?.ifEmpty { "Unknown" } ?: "Unknown"
+        val sdkVer = parts.getOrNull(4)?.toIntOrNull() ?: 0
+        val wearVer = parts.getOrNull(5) ?: ""
+        val isInstalled = parts.getOrNull(6)?.contains("package:com.digiwear.wear") == true
 
         val installedVersion = if (isInstalled) {
             val dumpsys = runCatching { execShell("dumpsys package com.digiwear.wear | grep -i versionName") }.getOrDefault("")
             dumpsys.substringAfter("versionName=").substringBefore("\n").trim().ifEmpty { "v1.0" }
         } else ""
 
-        val batteryOutput = runCatching { execShell("dumpsys battery | grep -i level") }.getOrDefault("")
+        val batteryOutput = parts.getOrNull(7) ?: ""
         val battery = batteryOutput.substringAfter("level:").trim().takeIf { it.isNotEmpty() }?.let { "$it%" } ?: ""
 
         return ConnectedWatchDetails(

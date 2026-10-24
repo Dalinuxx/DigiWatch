@@ -1072,7 +1072,7 @@ fun WatchSideloadScreen(
                         }
                         if (!connected) {
                             adbManager.log("Attempting mDNS discovery on $watchIp...")
-                            connected = adbManager.autoDiscoverAndConnect(context, watchIp)
+                            connected = adbManager.autoDiscoverAndConnect(context, watchIp, skipPort = pairingPort.toIntOrNull() ?: 0)
                             if (connected && adbManager.activePort > 0) {
                                 watchPort = adbManager.activePort.toString()
                             }

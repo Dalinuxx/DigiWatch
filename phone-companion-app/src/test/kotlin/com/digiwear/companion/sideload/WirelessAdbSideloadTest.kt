@@ -182,7 +182,7 @@ class WirelessAdbSideloadTest {
         connectionManager.setDeviceName("Custom-Wear-Client")
         assertEquals("Custom-Wear-Client", connectionManager.getDeviceName())
 
-        assertEquals(20000L, connectionManager.timeout)
+        assertEquals(180000L, connectionManager.timeout)
         assertTrue("API level should be >= 26", connectionManager.api >= 26)
 
         assertNotNull(connectionManager.getPrivateKey())

@@ -540,7 +540,24 @@ class WirelessAdbManager(private val context: Context) {
                 // Install via TLS connection manager
                 _connectionState.value = SideloadConnectionState.INSTALLING
                 log("Streaming APK to PackageInstaller session...")
-                val result = libadb.installApk(apkFile)
+                var result = libadb.installApk(apkFile)
+
+                // If stream was closed due to exhausted slots, reconnect with a clean socket session and retry
+                if (result.isFailure && result.exceptionOrNull()?.message?.contains("Stream closed", ignoreCase = true) == true) {
+                    val currentHost = runCatching { libadb.hostAddress.substringBefore(":") }.getOrNull()
+                    val currentPort = activePort
+                    if (!currentHost.isNullOrEmpty() && currentPort > 0) {
+                        log("Stream socket closed by watch daemon. Reconnecting clean TLS session to $currentHost:$currentPort...")
+                        val freshManager = DigiWearAdbConnectionManager(keyManager)
+                        val reconn = freshManager.connectWatch(currentHost, currentPort)
+                        if (reconn.isSuccess && freshManager.isConnected) {
+                            activeLibadb = freshManager
+                            log("Connected clean! Retrying PackageInstaller stream...")
+                            result = freshManager.installApk(apkFile)
+                        }
+                    }
+                }
+
                 if (result.isSuccess) {
                     installSuccess = true
                     log("Package installer session committed successfully!")
